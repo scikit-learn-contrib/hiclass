@@ -44,8 +44,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: false
+        DEFAULT_BUMP: patch
 
   build-n-publish:
+    needs: bump
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
     runs-on: ubuntu-latest
     steps:
@@ -77,4 +79,6 @@ jobs:
       if: startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
+        user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+        verbose: true
