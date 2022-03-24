@@ -43,26 +43,6 @@ Alternatively, HiClass and its dependencies can also be installed with pip:
 pip install hiclass
 ```
 
-### Option 3: Pipenv
-
-Lastly, `pipenv` can also be used to install HiClass and its dependencies. In order to use this, first install it via:
-```
-pip install pipenv
-```
-Afterwards, you can create an environment and install the dependencies via:
-```
-pipenv install
-```
-For dev dependencies, add `--dev` to the previous command.
-
-To activate the environment, run:
-```shell
-pipenv shell
-```
-For more information, please visit the [pipenv documentation](https://pipenv.pypa.io/en/latest/).
-
-If you do not wish to use pipenv, you can find the requirements in `Pipfile` under `packages` and `dev-packages`.
-
 ## TODO: rewrite quick start
 
 ~~An example usage can be found below. For a more thorough example, see [our interactive notebook](https://colab.research.google.com/drive/1Idzht9dNoB85pjc9gOL24t9ksrXZEA-9?usp=sharing). The full API documentation is available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).~~
