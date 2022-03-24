@@ -7,7 +7,6 @@ on:
 
 jobs:
   test:
-
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -34,7 +33,7 @@ jobs:
         pytest -v
 
   bump:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
