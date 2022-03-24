@@ -1,12 +1,15 @@
-# Hiclass - Hierarchical Classification Library
+# HiClass
 
-[![pipeline status](https://gitlab.com/dacs-hpi/hiclass/badges/master/pipeline.svg)](https://gitlab.com/dacs-hpi/hiclass/-/commits/master) [![coverage report](https://gitlab.com/dacs-hpi/hiclass/badges/master/coverage.svg)](https://gitlab.com/dacs-hpi/hiclass/-/commits/master) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest)
+HiClass is a machine learning library for local hierarchical classification compatible with scikit-learn.
+
+[![Install with conda](https://anaconda.org/conda-forge/hiclass/badges/installer/conda.svg)](https://anaconda.org/conda-forge/hiclass) [![Install with pip](https://badge.fury.io/py/hiclass.svg)](https://pypi.org/project/hiclass/)
+
 
 This library implements the three local classifier approaches described in [[1]](#1).
 
 ## Installation
 
-[![Install with conda](https://anaconda.org/conda-forge/hiclass/badges/installer/conda.svg)](https://anaconda.org/conda-forge/hiclass)
+
 
 HiClass and its dependencies can be easily installed with conda:
 
@@ -14,7 +17,7 @@ HiClass and its dependencies can be easily installed with conda:
 conda install -c conda-forge hiclass
 ```
 
-[![Install with pip](https://badge.fury.io/py/hiclass.svg)](https://pypi.org/project/hiclass/)
+
 
 Alternatively, HiClass and its dependencies can also be installed with pip:
 
