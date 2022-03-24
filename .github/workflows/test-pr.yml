@@ -30,7 +30,9 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -v
+        coverage xml
+        coverage html
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
-        files: .coverage,.coverage.*
+        files: .coverage,.coverage.*,coverage.xml
