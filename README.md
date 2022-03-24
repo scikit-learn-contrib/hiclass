@@ -7,23 +7,23 @@ HiClass is a python library for hierarchical classification compatible with scik
 ✨ Here are a couple of **demos** that show HiClass in action on hierarchical datasets:
 
 - Classify a consumer complaints dataset from the consumer financial protection bureau: [consumer-complaints]()
-- Classify a 16S dataset from the TAXXI benchmark: [16s]()
+- Classify a 16S rRNA dataset from the TAXXI benchmark: [16s-rrna]()
 
 ## Quick Links
 
-- [Features]()
-- [Benchmarks]()
-- [Roadmap]()
-- [Who is using HiClass]()
-- [Install]()
-- [Quick start]()
-- [Step-by-step- walk-through]()
-- [API documentation]()
-- [FAQ]()
-- [Support]()
-- [Contributing]()
-- [Getting latest updates]()
-- [Citation]()
+- [Features](#features)
+- [Benchmarks](#benchmarks)
+- [Roadmap](#roadmap)
+- [Who is using HiClass](#who-is-using-this)
+- [Install](#install)
+- [Quick start](#quick-start)
+- [Step-by-step- walk-through](#step-by-step-walk-through)
+- [API documentation](#api-documentation)
+- [FAQ](#faq)
+- [Support](#support)
+- [Contributing](#contributing)
+- [Getting latest updates](#getting-latest-updates)
+- [Citation](#citation)
 
 
 
