@@ -89,3 +89,5 @@ If you use HiClass, please cite:
   year={2021}
 }
 ```
+
+In addition, we would like to list publications that use our software on our repository. Please email the reference, the name of your lab, department and institution to fabio.malchermiranda@hpi.de
