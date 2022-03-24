@@ -43,6 +43,12 @@ Alternatively, HiClass and its dependencies can also be installed with pip:
 pip install hiclass
 ```
 
+## API Documentation
+
+Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).
+
+If you notice any issues with the documentation or walk-through, please let us know by opening an issue here: [https://github.com/mirand863/hiclass/issues](https://github.com/mirand863/hiclass/issues).
+
 ## TODO: rewrite quick start
 
 ~~An example usage can be found below. For a more thorough example, see [our interactive notebook](https://colab.research.google.com/drive/1Idzht9dNoB85pjc9gOL24t9ksrXZEA-9?usp=sharing). The full API documentation is available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).~~
