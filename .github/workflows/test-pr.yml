@@ -1,6 +1,9 @@
-name: Test
+name: Test PR
 
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   build:
