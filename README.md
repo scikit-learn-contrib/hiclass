@@ -25,41 +25,47 @@ HiClass is a python library for hierarchical classification compatible with scik
 - [Getting latest updates](#getting-latest-updates)
 - [Citation](#citation)
 
+## Install
 
+### Option 1: Conda
 
 HiClass and its dependencies can be easily installed with conda:
 
-```shell
+```
 conda install -c conda-forge hiclass
 ```
 
-
+### Option 2: Pip
 
 Alternatively, HiClass and its dependencies can also be installed with pip:
 
-```shell
+```
 pip install hiclass
 ```
 
+### Option 3: Pipenv
+
 Lastly, `pipenv` can also be used to install HiClass and its dependencies. In order to use this, first install it via:
-```shell
+```
 pip install pipenv
 ```
-Afterwards, you can create an environment and install the dependencies via (for dev dependencies, add `--dev`)
-```shell
+Afterwards, you can create an environment and install the dependencies via:
+```
 pipenv install
 ```
+For dev dependencies, add `--dev` to the previous command.
+
 To activate the environment, run:
 ```shell
 pipenv shell
 ```
-For more information, take a look at the [pipenv documentation](https://pipenv.pypa.io/en/latest/).
+For more information, please visit the [pipenv documentation](https://pipenv.pypa.io/en/latest/).
 
 If you do not wish to use pipenv, you can find the requirements in `Pipfile` under `packages` and `dev-packages`.
 
-## Usage
+## TODO: rewrite quick start
 
-An example usage can be found below. For a more thorough example, see [our interactive notebook](https://colab.research.google.com/drive/1Idzht9dNoB85pjc9gOL24t9ksrXZEA-9?usp=sharing). The full API documentation is available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).
+~~An example usage can be found below. For a more thorough example, see [our interactive notebook](https://colab.research.google.com/drive/1Idzht9dNoB85pjc9gOL24t9ksrXZEA-9?usp=sharing). The full API documentation is available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).~~
 
 ```python
 from hiclass import LocalClassifierPerNode
@@ -74,6 +80,14 @@ lcpn = LocalClassifierPerNode(local_classifier=rf)
 lcpn.fit(X_train, Y_train)
 predictions = lcpn.predict(X_test)
 ```
+
+## Contributing
+
+We are a small team on a mission to democratize hierarchical classification, and we'll take all the help we can get! If you'd like to get involved, here's information on where we could use your help: [Contributing.md](https://github.com/mirand863/hiclass/blob/master/CONTRIBUTING.md)
+
+## Getting Latest Updates
+
+If you'd like to get updates when we release new versions, please click on the "Watch" button on the top and select "Releases only". Github will then send you notifications along with a changelog with each new release.
 
 ## Citation
 
