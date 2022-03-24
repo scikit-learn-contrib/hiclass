@@ -2,7 +2,7 @@
 
 HiClass is a library for local hierarchical classification compatible with scikit-learn
 
-[![Test](https://github.com/mirand863/hiclass/actions/workflows/test.yml/badge.svg?event=push)](https://github.com/mirand863/hiclass/actions/workflows/test.yml) [![coverage report](https://gitlab.com/dacs-hpi/hiclass/badges/master/coverage.svg)](https://gitlab.com/dacs-hpi/hiclass/-/commits/master) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest)
+[![Deploy PyPI](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push)](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml) [![coverage report](https://gitlab.com/dacs-hpi/hiclass/badges/master/coverage.svg)](https://gitlab.com/dacs-hpi/hiclass/-/commits/master) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest)
 
 This library implements the three local classifier approaches described in [[1]](#1).
 
