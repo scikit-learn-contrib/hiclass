@@ -1,14 +1,31 @@
-# Hiclass
+# HiClass
 
-HiClass is a library for local hierarchical classification compatible with scikit-learn
+HiClass is a python library for hierarchical classification compatible with scikit-learn
 
-[![Deploy PyPI](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push)](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml) [![codecov](https://codecov.io/gh/mirand863/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR)](https://codecov.io/gh/mirand863/hiclass) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest)
+[![Deploy PyPI](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push)](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml) [![codecov](https://codecov.io/gh/mirand863/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR)](https://codecov.io/gh/mirand863/hiclass) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest) [![Install with conda](https://anaconda.org/conda-forge/hiclass/badges/installer/conda.svg)](https://anaconda.org/conda-forge/hiclass) [![Install with pip](https://badge.fury.io/py/hiclass.svg)](https://pypi.org/project/hiclass/)
 
-This library implements the three local classifier approaches described in [[1]](#1).
+✨ Here are a couple of **demos** that show HiClass in action on hierarchical datasets:
 
-## Installation
+- Classify a consumer complaints dataset from the consumer financial protection bureau: [consumer-complaints]()
+- Classify a 16S dataset from the TAXXI benchmark: [16s]()
 
-[![Install with conda](https://anaconda.org/conda-forge/hiclass/badges/installer/conda.svg)](https://anaconda.org/conda-forge/hiclass)
+## Quick Links
+
+- [Features]()
+- [Benchmarks]()
+- [Roadmap]()
+- [Who is using HiClass]()
+- [Install]()
+- [Quick start]()
+- [Step-by-step- walk-through]()
+- [API documentation]()
+- [FAQ]()
+- [Support]()
+- [Contributing]()
+- [Getting latest updates]()
+- [Citation]()
+
+
 
 HiClass and its dependencies can be easily installed with conda:
 
@@ -16,7 +33,7 @@ HiClass and its dependencies can be easily installed with conda:
 conda install -c conda-forge hiclass
 ```
 
-[![Install with pip](https://badge.fury.io/py/hiclass.svg)](https://pypi.org/project/hiclass/)
+
 
 Alternatively, HiClass and its dependencies can also be installed with pip:
 
@@ -57,12 +74,6 @@ lcpn = LocalClassifierPerNode(local_classifier=rf)
 lcpn.fit(X_train, Y_train)
 predictions = lcpn.predict(X_test)
 ```
-
-## References
-<a id="1">[1]</a> 
-Silla, C.N. and Freitas, A.A. (2011).
-A survey of hierarchical classification across different application domains.
-Data Mining and Knowledge Discovery, 22(1), pp.31-72.
 
 ## Citation
 
