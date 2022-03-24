@@ -36,4 +36,5 @@ jobs:
       uses: codecov/codecov-action@v2
     - name: List files
       run: |
+        pwd
         ls -lah
