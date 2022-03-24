@@ -1,0 +1,6 @@
+include versioneer.py
+include hiclass/_version.py
+include README.md
+include LICENSE
+graft hiclass
+recursive-exclude * *.py[co]
