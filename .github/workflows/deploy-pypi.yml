@@ -6,34 +6,34 @@ on:
       - main
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.8"]
-        os: [ubuntu-latest, macOS-latest, windows-latest]
 
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install pytest
-        python -m pip install pytest-flake8
-        python -m pip install pytest-pydocstyle
-        python -m pip install pytest-cov
-        python -m pip install .
-    - name: Test with pytest
-      run: |
-        pytest -v
+#  test:
+#    runs-on: ${{ matrix.os }}
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        python-version: ["3.8"]
+#        os: [ubuntu-latest, macOS-latest, windows-latest]
+#    steps:
+#    - uses: actions/checkout@v2
+#    - name: Set up Python ${{ matrix.python-version }}
+#      uses: actions/setup-python@v2
+#      with:
+#        python-version: ${{ matrix.python-version }}
+#    - name: Install dependencies
+#      run: |
+#        python -m pip install --upgrade pip
+#        python -m pip install pytest
+#        python -m pip install pytest-flake8
+#        python -m pip install pytest-pydocstyle
+#        python -m pip install pytest-cov
+#        python -m pip install .
+#    - name: Test with pytest
+#      run: |
+#        pytest -v
 
   bump:
-    needs: test
+#    needs: test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -53,13 +53,12 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: Set up Python 3.8
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: 3.8
+        fetch-depth: '0'
     - name: Install pypa/build
       run: |
-        git fetch --tags
-        git branch --create-reflog master origin/master
         python -m pip install build --user .
     - name: Build a binary wheel and a source tarball
       run: |
