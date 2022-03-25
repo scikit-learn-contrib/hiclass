@@ -32,6 +32,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - **Sparse matrices:** HiClass also supports features (X_train and X_test) built with sparse matrices, both for training and predicting.
 - **Parallel training:** Training can be performed in parallel on the hierarchical classifiers, which allows parallelization regardless of the implementations available on scikit-learn.
 - **Build pipelines and perform hyper-parameter tuning:** Since the hierarchical classifiers inherit from the BaseEstimator of scikit-learn, pipelines can be built and grid search executed to find out the best parameters.
+- **Hierarchical metrics:** HiClass supports the computation of hierarchical precision, recall and f-score, which are more appropriate for hierarchical data than traditional metrics.
 
 **Don't see a feature on this list?** Search our [issue tracker](https://github.com/mirand863/hiclass/issues) if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our roadmap based on user feedback, so we'd love to hear from you.
 
@@ -55,7 +56,7 @@ pip install hiclass
 
 ## Quick start
 
-Here's a quick example showcasing how you can train and predict using a local classifier per node.
+Here's a quick example showcasing how you can train and predict using a local classifier per node, with a `RandomForestClassifier` for each node:
 
 ```python
 from hiclass import LocalClassifierPerNode
@@ -82,12 +83,49 @@ classifier.fit(X_train, Y_train)
 predictions = classifier.predict(X_test)
 ```
 
-In order to use the local classifier per parent node instead, simply update the import and instantiate the object `classifier` as:
+HiClass also can be adopted in scikit-learn pipelines, and fully supports sparse matrices as input. In order to demonstrate the use of both of these features, we will use the following small consumer complaints dataset.
 
 ```python
 from hiclass import LocalClassifierPerParentNode
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
 
-classifier = LocalClassifierPerParentNode(local_classifier=rf)
+# define data
+X_train = [
+    'Struggling to repay loan',
+    'Unable to get annual report',
+]
+X_test = [
+    'Unable to get annual report',
+    'Struggling to repay loan',
+]
+Y_train = [
+    ['Loan', 'Student loan'],
+    ['Credit reporting', 'Reports']
+]
+```
+
+Now let's build a pipeline that will use `CountVectorizer` and `TfidfTransformer` to extract features:
+
+```python
+# Use logistic regression classifiers for every parent node
+lr = LogisticRegression()
+pipeline = Pipeline([
+    ('count', CountVectorizer()),
+    ('tfidf', TfidfTransformer()),
+    ('lcppn', LocalClassifierPerParentNode(local_classifier=lr)),
+])
+```
+
+Finally, let's train and predict with the pipeline we just created:
+
+```python
+# Train local classifier per parent node
+pipeline.fit(X_train, Y_train)
+
+# Predict
+predictions = pipeline.predict(X_test)
 ```
 
 ## Step-by-step walk-through
