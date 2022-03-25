@@ -1,6 +1,6 @@
 # HiClass
 
-HiClass is an open-source python library for hierarchical classification compatible with scikit-learn
+HiClass is an open-source Python library for hierarchical classification compatible with scikit-learn
 
 [![Deploy PyPI](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push)](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest) [![codecov](https://codecov.io/gh/mirand863/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR)](https://codecov.io/gh/mirand863/hiclass) [![Downloads Conda](https://img.shields.io/conda/dn/conda-forge/hiclass?label=conda)](https://anaconda.org/conda-forge/hiclass) [![Downloads pypi](https://img.shields.io/pypi/dm/hiclass?label=pypi)](https://pypi.org/project/hiclass/)  [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
@@ -24,6 +24,16 @@ HiClass is an open-source python library for hierarchical classification compati
 - [Contributing](#contributing)
 - [Getting latest updates](#getting-latest-updates)
 - [Citation](#citation)
+
+## Features
+
+- **Python lists and NumPy arrays:** Handles Python lists and NumPy arrays elegantly, out-of-the-box.
+- **Pandas Series and DataFrames:** If you prefer to work with pandas, that is not an issue as HiClass also works with Pandas.
+- **Sparse matrices:** HiClass also supports features (X_train and X_test) built with sparse matrices, both for training and predicting.
+- **Parallel training:** Training can be performed in parallel on the hierarchical classifiers, which allows parallelization regardless of the implementations available on scikit-learn.
+- **Build pipelines and perform hyper-parameter tuning:** Since the hierarchical classifiers inherit from the BaseEstimator of scikit-learn, pipelines can be built and grid search executed to find out the best parameters.
+
+**Don't see a feature on this list?** Search our issue tracker if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our roadmap based on user feedback, so we'd love to hear from you.
 
 ## Install
 
