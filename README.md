@@ -65,7 +65,7 @@ predictions = lcpn.predict(X_test)
 
 A step-by-step walk-through is available on our interactive notebook hosted on [Google Colab](https://colab.research.google.com/drive/1Idzht9dNoB85pjc9gOL24t9ksrXZEA-9?usp=sharing).
 
-This will guide you through the process of installing conda, hiclass, training and predicting in a small dataset.
+This will guide you through the process of installing hiclass with conda, training and predicting a small dataset.
 
 ## API Documentation
 
