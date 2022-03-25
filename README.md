@@ -31,7 +31,7 @@ HiClass is an open-source python library for hierarchical classification compati
 
 HiClass and its dependencies can be easily installed with conda:
 
-```
+```shell
 conda install -c conda-forge hiclass
 ```
 
@@ -39,7 +39,7 @@ conda install -c conda-forge hiclass
 
 Alternatively, HiClass and its dependencies can also be installed with pip:
 
-```
+```shell
 pip install hiclass
 ```
 
@@ -52,12 +52,23 @@ from hiclass import LocalClassifierPerNode
 from sklearn.ensemble import RandomForestClassifier
 
 # define data
-X_train, X_test = get_some_train_data()  # (n, num_features)
-Y_train = get_some_labels()  # (n, num_largest_hierarchy)
-# Use random forest classifiers for every node and run a classification
+X_train = [[1], [2], [3], [4]]
+X_test = [[4], [3], [2], [1]]
+Y_train = [
+    ['Animal', 'Mammal', 'Sheep'],
+    ['Animal', 'Mammal', 'Cow'],
+    ['Animal', 'Reptile', 'Snake'],
+    ['Animal', 'Reptile', 'Lizard'],
+]
+
+# Use random forest classifiers for every node
 rf = RandomForestClassifier()
 lcpn = LocalClassifierPerNode(local_classifier=rf)
+
+# Train local classifier per node
 lcpn.fit(X_train, Y_train)
+
+# Predict
 predictions = lcpn.predict(X_test)
 ```
 
@@ -87,7 +98,7 @@ If you use HiClass, please cite:
 
 > Miranda, Fábio M., Niklas Köehnecke, and Bernhard Y. Renard. "HiClass: a Python library for local hierarchical classification compatible with scikit-learn." arXiv preprint arXiv:2112.06560 (2021).
 
-```
+```latex
 @article{miranda2021hiclass,
   title={HiClass: a Python library for local hierarchical classification compatible with scikit-learn},
   author={Miranda, F{\'a}bio M and K{\"o}ehnecke, Niklas and Renard, Bernhard Y},
