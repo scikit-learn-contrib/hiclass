@@ -22,7 +22,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - [FAQ](#faq)
 - [Support](#support)
 - [Contributing](#contributing)
-- [Getting the latest updates](#getting-latest-updates)
+- [Getting the latest updates](#getting-the-latest-updates)
 - [Citation](#citation)
 
 ## Features
