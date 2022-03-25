@@ -106,9 +106,9 @@ If you notice any issues with the documentation or walk-through, please let us k
 
 If you run into any problems or issues, please create a [Github issue](https://github.com/mirand863/hiclass/issues) and we'll try our best to help.
 
-We strive to provide good support through our issue trackers on Github. However, if you'd like to receive private support with:
+We strive to provide good support through our issue tracker on Github. However, if you'd like to receive private support with:
 
-- Phone / video calls to discuss your specific use case and get recommendations on best practices
+- Phone / video calls to discuss your specific use case and get recommendations
 - Private discussions over Slack or Mattermost
 
 Please reach out to us at fabio.malchermiranda@hpi.de.
