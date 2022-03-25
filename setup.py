@@ -22,7 +22,7 @@ URL_GITHUB = "https://gitlab.com/dacs-hpi/hiclass"
 URL_ISSUES = "https://gitlab.com/dacs-hpi/hiclass/-/issues"
 EMAIL = "fabio.malchermiranda@hpi.de, Niklas.Koehnecke@student.hpi.uni-potsdam.de"
 AUTHOR = "Fabio Malcher Miranda, Niklas Koehnecke"
-REQUIRES_PYTHON = ">=3.8,<3.9"
+REQUIRES_PYTHON = ">=3.7,<3.9"
 KEYWORDS = ["hierarchical classification"]
 DACS_SOFTWARE = "https://gitlab.com/dacs-hpi"
 # What packages are required for this module to be executed?
@@ -129,7 +129,7 @@ setup(
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
 )
