@@ -73,13 +73,13 @@ Y_train = [
 
 # Use random forest classifiers for every node
 rf = RandomForestClassifier()
-hierarchical_classifier = LocalClassifierPerNode(local_classifier=rf)
+classifier = LocalClassifierPerNode(local_classifier=rf)
 
 # Train local classifier per node
-hierarchical_classifier.fit(X_train, Y_train)
+classifier.fit(X_train, Y_train)
 
 # Predict
-predictions = hierarchical_classifier.predict(X_test)
+predictions = classifier.predict(X_test)
 ```
 
 In order to use the local classifier per parent node instead, simply update the import and instantiate the object `hierarchical_classifier` as:
@@ -87,7 +87,7 @@ In order to use the local classifier per parent node instead, simply update the 
 ```python
 from hiclass import LocalClassifierPerParentNode
 
-hierarchical_classifier = LocalClassifierPerParentNode(local_classifier=rf)
+classifier = LocalClassifierPerParentNode(local_classifier=rf)
 ```
 
 ## Step-by-step walk-through
