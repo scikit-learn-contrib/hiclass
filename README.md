@@ -82,7 +82,7 @@ hierarchical_classifier.fit(X_train, Y_train)
 predictions = hierarchical_classifier.predict(X_test)
 ```
 
-In order to use the local classifier per node instead, you just need to update the import and instantiate the objest `hierarchical_classifier` as:
+In order to use the local classifier per parent node instead, simply update the import and instantiate the object `hierarchical_classifier` as:
 
 ```python
 from hiclass import LocalClassifierPerParentNode
