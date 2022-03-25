@@ -83,7 +83,7 @@ classifier.fit(X_train, Y_train)
 predictions = classifier.predict(X_test)
 ```
 
-HiClass can also be adopted in scikit-learn pipelines, and fully supports sparse matrices as input. In order to demonstrate the use of both of these features, we will use the following small consumer complaints dataset:
+HiClass can also be adopted in scikit-learn pipelines, and fully supports sparse matrices as input. In order to demonstrate the use of both of these features, we will use the following consumer complaints dataset:
 
 ```python
 from hiclass import LocalClassifierPerParentNode
