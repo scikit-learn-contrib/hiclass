@@ -102,6 +102,17 @@ Here's our official API documentation, available on [Read the Docs](https://hicl
 
 If you notice any issues with the documentation or walk-through, please let us know by opening an issue here: [https://github.com/mirand863/hiclass/issues](https://github.com/mirand863/hiclass/issues).
 
+## Support
+
+If you run into any problems or issues, please create a [Github issue](https://github.com/mirand863/hiclass/issues) and we'll try our best to help.
+
+We strive to provide good support through our issue trackers on Github. However, if you'd like to receive private support with:
+
+- Phone / video calls to discuss your specific use case and get recommendations on best practices
+- Private discussions over Slack or Mattermost
+
+Please reach out to us at fabio.malchermiranda@hpi.de.
+
 ## Contributing
 
 We are a small team on a mission to democratize hierarchical classification, and we'll take all the help we can get! If you'd like to get involved, here's information on where we could use your help: [Contributing.md](https://github.com/mirand863/hiclass/blob/master/CONTRIBUTING.md)
