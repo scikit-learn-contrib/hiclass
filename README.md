@@ -106,7 +106,7 @@ Y_train = [
 ]
 ```
 
-Now let's build a pipeline that will use `CountVectorizer` and `TfidfTransformer` to extract features:
+Now let's build a pipeline that will use `CountVectorizer` and `TfidfTransformer` to extract features as sparse matrices:
 
 ```python
 # Use logistic regression classifiers for every parent node
