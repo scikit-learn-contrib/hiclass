@@ -9,7 +9,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - Classify a consumer complaints dataset from the consumer financial protection bureau: [consumer-complaints]()
 - Classify a 16S rRNA dataset from the TAXXI benchmark: [16s-rrna]()
 
-## Quick Links
+## Quick links
 
 - [Features](#features)
 - [Benchmarks](#benchmarks)
@@ -22,7 +22,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - [FAQ](#faq)
 - [Support](#support)
 - [Contributing](#contributing)
-- [Getting latest updates](#getting-latest-updates)
+- [Getting the latest updates](#getting-latest-updates)
 - [Citation](#citation)
 
 ## Features
@@ -82,7 +82,7 @@ classifier.fit(X_train, Y_train)
 predictions = classifier.predict(X_test)
 ```
 
-In order to use the local classifier per parent node instead, simply update the import and instantiate the object `hierarchical_classifier` as:
+In order to use the local classifier per parent node instead, simply update the import and instantiate the object `classifier` as:
 
 ```python
 from hiclass import LocalClassifierPerParentNode
@@ -96,7 +96,7 @@ A step-by-step walk-through is available on our interactive notebook hosted on [
 
 This will guide you through the process of installing hiclass with conda, training and predicting a small dataset.
 
-## API Documentation
+## API documentation
 
 Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).
 
@@ -117,7 +117,7 @@ Please reach out to us at fabio.malchermiranda@hpi.de.
 
 We are a small team on a mission to democratize hierarchical classification, and we'll take all the help we can get! If you'd like to get involved, here's information on where we could use your help: [Contributing.md](https://github.com/mirand863/hiclass/blob/master/CONTRIBUTING.md)
 
-## Getting Latest Updates
+## Getting the latest updates
 
 If you'd like to get updates when we release new versions, please click on the "Watch" button on the top and select "Releases only". Github will then send you notifications along with a changelog with each new release.
 
