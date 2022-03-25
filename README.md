@@ -28,7 +28,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 ## Features
 
 - **Python lists and NumPy arrays:** Handles Python lists and NumPy arrays elegantly, out-of-the-box.
-- **Pandas Series and DataFrames:** If you prefer to work with pandas, that is not an issue as HiClass also works with Pandas.
+- **Pandas Series and DataFrames:** If you prefer to use pandas, that is not an issue as HiClass also works with Pandas.
 - **Sparse matrices:** HiClass also supports features (X_train and X_test) built with sparse matrices, both for training and predicting.
 - **Parallel training:** Training can be performed in parallel on the hierarchical classifiers, which allows parallelization regardless of the implementations available on scikit-learn.
 - **Build pipelines and perform hyper-parameter tuning:** Since the hierarchical classifiers inherit from the BaseEstimator of scikit-learn, pipelines can be built and grid search executed to find out the best parameters.
@@ -73,13 +73,21 @@ Y_train = [
 
 # Use random forest classifiers for every node
 rf = RandomForestClassifier()
-lcpn = LocalClassifierPerNode(local_classifier=rf)
+hierarchical_classifier = LocalClassifierPerNode(local_classifier=rf)
 
 # Train local classifier per node
-lcpn.fit(X_train, Y_train)
+hierarchical_classifier.fit(X_train, Y_train)
 
 # Predict
-predictions = lcpn.predict(X_test)
+predictions = hierarchical_classifier.predict(X_test)
+```
+
+In order to use the local classifier per node instead, you just need to update the import and instantiate the objest `hierarchical_classifier` as:
+
+```python
+from hiclass import LocalClassifierPerParentNode
+
+hierarchical_classifier = LocalClassifierPerParentNode(local_classifier=rf)
 ```
 
 ## Step-by-step walk-through
