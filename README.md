@@ -1,6 +1,6 @@
 # HiClass
 
-HiClass is an open-source python library for hierarchical classification compatible with scikit-learn
+HiClass is an open-source Python library for hierarchical classification compatible with scikit-learn
 
 [![Deploy PyPI](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push)](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest) [![codecov](https://codecov.io/gh/mirand863/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR)](https://codecov.io/gh/mirand863/hiclass) [![Downloads Conda](https://img.shields.io/conda/dn/conda-forge/hiclass?label=conda)](https://anaconda.org/conda-forge/hiclass) [![Downloads pypi](https://img.shields.io/pypi/dm/hiclass?label=pypi)](https://pypi.org/project/hiclass/)  [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
@@ -9,7 +9,7 @@ HiClass is an open-source python library for hierarchical classification compati
 - Classify a consumer complaints dataset from the consumer financial protection bureau: [consumer-complaints]()
 - Classify a 16S rRNA dataset from the TAXXI benchmark: [16s-rrna]()
 
-## Quick Links
+## Quick links
 
 - [Features](#features)
 - [Benchmarks](#benchmarks)
@@ -22,8 +22,18 @@ HiClass is an open-source python library for hierarchical classification compati
 - [FAQ](#faq)
 - [Support](#support)
 - [Contributing](#contributing)
-- [Getting latest updates](#getting-latest-updates)
+- [Getting the latest updates](#getting-the-latest-updates)
 - [Citation](#citation)
+
+## Features
+
+- **Python lists and NumPy arrays:** Handles Python lists and NumPy arrays elegantly, out-of-the-box.
+- **Pandas Series and DataFrames:** If you prefer to use pandas, that is not an issue as HiClass also works with Pandas.
+- **Sparse matrices:** HiClass also supports features (X_train and X_test) built with sparse matrices, both for training and predicting.
+- **Parallel training:** Training can be performed in parallel on the hierarchical classifiers, which allows parallelization regardless of the implementations available on scikit-learn.
+- **Build pipelines and perform hyper-parameter tuning:** Since the hierarchical classifiers inherit from the BaseEstimator of scikit-learn, pipelines can be built and grid search executed to find out the best parameters.
+
+**Don't see a feature on this list?** Search our [issue tracker](https://github.com/mirand863/hiclass/issues) if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our roadmap based on user feedback, so we'd love to hear from you.
 
 ## Install
 
@@ -63,13 +73,21 @@ Y_train = [
 
 # Use random forest classifiers for every node
 rf = RandomForestClassifier()
-lcpn = LocalClassifierPerNode(local_classifier=rf)
+classifier = LocalClassifierPerNode(local_classifier=rf)
 
 # Train local classifier per node
-lcpn.fit(X_train, Y_train)
+classifier.fit(X_train, Y_train)
 
 # Predict
-predictions = lcpn.predict(X_test)
+predictions = classifier.predict(X_test)
+```
+
+In order to use the local classifier per parent node instead, simply update the import and instantiate the object `classifier` as:
+
+```python
+from hiclass import LocalClassifierPerParentNode
+
+classifier = LocalClassifierPerParentNode(local_classifier=rf)
 ```
 
 ## Step-by-step walk-through
@@ -78,17 +96,28 @@ A step-by-step walk-through is available on our interactive notebook hosted on [
 
 This will guide you through the process of installing hiclass with conda, training and predicting a small dataset.
 
-## API Documentation
+## API documentation
 
 Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).
 
 If you notice any issues with the documentation or walk-through, please let us know by opening an issue here: [https://github.com/mirand863/hiclass/issues](https://github.com/mirand863/hiclass/issues).
 
+## Support
+
+If you run into any problems or issues, please create a [Github issue](https://github.com/mirand863/hiclass/issues) and we'll try our best to help.
+
+We strive to provide good support through our issue tracker on Github. However, if you'd like to receive private support with:
+
+- Phone / video calls to discuss your specific use case and get recommendations
+- Private discussions over Slack or Mattermost
+
+Please reach out to us at fabio.malchermiranda@hpi.de.
+
 ## Contributing
 
 We are a small team on a mission to democratize hierarchical classification, and we'll take all the help we can get! If you'd like to get involved, here's information on where we could use your help: [Contributing.md](https://github.com/mirand863/hiclass/blob/master/CONTRIBUTING.md)
 
-## Getting Latest Updates
+## Getting the latest updates
 
 If you'd like to get updates when we release new versions, please click on the "Watch" button on the top and select "Releases only". Github will then send you notifications along with a changelog with each new release.
 
@@ -107,4 +136,4 @@ If you use HiClass, please cite:
 }
 ```
 
-In addition, we would like to list publications that use our software on our repository. Please email the reference, the name of your lab, department and institution to fabio.malchermiranda@hpi.de
+In addition, we would like to list publications that use HiClass to solve hierarchical problems. If you would like your manuscript to be added to this list, please email the reference, the name of your lab, department and institution to fabio.malchermiranda@hpi.de
