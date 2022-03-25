@@ -43,15 +43,9 @@ Alternatively, HiClass and its dependencies can also be installed with pip:
 pip install hiclass
 ```
 
-## API Documentation
+## Quick start
 
-Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).
-
-If you notice any issues with the documentation or walk-through, please let us know by opening an issue here: [https://github.com/mirand863/hiclass/issues](https://github.com/mirand863/hiclass/issues).
-
-## TODO: rewrite quick start
-
-~~An example usage can be found below. For a more thorough example, see [our interactive notebook](https://colab.research.google.com/drive/1Idzht9dNoB85pjc9gOL24t9ksrXZEA-9?usp=sharing). The full API documentation is available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).~~
+Here's a quick example showcasing how you can train and predict using a local classifier per node.
 
 ```python
 from hiclass import LocalClassifierPerNode
@@ -66,6 +60,18 @@ lcpn = LocalClassifierPerNode(local_classifier=rf)
 lcpn.fit(X_train, Y_train)
 predictions = lcpn.predict(X_test)
 ```
+
+## Step-by-step walk-through
+
+A step-by-step walk-through is available on our interactive notebook hosted on [Google Colab](https://colab.research.google.com/drive/1Idzht9dNoB85pjc9gOL24t9ksrXZEA-9?usp=sharing).
+
+This will guide you through the process of installing conda, hiclass, training and predicting in a small dataset.
+
+## API Documentation
+
+Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).
+
+If you notice any issues with the documentation or walk-through, please let us know by opening an issue here: [https://github.com/mirand863/hiclass/issues](https://github.com/mirand863/hiclass/issues).
 
 ## Contributing
 
