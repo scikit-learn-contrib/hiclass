@@ -90,14 +90,6 @@ from hiclass import LocalClassifierPerParentNode
 classifier = LocalClassifierPerParentNode(local_classifier=rf)
 ```
 
-And similarly for the local classifier per level:
-
-```python
-from hiclass import LocalClassifierPerLevel
-
-classifier = LocalClassifierPerLevel(local_classifier=rf)
-```
-
 ## Step-by-step walk-through
 
 A step-by-step walk-through is available on our interactive notebook hosted on [Google Colab](https://colab.research.google.com/drive/1Idzht9dNoB85pjc9gOL24t9ksrXZEA-9?usp=sharing).
