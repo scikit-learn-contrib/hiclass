@@ -33,7 +33,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - **Parallel training:** Training can be performed in parallel on the hierarchical classifiers, which allows parallelization regardless of the implementations available on scikit-learn.
 - **Build pipelines and perform hyper-parameter tuning:** Since the hierarchical classifiers inherit from the BaseEstimator of scikit-learn, pipelines can be built and grid search executed to find out the best parameters.
 
-**Don't see a feature on this list?** Search our issue tracker if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our roadmap based on user feedback, so we'd love to hear from you.
+**Don't see a feature on this list?** Search our [issue tracker](https://github.com/mirand863/hiclass/issues) if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our roadmap based on user feedback, so we'd love to hear from you.
 
 ## Install
 
