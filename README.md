@@ -6,7 +6,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 
 ✨ Here are a couple of **demos** that show HiClass in action on hierarchical datasets:
 
-- Classify a consumer complaints dataset from the consumer financial protection bureau: [consumer-complaints]()
+- Classify a consumer complaints dataset from the consumer financial protection bureau: [consumer-complaints](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)
 - Classify a 16S rRNA dataset from the TAXXI benchmark: [16s-rrna]()
 
 ## Quick links
