@@ -3,6 +3,7 @@ Local classifier per level approach.
 
 Numeric and string output labels are both handled.
 """
+import logging
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.metrics import euclidean_distances
@@ -71,12 +72,12 @@ class LocalClassifierPerLevel(BaseEstimator):
             Fitted estimator.
         """
         # Check that X and y have correct shape
-        X, y = check_X_y(X, y)
-        # Store the classes seen during fit
-        self.classes_ = unique_labels(y)
+        # and convert them to np.ndarray if need be
+        self.X_, self.y_ = check_X_y(X, y, multi_output=True, accept_sparse="csr")
 
-        self.X_ = X
-        self.y_ = y
+        # Create and configure logger
+        self._create_logger()
+
         # Return the classifier
         return self
 
@@ -105,3 +106,23 @@ class LocalClassifierPerLevel(BaseEstimator):
 
         closest = np.argmin(euclidean_distances(X, self.X_), axis=1)
         return self.y_[closest]
+
+    def _create_logger(self):
+        # Create logger
+        self.logger_ = logging.getLogger("LCPL")
+        self.logger_.setLevel(self.verbose)
+
+        # Create console handler and set verbose level
+        ch = logging.StreamHandler()
+        ch.setLevel(self.verbose)
+
+        # Create formatter
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
+
+        # Add formatter to ch
+        ch.setFormatter(formatter)
+
+        # Add ch to logger
+        self.logger_.addHandler(ch)
