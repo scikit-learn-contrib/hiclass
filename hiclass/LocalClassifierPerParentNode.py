@@ -90,11 +90,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         self : object
             Fitted estimator.
         """
-        # Execute common methods held by super class hierarchical classifier
+        # Execute common methods held by super class HierarchicalClassifier
         super().fit(X, y)
-
-        # Create DAG from self.y_ and store to self.hierarchy_
-        self._create_digraph()
 
         # If user passes edge_list, then export
         # DAG to CSV file to visualize with Gephi
@@ -191,46 +188,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
                     y[i, j] = y[i, j].split(self.separator_)[-1]
 
         return y
-
-    def _create_digraph(self):
-        # Create DiGraph
-        self.hierarchy_ = nx.DiGraph()
-
-        # Save dtype of y_
-        self.dtype_ = self.y_.dtype
-
-        # 1D disguised as 2D
-        if self.y_.ndim == 2 and self.y_.shape[1] == 1:
-            self.logger_.info("Converting y to 1D")
-            self.y_ = self.y_.flatten()
-
-        # Check dimension of labels
-        if self.y_.ndim == 2:
-            # 2D labels
-            # Create max_levels variable
-            self.max_levels_ = self.y_.shape[1]
-            rows, columns = self.y_.shape
-            self.logger_.info(f"Creating digraph from {rows} 2D labels")
-            for row in range(rows):
-                for column in range(columns - 1):
-                    self.hierarchy_.add_edge(
-                        self.y_[row, column], self.y_[row, column + 1]
-                    )
-
-        elif self.y_.ndim == 1:
-            # 1D labels
-            # Create max_levels_ variable
-            self.max_levels_ = 1
-            self.logger_.info(f"Creating digraph from {self.y_.size} 1D labels")
-            for label in self.y_:
-                self.hierarchy_.add_node(label)
-
-        else:
-            # Unsuported dimension
-            self.logger_.error(f"y with {self.y_.ndim} dimensions detected")
-            raise ValueError(
-                f"Creating graph from y with {self.y_.ndim} dimensions is not supported"
-            )
 
     def _convert_1d_y_to_2d(self):
         # This conversion is necessary for the binary policies
