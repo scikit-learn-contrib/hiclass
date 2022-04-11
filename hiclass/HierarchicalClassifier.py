@@ -74,7 +74,7 @@ class HierarchicalClassifier(abc.ABC):
 
     def _create_logger(self):
         # Create logger
-        self.logger_ = logging.getLogger("LCPN")
+        self.logger_ = logging.getLogger(self.classifier_abbreviation)
         self.logger_.setLevel(self.verbose)
 
         # Create console handler and set verbose level

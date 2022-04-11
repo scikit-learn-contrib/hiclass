@@ -70,6 +70,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             replace_classifiers=replace_classifiers,
             n_jobs=n_jobs,
         )
+        self.classifier_abbreviation = "LCPPN"
 
     def fit(self, X, y):
         """
