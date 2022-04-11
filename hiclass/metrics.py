@@ -6,7 +6,7 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray):
     """
     Compute precision score for hierarchical classification.
 
-    hP = sum(|S intersection T|) / sum(|S|),
+    hP = sum(len(S intersection T)) / sum(len(S)),
     where S is the set consisting of the most specific class(es) predicted for a test example and all respective ancestors
     and T is the set consisting of the true most specific class(es) for a test example and all respective ancestors.
 
@@ -39,7 +39,7 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray):
     """
     Compute recall score for hierarchical classification.
 
-    hR = sum(|S intersection T|) / sum(|T|),
+    hR = sum(len(S intersection T)) / sum(len(T)),
     where S is the set consisting of the most specific class(es) predicted for a test example and all respective ancestors
     and T is the set consisting of the true most specific class(es) for a test example and all respective ancestors.
 

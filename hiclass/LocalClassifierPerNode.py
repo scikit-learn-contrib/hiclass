@@ -4,17 +4,17 @@ Local classifier per node approach.
 Numeric and string output labels are both handled.
 """
 import logging
-from copy import deepcopy
-
 import networkx as nx
 import numpy as np
 import ray
+from copy import deepcopy
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 
 from hiclass import BinaryPolicy
 from hiclass.ConstantClassifier import ConstantClassifier
+from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
 
 @ray.remote
@@ -28,7 +28,7 @@ def _parallel_fit(lcpn, node):
     return classifier
 
 
-class LocalClassifierPerNode(BaseEstimator):
+class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
     """
     Assign local classifiers to each node of the graph, except the root node.
 

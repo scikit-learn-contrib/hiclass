@@ -5,16 +5,16 @@ Numeric and string output labels are both handled.
 """
 
 import logging
-from copy import deepcopy
-
 import networkx as nx
 import numpy as np
 import ray
+from copy import deepcopy
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
+from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
 
 @ray.remote
@@ -29,47 +29,13 @@ def _parallel_fit(lcppn, node):
     return classifier
 
 
-class LocalClassifierPerParentNode(BaseEstimator):
+class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
     """
     Assign local classifiers to each parent node of the graph.
 
     A local classifier per parent node is a local hierarchical classifier that fits one multi-class classifier
     for each parent node of the class hierarchy.
     """
-
-    def __init__(
-        self,
-        local_classifier: BaseEstimator = None,
-        verbose: int = 0,
-        edge_list: str = None,
-        replace_classifiers: bool = True,
-        n_jobs: int = 1,
-    ):
-        """
-        Initialize a local classifier per parent node.
-
-        Parameters
-        ----------
-        local_classifier : BaseEstimator, default=LogisticRegression
-            The local_classifier used to create the collection of local classifiers. Needs to have fit, predict and
-            clone methods.
-        verbose : int, default=0
-            Controls the verbosity when fitting and predicting.
-            See https://verboselogs.readthedocs.io/en/latest/readme.html#overview-of-logging-levels
-            for more information.
-        edge_list : str, default=None
-            Path to write the hierarchy built.
-        replace_classifiers : bool, default=True
-            Turns on (True) the replacement of a local classifier with a constant classifier when trained on only
-            a single unique class.
-        n_jobs : int, default=1
-            The number of jobs to run in parallel. Only :code:`fit` is parallelized.
-        """
-        self.local_classifier = local_classifier
-        self.verbose = verbose
-        self.edge_list = edge_list
-        self.replace_classifiers = replace_classifiers
-        self.n_jobs = n_jobs
 
     def fit(self, X, y):
         """
