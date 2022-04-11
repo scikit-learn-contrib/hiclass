@@ -89,6 +89,9 @@ class HierarchicalClassifier(abc.ABC):
         # DAG to CSV file to visualize with Gephi
         self._export_digraph()
 
+        # Assert that graph is directed acyclic
+        self._assert_digraph_is_dag()
+
     def _create_logger(self):
         # Create logger
         self.logger_ = logging.getLogger(self.classifier_abbreviation)
@@ -171,3 +174,9 @@ class HierarchicalClassifier(abc.ABC):
             # Export DAG to CSV file
             self.logger_.info(f"Writing edge list to file {self.edge_list}")
             nx.write_edgelist(hierarchy, self.edge_list, delimiter=",")
+
+    def _assert_digraph_is_dag(self):
+        # Assert that graph is directed acyclic
+        if not nx.is_directed_acyclic_graph(self.hierarchy_):
+            self.logger_.error("Cycle detected in graph")
+            raise ValueError("Graph is not directed acyclic")

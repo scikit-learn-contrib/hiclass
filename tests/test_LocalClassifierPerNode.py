@@ -26,19 +26,6 @@ def test_convert_1d_y_to_2d(graph_1d):
 
 
 @pytest.fixture
-def cyclic_graph():
-    graph = LocalClassifierPerNode()
-    graph.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("c", "a")])
-    graph.logger_ = logging.getLogger("LCPN")
-    return graph
-
-
-def test_assert_digraph_is_dag(cyclic_graph):
-    with pytest.raises(ValueError):
-        cyclic_graph._assert_digraph_is_dag()
-
-
-@pytest.fixture
 def digraph_with_policy():
     digraph = LocalClassifierPerNode(binary_policy="exclusive")
     digraph.hierarchy_ = nx.DiGraph([("a", "b")])

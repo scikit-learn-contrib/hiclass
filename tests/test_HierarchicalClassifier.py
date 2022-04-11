@@ -109,3 +109,16 @@ def test_export_digraph(digraph_2d):
     digraph_2d._export_digraph()
     digraph_2d.edge_list.seek(0)
     assert digraph_2d.edge_list.read() == ground_truth
+
+
+@pytest.fixture
+def cyclic_graph():
+    classifier = HierarchicalClassifier()
+    classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("c", "a")])
+    classifier.logger_ = logging.getLogger("HC")
+    return classifier
+
+
+def test_assert_digraph_is_dag(cyclic_graph):
+    with pytest.raises(ValueError):
+        cyclic_graph._assert_digraph_is_dag()

@@ -3,10 +3,11 @@ Local classifier per node approach.
 
 Numeric and string output labels are both handled.
 """
+from copy import deepcopy
+
 import networkx as nx
 import numpy as np
 import ray
-from copy import deepcopy
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import check_array, check_is_fitted
@@ -96,9 +97,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         """
         # Execute common methods held by super class HierarchicalClassifier
         super().fit(X, y)
-
-        # Assert that graph is directed acyclic
-        self._assert_digraph_is_dag()
 
         # If y is 1D, convert to 2D for binary policies
         self._convert_1d_y_to_2d()
@@ -208,12 +206,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         # This conversion is necessary for the binary policies
         if self.y_.ndim == 1:
             self.y_ = np.reshape(self.y_, (-1, 1))
-
-    def _assert_digraph_is_dag(self):
-        # Assert that graph is directed acyclic
-        if not nx.is_directed_acyclic_graph(self.hierarchy_):
-            self.logger_.error("Cycle detected in graph")
-            raise ValueError("Graph is not directed acyclic")
 
     def _initialize_binary_policy(self):
         if isinstance(self.binary_policy, str):

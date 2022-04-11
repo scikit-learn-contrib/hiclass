@@ -3,13 +3,12 @@ Local classifier per level approach.
 
 Numeric and string output labels are both handled.
 """
-import networkx as nx
 import numpy as np
-from hiclass.HierarchicalClassifier import HierarchicalClassifier
 from sklearn.base import BaseEstimator
 from sklearn.metrics import euclidean_distances
-from sklearn.utils.multiclass import unique_labels
 from sklearn.utils.validation import check_array, check_is_fitted
+
+from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
 
 class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
@@ -78,9 +77,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # Execute common methods held by super class HierarchicalClassifier
         super().fit(X, y)
 
-        # # Assert that graph is directed acyclic
-        # self._assert_digraph_is_dag()
-        #
         # # If y is 1D, convert to 2D for binary policies
         # self._convert_1d_y_to_2d()
         #
@@ -106,8 +102,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # # TODO: Add parameter to receive hierarchy as parameter in constructor
         #
         # # TODO: Add support to empty labels in some levels
-        #
-        # # TODO: Parallelize fit
         #
         # # Delete unnecessary variables
         # self._clean_up()
