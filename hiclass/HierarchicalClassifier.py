@@ -1,5 +1,6 @@
 """Shared code for all classifiers."""
 import abc
+import logging
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_X_y
 
@@ -67,3 +68,26 @@ class HierarchicalClassifier(abc.ABC):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
         self.X_, self.y_ = check_X_y(X, y, multi_output=True, accept_sparse="csr")
+
+        # Create and configure logger
+        self._create_logger()
+
+    def _create_logger(self):
+        # Create logger
+        self.logger_ = logging.getLogger("LCPN")
+        self.logger_.setLevel(self.verbose)
+
+        # Create console handler and set verbose level
+        ch = logging.StreamHandler()
+        ch.setLevel(self.verbose)
+
+        # Create formatter
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
+
+        # Add formatter to ch
+        ch.setFormatter(formatter)
+
+        # Add ch to logger
+        self.logger_.addHandler(ch)

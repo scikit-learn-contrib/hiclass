@@ -3,7 +3,6 @@ Local classifier per level approach.
 
 Numeric and string output labels are both handled.
 """
-import logging
 import networkx as nx
 import numpy as np
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
@@ -78,9 +77,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # Execute common methods held by super class hierarchical classifier
         super().fit(X, y)
 
-        # Create and configure logger
-        self._create_logger()
-
         # Avoids creating more columns in prediction if edges are a->b and b->c,
         # which would generate the prediction a->b->c
         self._disambiguate()
@@ -154,26 +150,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         closest = np.argmin(euclidean_distances(X, self.X_), axis=1)
         return self.y_[closest]
-
-    def _create_logger(self):
-        # Create logger
-        self.logger_ = logging.getLogger("LCPL")
-        self.logger_.setLevel(self.verbose)
-
-        # Create console handler and set verbose level
-        ch = logging.StreamHandler()
-        ch.setLevel(self.verbose)
-
-        # Create formatter
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
-
-        # Add formatter to ch
-        ch.setFormatter(formatter)
-
-        # Add ch to logger
-        self.logger_.addHandler(ch)
 
     def _disambiguate(self):
         self.separator_ = "::HiClass::Separator::"
