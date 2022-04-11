@@ -1,9 +1,8 @@
 import logging
-import tempfile
-
 import networkx as nx
 import numpy as np
 import pytest
+import tempfile
 from numpy.testing import assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError

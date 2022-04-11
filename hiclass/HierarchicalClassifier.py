@@ -1,6 +1,7 @@
 """Shared code for all classifiers."""
 import abc
 import logging
+import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_X_y
 
@@ -76,6 +77,10 @@ class HierarchicalClassifier(abc.ABC):
         # Create and configure logger
         self._create_logger()
 
+        # Avoids creating more columns in prediction if edges are a->b and b->c,
+        # which would generate the prediction a->b->c
+        self._disambiguate()
+
     def _create_logger(self):
         # Create logger
         self.logger_ = logging.getLogger(self.classifier_abbreviation)
@@ -95,3 +100,14 @@ class HierarchicalClassifier(abc.ABC):
 
         # Add ch to logger
         self.logger_.addHandler(ch)
+
+    def _disambiguate(self):
+        self.separator_ = "::HiClass::Separator::"
+        if self.y_.ndim == 2:
+            new_y = []
+            for i in range(self.y_.shape[0]):
+                row = [self.y_[i, 0]]
+                for j in range(1, self.y_.shape[1]):
+                    row.append(str(row[-1]) + self.separator_ + str(self.y_[i, j]))
+                new_y.append(np.asarray(row, dtype=np.str_))
+            self.y_ = np.array(new_y)

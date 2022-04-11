@@ -1,9 +1,8 @@
 import logging
-import tempfile
-
 import networkx as nx
 import numpy as np
 import pytest
+import tempfile
 from numpy.testing import assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError
@@ -17,21 +16,6 @@ from hiclass import LocalClassifierPerParentNode
 @parametrize_with_checks([LocalClassifierPerParentNode()])
 def test_sklearn_compatible_estimator(estimator, check):
     check(estimator)
-
-
-@pytest.fixture
-def ambiguous_node():
-    graph = LocalClassifierPerParentNode()
-    graph.y_ = np.array([["a", "b"], ["b", "c"]])
-    return graph
-
-
-def test_disambiguate(ambiguous_node):
-    ground_truth = np.array(
-        [["a", "a::HiClass::Separator::b"], ["b", "b::HiClass::Separator::c"]]
-    )
-    ambiguous_node._disambiguate()
-    assert_array_equal(ground_truth, ambiguous_node.y_)
 
 
 @pytest.fixture

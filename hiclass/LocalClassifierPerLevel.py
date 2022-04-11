@@ -78,10 +78,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # Execute common methods held by super class hierarchical classifier
         super().fit(X, y)
 
-        # Avoids creating more columns in prediction if edges are a->b and b->c,
-        # which would generate the prediction a->b->c
-        self._disambiguate()
-
         # Create DAG from self.y_ and store to self.hierarchy_
         self._create_digraph()
 
@@ -151,17 +147,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         closest = np.argmin(euclidean_distances(X, self.X_), axis=1)
         return self.y_[closest]
-
-    def _disambiguate(self):
-        self.separator_ = "::HiClass::Separator::"
-        if self.y_.ndim == 2:
-            new_y = []
-            for i in range(self.y_.shape[0]):
-                row = [self.y_[i, 0]]
-                for j in range(1, self.y_.shape[1]):
-                    row.append(str(row[-1]) + self.separator_ + str(self.y_[i, j]))
-                new_y.append(np.asarray(row, dtype=np.str_))
-            self.y_ = np.array(new_y)
 
     def _create_digraph(self):
         # Create DiGraph
