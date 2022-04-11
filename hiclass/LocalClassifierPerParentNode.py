@@ -69,8 +69,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             edge_list=edge_list,
             replace_classifiers=replace_classifiers,
             n_jobs=n_jobs,
+            classifier_abbreviation="LCPPN",
         )
-        self.classifier_abbreviation = "LCPPN"
 
     def fit(self, X, y):
         """

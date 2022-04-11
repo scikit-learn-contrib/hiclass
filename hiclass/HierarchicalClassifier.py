@@ -18,6 +18,7 @@ class HierarchicalClassifier(abc.ABC):
         edge_list: str = None,
         replace_classifiers: bool = True,
         n_jobs: int = 1,
+        classifier_abbreviation: str = "",
     ):
         """
         Initialize a local hierarchical classifier.
@@ -38,12 +39,15 @@ class HierarchicalClassifier(abc.ABC):
             a single unique class.
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
+        classifier_abbreviation : str, default=""
+            The abbreviation of the local hierarchical classifier to be displayed during logging.
         """
         self.local_classifier = local_classifier
         self.verbose = verbose
         self.edge_list = edge_list
         self.replace_classifiers = replace_classifiers
         self.n_jobs = n_jobs
+        self.classifier_abbreviation = classifier_abbreviation
 
     def fit(self, X, y):
         """

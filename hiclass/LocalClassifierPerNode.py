@@ -72,9 +72,9 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             edge_list=edge_list,
             replace_classifiers=replace_classifiers,
             n_jobs=n_jobs,
+            classifier_abbreviation="LCPN",
         )
         self.binary_policy = binary_policy
-        self.classifier_abbreviation = "LCPN"
 
     def fit(self, X, y):
         """

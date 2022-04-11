@@ -54,8 +54,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             edge_list=edge_list,
             replace_classifiers=replace_classifiers,
             n_jobs=n_jobs,
+            classifier_abbreviation="LCPL",
         )
-        self.classifier_abbreviation = "LCPN"
 
     def fit(self, X, y):
         """
