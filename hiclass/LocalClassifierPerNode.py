@@ -141,8 +141,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         # TODO: Add support to empty labels in some levels
 
-        # TODO: Parallelize fit
-
         # Delete unnecessary variables
         self._clean_up()
 

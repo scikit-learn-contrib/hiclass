@@ -79,9 +79,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # If y is 1D, convert to 2D for binary policies
         self._convert_1d_y_to_2d()
 
-        # # Initialize policy
-        # self._initialize_binary_policy()
-
         # Detect root(s) and add artificial root to DAG
         self._add_artificial_root()
 
@@ -101,8 +98,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # TODO: Add parameter to receive hierarchy as parameter in constructor
 
         # TODO: Add support to empty labels in some levels
-
-        # TODO: Parallelize fit
 
         # Delete unnecessary variables
         self._clean_up()
