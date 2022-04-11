@@ -3,8 +3,8 @@
 Data Utilities
 ==============
 
-Policies
---------
+Binary Policies
+---------------
 
 ExclusivePolicy
 ^^^^^^^^^^^^^^^
@@ -69,7 +69,7 @@ ExclusiveSiblingsPolicy
 ..................................
 
 
-Utility functions
------------------
+Hierarchical Metrics
+--------------------
 .. automodule:: metrics
     :members:
