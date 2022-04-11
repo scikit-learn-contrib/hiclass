@@ -67,12 +67,14 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
         """
-        self.local_classifier = local_classifier
+        super().__init__(
+            local_classifier=local_classifier,
+            verbose=verbose,
+            edge_list=edge_list,
+            replace_classifiers=replace_classifiers,
+            n_jobs=n_jobs,
+        )
         self.binary_policy = binary_policy
-        self.verbose = verbose
-        self.edge_list = edge_list
-        self.replace_classifiers = replace_classifiers
-        self.n_jobs = n_jobs
 
     def fit(self, X, y):
         """
