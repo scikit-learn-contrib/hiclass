@@ -1,8 +1,8 @@
 import logging
+
 import networkx as nx
 import numpy as np
 import pytest
-import tempfile
 from numpy.testing import assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError
@@ -17,12 +17,6 @@ from hiclass.BinaryPolicy import ExclusivePolicy
 @parametrize_with_checks([LocalClassifierPerNode()])
 def test_sklearn_compatible_estimator(estimator, check):
     check(estimator)
-
-
-def test_convert_1d_y_to_2d(graph_1d):
-    ground_truth = np.array([["a"], ["b"], ["c"], ["d"]])
-    graph_1d._convert_1d_y_to_2d()
-    assert_array_equal(ground_truth, graph_1d.y_)
 
 
 @pytest.fixture

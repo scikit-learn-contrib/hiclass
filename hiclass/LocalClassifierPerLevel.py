@@ -77,9 +77,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # Execute common methods held by super class HierarchicalClassifier
         super().fit(X, y)
 
-        # # If y is 1D, convert to 2D for binary policies
-        # self._convert_1d_y_to_2d()
-        #
         # # Initialize policy
         # self._initialize_binary_policy()
         #

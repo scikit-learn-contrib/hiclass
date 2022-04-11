@@ -92,6 +92,9 @@ class HierarchicalClassifier(abc.ABC):
         # Assert that graph is directed acyclic
         self._assert_digraph_is_dag()
 
+        # If y is 1D, convert to 2D for binary policies
+        self._convert_1d_y_to_2d()
+
     def _create_logger(self):
         # Create logger
         self.logger_ = logging.getLogger(self.classifier_abbreviation)
@@ -180,3 +183,8 @@ class HierarchicalClassifier(abc.ABC):
         if not nx.is_directed_acyclic_graph(self.hierarchy_):
             self.logger_.error("Cycle detected in graph")
             raise ValueError("Graph is not directed acyclic")
+
+    def _convert_1d_y_to_2d(self):
+        # This conversion is necessary for the binary policies
+        if self.y_.ndim == 1:
+            self.y_ = np.reshape(self.y_, (-1, 1))

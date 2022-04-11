@@ -94,9 +94,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # Execute common methods held by super class HierarchicalClassifier
         super().fit(X, y)
 
-        # If y is 1D, convert to 2D for binary policies
-        self._convert_1d_y_to_2d()
-
         # Detect root(s) and add artificial root to DAG
         self._add_artificial_root()
 
@@ -182,11 +179,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
                     y[i, j] = y[i, j].split(self.separator_)[-1]
 
         return y
-
-    def _convert_1d_y_to_2d(self):
-        # This conversion is necessary for the binary policies
-        if self.y_.ndim == 1:
-            self.y_ = np.reshape(self.y_, (-1, 1))
 
     def _add_artificial_root(self):
         # Detect root(s)

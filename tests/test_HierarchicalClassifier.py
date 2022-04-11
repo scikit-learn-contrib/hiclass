@@ -122,3 +122,9 @@ def cyclic_graph():
 def test_assert_digraph_is_dag(cyclic_graph):
     with pytest.raises(ValueError):
         cyclic_graph._assert_digraph_is_dag()
+
+
+def test_convert_1d_y_to_2d(graph_1d):
+    ground_truth = np.array([["a"], ["b"], ["c"], ["d"]])
+    graph_1d._convert_1d_y_to_2d()
+    assert_array_equal(ground_truth, graph_1d.y_)
