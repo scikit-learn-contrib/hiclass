@@ -85,6 +85,10 @@ class HierarchicalClassifier(abc.ABC):
         # Create DAG from self.y_ and store to self.hierarchy_
         self._create_digraph()
 
+        # If user passes edge_list, then export
+        # DAG to CSV file to visualize with Gephi
+        self._export_digraph()
+
     def _create_logger(self):
         # Create logger
         self.logger_ = logging.getLogger(self.classifier_abbreviation)
@@ -155,3 +159,15 @@ class HierarchicalClassifier(abc.ABC):
             raise ValueError(
                 f"Creating graph from y with {self.y_.ndim} dimensions is not supported"
             )
+
+    def _export_digraph(self):
+        # Check if edge_list is set
+        if self.edge_list:
+            # Add quotes to all nodes in case the text has commas
+            mapping = {}
+            for node in self.hierarchy_:
+                mapping[node] = '"{}"'.format(node.split(self.separator_)[-1])
+            hierarchy = nx.relabel_nodes(self.hierarchy_, mapping, copy=True)
+            # Export DAG to CSV file
+            self.logger_.info(f"Writing edge list to file {self.edge_list}")
+            nx.write_edgelist(hierarchy, self.edge_list, delimiter=",")

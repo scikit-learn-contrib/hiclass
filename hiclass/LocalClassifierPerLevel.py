@@ -78,10 +78,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # Execute common methods held by super class HierarchicalClassifier
         super().fit(X, y)
 
-        # If user passes edge_list, then export
-        # DAG to CSV file to visualize with Gephi
-        self._export_digraph()
-
         # # Assert that graph is directed acyclic
         # self._assert_digraph_is_dag()
         #
@@ -144,15 +140,3 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         closest = np.argmin(euclidean_distances(X, self.X_), axis=1)
         return self.y_[closest]
-
-    def _export_digraph(self):
-        # Check if edge_list is set
-        if self.edge_list:
-            # Add quotes to all nodes in case the text has commas
-            mapping = {}
-            for node in self.hierarchy_:
-                mapping[node] = '"{}"'.format(node.split(self.separator_)[-1])
-            hierarchy = nx.relabel_nodes(self.hierarchy_, mapping, copy=True)
-            # Export DAG to CSV file
-            self.logger_.info(f"Writing edge list to file {self.edge_list}")
-            nx.write_edgelist(hierarchy, self.edge_list, delimiter=",")

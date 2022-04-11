@@ -102,3 +102,10 @@ def digraph_3d():
 def test_create_digraph_3d(digraph_3d):
     with pytest.raises(ValueError):
         digraph_3d._create_digraph()
+
+
+def test_export_digraph(digraph_2d):
+    ground_truth = b'"a","b",{}\n"b","c",{}\n"d","e",{}\n"e","f",{}\n'
+    digraph_2d._export_digraph()
+    digraph_2d.edge_list.seek(0)
+    assert digraph_2d.edge_list.read() == ground_truth

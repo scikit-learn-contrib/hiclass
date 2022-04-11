@@ -24,13 +24,6 @@ def test_convert_1d_y_to_2d(graph_1d):
     assert_array_equal(ground_truth, graph_1d.y_)
 
 
-def test_export_digraph(digraph_2d):
-    ground_truth = b'"a","b",{}\n"b","c",{}\n"d","e",{}\n"e","f",{}\n'
-    digraph_2d._export_digraph()
-    digraph_2d.edge_list.seek(0)
-    assert digraph_2d.edge_list.read() == ground_truth
-
-
 @pytest.fixture
 def cyclic_graph():
     graph = LocalClassifierPerParentNode()
