@@ -10,7 +10,7 @@ import ray
 from copy import deepcopy
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
-from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
+from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass import BinaryPolicy
 from hiclass.ConstantClassifier import ConstantClassifier
@@ -94,9 +94,8 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         self : object
             Fitted estimator.
         """
-        # Check that X and y have correct shape
-        # and convert them to np.ndarray if need be
-        self.X_, self.y_ = check_X_y(X, y, multi_output=True, accept_sparse="csr")
+        # Execute common methods held by super class hierarchical classifier
+        super().fit(X, y)
 
         # Create and configure logger
         self._create_logger()

@@ -1,6 +1,7 @@
 """Shared code for all classifiers."""
 import abc
 from sklearn.base import BaseEstimator
+from sklearn.utils.validation import check_X_y
 
 
 class HierarchicalClassifier(abc.ABC):
@@ -42,3 +43,27 @@ class HierarchicalClassifier(abc.ABC):
         self.edge_list = edge_list
         self.replace_classifiers = replace_classifiers
         self.n_jobs = n_jobs
+
+    def fit(self, X, y):
+        """
+        Fit a local hierarchical classifier.
+
+        Needs to be subclassed by other classifiers as it only offers common methods.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            The training input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csc_matrix``.
+        y : array-like of shape (n_samples, n_levels)
+            The target values, i.e., hierarchical class labels for classification.
+
+        Returns
+        -------
+        self : object
+            Fitted estimator.
+        """
+        # Check that X and y have correct shape
+        # and convert them to np.ndarray if need be
+        self.X_, self.y_ = check_X_y(X, y, multi_output=True, accept_sparse="csr")
