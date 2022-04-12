@@ -1,4 +1,5 @@
 import logging
+import tempfile
 
 import networkx as nx
 import numpy as np
@@ -99,6 +100,17 @@ def test_fit_1_class():
     lcppn.fit(X, y)
     prediction = lcppn.predict(X)
     assert_array_equal(ground_truth, prediction)
+
+
+@pytest.fixture
+def digraph_2d():
+    classifier = LocalClassifierPerParentNode()
+    classifier.y_ = np.array([["a", "b", "c"], ["d", "e", "f"]])
+    classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
+    classifier.logger_ = logging.getLogger("HC")
+    classifier.edge_list = tempfile.TemporaryFile()
+    classifier.separator_ = "::HiClass::Separator::"
+    return classifier
 
 
 def test_get_parents(digraph_2d):
