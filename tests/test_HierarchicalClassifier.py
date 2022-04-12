@@ -128,3 +128,33 @@ def test_convert_1d_y_to_2d(graph_1d):
     ground_truth = np.array([["a"], ["b"], ["c"], ["d"]])
     graph_1d._convert_1d_y_to_2d()
     assert_array_equal(ground_truth, graph_1d.y_)
+
+
+@pytest.fixture
+def digraph_one_root():
+    classifier = HierarchicalClassifier()
+    classifier.logger_ = logging.getLogger("HC")
+    classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("c", "d")])
+    return classifier
+
+
+def test_add_artificial_root(digraph_one_root):
+    digraph_one_root._add_artificial_root()
+    successors = list(digraph_one_root.hierarchy_.successors("hiclass::root"))
+    assert ["a"] == successors
+    assert "hiclass::root" == digraph_one_root.root_
+
+
+@pytest.fixture
+def digraph_multiple_roots():
+    classifier = HierarchicalClassifier()
+    classifier.logger_ = logging.getLogger("HC")
+    classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("c", "d"), ("e", "f")])
+    return classifier
+
+
+def test_add_artificial_root_multiple_roots(digraph_multiple_roots):
+    digraph_multiple_roots._add_artificial_root()
+    successors = list(digraph_multiple_roots.hierarchy_.successors("hiclass::root"))
+    assert ["a", "c", "e"] == successors
+    assert "hiclass::root" == digraph_multiple_roots.root_

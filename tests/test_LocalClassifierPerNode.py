@@ -63,48 +63,6 @@ def test_initialize_object_binary_policy(digraph_with_object_policy):
 
 
 @pytest.fixture
-def digraph_one_root():
-    digraph = LocalClassifierPerNode()
-    digraph.logger_ = logging.getLogger("LCPN")
-    digraph.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("c", "d")])
-    return digraph
-
-
-def test_add_artificial_root(digraph_one_root):
-    digraph_one_root._add_artificial_root()
-    successors = list(digraph_one_root.hierarchy_.successors("hiclass::root"))
-    root = [
-        node
-        for node, in_degree in digraph_one_root.hierarchy_.in_degree()
-        if in_degree == 0
-    ]
-    assert ["a"] == successors
-    assert ["hiclass::root"] == root
-    assert "hiclass::root" == digraph_one_root.root_
-
-
-@pytest.fixture
-def digraph_multiple_roots():
-    digraph = LocalClassifierPerNode()
-    digraph.logger_ = logging.getLogger("LCPN")
-    digraph.hierarchy_ = nx.DiGraph([("a", "b"), ("c", "d"), ("e", "f")])
-    return digraph
-
-
-def test_add_artificial_root_multiple_roots(digraph_multiple_roots):
-    digraph_multiple_roots._add_artificial_root()
-    successors = list(digraph_multiple_roots.hierarchy_.successors("hiclass::root"))
-    root = [
-        node
-        for node, in_degree in digraph_multiple_roots.hierarchy_.in_degree()
-        if in_degree == 0
-    ]
-    assert ["a", "c", "e"] == successors
-    assert ["hiclass::root"] == root
-    assert "hiclass::root" == digraph_multiple_roots.root_
-
-
-@pytest.fixture
 def digraph_logistic_regression():
     digraph = LocalClassifierPerNode(local_classifier=LogisticRegression())
     digraph.hierarchy_ = nx.DiGraph([("a", "b"), ("a", "c")])

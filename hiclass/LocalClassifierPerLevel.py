@@ -77,12 +77,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # Execute common methods held by super class HierarchicalClassifier
         super().fit(X, y)
 
-        # # Initialize policy
-        # self._initialize_binary_policy()
-        #
-        # # Detect root(s) and add artificial root to DAG
-        # self._add_artificial_root()
-        #
         # # Initialize local classifiers in DAG
         # self._initialize_local_classifiers()
         #

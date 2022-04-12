@@ -95,6 +95,9 @@ class HierarchicalClassifier(abc.ABC):
         # If y is 1D, convert to 2D for binary policies
         self._convert_1d_y_to_2d()
 
+        # Detect root(s) and add artificial root to DAG
+        self._add_artificial_root()
+
     def _create_logger(self):
         # Create logger
         self.logger_ = logging.getLogger(self.classifier_abbreviation)
@@ -188,3 +191,15 @@ class HierarchicalClassifier(abc.ABC):
         # This conversion is necessary for the binary policies
         if self.y_.ndim == 1:
             self.y_ = np.reshape(self.y_, (-1, 1))
+
+    def _add_artificial_root(self):
+        # Detect root(s)
+        roots = [
+            node for node, in_degree in self.hierarchy_.in_degree() if in_degree == 0
+        ]
+        self.logger_.info(f"Detected {len(roots)} roots")
+
+        # Add artificial root as predecessor to root(s) detected
+        self.root_ = "hiclass::root"
+        for old_root in roots:
+            self.hierarchy_.add_edge(self.root_, old_root)

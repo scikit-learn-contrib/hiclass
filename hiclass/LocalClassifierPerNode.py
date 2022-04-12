@@ -101,9 +101,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         # Initialize policy
         self._initialize_binary_policy()
 
-        # Detect root(s) and add artificial root to DAG
-        self._add_artificial_root()
-
         # Initialize local classifiers in DAG
         self._initialize_local_classifiers()
 
@@ -217,18 +214,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             raise ValueError(
                 f"Binary policy type must str, not {type(self.binary_policy)}."
             )
-
-    def _add_artificial_root(self):
-        # Detect root(s)
-        roots = [
-            node for node, in_degree in self.hierarchy_.in_degree() if in_degree == 0
-        ]
-        self.logger_.info(f"Detected {len(roots)} roots")
-
-        # Add artificial root as predecessor to root(s) detected
-        self.root_ = "hiclass::root"
-        for old_root in roots:
-            self.hierarchy_.add_edge(self.root_, old_root)
 
     def _initialize_local_classifiers(self):
         # Create a deep copy of the local classifier specified
