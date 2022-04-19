@@ -9,7 +9,6 @@ import networkx as nx
 import numpy as np
 import ray
 from sklearn.base import BaseEstimator
-from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass import BinaryPolicy
@@ -100,9 +99,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         # Initialize policy
         self._initialize_binary_policy()
-
-        # Initialize local classifiers in DAG
-        self._initialize_local_classifiers()
 
         # Fit local classifiers in DAG
         if self.n_jobs > 1:
@@ -216,14 +212,8 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             )
 
     def _initialize_local_classifiers(self):
-        # Create a deep copy of the local classifier specified
-        # for each node in the hierarchy and save to attribute "classifier"
-        self.logger_.info("Initializing local classifiers")
+        super()._initialize_local_classifiers()
         local_classifiers = {}
-        if self.local_classifier is None:
-            self.local_classifier_ = LogisticRegression()
-        else:
-            self.local_classifier_ = self.local_classifier
         for node in self.hierarchy_.nodes:
             # Skip only root node
             if node != self.root_:

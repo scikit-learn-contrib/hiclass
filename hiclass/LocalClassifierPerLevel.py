@@ -3,6 +3,8 @@ Local classifier per level approach.
 
 Numeric and string output labels are both handled.
 """
+from copy import deepcopy
+
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.metrics import euclidean_distances
@@ -77,9 +79,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # Execute common methods held by super class HierarchicalClassifier
         super().fit(X, y)
 
-        # # Initialize local classifiers in DAG
-        # self._initialize_local_classifiers()
-        #
         # # Fit local classifiers in DAG
         # if self.n_jobs > 1:
         #     self._fit_digraph_parallel()
@@ -125,3 +124,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         closest = np.argmin(euclidean_distances(X, self.X_), axis=1)
         return self.y_[closest]
+
+    def _initialize_local_classifiers(self):
+        super()._initialize_local_classifiers()
+        self.local_classifiers_ = [deepcopy(self.local_classifier_)] * self.y_.shape[1]

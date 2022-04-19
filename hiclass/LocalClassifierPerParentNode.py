@@ -9,7 +9,6 @@ import networkx as nx
 import numpy as np
 import ray
 from sklearn.base import BaseEstimator
-from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
@@ -94,9 +93,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # Execute common methods held by super class HierarchicalClassifier
         super().fit(X, y)
 
-        # Initialize local classifiers in DAG
-        self._initialize_local_classifiers()
-
         # Fit local classifiers in DAG
         if self.n_jobs > 1:
             self._fit_digraph_parallel()
@@ -178,14 +174,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         return y
 
     def _initialize_local_classifiers(self):
-        # Create a deep copy of the local classifier specified
-        # for each node in the hierarchy and save to attribute "classifier"
-        self.logger_.info("Initializing local classifiers")
+        super()._initialize_local_classifiers()
         local_classifiers = {}
-        if self.local_classifier is None:
-            self.local_classifier_ = LogisticRegression()
-        else:
-            self.local_classifier_ = self.local_classifier
         nodes = self._get_parents()
         for node in nodes:
             local_classifiers[node] = {"classifier": deepcopy(self.local_classifier_)}

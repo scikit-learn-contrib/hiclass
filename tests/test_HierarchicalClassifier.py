@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 import tempfile
 from numpy.testing import assert_array_equal
+from sklearn.linear_model import LogisticRegression
 
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
@@ -158,3 +159,9 @@ def test_add_artificial_root_multiple_roots(digraph_multiple_roots):
     successors = list(digraph_multiple_roots.hierarchy_.successors("hiclass::root"))
     assert ["a", "c", "e"] == successors
     assert "hiclass::root" == digraph_multiple_roots.root_
+
+
+def test_initialize_local_classifiers_2(digraph_multiple_roots):
+    digraph_multiple_roots.local_classifier = None
+    digraph_multiple_roots._initialize_local_classifiers()
+    assert isinstance(digraph_multiple_roots.local_classifier_, LogisticRegression)

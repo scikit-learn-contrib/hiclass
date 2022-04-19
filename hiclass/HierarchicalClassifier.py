@@ -1,9 +1,11 @@
 """Shared code for all classifiers."""
 import abc
 import logging
+
 import networkx as nx
 import numpy as np
 from sklearn.base import BaseEstimator
+from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import check_X_y
 
 
@@ -97,6 +99,9 @@ class HierarchicalClassifier(abc.ABC):
 
         # Detect root(s) and add artificial root to DAG
         self._add_artificial_root()
+
+        # Initialize local classifiers in DAG
+        self._initialize_local_classifiers()
 
     def _create_logger(self):
         # Create logger
@@ -203,3 +208,12 @@ class HierarchicalClassifier(abc.ABC):
         self.root_ = "hiclass::root"
         for old_root in roots:
             self.hierarchy_.add_edge(self.root_, old_root)
+
+    def _initialize_local_classifiers(self):
+        # Create a deep copy of the local classifier specified
+        # for each node in the hierarchy and save to attribute "classifier"
+        self.logger_.info("Initializing local classifiers")
+        if self.local_classifier is None:
+            self.local_classifier_ = LogisticRegression()
+        else:
+            self.local_classifier_ = self.local_classifier

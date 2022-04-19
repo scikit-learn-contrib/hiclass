@@ -31,7 +31,7 @@ def digraph_logistic_regression():
     return digraph
 
 
-def test_initialize_local_classifiers_1(digraph_logistic_regression):
+def test_initialize_local_classifiers(digraph_logistic_regression):
     digraph_logistic_regression._initialize_local_classifiers()
     for node in digraph_logistic_regression.hierarchy_.nodes:
         if node == digraph_logistic_regression.root_:
@@ -45,12 +45,6 @@ def test_initialize_local_classifiers_1(digraph_logistic_regression):
                     digraph_logistic_regression.hierarchy_.nodes[node]["classifier"],
                     LogisticRegression,
                 )
-
-
-def test_initialize_local_classifiers_2(digraph_logistic_regression):
-    digraph_logistic_regression.local_classifier = None
-    digraph_logistic_regression._initialize_local_classifiers()
-    assert isinstance(digraph_logistic_regression.local_classifier_, LogisticRegression)
 
 
 def test_fit_digraph(digraph_logistic_regression):
