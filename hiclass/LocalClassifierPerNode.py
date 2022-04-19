@@ -111,9 +111,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         # TODO: Add support to empty labels in some levels
 
-        # Delete unnecessary variables
-        self._clean_up()
-
         # Return the classifier
         return self
 
@@ -254,7 +251,5 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             classifier.fit(X, y)
 
     def _clean_up(self):
-        self.logger_.info("Cleaning up variables that can take a lot of disk space")
-        del self.X_
-        del self.y_
+        super()._clean_up()
         del self.binary_policy_

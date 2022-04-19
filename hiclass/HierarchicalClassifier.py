@@ -79,6 +79,9 @@ class HierarchicalClassifier(abc.ABC):
         else:
             self._fit_digraph()
 
+        # Delete unnecessary variables
+        self._clean_up()
+
     def _pre_fit(self, X, y):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
@@ -224,3 +227,8 @@ class HierarchicalClassifier(abc.ABC):
             self.local_classifier_ = LogisticRegression()
         else:
             self.local_classifier_ = self.local_classifier
+
+    def _clean_up(self):
+        self.logger_.info("Cleaning up variables that can take a lot of disk space")
+        del self.X_
+        del self.y_
