@@ -151,6 +151,8 @@ def digraph_multiple_roots():
     classifier = HierarchicalClassifier()
     classifier.logger_ = logging.getLogger("HC")
     classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("c", "d"), ("e", "f")])
+    classifier.X_ = np.array([[1, 2], [3, 4], [5, 6]])
+    classifier.y_ = np.array([["a", "b"], ["c", "d"], ["e", "f"]])
     return classifier
 
 
@@ -165,3 +167,11 @@ def test_initialize_local_classifiers_2(digraph_multiple_roots):
     digraph_multiple_roots.local_classifier = None
     digraph_multiple_roots._initialize_local_classifiers()
     assert isinstance(digraph_multiple_roots.local_classifier_, LogisticRegression)
+
+
+def test_clean_up(digraph_multiple_roots):
+    digraph_multiple_roots._clean_up()
+    with pytest.raises(AttributeError):
+        assert digraph_multiple_roots.X_ is None
+    with pytest.raises(AttributeError):
+        assert digraph_multiple_roots.y_ is None

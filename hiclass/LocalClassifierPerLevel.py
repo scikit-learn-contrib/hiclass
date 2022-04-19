@@ -124,7 +124,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         y : ndarray of shape (n_samples,) or (n_samples, n_outputs)
             The predicted classes.
         """
-        # Check is fit had been called
+        # Check if fit has been called
         check_is_fitted(self)
 
         # Input validation

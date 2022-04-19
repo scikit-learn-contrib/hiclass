@@ -140,6 +140,16 @@ def test_fit_1_class():
     assert_array_equal(ground_truth, prediction)
 
 
+def test_clean_up(digraph_logistic_regression):
+    digraph_logistic_regression._clean_up()
+    with pytest.raises(AttributeError):
+        assert digraph_logistic_regression.X_ is None
+    with pytest.raises(AttributeError):
+        assert digraph_logistic_regression.y_ is None
+    with pytest.raises(AttributeError):
+        assert digraph_logistic_regression.binary_policy_ is None
+
+
 @pytest.fixture
 def fitted_logistic_regression():
     digraph = LocalClassifierPerNode(local_classifier=LogisticRegression())
