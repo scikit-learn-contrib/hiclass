@@ -3,8 +3,10 @@ import logging
 import networkx as nx
 import numpy as np
 import pytest
+from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.estimator_checks import parametrize_with_checks
+from sklearn.utils.validation import check_is_fitted
 
 from hiclass import LocalClassifierPerLevel
 
@@ -33,3 +35,18 @@ def test_initialize_local_classifiers(digraph_logistic_regression):
             classifier,
             LogisticRegression,
         )
+
+
+def test_fit_digraph(digraph_logistic_regression):
+    classifiers = [
+        LogisticRegression(),
+        LogisticRegression(),
+    ]
+    digraph_logistic_regression.local_classifiers_ = classifiers
+    digraph_logistic_regression._fit_digraph()
+    for classifier in digraph_logistic_regression.local_classifiers_:
+        try:
+            check_is_fitted(classifier)
+        except NotFittedError as e:
+            pytest.fail(repr(e))
+    assert 1

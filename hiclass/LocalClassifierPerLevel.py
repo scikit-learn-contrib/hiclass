@@ -10,6 +10,7 @@ from sklearn.base import BaseEstimator
 from sklearn.metrics import euclidean_distances
 from sklearn.utils.validation import check_array, check_is_fitted
 
+from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
 
@@ -84,15 +85,18 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         #     self._fit_digraph_parallel()
         # else:
         #     self._fit_digraph()
-        #
-        # # TODO: Store the classes seen during fit
-        #
-        # # TODO: Add function to allow user to change local classifier
-        #
-        # # TODO: Add parameter to receive hierarchy as parameter in constructor
-        #
-        # # TODO: Add support to empty labels in some levels
-        #
+
+        # Fit local classifiers in DAG
+        self._fit_digraph()
+
+        # TODO: Store the classes seen during fit
+
+        # TODO: Add function to allow user to change local classifier
+
+        # TODO: Add parameter to receive hierarchy as parameter in constructor
+
+        # TODO: Add support to empty labels in some levels
+
         # # Delete unnecessary variables
         # self._clean_up()
 
@@ -128,3 +132,20 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     def _initialize_local_classifiers(self):
         super()._initialize_local_classifiers()
         self.local_classifiers_ = [deepcopy(self.local_classifier_)] * self.y_.shape[1]
+
+    def _fit_digraph(self):
+        self.logger_.info("Fitting local classifiers")
+        for level, classifier in enumerate(self.local_classifiers_):
+            self.logger_.info(
+                f"Fitting local classifier for level '{level + 1}' ({level + 1}/{len(self.local_classifiers_)})"
+            )
+            X = self.X_
+            y = self.y_[:, level]
+            unique_y = np.unique(y)
+            if len(unique_y) == 1 and self.replace_classifiers:
+                self.logger_.warning(
+                    f"Fitting ConstantClassifier for level '{level + 1}'"
+                )
+                self.local_classifiers_[level] = ConstantClassifier()
+                classifier = self.local_classifiers_[level]
+            classifier.fit(X, y)
