@@ -73,6 +73,8 @@ class HierarchicalClassifier(abc.ABC):
         self : object
             Fitted estimator.
         """
+
+    def _pre_fit(self, X, y):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
         self.X_, self.y_ = check_X_y(X, y, multi_output=True, accept_sparse="csr")

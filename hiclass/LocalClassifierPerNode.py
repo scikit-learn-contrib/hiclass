@@ -94,8 +94,8 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         self : object
             Fitted estimator.
         """
-        # Execute common methods held by super class HierarchicalClassifier
-        super().fit(X, y)
+        # Execute common methods necessary before fitting
+        super()._pre_fit(X, y)
 
         # Initialize policy
         self._initialize_binary_policy()

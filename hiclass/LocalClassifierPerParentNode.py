@@ -90,8 +90,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         self : object
             Fitted estimator.
         """
-        # Execute common methods held by super class HierarchicalClassifier
-        super().fit(X, y)
+        # Execute common methods necessary before fitting
+        super()._pre_fit(X, y)
 
         # Fit local classifiers in DAG
         if self.n_jobs > 1:
