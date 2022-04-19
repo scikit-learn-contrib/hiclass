@@ -73,6 +73,11 @@ class HierarchicalClassifier(abc.ABC):
         self : object
             Fitted estimator.
         """
+        # Fit local classifiers in DAG
+        if self.n_jobs > 1:
+            self._fit_digraph_parallel()
+        else:
+            self._fit_digraph()
 
     def _pre_fit(self, X, y):
         # Check that X and y have correct shape

@@ -6,12 +6,25 @@ Numeric and string output labels are both handled.
 from copy import deepcopy
 
 import numpy as np
+import ray
 from sklearn.base import BaseEstimator
 from sklearn.metrics import euclidean_distances
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
+
+
+@ray.remote
+def _parallel_fit(lcpl, level):
+    classifier = lcpl.local_classifiers_[level]
+    X = lcpl.X_
+    y = lcpl.y_[:, level]
+    unique_y = np.unique(y)
+    if len(unique_y) == 1 and lcpl.replace_classifiers:
+        classifier = ConstantClassifier()
+    classifier.fit(X, y)
+    return classifier
 
 
 class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
@@ -80,14 +93,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # Execute common methods necessary before fitting
         super()._pre_fit(X, y)
 
-        # # Fit local classifiers in DAG
-        # if self.n_jobs > 1:
-        #     self._fit_digraph_parallel()
-        # else:
-        #     self._fit_digraph()
-
         # Fit local classifiers in DAG
-        self._fit_digraph()
+        super().fit(X, y)
 
         # TODO: Store the classes seen during fit
 
@@ -149,3 +156,12 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                 self.local_classifiers_[level] = ConstantClassifier()
                 classifier = self.local_classifiers_[level]
             classifier.fit(X, y)
+
+    def _fit_digraph_parallel(self, local_mode: bool = False):
+        self.logger_.info("Fitting local classifiers")
+        ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
+        lcpl = ray.put(self)
+        results = [_parallel_fit.remote(lcpl, level) for level in range(len(self.local_classifiers_))]
+        classifiers = ray.get(results)
+        for level, classifier in enumerate(classifiers):
+            self.local_classifiers_[level] = classifier

@@ -94,10 +94,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         super()._pre_fit(X, y)
 
         # Fit local classifiers in DAG
-        if self.n_jobs > 1:
-            self._fit_digraph_parallel()
-        else:
-            self._fit_digraph()
+        super().fit(X, y)
 
         # TODO: Store the classes seen during fit
 
