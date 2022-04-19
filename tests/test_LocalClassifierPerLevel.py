@@ -3,6 +3,7 @@ import logging
 import networkx as nx
 import numpy as np
 import pytest
+from numpy.testing import assert_array_equal
 from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.estimator_checks import parametrize_with_checks
@@ -66,3 +67,13 @@ def test_fit_digraph_parallel(digraph_logistic_regression):
         except NotFittedError as e:
             pytest.fail(repr(e))
     assert 1
+
+
+def test_fit_1_class():
+    lcpl = LocalClassifierPerLevel(local_classifier=LogisticRegression(), n_jobs=2)
+    y = np.array([["1", "2"]])
+    X = np.array([[1, 2]])
+    ground_truth = np.array([["1", "2"]])
+    lcpl.fit(X, y)
+    prediction = lcpl.predict(X)
+    assert_array_equal(ground_truth, prediction)
