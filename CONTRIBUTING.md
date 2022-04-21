@@ -17,6 +17,7 @@ pip install pytest
 pip install pytest-flake8
 pip install pytest-pydocstyle
 pip install pytest-cov
+pip install -e .
 ```
 
 To run the tests simply execute:
