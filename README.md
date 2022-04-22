@@ -41,11 +41,11 @@ HiClass is an open-source Python library for hierarchical classification compati
 
 ### Consumer complaints dataset with ~XK training examples
 
-|Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|
-|----------|:-------------:|:------------:|
-|[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|X|Y|
-|[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|X|Y|
-|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|X|Y|
+|Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|Disk Usage (MB)|
+|----------|:-----------------------:|:---------------:|:-------------:|
+|[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|X|Y|Z|
+|[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|X|Y|Z|
+|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|X|Y|Z|
 
 We would love to benchmark with larger datasets, if we can find large ones in the public domain. If you have any suggestions for hierarchical datasets that are open, please let us know by opening an issue. We would also be delighted if you are able to share benchmarks from your own large datasets. Please send us a PR!
 
