@@ -37,6 +37,16 @@ HiClass is an open-source Python library for hierarchical classification compati
 
 **Don't see a feature on this list?** Search our [issue tracker](https://github.com/mirand863/hiclass/issues) if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our roadmap based on user feedback, so we'd love to hear from you.
 
+## Benchmarks
+
+### Consumer complaints dataset (~600k training examples)
+
+|Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|
+|----------|:-------------:|:------------:|
+|[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|X|Y|
+|[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|X|Y|
+|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|X|Y|
+
 ## Roadmap
 
 Here is our public roadmap: https://github.com/mirand863/hiclass/projects/1.
