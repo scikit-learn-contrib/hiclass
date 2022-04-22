@@ -39,7 +39,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 
 ## Benchmarks
 
-### Consumer complaints dataset (~600k training examples)
+### Consumer complaints dataset with ~XK training examples
 
 |Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|
 |----------|:-------------:|:------------:|
