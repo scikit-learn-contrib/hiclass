@@ -39,7 +39,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 
 ## Benchmarks
 
-### Consumer complaints dataset with ~XK training examples
+### Consumer complaints dataset with ~600K training examples
 
 This first benchmark was executed on Google Colab with only 1 core, using Logistic Regression as the base classifier.
 
