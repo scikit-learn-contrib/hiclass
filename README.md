@@ -47,7 +47,7 @@ This first benchmark was executed on Google Colab with only 1 core, using Logist
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
 |[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|00:52:41|5.17|115|0.7615|
 |[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|00:27:55|4.65|116|0.7572|
-|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|X|Y|Z|F|
+|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|03:14:40|8.95|101|0.7556|
 
 We would love to benchmark with larger datasets, if we can find large ones in the public domain. If you have any suggestions for hierarchical datasets that are open, please let us know by opening an issue. We would also be delighted if you are able to share benchmarks from your own large datasets. Please send us a PR!
 
