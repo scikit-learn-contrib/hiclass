@@ -37,6 +37,37 @@ HiClass is an open-source Python library for hierarchical classification compati
 
 **Don't see a feature on this list?** Search our [issue tracker](https://github.com/mirand863/hiclass/issues) if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our roadmap based on user feedback, so we'd love to hear from you.
 
+## Benchmarks
+
+### Consumer complaints dataset with ~600K training examples
+
+This first benchmark was executed on Google Colab with only 1 core, using Logistic Regression as the base classifier.
+
+|Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
+|----------|:-----------------------:|:---------------:|:-------------:|:-----:|
+|[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|00:52:41|5.17|115|**0.7615**|
+|[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|**00:27:55**|**4.65**|116|0.7572|
+|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|03:14:40|8.95|**101**|0.7556|
+
+This second benchmark is similar to the last one, except that it was executed on a cluster node running GNU/Linux with 512 GB physical memory and 128
+cores provided by two AMD EPYC™ 7742 processors, and each model had 12 cores available for training.
+
+|Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
+|----------|:-----------------------:|:---------------:|:-------------:|:-----:|
+|Local Classifier per Parent Node|00:27:37|4.17|115|**0.7619**|
+|Local Classifier per Node|**00:06:28**|**4.06**|117|0.7578|
+|Flat Classifier|01:42:36|7.16|**102**|0.7566|
+
+Lastly, this third benchmark was also executed on the same cluster node as the previous benchmark and 12 cores were provided for each model, however, the base classifier was random forest instead.
+
+|Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|Disk Usage (GB)|F-score|
+|----------|:-----------------------:|:---------------:|:-------------:|:-----:|
+|Local Classifier per Parent Node|02:57:39|**35.06**|**11**|0.7147|
+|Local Classifier per Node|02:18:57|39.20|12|**0.7440**|
+|Flat Classifier|**00:31:55**|77.21|36|0.6404|
+
+We would love to benchmark with larger datasets, if we can find large ones in the public domain. If you have any suggestions for hierarchical datasets that are open, please let us know by opening an issue. We would also be delighted if you are able to share benchmarks from your own large datasets. Please send us a PR!
+
 ## Roadmap
 
 Here is our public roadmap: https://github.com/mirand863/hiclass/projects/1.
@@ -90,7 +121,7 @@ classifier.fit(X_train, Y_train)
 predictions = classifier.predict(X_test)
 ```
 
-HiClass can also be adopted in scikit-learn pipelines, and fully supports sparse matrices as input. In order to demonstrate the use of both of these features, we will use the following consumer complaints dataset:
+HiClass can also be adopted in scikit-learn pipelines, and fully supports sparse matrices as input. In order to demonstrate the use of both of these features, we will use the following example:
 
 ```python
 from hiclass import LocalClassifierPerParentNode
