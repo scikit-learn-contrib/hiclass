@@ -170,8 +170,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                     self.hierarchy_, self.root_, predecessor
                 )
                 prediction = np.array(prediction)
-                if prediction.ndim == 2 and prediction.shape[1] == 1:
-                    prediction = prediction.flatten()
                 y[mask, level] = prediction
 
         # Convert back to 1D if there is only 1 column to pass all sklearn's checks

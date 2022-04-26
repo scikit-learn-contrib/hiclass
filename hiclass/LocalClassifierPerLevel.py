@@ -128,14 +128,67 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         check_is_fitted(self)
 
         # Input validation
-        X = check_array(X)
+        X = check_array(X, accept_sparse="csr")
 
-        closest = np.argmin(euclidean_distances(X, self.X_), axis=1)
-        return self.y_[closest]
+        y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
+
+        # TODO: Add threshold to stop prediction halfway if need be
+
+        self.logger_.info("Predicting")
+
+        for level, classifier in enumerate(self.local_classifiers_):
+            self.logger_.info(f"Predicting level {level}")
+            if level == 0:
+                y[:, level] = classifier.predict(X)
+            else:
+                all_probabilities = classifier.predict_proba(X)
+                successors = np.array(
+                    [list(self.hierarchy_.successors(node)) for node in y[:, level - 1]]
+                )
+                classes_masks = np.array(
+                    [
+                        np.isin(classifier.classes_, successors[i])
+                        for i in range(len(successors))
+                    ]
+                )
+                probabilities = np.array(
+                    [
+                        all_probabilities[i, classes_masks[i]]
+                        for i in range(len(classes_masks))
+                    ]
+                )
+                highest_probabilities = np.argmax(probabilities, axis=1)
+                classes = np.array(
+                    [
+                        classifier.classes_[classes_masks[i]]
+                        for i in range(len(classes_masks))
+                    ]
+                )
+                predictions = np.array(
+                    [
+                        classes[i][highest_probabilities[i]]
+                        for i in range(len(highest_probabilities))
+                    ]
+                )
+                y[:, level] = predictions
+
+        # Convert back to 1D if there is only 1 column to pass all sklearn's checks
+        if self.max_levels_ == 1:
+            y = y.flatten()
+
+        # Remove separator from predictions
+        if y.ndim == 2:
+            for i in range(y.shape[0]):
+                for j in range(1, y.shape[1]):
+                    y[i, j] = y[i, j].split(self.separator_)[-1]
+
+        return y
 
     def _initialize_local_classifiers(self):
         super()._initialize_local_classifiers()
-        self.local_classifiers_ = [deepcopy(self.local_classifier_)] * self.y_.shape[1]
+        self.local_classifiers_ = [
+            deepcopy(self.local_classifier_) for _ in range(self.y_.shape[1])
+        ]
 
     def _fit_digraph(self):
         self.logger_.info("Fitting local classifiers")
@@ -158,7 +211,10 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         self.logger_.info("Fitting local classifiers")
         ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
         lcpl = ray.put(self)
-        results = [_parallel_fit.remote(lcpl, level) for level in range(len(self.local_classifiers_))]
+        results = [
+            _parallel_fit.remote(lcpl, level)
+            for level in range(len(self.local_classifiers_))
+        ]
         classifiers = ray.get(results)
         for level, classifier in enumerate(classifiers):
             self.local_classifiers_[level] = classifier
