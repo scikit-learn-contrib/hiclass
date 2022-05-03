@@ -11,11 +11,11 @@ random_state: 42
 
 classifiers:
   - logistic_regression
-#  - random_forest
+  - random_forest
 #  - hist_gradient # does not support sparse matrices, so will need more than 500GB of RAM
 
 models:
   - lcpl
-#  - flat
-#  - lcpn
-#  - lcppn
+  - flat
+  - lcpn
+  - lcppn
