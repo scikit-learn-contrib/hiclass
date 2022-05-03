@@ -11,7 +11,7 @@ With Anaconda installed, we can create a new environment with snakemake by runni
 ```
 git clone https://github.com/mirand863/hiclass.git
 cd hiclass/benchmarks/consumer_complaints
-conda env create -n snakemake -f envs/snakemake.yml
+conda env create --name snakemake --file envs/snakemake.yml
 ```
 
 The file `config.yml` holds configuration information to run the pipeline, e.g., working directory, number of threads to run tasks in parallel, random seed to enable reproducibility, number of rows to run the pipeline on a subset of the data, the base classifiers from scikit-learn and the hierarchical and flat models. For the purpose of this tutorial, we will keep most parameters intact and modify only the working directory. In order to do that, run the command `pwd` and update the `workdir` parameter with the output from `pwd`.
