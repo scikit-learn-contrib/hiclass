@@ -4,7 +4,7 @@ This is a reproducible Snakemake pipeline to benchmark HiClass on the consumer c
 
 ## Installation
 
-The main requirement to run this pipeline is Anaconda 3. Please, install the latest version of Anaconda 3 on your machine beforehand [https://www.anaconda.com/products/distribution](https://www.anaconda.com/products/distribution).
+The main requirement to run this pipeline is Anaconda 3. Please, install the latest version of [Anaconda 3](https://www.anaconda.com/products/distribution) on your machine beforehand.
 
 With Anaconda installed, we can create a new environment with snakemake by running the following commands:
 
