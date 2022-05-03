@@ -54,17 +54,19 @@ cores provided by two AMD EPYC™ 7742 processors, and each model had 12 cores a
 
 |Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|00:27:37|4.17|115|**0.7619**|
-|Local Classifier per Node|**00:06:28**|**4.06**|117|0.7578|
-|Flat Classifier|01:42:36|7.16|**102**|0.7566|
+|Local Classifier per Parent Node|00:21:54|3.87|116|**0.7606**|
+|Local Classifier per Node|**00:05:33**|**3.76**|118|0.7563|
+|Local Classifier per Level|01:52:42|3.87|118|**0.7606**|
+|Flat Classifier|01:48:54|7.23|**103**|0.7553|
 
 Lastly, this third benchmark was also executed on the same cluster node as the previous benchmark and 12 cores were provided for each model, however, the base classifier was random forest instead.
 
 |Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|Disk Usage (GB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|02:57:39|**35.06**|**11**|0.7147|
-|Local Classifier per Node|02:18:57|39.20|12|**0.7440**|
-|Flat Classifier|**00:31:55**|77.21|36|0.6404|
+|Local Classifier per Parent Node|03:04:23|**34.98**|**11**|0.7133|
+|Local Classifier per Node|02:21:05|39.16|12|**0.7450**|
+|Local Classifier per Level|03:58:59|136.50|43|0.7093|
+|Flat Classifier|**00:31:02**|77.32|37|0.6405|
 
 We would love to benchmark with larger datasets, if we can find large ones in the public domain. If you have any suggestions for hierarchical datasets that are open, please let us know by opening an issue. We would also be delighted if you are able to share benchmarks from your own large datasets. Please send us a PR!
 
