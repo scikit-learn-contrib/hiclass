@@ -2,8 +2,8 @@ configfile: "config.yml"
 
 workdir: config["workdir"]
 
-# include: "rules/download"
-# include: "rules/split_data"
+include: "rules/download"
+include: "rules/split_data"
 include: "rules/train"
 include: "rules/predict"
 include: "rules/metrics"
