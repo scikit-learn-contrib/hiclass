@@ -22,9 +22,9 @@ After a successful installation, we can activate the newly created environment a
 
 ```
 conda activate snakemake
-snakemake -kpr --use-conda --cores 48
+snakemake --keep-going --printshellcmds --reason --use-conda --cores 48
 ```
 
-The parameter --use-conda is necessary to indicate that conda will be used to manage the software dependencies of the pipeline, while the parameter --cores tells Snakemake how many cpus can be used overall (the more cpus you can spare, the faster the pipeline will be completed).
+The parameter --keep-going forces Snakemake to keep executing independent tasks if an unrelated one fails, while the parameter --printshellcmds enables printing the commands that will be executed, the parameter --reason makes Snakemake print the reason for each executed rule, the parameter --use-conda is necessary to indicate that conda will be used to manage the software dependencies of the pipeline, and the parameter --cores tells Snakemake how many cpus can be used overall (the more cpus you can spare, the faster the pipeline will be completed).
 
 The trained models, predictions and benchmarks for each model are saved in the results folder.
