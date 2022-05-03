@@ -143,7 +143,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             else:
                 all_probabilities = classifier.predict_proba(X)
                 successors = np.array(
-                    [list(self.hierarchy_.successors(node)) for node in y[:, level - 1]]
+                    [list(self.hierarchy_.successors(node)) for node in y[:, level - 1]],
+                    dtype=object,
                 )
                 classes_masks = np.array(
                     [
@@ -155,14 +156,16 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                     [
                         all_probabilities[i, classes_masks[i]]
                         for i in range(len(classes_masks))
-                    ]
+                    ],
+                    dtype=object,
                 )
-                highest_probabilities = np.argmax(probabilities, axis=1)
+                highest_probabilities = [np.argmax(probabilities[i], axis=0) for i in range(len(probabilities))]
                 classes = np.array(
                     [
                         classifier.classes_[classes_masks[i]]
                         for i in range(len(classes_masks))
-                    ]
+                    ],
+                    dtype=object,
                 )
                 predictions = np.array(
                     [
