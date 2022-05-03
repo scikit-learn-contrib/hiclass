@@ -1,5 +1,4 @@
 import logging
-import tempfile
 
 import networkx as nx
 import numpy as np
@@ -18,98 +17,6 @@ from hiclass.BinaryPolicy import ExclusivePolicy
 @parametrize_with_checks([LocalClassifierPerNode()])
 def test_sklearn_compatible_estimator(estimator, check):
     check(estimator)
-
-
-@pytest.fixture
-def graph_1d():
-    graph = LocalClassifierPerNode()
-    graph.y_ = np.array(["a", "b", "c", "d"])
-    graph.logger_ = logging.getLogger("LCPN")
-    return graph
-
-
-def test_create_digraph_1d(graph_1d):
-    ground_truth = nx.DiGraph()
-    ground_truth.add_nodes_from(np.array(["a", "b", "c", "d"]))
-    graph_1d._create_digraph()
-    assert nx.is_isomorphic(ground_truth, graph_1d.hierarchy_)
-    assert list(ground_truth.nodes) == list(graph_1d.hierarchy_.nodes)
-    assert list(ground_truth.edges) == list(graph_1d.hierarchy_.edges)
-
-
-@pytest.fixture
-def graph_1d_disguised_as_2d():
-    graph = LocalClassifierPerNode()
-    graph.y_ = np.array([["a"], ["b"], ["c"], ["d"]])
-    graph.logger_ = logging.getLogger("LCPN")
-    return graph
-
-
-def test_create_digraph_1d_disguised_as_2d(graph_1d_disguised_as_2d):
-    ground_truth = nx.DiGraph()
-    ground_truth.add_nodes_from(np.array(["a", "b", "c", "d"]))
-    graph_1d_disguised_as_2d._create_digraph()
-    assert nx.is_isomorphic(ground_truth, graph_1d_disguised_as_2d.hierarchy_)
-    assert list(ground_truth.nodes) == list(graph_1d_disguised_as_2d.hierarchy_.nodes)
-    assert list(ground_truth.edges) == list(graph_1d_disguised_as_2d.hierarchy_.edges)
-
-
-@pytest.fixture
-def digraph_2d():
-    dag_2d = LocalClassifierPerNode()
-    dag_2d.y_ = np.array([["a", "b", "c"], ["d", "e", "f"]])
-    dag_2d.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
-    dag_2d.logger_ = logging.getLogger("LCPN")
-    dag_2d.edge_list = tempfile.TemporaryFile()
-    dag_2d.separator_ = "::HiClass::Separator::"
-    return dag_2d
-
-
-def test_create_digraph_2d(digraph_2d):
-    ground_truth = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
-    digraph_2d._create_digraph()
-    assert nx.is_isomorphic(ground_truth, digraph_2d.hierarchy_)
-    assert list(ground_truth.nodes) == list(digraph_2d.hierarchy_.nodes)
-    assert list(ground_truth.edges) == list(digraph_2d.hierarchy_.edges)
-
-
-@pytest.fixture
-def digraph_3d():
-    dag_3d = LocalClassifierPerNode()
-    dag_3d.y_ = np.arange(27).reshape((3, 3, 3))
-    dag_3d.logger_ = logging.getLogger("LCPN")
-    return dag_3d
-
-
-def test_create_digraph_3d(digraph_3d):
-    with pytest.raises(ValueError):
-        digraph_3d._create_digraph()
-
-
-def test_convert_1d_y_to_2d(graph_1d):
-    ground_truth = np.array([["a"], ["b"], ["c"], ["d"]])
-    graph_1d._convert_1d_y_to_2d()
-    assert_array_equal(ground_truth, graph_1d.y_)
-
-
-def test_export_digraph(digraph_2d):
-    ground_truth = b'"a","b",{}\n"b","c",{}\n"d","e",{}\n"e","f",{}\n'
-    digraph_2d._export_digraph()
-    digraph_2d.edge_list.seek(0)
-    assert digraph_2d.edge_list.read() == ground_truth
-
-
-@pytest.fixture
-def cyclic_graph():
-    graph = LocalClassifierPerNode()
-    graph.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("c", "a")])
-    graph.logger_ = logging.getLogger("LCPN")
-    return graph
-
-
-def test_assert_digraph_is_dag(cyclic_graph):
-    with pytest.raises(ValueError):
-        cyclic_graph._assert_digraph_is_dag()
 
 
 @pytest.fixture
@@ -156,48 +63,6 @@ def test_initialize_object_binary_policy(digraph_with_object_policy):
 
 
 @pytest.fixture
-def digraph_one_root():
-    digraph = LocalClassifierPerNode()
-    digraph.logger_ = logging.getLogger("LCPN")
-    digraph.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("c", "d")])
-    return digraph
-
-
-def test_add_artificial_root(digraph_one_root):
-    digraph_one_root._add_artificial_root()
-    successors = list(digraph_one_root.hierarchy_.successors("hiclass::root"))
-    root = [
-        node
-        for node, in_degree in digraph_one_root.hierarchy_.in_degree()
-        if in_degree == 0
-    ]
-    assert ["a"] == successors
-    assert ["hiclass::root"] == root
-    assert "hiclass::root" == digraph_one_root.root_
-
-
-@pytest.fixture
-def digraph_multiple_roots():
-    digraph = LocalClassifierPerNode()
-    digraph.logger_ = logging.getLogger("LCPN")
-    digraph.hierarchy_ = nx.DiGraph([("a", "b"), ("c", "d"), ("e", "f")])
-    return digraph
-
-
-def test_add_artificial_root_multiple_roots(digraph_multiple_roots):
-    digraph_multiple_roots._add_artificial_root()
-    successors = list(digraph_multiple_roots.hierarchy_.successors("hiclass::root"))
-    root = [
-        node
-        for node, in_degree in digraph_multiple_roots.hierarchy_.in_degree()
-        if in_degree == 0
-    ]
-    assert ["a", "c", "e"] == successors
-    assert ["hiclass::root"] == root
-    assert "hiclass::root" == digraph_multiple_roots.root_
-
-
-@pytest.fixture
 def digraph_logistic_regression():
     digraph = LocalClassifierPerNode(local_classifier=LogisticRegression())
     digraph.hierarchy_ = nx.DiGraph([("a", "b"), ("a", "c")])
@@ -210,7 +75,7 @@ def digraph_logistic_regression():
     return digraph
 
 
-def test_initialize_local_classifiers_1(digraph_logistic_regression):
+def test_initialize_local_classifiers(digraph_logistic_regression):
     digraph_logistic_regression._initialize_local_classifiers()
     for node in digraph_logistic_regression.hierarchy_.nodes:
         if node != digraph_logistic_regression.root_:
@@ -224,12 +89,6 @@ def test_initialize_local_classifiers_1(digraph_logistic_regression):
                     digraph_logistic_regression.hierarchy_.nodes[node]["classifier"],
                     LogisticRegression,
                 )
-
-
-def test_initialize_local_classifiers_2(digraph_logistic_regression):
-    digraph_logistic_regression.local_classifier = None
-    digraph_logistic_regression._initialize_local_classifiers()
-    assert isinstance(digraph_logistic_regression.local_classifier_, LogisticRegression)
 
 
 def test_fit_digraph(digraph_logistic_regression):
@@ -279,6 +138,16 @@ def test_fit_1_class():
     lcpn.fit(X, y)
     prediction = lcpn.predict(X)
     assert_array_equal(ground_truth, prediction)
+
+
+def test_clean_up(digraph_logistic_regression):
+    digraph_logistic_regression._clean_up()
+    with pytest.raises(AttributeError):
+        assert digraph_logistic_regression.X_ is None
+    with pytest.raises(AttributeError):
+        assert digraph_logistic_regression.y_ is None
+    with pytest.raises(AttributeError):
+        assert digraph_logistic_regression.binary_policy_ is None
 
 
 @pytest.fixture

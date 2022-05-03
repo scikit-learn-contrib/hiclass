@@ -3,13 +3,13 @@
 Data Utilities
 ==============
 
-Policies
---------
+Binary Policies
+---------------
 
 ExclusivePolicy
 ^^^^^^^^^^^^^^^
 
-.. autoclass:: BinaryPolicies.ExclusivePolicy
+.. autoclass:: BinaryPolicy.ExclusivePolicy
     :members:
     :show-inheritance:
     :inherited-members:
@@ -20,7 +20,7 @@ ExclusivePolicy
 LessExclusivePolicy
 ^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: BinaryPolicies.LessExclusivePolicy
+.. autoclass:: BinaryPolicy.LessExclusivePolicy
     :members:
     :show-inheritance:
     :inherited-members:
@@ -30,7 +30,7 @@ LessExclusivePolicy
 
 InclusivePolicy
 ^^^^^^^^^^^^^^^
-.. autoclass:: BinaryPolicies.InclusivePolicy
+.. autoclass:: BinaryPolicy.InclusivePolicy
     :members:
     :show-inheritance:
     :inherited-members:
@@ -40,7 +40,7 @@ InclusivePolicy
 
 LessInclusivePolicy
 ^^^^^^^^^^^^^^^^^^^
-.. autoclass:: BinaryPolicies.LessInclusivePolicy
+.. autoclass:: BinaryPolicy.LessInclusivePolicy
     :members:
     :show-inheritance:
     :inherited-members:
@@ -50,7 +50,7 @@ LessInclusivePolicy
 
 SiblingsPolicy
 ^^^^^^^^^^^^^^
-.. autoclass:: BinaryPolicies.SiblingsPolicy
+.. autoclass:: BinaryPolicy.SiblingsPolicy
     :members:
     :show-inheritance:
     :inherited-members:
@@ -60,7 +60,7 @@ SiblingsPolicy
 
 ExclusiveSiblingsPolicy
 ^^^^^^^^^^^^^^^^^^^^^^^
-.. autoclass:: BinaryPolicies.ExclusiveSiblingsPolicy
+.. autoclass:: BinaryPolicy.ExclusiveSiblingsPolicy
     :members:
     :show-inheritance:
     :inherited-members:
@@ -69,7 +69,7 @@ ExclusiveSiblingsPolicy
 ..................................
 
 
-Utility functions
------------------
-.. automodule:: data
+Hierarchical Metrics
+--------------------
+.. automodule:: metrics
     :members:

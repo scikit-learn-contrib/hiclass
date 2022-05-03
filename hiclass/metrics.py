@@ -1,12 +1,13 @@
 """Helper functions to compute hierarchical evaluation metrics."""
 import numpy as np
+from sklearn.utils import check_array
 
 
 def precision(y_true: np.ndarray, y_pred: np.ndarray):
     """
     Compute precision score for hierarchical classification.
 
-    hP = sum(|S intersection T|) / sum(|S|),
+    hP = sum(len(S intersection T)) / sum(len(S)),
     where S is the set consisting of the most specific class(es) predicted for a test example and all respective ancestors
     and T is the set consisting of the true most specific class(es) for a test example and all respective ancestors.
 
@@ -22,6 +23,8 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray):
         What proportion of positive identifications was actually correct?
     """
     assert len(y_true) == len(y_pred)
+    y_true = check_array(y_true, dtype=None)
+    y_pred = check_array(y_pred, dtype=None)
     sum_intersection = 0
     sum_prediction_and_ancestors = 0
     for ground_truth, prediction in zip(y_true, y_pred):
@@ -39,7 +42,7 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray):
     """
     Compute recall score for hierarchical classification.
 
-    hR = sum(|S intersection T|) / sum(|T|),
+    hR = sum(len(S intersection T)) / sum(len(T)),
     where S is the set consisting of the most specific class(es) predicted for a test example and all respective ancestors
     and T is the set consisting of the true most specific class(es) for a test example and all respective ancestors.
 
@@ -55,6 +58,8 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray):
         What proportion of actual positives was identified correctly?
     """
     assert len(y_true) == len(y_pred)
+    y_true = check_array(y_true, dtype=None)
+    y_pred = check_array(y_pred, dtype=None)
     sum_intersection = 0
     sum_prediction_and_ancestors = 0
     for ground_truth, prediction in zip(y_true, y_pred):
@@ -87,6 +92,8 @@ def f1(y_true: np.ndarray, y_pred: np.ndarray):
         Weighted average of the precision and recall
     """
     assert len(y_true) == len(y_pred)
+    y_true = check_array(y_true, dtype=None)
+    y_pred = check_array(y_pred, dtype=None)
     prec = precision(y_true, y_pred)
     rec = recall(y_true, y_pred)
     f1 = 2 * prec * rec / (prec + rec)

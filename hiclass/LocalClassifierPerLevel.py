@@ -3,347 +3,221 @@ Local classifier per level approach.
 
 Numeric and string output labels are both handled.
 """
-from itertools import repeat
-from typing import Any, Tuple, Type, Union, List, Optional
+from copy import deepcopy
 
 import numpy as np
+import ray
+from sklearn.base import BaseEstimator
+from sklearn.metrics import euclidean_distances
+from sklearn.utils.validation import check_array, check_is_fitted
 
-from hiclass.data import NODE_TYPE
-from hiclass.Classifier import (
-    Classifier,
-    DuplicateFilter,
-    fit_or_replace,
-    ConstantClassifier,
-    raise_error_and_log,
-)
+from hiclass.ConstantClassifier import ConstantClassifier
+from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
 
-class DefaultProbability:
-    """Defines probability calculations used to return probabilities for all local classifiers."""
-
-    def predict_proba(self, classifiers: List[Any], X: np.ndarray) -> List:
-        """
-        Compute prediction probabilities.
-
-        Parameters
-        ----------
-        classifiers : List of classifiers
-            The local classifiers that should be used for the prediction
-        X : np.array of shape (n_samples, n_features)
-            The input samples.
-
-        Returns
-        -------
-        probabilities : np.ndarray of shape (n_levels, n_samples)
-            Prediction probabilities for all classes in each hierarchical level.
-        """
-        probabilities = []
-        for classifier in classifiers:
-            probabilities.append(classifier.predict_proba(X))
-        return probabilities
+@ray.remote
+def _parallel_fit(lcpl, level):
+    classifier = lcpl.local_classifiers_[level]
+    X = lcpl.X_
+    y = lcpl.y_[:, level]
+    unique_y = np.unique(y)
+    if len(unique_y) == 1 and lcpl.replace_classifiers:
+        classifier = ConstantClassifier()
+    classifier.fit(X, y)
+    return classifier
 
 
-IMPLEMENTED_PROBABILITIES = {"default": DefaultProbability}
-
-
-def _fit_classifier(
-    level: int,
-    classifier: Any,
-    level_nodes: np.array,
-    data: np.ndarray,
-    labels: np.ndarray,
-    placeholder: NODE_TYPE,
-    replace_classifier: bool,
-) -> Tuple[int, Any, str]:
-    """Fits a local classifier for a given level and data and metadata.
-
-    Parameters
-    ----------
-    level : int
-        The level that the classifier should be assigned to.
-    classifier : Any
-        The classifier that is fitted.
-    level_nodes : np.array
-        A list of nodes from the hierarchy that belong to the given `level`.
-    data : np.array
-        The data that is being used for training the classifier.
-    labels : np.array
-        The labels corresponding to the given data. Must have the same number of rows as `data`.
-    placeholder : int or str
-        A placeholder descriptor for non-existing labels in the `labels` argument.
-    replace_classifier : bool
-        Turns on (True) the replacement of classifiers with a constant classifier when trained on only
-        a single unique label.
-
-    Returns
-    -------
-    level : int
-        Level for which the classifier was fitted.
-    classifier : Any
-        The classifier that was fitted for the given node.
-    warning : str
-        The warnings raised.
+class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     """
-    shifted_level = level - 1
-    relevant_data = labels[:, shifted_level] != placeholder
-    classes = np.zeros_like(relevant_data, dtype=int)
-
-    mapping = dict(zip(level_nodes, range(0, len(level_nodes))))
-    for node in level_nodes:
-        positive_samples = labels[:, shifted_level] == node
-        classes[positive_samples] = mapping[node]
-
-    classifier, warning = fit_or_replace(
-        replace_classifier,
-        classifier,
-        data[relevant_data],
-        classes[relevant_data],
-        len(mapping),
-    )
-    return level, classifier, warning
-
-
-class LocalClassifierPerLevel(Classifier):
-    """
-    Assign local classifiers for each class hierarchy level.
+    Assign local classifiers to each level of the hierarchy, except the root node.
 
     A local classifier per level is a local hierarchical classifier that fits one local multi-class classifier
-    for each level of the hierarchy. In case of a DAG, nodes are assigned their highest possible level, with the root
-    being the highest level.
+    for each level of the class hierarchy, except for the root node.
     """
 
-    def fit(
+    def __init__(
         self,
-        X: np.ndarray,
-        Y: np.ndarray,
-        placeholder_label: Optional[NODE_TYPE] = None,
+        local_classifier: BaseEstimator = None,
+        verbose: int = 0,
+        edge_list: str = None,
         replace_classifiers: bool = True,
-    ) -> None:
+        n_jobs: int = 1,
+    ):
         """
-        Fit the local classifiers.
+        Initialize a local classifier per level.
 
         Parameters
         ----------
-        X : np.array of shape(n_samples, n_features)
-            The training input samples.
-        Y : np.array of shape (n_samples, n_levels)
-            The hierarchical labels.
-        placeholder_label : int or str, default=None
-            Label that corresponds to "no label available for this data point". Defaults will be used if not passed.
+        local_classifier : BaseEstimator, default=LogisticRegression
+            The local_classifier used to create the collection of local classifiers. Needs to have fit, predict and
+            clone methods.
+        verbose : int, default=0
+            Controls the verbosity when fitting and predicting.
+            See https://verboselogs.readthedocs.io/en/latest/readme.html#overview-of-logging-levels
+            for more information.
+        edge_list : str, default=None
+            Path to write the hierarchy built.
         replace_classifiers : bool, default=True
             Turns on (True) the replacement of a local classifier with a constant classifier when trained on only
             a single unique class.
+        n_jobs : int, default=1
+            The number of jobs to run in parallel. Only :code:`fit` is parallelized.
         """
-        super().fit(X, Y, placeholder_label, replace_classifiers)
-
-        if not self.unique_taxonomy:
-            Y = self._make_unique(Y)
-
-        duplicate_filter = DuplicateFilter()
-        self.log.addFilter(duplicate_filter)  # removes possible duplicate warnings
-
-        if all(Y[:, 0] == self.root):
-            Y = Y[:, 1:]
-        if any(Y[:, 0] == self.root):
-            error_msg = (
-                "Some labels contain the root node and some do not. Classifier can only be fit when "
-                "labels are consistent."
-            )
-            raise_error_and_log(ValueError, self.log, error_msg)
-
-        fit_args = zip(
-            range(0, len(self.classes_)),
-            self.classifiers,
-            self.classes_,
-            repeat(X),
-            repeat(Y),
-            repeat(placeholder_label),
-            repeat(replace_classifiers),
+        super().__init__(
+            local_classifier=local_classifier,
+            verbose=verbose,
+            edge_list=edge_list,
+            replace_classifiers=replace_classifiers,
+            n_jobs=n_jobs,
+            classifier_abbreviation="LCPL",
         )
 
-        next(fit_args)  # skip the root node
-        self._fit_classifier(_fit_classifier, fit_args)
-        self.classifiers[0] = ConstantClassifier(0, 1)
-
-        self.log.removeFilter(duplicate_filter)  # delete duplicate filter
-
-    def predict_proba(
-        self, X: np.ndarray, algorithm: Union[str, Type[DefaultProbability]] = "default"
-    ) -> List:
+    def fit(self, X, y):
         """
-        Compute prediction probabilities.
+        Fit a local classifier per level.
 
         Parameters
         ----------
-        X : np.array of shape(n_samples, n_features)
-            The input samples.
-        algorithm : str or Probability
-            The algorithm to use for calculating probabilities.
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            The training input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csc_matrix``.
+        y : array-like of shape (n_samples, n_levels)
+            The target values, i.e., hierarchical class labels for classification.
 
         Returns
         -------
-        probabilities : np.ndarray of shape (n_levels, n_samples)
-            Prediction probabilities for all classes in each hierarchical level.
+        self : object
+            Fitted estimator.
         """
-        if type(algorithm) == str:
-            try:
-                probability_algorithm = IMPLEMENTED_PROBABILITIES[algorithm.lower()]()
-            except KeyError:
-                error_msg = (
-                    f"Probability algorithm {algorithm} not implemented. Available algorithms are:\n"
-                    f"{list(IMPLEMENTED_PROBABILITIES.keys())}"
+        # Execute common methods necessary before fitting
+        super()._pre_fit(X, y)
+
+        # Fit local classifiers in DAG
+        super().fit(X, y)
+
+        # TODO: Store the classes seen during fit
+
+        # TODO: Add function to allow user to change local classifier
+
+        # TODO: Add parameter to receive hierarchy as parameter in constructor
+
+        # TODO: Add support to empty labels in some levels
+
+        # Return the classifier
+        return self
+
+    def predict(self, X):
+        """
+        Predict classes for the given data.
+
+        Hierarchical labels are returned.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            The input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csr_matrix``.
+        Returns
+        -------
+        y : ndarray of shape (n_samples,) or (n_samples, n_outputs)
+            The predicted classes.
+        """
+        # Check if fit has been called
+        check_is_fitted(self)
+
+        # Input validation
+        X = check_array(X, accept_sparse="csr")
+
+        y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
+
+        # TODO: Add threshold to stop prediction halfway if need be
+
+        self.logger_.info("Predicting")
+
+        for level, classifier in enumerate(self.local_classifiers_):
+            self.logger_.info(f"Predicting level {level}")
+            if level == 0:
+                y[:, level] = classifier.predict(X)
+            else:
+                all_probabilities = classifier.predict_proba(X)
+                successors = np.array(
+                    [list(self.hierarchy_.successors(node)) for node in y[:, level - 1]],
+                    dtype=object,
                 )
-                raise_error_and_log(KeyError, self.log, error_msg)
-        else:
-            probability_algorithm = algorithm
-        return probability_algorithm.predict_proba(self.classifiers, X)
+                classes_masks = np.array(
+                    [
+                        np.isin(classifier.classes_, successors[i])
+                        for i in range(len(successors))
+                    ]
+                )
+                probabilities = np.array(
+                    [
+                        all_probabilities[i, classes_masks[i]]
+                        for i in range(len(classes_masks))
+                    ],
+                    dtype=object,
+                )
+                highest_probabilities = [np.argmax(probabilities[i], axis=0) for i in range(len(probabilities))]
+                classes = np.array(
+                    [
+                        classifier.classes_[classes_masks[i]]
+                        for i in range(len(classes_masks))
+                    ],
+                    dtype=object,
+                )
+                predictions = np.array(
+                    [
+                        classes[i][highest_probabilities[i]]
+                        for i in range(len(highest_probabilities))
+                    ]
+                )
+                y[:, level] = predictions
 
-    def _ensure_possible_predictions(
-        self, final_prediction: np.ndarray, predictions: np.ndarray, depth: int
-    ) -> np.ndarray:
-        """Zero prediction results that are not possible."""
-        if depth == 0:
-            return predictions
-        previous_predictions = np.unique(final_prediction[:, depth - 1])
-        corrected_predictions = np.zeros_like(predictions)
-        possible_children = [
-            list(self.hierarchy.successors(node)) for node in previous_predictions
+        # Convert back to 1D if there is only 1 column to pass all sklearn's checks
+        if self.max_levels_ == 1:
+            y = y.flatten()
+
+        # Remove separator from predictions
+        if y.ndim == 2:
+            for i in range(y.shape[0]):
+                for j in range(1, y.shape[1]):
+                    y[i, j] = y[i, j].split(self.separator_)[-1]
+
+        return y
+
+    def _initialize_local_classifiers(self):
+        super()._initialize_local_classifiers()
+        self.local_classifiers_ = [
+            deepcopy(self.local_classifier_) for _ in range(self.y_.shape[1])
         ]
-        for previous_prediction, possible_predictions in zip(
-            previous_predictions, possible_children
-        ):
-            relevant_rows = np.where(
-                final_prediction[:, depth - 1] == previous_prediction
-            )[0][:, None]
-            possible_predictions = np.array(
-                [
-                    np.where(self.classes_[depth] == node)[0][0]
-                    for node in possible_predictions
-                ]
+
+    def _fit_digraph(self):
+        self.logger_.info("Fitting local classifiers")
+        for level, classifier in enumerate(self.local_classifiers_):
+            self.logger_.info(
+                f"Fitting local classifier for level '{level + 1}' ({level + 1}/{len(self.local_classifiers_)})"
             )
-            corrected_predictions[relevant_rows, possible_predictions] = predictions[
-                relevant_rows, possible_predictions
-            ]
-        return corrected_predictions
+            X = self.X_
+            y = self.y_[:, level]
+            unique_y = np.unique(y)
+            if len(unique_y) == 1 and self.replace_classifiers:
+                self.logger_.warning(
+                    f"Fitting ConstantClassifier for level '{level + 1}'"
+                )
+                self.local_classifiers_[level] = ConstantClassifier()
+                classifier = self.local_classifiers_[level]
+            classifier.fit(X, y)
 
-    def _specialize_prediction(
-        self,
-        local_identifier: NODE_TYPE,
-        depth: int,
-        data: np.ndarray,
-        threshold: float,
-        final_prediction: np.ndarray,
-        selected_rows: np.ndarray,
-    ) -> None:
-        local_identifier = depth
-        if self._stopping_criterion(depth):
-            return
-
-        nodes_to_predict = self._get_nodes_to_predict(local_identifier)
-        additional_prediction_args = self._choose_required_prediction_args(
-            local_identifier, nodes_to_predict, selected_rows
-        )
-
-        predictions = self._create_prediction(data, *additional_prediction_args)
-        predictions = self._ensure_possible_predictions(
-            final_prediction, predictions, depth
-        ).T
-
-        most_likely_labels, rows_under_threshold = self._analyze_prediction(
-            predictions, threshold
-        )
-        selected_rows = np.logical_and(
-            selected_rows, np.logical_not(rows_under_threshold)
-        )
-
-        self._continue_prediction(
-            nodes_to_predict,
-            selected_rows,
-            most_likely_labels,
-            rows_under_threshold,
-            depth,
-            data,
-            threshold,
-            final_prediction,
-        )
-
-    def _get_nodes_to_predict(self, local_identifier: int) -> np.ndarray:
-        return self.classes_[local_identifier]
-
-    def _choose_required_prediction_args(
-        self,
-        local_identifier: NODE_TYPE,
-        nodes_to_predict: np.ndarray,
-        selected_rows: np.ndarray,
-    ) -> Any:
-        return [local_identifier]
-
-    def _stopping_criterion(self, value: int) -> bool:
-        return value >= len(self.classes_)
-
-    def _create_prediction(self, data: np.ndarray, depth: int) -> np.ndarray:
-        classifier = self.get_classifier(depth)
-        return self._predict_with_classifier(classifier, data)
-
-    def _continue_prediction(
-        self,
-        nodes_to_predict: np.ndarray,
-        selected_rows: np.ndarray,
-        most_likely_labels: np.ndarray,
-        rows_under_threshold: np.ndarray,
-        depth: int,
-        data: np.ndarray,
-        threshold: float,
-        final_prediction: np.ndarray,
-    ):
-        if np.all(rows_under_threshold):
-            return
-
-        for label in nodes_to_predict:
-            corresponding_data = np.copy(selected_rows)
-            label_idx = np.where(nodes_to_predict == label)[0][0]
-            corresponding_data[selected_rows] = (most_likely_labels == label_idx)[
-                selected_rows
-            ]
-            final_prediction[corresponding_data, depth] = label
-
-        self._specialize_prediction(
-            depth + 1, depth + 1, data, threshold, final_prediction, selected_rows
-        )
-
-    def _initialize_classifiers(self) -> None:
-        super()._initialize_classifiers()
-        self.classifiers = [self._copy_classifier() for _ in self.classes_]
-
-    def get_classifier(self, descriptor: int) -> Any:
-        """
-        Return the local classifier associated to the given hierarchy level.
-
-        Raise IndexError if the level is invalid.
-
-        Parameters
-        ----------
-        descriptor : int or str
-            the descriptor for which the local classifier should be returned.
-
-        Returns
-        -------
-        classifier : Any
-            The local classifier that is assigned to the given descriptor.
-        """
-        if descriptor < 0 or descriptor >= len(self.classes_):
-            raise IndexError("Hierarchy level does not exist.")
-        return self.classifiers[descriptor]
-
-    def set_classifier(self, descriptor: int, classifier: Any) -> None:
-        """
-        Set the local classifier for a given hierarchy level.
-
-        Parameters
-        ----------
-        descriptor : int or str
-            the descriptor for which the local classifier should be set.
-        classifier : Any
-            The local classifier that will be assigned to the given label.
-        """
-        self.classifiers[descriptor] = classifier
+    def _fit_digraph_parallel(self, local_mode: bool = False):
+        self.logger_.info("Fitting local classifiers")
+        ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
+        lcpl = ray.put(self)
+        results = [
+            _parallel_fit.remote(lcpl, level)
+            for level in range(len(self.local_classifiers_))
+        ]
+        classifiers = ray.get(results)
+        for level, classifier in enumerate(classifiers):
+            self.local_classifiers_[level] = classifier

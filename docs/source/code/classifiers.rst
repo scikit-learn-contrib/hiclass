@@ -5,38 +5,18 @@ Classifiers
 Shared classes
 --------------
 
-Classifier
-^^^^^^^^^^
-.. autoclass:: Classifier.Classifier
+HierarchicalClassifier
+^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: HierarchicalClassifier.HierarchicalClassifier
     :members:
     :special-members: __init__
 
-
-..................................
-
-NodeClassifier
-^^^^^^^^^^^^^^
-.. autoclass:: Classifier.NodeClassifier
-    :members:
-    :show-inheritance:
-    :inherited-members:
-    :special-members: __init__
-
-..................................
-
-DuplicateFilter
-^^^^^^^^^^^^^^^
-.. autoclass:: Classifier.DuplicateFilter
-    :members:
-    :show-inheritance:
-    :inherited-members:
-    :special-members: __init__
 
 ..................................
 
 ConstantClassifier
 ^^^^^^^^^^^^^^^^^^
-.. autoclass:: Classifier.ConstantClassifier
+.. autoclass:: ConstantClassifier.ConstantClassifier
     :members:
     :special-members: __init__
 
@@ -63,7 +43,7 @@ LocalClassifierPerNode
 ..................................
 
 LocalClassifierPerParentNode
-------------------------
+----------------------------
 .. autoclass:: LocalClassifierPerParentNode.LocalClassifierPerParentNode
     :members:
     :show-inheritance:
