@@ -69,7 +69,7 @@ Lastly, this third benchmark was also executed on the same cluster node as the p
 |Local Classifier per Level|03:58:59|136.50|43|0.7093|
 |Flat Classifier|**00:31:02**|77.32|37|0.6405|
 
-For reproducibility, a Snakemake pipeline was created. Instructions on how to run it and source code are available at [https://github.com/mirand863/hiclass/benchmarks/consumer_complaints](https://github.com/mirand863/hiclass/benchmarks/consumer_complaints).
+For reproducibility, a Snakemake pipeline was created. Instructions on how to run it and source code are available at [https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints](https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints).
 
 We would love to benchmark with larger datasets, if we can find large ones in the public domain. If you have any suggestions for hierarchical datasets that are open, please let us know by opening an issue. We would also be delighted if you are able to share benchmarks from your own large datasets. Please send us a PR!
 
