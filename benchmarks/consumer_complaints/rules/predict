@@ -1,0 +1,25 @@
+rule predict:
+    input:
+        trained_model = "results/{model}/{classifier}/trained_model.sav",
+        x_test = "results/split_data/x_test.csv.zip"
+    output:
+        predictions = "results/{model}/{classifier}/predictions.csv.zip",
+        time= "results/{model}/{classifier}/prediction_time.txt"
+    params:
+        model = "{model}"
+    conda:
+        "../envs/hiclass.yml"
+    threads:
+        config["threads"]
+    benchmark:
+        "results/{model}/{classifier}/prediction_benchmark.tsv"
+    shell:
+        """
+        /usr/bin/time -v \
+        -o {output.time} \
+        python scripts/predict.py \
+        --trained-model {input.trained_model} \
+        --x-test {input.x_test} \
+        --predictions {output.predictions} \
+        --classifier {params.model}
+        """

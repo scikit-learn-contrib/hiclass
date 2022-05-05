@@ -45,9 +45,10 @@ This first benchmark was executed on Google Colab with only 1 core, using Logist
 
 |Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|00:52:41|5.17|115|**0.7615**|
-|[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|**00:27:55**|**4.65**|116|0.7572|
-|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|03:14:40|8.95|**101**|0.7556|
+|[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|01:00:01|5.21|118|**0.7630**|
+|[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|**00:21:14**|**4.70**|120|0.7587|
+|[Local Classifier per Level](https://colab.research.google.com/drive/1b_Qb2d6RhSO7ICYTIsxH6ZqCVgeKWmll?usp=sharing)|03:11:42|9.69|120|0.7626|
+|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|03:09:35|8.98|**104**|0.7565|
 
 This second benchmark is similar to the last one, except that it was executed on a cluster node running GNU/Linux with 512 GB physical memory and 128
 cores provided by two AMD EPYC™ 7742 processors, and each model had 12 cores available for training.
@@ -67,6 +68,8 @@ Lastly, this third benchmark was also executed on the same cluster node as the p
 |Local Classifier per Node|02:21:05|39.16|12|**0.7450**|
 |Local Classifier per Level|03:58:59|136.50|43|0.7093|
 |Flat Classifier|**00:31:02**|77.32|37|0.6405|
+
+For reproducibility, a Snakemake pipeline was created. Instructions on how to run it and source code are available at [https://github.com/mirand863/hiclass/benchmarks/consumer_complaints](https://github.com/mirand863/hiclass/benchmarks/consumer_complaints).
 
 We would love to benchmark with larger datasets, if we can find large ones in the public domain. If you have any suggestions for hierarchical datasets that are open, please let us know by opening an issue. We would also be delighted if you are able to share benchmarks from your own large datasets. Please send us a PR!
 

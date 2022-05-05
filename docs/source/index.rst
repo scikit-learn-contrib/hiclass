@@ -6,7 +6,7 @@
 Welcome to hiclass' documentation!
 ===================================
 
-This is the documentation for the `hiclass repository <https://gitlab.com/dacs-hpi/hiclass>`_.
+This is the documentation for the `hiclass repository <https://github.com/mirand863/hiclass>`_.
 
 For more information on setup, refer to the :code:`README.md` of the repository.
 

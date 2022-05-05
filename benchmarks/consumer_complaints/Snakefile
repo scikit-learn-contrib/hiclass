@@ -1,0 +1,13 @@
+configfile: "config.yml"
+
+workdir: config["workdir"]
+
+include: "rules/download"
+include: "rules/split_data"
+include: "rules/train"
+include: "rules/predict"
+include: "rules/metrics"
+
+rule all:
+    input:
+        metrics = [f"results/{model}/{classifier}/metrics.csv" for classifier in config["classifiers"] for model in config["models"]]

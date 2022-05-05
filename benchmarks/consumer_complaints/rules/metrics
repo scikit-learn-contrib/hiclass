@@ -1,0 +1,18 @@
+rule metrics:
+    input:
+        predictions = "results/{model}/{classifier}/predictions.csv.zip",
+        ground_truth = "results/split_data/y_test.csv.zip"
+    output:
+        metrics = "results/{model}/{classifier}/metrics.csv",
+    params:
+        classifier = "{classifier}",
+        model = "{model}",
+    conda:
+        "../envs/hiclass.yml"
+    shell:
+        """
+        python scripts/metrics.py \
+        --predictions {input.predictions} \
+        --ground-truth {input.ground_truth} \
+        --metrics {output.metrics}
+        """

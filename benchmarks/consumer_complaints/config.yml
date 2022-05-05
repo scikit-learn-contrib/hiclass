@@ -1,0 +1,21 @@
+workdir: /home/fabio/Desktop/hiclass/benchmarks/consumer_complaints
+
+threads: 12
+
+data: 'https://files.consumerfinance.gov/ccdb/complaints.csv.zip'
+
+random_state: 42
+
+# Uncomment the next line to use a subset of the data
+#nrows: 1000
+
+classifiers:
+  - logistic_regression
+  - random_forest
+#  - hist_gradient # does not support sparse matrices, so will need more than 500GB of RAM
+
+models:
+  - lcpl
+  - flat
+  - lcpn
+  - lcppn

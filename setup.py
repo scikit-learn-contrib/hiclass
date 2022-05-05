@@ -16,10 +16,10 @@ from setuptools import find_packages, setup, Command
 NAME = "hiclass"
 DESCRIPTION = "Hierarchical Classification Library."
 
-# URL = 'https://gitlab.com/dacs-hpi/hiclass'
-# URL_DOKU = "https://gitlab.com/dacs-hpi/hiclass
-URL_GITHUB = "https://gitlab.com/dacs-hpi/hiclass"
-URL_ISSUES = "https://gitlab.com/dacs-hpi/hiclass/-/issues"
+# URL = 'https://github.com/mirand863/hiclass'
+# URL_DOKU = "https://github.com/mirand863/hiclass
+URL_GITHUB = "https://github.com/mirand863/hiclass"
+URL_ISSUES = "https://github.com/mirand863/hiclass/issues"
 EMAIL = "fabio.malchermiranda@hpi.de, Niklas.Koehnecke@student.hpi.uni-potsdam.de"
 AUTHOR = "Fabio Malcher Miranda, Niklas Koehnecke"
 REQUIRES_PYTHON = ">=3.7,<3.9"

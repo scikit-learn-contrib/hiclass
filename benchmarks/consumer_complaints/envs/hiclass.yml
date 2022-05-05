@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+dependencies:
+  - hiclass=4.0.0
+  - pandas=1.4.1
+  - python=3.8
+  - ray-core
+
