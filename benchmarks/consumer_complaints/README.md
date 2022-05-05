@@ -18,7 +18,7 @@ The file `config.yml` holds configuration information to run the pipeline, e.g.,
 
 ## Running
 
-After a successful installation, we can activate the newly created environment and run the pipeline (please don't forget to modify the config file with your working directory as described in the last section).
+After a successful installation, you can activate the newly created environment and run the pipeline (please don't forget to modify the config file with your working directory as described in the last section).
 
 ```
 conda activate snakemake
