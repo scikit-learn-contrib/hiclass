@@ -1,10 +1,10 @@
 import pandas as pd
+from lightgbm import LGBMClassifier
 from pandas.testing import assert_series_equal
 from scripts.train import join, get_flat_classifier, get_hierarchical_classifier
 from scripts.train import parse_args
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from xgboost import XGBClassifier
 
 from hiclass import (
     LocalClassifierPerNode,
@@ -25,7 +25,7 @@ def test_parser():
             "--trained-model",
             "model.sav",
             "--classifier",
-            "xgboost",
+            "lightgbm",
             "--random-state",
             "0",
             "--model",
@@ -41,7 +41,7 @@ def test_parser():
     assert parser.trained_model is not None
     assert "model.sav" == parser.trained_model
     assert parser.classifier is not None
-    assert "xgboost" == parser.classifier
+    assert "lightgbm" == parser.classifier
     assert parser.random_state is not None
     assert 0 == parser.random_state
     assert parser.model is not None
@@ -94,10 +94,10 @@ def test_get_flat_classifier():
     flat = get_flat_classifier(n_jobs, base_classifier, random_state)
     assert flat is not None
     assert isinstance(flat, RandomForestClassifier)
-    base_classifier = "xgboost"
+    base_classifier = "lightgbm"
     flat = get_flat_classifier(n_jobs, base_classifier, random_state)
     assert flat is not None
-    assert isinstance(flat, XGBClassifier)
+    assert isinstance(flat, LGBMClassifier)
 
 
 def test_get_hierarchical_classifier():
@@ -117,7 +117,7 @@ def test_get_hierarchical_classifier():
     )
     assert model is not None
     assert isinstance(model, LocalClassifierPerParentNode)
-    local_classifier = "xgboost"
+    local_classifier = "lightgbm"
     hierarchical_classifier = "local_classifier_per_level"
     model = get_hierarchical_classifier(
         n_jobs, local_classifier, hierarchical_classifier, random_state

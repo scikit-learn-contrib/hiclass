@@ -6,12 +6,12 @@ import sys
 from argparse import Namespace
 
 import pandas as pd
+from lightgbm import LGBMClassifier
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from xgboost import XGBClassifier
 
 from data import load_dataframe
 from hiclass import (
@@ -29,7 +29,7 @@ classifiers = {
     "random_forest": RandomForestClassifier(
         n_jobs=1,
     ),
-    "xgboost": XGBClassifier(
+    "lightgbm": LGBMClassifier(
         n_jobs=1,
     ),
 }

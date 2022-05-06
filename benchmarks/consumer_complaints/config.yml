@@ -12,7 +12,7 @@ nrows: 1000
 classifiers:
   - logistic_regression
   - random_forest
-  - xgboost
+  - lightgbm
 
 models:
   - flat
