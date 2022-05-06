@@ -12,10 +12,10 @@ random_state: 42
 classifiers:
   - logistic_regression
   - random_forest
-#  - hist_gradient # does not support sparse matrices, so will need more than 500GB of RAM
+  - lightgbm
 
 models:
-  - lcpl
   - flat
-  - lcpn
-  - lcppn
+  - local_classifier_per_node
+  - local_classifier_per_parent_node
+  - local_classifier_per_level

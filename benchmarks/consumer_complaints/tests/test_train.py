@@ -1,15 +1,16 @@
 import pandas as pd
+from lightgbm import LGBMClassifier
+from pandas.testing import assert_series_equal
+from scripts.train import join, get_flat_classifier, get_hierarchical_classifier
+from scripts.train import parse_args
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+
 from hiclass import (
     LocalClassifierPerNode,
     LocalClassifierPerParentNode,
     LocalClassifierPerLevel,
 )
-from pandas.testing import assert_series_equal
-from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier
-from sklearn.linear_model import LogisticRegression
-
-from scripts.train import join, get_flat_classifier, get_hierarchical_classifier
-from scripts.train import parse_args
 
 
 def test_parser():
@@ -24,7 +25,7 @@ def test_parser():
             "--trained-model",
             "model.sav",
             "--classifier",
-            "hist_gradient",
+            "lightgbm",
             "--random-state",
             "0",
             "--model",
@@ -40,7 +41,7 @@ def test_parser():
     assert parser.trained_model is not None
     assert "model.sav" == parser.trained_model
     assert parser.classifier is not None
-    assert "hist_gradient" == parser.classifier
+    assert "lightgbm" == parser.classifier
     assert parser.random_state is not None
     assert 0 == parser.random_state
     assert parser.model is not None
@@ -93,16 +94,16 @@ def test_get_flat_classifier():
     flat = get_flat_classifier(n_jobs, base_classifier, random_state)
     assert flat is not None
     assert isinstance(flat, RandomForestClassifier)
-    base_classifier = "hist_gradient"
+    base_classifier = "lightgbm"
     flat = get_flat_classifier(n_jobs, base_classifier, random_state)
     assert flat is not None
-    assert isinstance(flat, HistGradientBoostingClassifier)
+    assert isinstance(flat, LGBMClassifier)
 
 
 def test_get_hierarchical_classifier():
     n_jobs = 1
     local_classifier = "logistic_regression"
-    hierarchical_classifier = "lcpn"
+    hierarchical_classifier = "local_classifier_per_node"
     random_state = 0
     model = get_hierarchical_classifier(
         n_jobs, local_classifier, hierarchical_classifier, random_state
@@ -110,14 +111,14 @@ def test_get_hierarchical_classifier():
     assert model is not None
     assert isinstance(model, LocalClassifierPerNode)
     local_classifier = "random_forest"
-    hierarchical_classifier = "lcppn"
+    hierarchical_classifier = "local_classifier_per_parent_node"
     model = get_hierarchical_classifier(
         n_jobs, local_classifier, hierarchical_classifier, random_state
     )
     assert model is not None
     assert isinstance(model, LocalClassifierPerParentNode)
-    local_classifier = "hist_gradient"
-    hierarchical_classifier = "lcpl"
+    local_classifier = "lightgbm"
+    hierarchical_classifier = "local_classifier_per_level"
     model = get_hierarchical_classifier(
         n_jobs, local_classifier, hierarchical_classifier, random_state
     )

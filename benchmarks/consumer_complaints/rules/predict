@@ -4,19 +4,17 @@ rule predict:
         x_test = "results/split_data/x_test.csv.zip"
     output:
         predictions = "results/{model}/{classifier}/predictions.csv.zip",
-        time= "results/{model}/{classifier}/prediction_time.txt"
+        benchmark = "results/{model}/{classifier}/prediction_benchmark.txt"
     params:
         model = "{model}"
     conda:
         "../envs/hiclass.yml"
     threads:
         config["threads"]
-    benchmark:
-        "results/{model}/{classifier}/prediction_benchmark.tsv"
     shell:
         """
         /usr/bin/time -v \
-        -o {output.time} \
+        -o {output.benchmark} \
         python scripts/predict.py \
         --trained-model {input.trained_model} \
         --x-test {input.x_test} \

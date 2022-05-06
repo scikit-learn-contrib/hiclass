@@ -5,4 +5,4 @@ dependencies:
   - pandas=1.4.1
   - python=3.8
   - ray-core
-
+  - lightgbm=3.3.2

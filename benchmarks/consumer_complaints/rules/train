@@ -4,7 +4,7 @@ rule train:
         y_train = "results/split_data/y_train.csv.zip"
     output:
         trained_model = "results/{model}/{classifier}/trained_model.sav",
-        time = "results/{model}/{classifier}/training_time.txt",
+        benchmark = "results/{model}/{classifier}/training_benchmark.txt"
     params:
         classifier = "{classifier}",
         model = "{model}",
@@ -13,12 +13,10 @@ rule train:
         "../envs/hiclass.yml"
     threads:
         config["threads"]
-    benchmark:
-        "results/{model}/{classifier}/training_benchmark.tsv"
     shell:
         """
         /usr/bin/time -v \
-        -o {output.time} \
+        -o {output.benchmark} \
         python scripts/train.py \
         --n-jobs {threads} \
         --x-train {input.x_train} \
