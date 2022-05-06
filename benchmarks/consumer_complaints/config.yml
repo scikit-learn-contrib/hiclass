@@ -7,15 +7,15 @@ data: 'https://files.consumerfinance.gov/ccdb/complaints.csv.zip'
 random_state: 42
 
 # Uncomment the next line to use a subset of the data
-#nrows: 1000
+nrows: 1000
 
 classifiers:
   - logistic_regression
   - random_forest
-#  - hist_gradient # does not support sparse matrices, so will need more than 500GB of RAM
+  - xgboost
 
 models:
-  - lcpl
   - flat
-  - lcpn
-  - lcppn
+  - local_classifier_per_node
+  - local_classifier_per_parent_node
+  - local_classifier_per_level

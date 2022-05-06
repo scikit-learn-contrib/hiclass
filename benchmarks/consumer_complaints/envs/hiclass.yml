@@ -5,4 +5,5 @@ dependencies:
   - pandas=1.4.1
   - python=3.8
   - ray-core
+  - py-xgboost=1.5.0
 

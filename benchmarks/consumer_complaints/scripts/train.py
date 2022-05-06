@@ -6,18 +6,19 @@ import sys
 from argparse import Namespace
 
 import pandas as pd
+from sklearn.base import BaseEstimator
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from xgboost import XGBClassifier
+
+from data import load_dataframe
 from hiclass import (
     LocalClassifierPerNode,
     LocalClassifierPerParentNode,
     LocalClassifierPerLevel,
 )
-from sklearn.base import BaseEstimator
-from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
-
-from data import load_dataframe
 
 # Base classifiers used for building models
 classifiers = {
@@ -28,15 +29,17 @@ classifiers = {
     "random_forest": RandomForestClassifier(
         n_jobs=1,
     ),
-    "hist_gradient": HistGradientBoostingClassifier(),
+    "xgboost": XGBClassifier(
+        n_jobs=1,
+    ),
 }
 
 
 # Hierarchical classifiers used for training
 hierarchical_classifiers = {
-    "lcpn": LocalClassifierPerNode(),
-    "lcppn": LocalClassifierPerParentNode(),
-    "lcpl": LocalClassifierPerLevel(),
+    "local_classifier_per_node": LocalClassifierPerNode(),
+    "local_classifier_per_parent_node": LocalClassifierPerParentNode(),
+    "local_classifier_per_level": LocalClassifierPerLevel(),
 }
 
 
@@ -143,10 +146,7 @@ def get_flat_classifier(
         Flat classifier.
     """
     model = classifiers[base_classifier]
-    if isinstance(model, HistGradientBoostingClassifier):
-        model = model.set_params(random_state=random_state)
-    else:
-        model.set_params(n_jobs=n_jobs, random_state=random_state)
+    model.set_params(n_jobs=n_jobs, random_state=random_state)
     return model
 
 
