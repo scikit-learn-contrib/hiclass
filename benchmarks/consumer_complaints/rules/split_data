@@ -5,16 +5,17 @@ rule split_data:
         x_train = "results/split_data/x_train.csv.zip",
         x_test = "results/split_data/x_test.csv.zip",
         y_train = "results/split_data/y_train.csv.zip",
-        y_test = "results/split_data/y_test.csv.zip"
+        y_test = "results/split_data/y_test.csv.zip",
+        benchmark = "results/split_data/benchmark.txt"
     params:
         nrows = config["nrows"] if "nrows" in config else None,
         random_state = config["random_state"]
     conda:
         "../envs/hiclass.yml"
-    benchmark:
-        "results/split_data/benchmark.tsv"
     shell:
         """
+        /usr/bin/time -v \
+        -o {output.benchmark} \
         python scripts/split_data.py \
         --data {input} \
         --x-train {output.x_train} \
