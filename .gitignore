@@ -1,6 +1,11 @@
 # don't add notebooks by default as they clutter up the git
 *.ipynb
 
+### Snakemake ###
+.snakemake
+data
+results
+
 # Created by https://www.toptal.com/developers/gitignore/api/python,pycharm,pycharm+all,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,pycharm,pycharm+all,visualstudiocode
 
