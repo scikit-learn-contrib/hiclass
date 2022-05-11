@@ -1,7 +1,7 @@
 .. _classifiers:
 
-Classifiers
-===========
+Hierarchical Classifiers
+========================
 Shared classes
 --------------
 

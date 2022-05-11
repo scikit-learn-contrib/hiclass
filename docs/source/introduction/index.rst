@@ -18,7 +18,7 @@ Once you are set up, we suggest working through our examples, including:
 - A typical "Hello World" example, for an `entry-level description of the main concepts <TODO>`_.
 - A more detailed `tutorial <TODO>`_ to give you hands-on experience.
 
-We also recommend the `API reference documentation <TODO>`_ for additional information.
+We also recommend the :ref:`API reference documentation` for additional information.
 
 Assumptions
 ===========

@@ -41,5 +41,4 @@ Introduction
 .. toctree::
    :maxdepth: 3
 
-   code/index
-   about
+   api/index
