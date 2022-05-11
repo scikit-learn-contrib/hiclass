@@ -30,9 +30,6 @@ Welcome to hiclass' documentation!
     :target: https://opensource.org/licenses/BSD-3-Clause
     :alt: License
 
-Introduction
-============
-
 .. toctree::
     :titlesonly:
 
