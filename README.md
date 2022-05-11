@@ -4,22 +4,19 @@ HiClass is an open-source Python library for hierarchical classification compati
 
 [![Deploy PyPI](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push)](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest) [![codecov](https://codecov.io/gh/mirand863/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR)](https://codecov.io/gh/mirand863/hiclass) [![Downloads Conda](https://img.shields.io/conda/dn/conda-forge/hiclass?label=conda)](https://anaconda.org/conda-forge/hiclass) [![Downloads pypi](https://img.shields.io/pypi/dm/hiclass?label=pypi)](https://pypi.org/project/hiclass/)  [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
-✨ Here are a couple of **demos** that show HiClass in action on hierarchical datasets:
+✨ Here is a **demo** that show HiClass in action on hierarchical data:
 
 - Classify a consumer complaints dataset from the consumer financial protection bureau: [consumer-complaints](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)
-- Classify a 16S rRNA dataset from the TAXXI benchmark: [16s-rrna]()
 
 ## Quick links
 
 - [Features](#features)
 - [Benchmarks](#benchmarks)
 - [Roadmap](#roadmap)
-- [Who is using HiClass](#who-is-using-this)
 - [Install](#install)
 - [Quick start](#quick-start)
 - [Step-by-step- walk-through](#step-by-step-walk-through)
 - [API documentation](#api-documentation)
-- [FAQ](#faq)
 - [Support](#support)
 - [Contributing](#contributing)
 - [Getting the latest updates](#getting-the-latest-updates)
@@ -43,7 +40,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 
 This first benchmark was executed on Google Colab with only 1 core, using Logistic Regression as the base classifier.
 
-|Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
+|Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
 |[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|01:00:01|5.21|118|**0.7630**|
 |[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|**00:21:14**|**4.70**|120|0.7587|
@@ -53,7 +50,7 @@ This first benchmark was executed on Google Colab with only 1 core, using Logist
 This second benchmark is similar to the last one, except that it was executed on a cluster node running GNU/Linux with 512 GB physical memory and 128
 cores provided by two AMD EPYC™ 7742 processors, and each model had 12 cores available for training.
 
-|Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
+|Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
 |Local Classifier per Parent Node|00:21:54|3.87|116|**0.7606**|
 |Local Classifier per Node|**00:05:33**|**3.76**|118|0.7563|
@@ -62,7 +59,7 @@ cores provided by two AMD EPYC™ 7742 processors, and each model had 12 cores a
 
 This third benchmark was also executed on the same cluster node as the previous benchmark and 12 cores were provided for each model, however, the base classifier was LightGBM instead.
 
-|Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
+|Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
 |Local Classifier per Parent Node|**00:24:42**|3.87|77|0.7127|
 |Local Classifier per Node|00:30:50|4.87|311|**0.7503**|
@@ -71,7 +68,7 @@ This third benchmark was also executed on the same cluster node as the previous 
 
 Lastly, this fourth benchmark was also executed on the same cluster node as the previous benchmarks and 12 cores were provided for each model, however, the base classifier was random forest instead.
 
-|Classifier|Training Time (hh::mm:ss)|Memory Usage (GB)|Disk Usage (GB)|F-score|
+|Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (GB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
 |Local Classifier per Parent Node|03:04:23|**34.98**|**11**|0.7133|
 |Local Classifier per Node|02:21:05|39.16|12|**0.7450**|
@@ -225,5 +222,7 @@ If you use HiClass, please cite:
   year={2021}
 }
 ```
+
+**Note**: If you use HiClass in your GitHub projects, please add `hiclass` in the `requirements.txt`.
 
 In addition, we would like to list publications that use HiClass to solve hierarchical problems. If you would like your manuscript to be added to this list, please email the reference, the name of your lab, department and institution to fabio.malchermiranda@hpi.de
