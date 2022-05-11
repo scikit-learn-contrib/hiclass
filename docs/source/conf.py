@@ -20,8 +20,8 @@ print(sys.path)
 # -- Project information -----------------------------------------------------
 
 project = 'hiclass'
-copyright = '2021, Niklas Köhnecke, Fabio Malcher Miranda'
-author = 'Niklas Köhnecke, Fabio Malcher Miranda'
+copyright = '2022, Fabio Malcher Miranda, Niklas Köhnecke'
+author = 'Fabio Malcher Miranda, Niklas Köhnecke'
 
 
 # -- General configuration ---------------------------------------------------
