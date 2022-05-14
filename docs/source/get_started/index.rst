@@ -7,3 +7,4 @@ Get Started
 
     prerequisites
     virtual_environments
+    install
