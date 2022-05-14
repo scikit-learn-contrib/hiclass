@@ -18,3 +18,4 @@ Depending on your preferred installation method, you can create virtual environm
 
     conda
     venv
+    pipenv

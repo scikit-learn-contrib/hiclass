@@ -3,21 +3,21 @@ conda
 
 Install :literal:`conda` on your computer, following the `official guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 
-Create a new virtual environment called :literal:`hiclass` using :literal:`conda`:
+Create a new virtual environment called :literal:`hiclass-environment` using :literal:`conda`:
 
 .. code-block:: bash
 
-    conda create --name hiclass python=3.8 --yes
+    conda create --name hiclass-environment python=3.8 --yes
 
 
 This will create an isolated Python 3.8 environment. To activate it:
 
 .. code-block:: bash
 
-    conda activate hiclass
+    conda activate hiclass-environment
 
 
-To exit :literal:`hiclass`:
+To exit :literal:`hiclass-environment`:
 
 .. code-block:: bash
 
