@@ -6,4 +6,3 @@ Introduction
 
     what
     learn
-    assumptions

@@ -34,6 +34,7 @@ Welcome to hiclass' documentation!
     :titlesonly:
 
     introduction/index
+    get_started/index
 
 .. toctree::
    :maxdepth: 3
