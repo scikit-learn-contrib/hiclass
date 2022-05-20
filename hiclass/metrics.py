@@ -44,9 +44,11 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray):
     """
     Compute recall score for hierarchical classification.
 
-    hR = sum(len(S intersection T)) / sum(len(T)),
-    where S is the set consisting of the most specific class(es) predicted for a test example and all respective ancestors
-    and T is the set consisting of the true most specific class(es) for a test example and all respective ancestors.
+    :math:`\displaystyle{hR = \dfrac{\sum_i|a_i \cap b_i|}{\sum_i|b_i|}}`,
+    where :math:`a_i` is the set consisting of the most specific classes predicted
+    for test example :math:`i` and all their ancestor classes, while :math:`b_i` is the
+    set containing the true most specific classes of test example :math:`i` and all
+    their ancestors, with summations computed over all test examples.
 
     Parameters
     ----------
@@ -79,8 +81,8 @@ def f1(y_true: np.ndarray, y_pred: np.ndarray):
     """
     Compute f1 score for hierarchical classification.
 
-    hF = 2 * hP * hR / (hP + hR),
-    where hP is the hierarchical precision and hR is the hierarchical recall.
+    :math:`\displaystyle{hF = \dfrac{2 * hP * hR}{hP + hR}}`,
+    where :math:`hP` is the hierarchical precision and :math:`hR` is the hierarchical recall.
 
     Parameters
     ----------
