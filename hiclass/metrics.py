@@ -4,12 +4,12 @@ from sklearn.utils import check_array
 
 
 def precision(y_true: np.ndarray, y_pred: np.ndarray):
-    """
+    r"""
     Compute precision score for hierarchical classification.
 
-    :math:`hP = \displaystyle{\dfrac{\sum_{i}| a_i \cap b_i |}{\sum_{i}| a_i |}}`,
-    where :math:`a_i` is the set consisting of the most specific classes predicted
-    for test example :math:`i` and all their ancestor classes, while :math:`b_i` is the
+    :math:`hP = \displaystyle{\frac{\sum_{i}| \alpha_i \cap \beta_i |}{\sum_{i}| \alpha_i |}}`,
+    where :math:`\alpha_i` is the set consisting of the most specific classes predicted
+    for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the
     set containing the true most specific classes of test example :math:`i` and all
     their ancestors, with summations computed over all test examples.
 
@@ -41,12 +41,12 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray):
 
 
 def recall(y_true: np.ndarray, y_pred: np.ndarray):
-    """
+    r"""
     Compute recall score for hierarchical classification.
 
-    :math:`\displaystyle{hR = \dfrac{\sum_i|a_i \cap b_i|}{\sum_i|b_i|}}`,
-    where :math:`a_i` is the set consisting of the most specific classes predicted
-    for test example :math:`i` and all their ancestor classes, while :math:`b_i` is the
+    :math:`\displaystyle{hR = \frac{\sum_i|\alpha_i \cap \beta_i|}{\sum_i|\beta_i|}}`,
+    where :math:`\alpha_i` is the set consisting of the most specific classes predicted
+    for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the
     set containing the true most specific classes of test example :math:`i` and all
     their ancestors, with summations computed over all test examples.
 
@@ -78,10 +78,10 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray):
 
 
 def f1(y_true: np.ndarray, y_pred: np.ndarray):
-    """
+    r"""
     Compute f1 score for hierarchical classification.
 
-    :math:`\displaystyle{hF = \dfrac{2 * hP * hR}{hP + hR}}`,
+    :math:`\displaystyle{hF = \frac{2 \times hP \times hR}{hP + hR}}`,
     where :math:`hP` is the hierarchical precision and :math:`hR` is the hierarchical recall.
 
     Parameters
