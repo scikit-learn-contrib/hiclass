@@ -17,7 +17,7 @@ We will be using a :literal:`RandomForestClassifier` for each node in the :liter
     rf = RandomForestClassifier()
     classifier = LocalClassifierPerNode(local_classifier=rf)
 
-If you wish to use the :literal:`LocalClassifierPerParentNode` or :literal:`LocalClassifierPerLevel` instead, you can just replace the first import line with one of the following options:
+If you wish to use the :literal:`LocalClassifierPerParentNode` or :literal:`LocalClassifierPerLevel` instead, you can just replace the first import line with one of these alternatives:
 
 .. code-block:: python
 
