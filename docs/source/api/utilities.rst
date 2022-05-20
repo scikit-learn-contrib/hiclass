@@ -84,7 +84,7 @@ Recall
 
 ..................................
 
-f-score
+F-score
 ^^^^^^^
 
 .. autofunction:: metrics.f1
