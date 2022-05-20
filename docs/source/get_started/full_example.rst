@@ -1,7 +1,7 @@
 Hello Hiclass!
 ==============
 
-It’s now time to stitch the code together. Here is the full example:
+It is now time to stitch the code together. Here is the full example:
 
 .. code-block:: python
 
