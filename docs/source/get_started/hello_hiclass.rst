@@ -13,3 +13,4 @@ You can copy the example as one chunk of code from the last page of this section
     :hidden:
 
     local_classifier
+    hierarchical_data
