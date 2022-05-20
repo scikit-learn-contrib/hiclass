@@ -1,4 +1,4 @@
-Hello Hiclass!
+Hello HiClass!
 ==============
 
 It is now time to stitch the code together. Here is the full example:
