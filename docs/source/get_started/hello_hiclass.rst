@@ -12,5 +12,7 @@ You can copy the example as one chunk of code from the last page of this section
 .. toctree::
     :hidden:
 
-    local_classifier
     hierarchical_data
+    local_classifier
+    training_and_predicting
+    full_example

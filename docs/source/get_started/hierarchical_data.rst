@@ -13,7 +13,7 @@ Many datasets have labels in hierarchical structures, which means that they can 
 
    Animal hierarchy adapted from [2]_.
 
-HiClass makes it simple to train local hierarchical classifiers. All it needs are hierarchical labels defined in a :math:`m \times n` matrix, where each row is a training example and each column is a level in the hierarchy. This hierarchy matrix can be represented with Python lists, numpy arrays or Pandas DataFrames. Training features need to be numerical, hence feature extraction might be necessary depending on the data.
+HiClass makes it simple to train local hierarchical classifiers. All it needs are hierarchical labels defined in a :math:`m \times n` matrix, where each row is a training example and each column is a level in the hierarchy. This matrix can be represented with Python lists, NumPy arrays or Pandas DataFrames. Training features need to be numerical, hence feature extraction might be necessary depending on the data.
 
 For this example we will define a short phylogeny tree, with the following numerical features and hierarchical labels:
 
