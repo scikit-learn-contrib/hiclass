@@ -50,6 +50,6 @@ We will be using a :literal:`RandomForestClassifier` for each node in the :liter
 
 .. note::
 
-   The :literal:`LocalClassifierPerParentNode` will have a :literal:`RandomForestClassifier` for each parent node existing in the hierarchy, while the :literal:`LocalClassifierPerLevel` will possess a :literal:`RandomForestClassifier` for each level in the training labels.
+   The :literal:`LocalClassifierPerParentNode` has a :literal:`RandomForestClassifier` for each parent node existing in the hierarchy, while the :literal:`LocalClassifierPerLevel` contains a :literal:`RandomForestClassifier` for each level in the training labels.
 
 .. [1] Silla, C. N., & Freitas, A. A. (2011). A survey of hierarchical classification across different application domains. Data Mining and Knowledge Discovery, 22(1), 31-72.
