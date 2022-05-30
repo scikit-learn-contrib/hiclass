@@ -17,6 +17,8 @@ sys.path.insert(0, os.path.abspath('./../..'))
 sys.path.insert(0, os.path.abspath('./../../hiclass'))
 print(sys.path)
 
+import sphinx_code_tabs
+
 # -- Project information -----------------------------------------------------
 
 project = 'hiclass'
@@ -33,7 +35,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
-    'sphinx.ext.code_tabs',
+    'sphinx_code_tabs',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
