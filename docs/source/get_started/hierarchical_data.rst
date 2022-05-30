@@ -28,7 +28,7 @@ For this example we will define a short phylogeny tree, with the following numer
         ['Animal', 'Reptile', 'Lizard'],
     ]
 
-Note that order of the training and test features are reversed to make sure that the model actually works.
+Note that the order of the training and test features were reversed to make sure that the model actually works.
 
 .. [1] Burred, J. J., & Lerch, A. (2003, September). A hierarchical approach to automatic musical genre classification. In Proceedings of the 6th international conference on digital audio effects (pp. 8-11).
 

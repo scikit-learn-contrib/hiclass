@@ -13,7 +13,7 @@ This will create a folder called :literal:`hiclass-environment` in your current 
 .. tabs::
 
     .. code-tab:: bash
-        :caption: macOS / Linux
+        :caption: GNU/Linux or macOS
 
         python -m venv env/hiclass-environment
 
@@ -27,7 +27,7 @@ Activate this virtual environment:
 .. tabs::
 
     .. code-tab:: bash
-        :caption: macOS / Linux
+        :caption: GNU/Linux or macOS
 
         source env/hiclass-environment/bin/activate
 
