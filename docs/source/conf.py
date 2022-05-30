@@ -33,7 +33,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
-    'sphinx_code_tabs',
+    'sphinx.ext.code_tabs',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
