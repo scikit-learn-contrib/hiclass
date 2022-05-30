@@ -36,6 +36,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
     'sphinx_code_tabs',
+    'sphinx_search.extension',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
