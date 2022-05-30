@@ -10,19 +10,31 @@ If you are using Python 3, you should already have the :literal:`venv` module in
 
 This will create a folder called :literal:`hiclass-environment` in your current working directory. Then you should create a new virtual environment in this directory by running:
 
-.. code-block:: bash
+.. tabs::
 
-    python -m venv env/hiclass-environment  # macOS / Linux
-    python -m venv env\hiclass-environment  # Windows
+    .. code-tab:: bash
+        :caption: macOS / Linux
 
+        python -m venv env/hiclass-environment
+
+    .. code-tab:: bash
+        :caption: Windows
+
+        python -m venv env\hiclass-environment
 
 Activate this virtual environment:
 
-.. code-block:: bash
+.. tabs::
 
-    source env/hiclass-environment/bin/activate # macOS / Linux
-    .\env\hiclass-environment\Scripts\activate  # Windows
+    .. code-tab:: bash
+        :caption: macOS / Linux
 
+        source env/hiclass-environment/bin/activate
+
+    .. code-tab:: bash
+        :caption: Windows
+
+        .\env\hiclass-environment\Scripts\activate
 
 To exit the environment:
 
