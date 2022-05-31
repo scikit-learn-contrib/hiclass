@@ -1,5 +1,5 @@
-Choosing a training policy
-==========================
+Selecting a training policy
+===========================
 
 The siblings policy is used by default on the local classifier per node, but the remaining ones can be used with the parameter :literal:`binary_policy`, for example:
 
@@ -40,4 +40,3 @@ The siblings policy is used by default on the local classifier per node, but the
 
         rf = RandomForestClassifier()
         classifier = LocalClassifierPerNode(local_classifier=rf, binary_policy="exclusive_siblings")
-

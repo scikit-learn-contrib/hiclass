@@ -10,3 +10,4 @@ HiClass provides implementations for the most popular machine learning models fo
     :maxdepth: 3
 
     local_classifier_per_node
+    local_classifier_per_parent_node
