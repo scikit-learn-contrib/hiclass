@@ -10,10 +10,13 @@ One of the most popular approaches in the literature, the local classifier per n
 
    Visual representation of the local classifier per node approach, adapted from [1]_.
 
+Training Policies
+=================
+
 There are multiple ways to define the set of positive and negative examples for training the binary classifiers. In HiClass we implemented 6 policies described at [1]_, which were based on previous work from [2]_ and [3]_. In the table below the notation used to define the sets of positive and negative examples is presented, as described by [1]_.
 
 =============================  ===============================================================
-Symbol                         Meaning
+**Symbol**                     **Meaning**
 -----------------------------  ---------------------------------------------------------------
 :math:`Tr`                     The set of all training examples
 :math:`Tr^+(c_i)`              The set of positive training examples of :math:`c_i`
@@ -25,6 +28,19 @@ Symbol                         Meaning
 :math:`\leftrightarrow (c_i)`  The set of sibling categories of :math:`c_i`
 :math:`*(c_i)`                 Denotes examples whose most specific known class is :math:`c_i`
 =============================  ===============================================================
+
+Based on this notation, we can define the different policies and their sets of positive and negative examples as follows:
+
+======================  ================================================  =============================================================
+**Policy**              **Positive examples**                             **Negative examples**
+----------------------  ------------------------------------------------  -------------------------------------------------------------
+**Exclusive**           :math:`Tr^+(c_i) = *(c_i)`                        :math:`Tr^-(c_i) = Tr \setminus *(c_i)`
+**Less exclusive**      :math:`Tr^+(c_i) = *(c_i)`                        :math:`Tr^-(c_i) = Tr \setminus *(c_i) \cup \Downarrow (c_i)`
+**Less inclusive**      :math:`Tr^+(c_i) = *(c_i) \cup \Downarrow (c_i)`  :math:`Tr^-(c_i) = Tr \setminus *(c_i) \cup \Downarrow (c_i)`
+**Inclusive**           :math:`Tr^+(c_i) = *(c_i) \cup \Downarrow (c_i)`  :math:`Tr^-(c_i) = Tr \setminus *(c_i) \cup \Downarrow (c_i) \cup \Uparrow (c_i)`
+**Siblings**            :math:`Tr^+(c_i) = *(c_i) \cup \Downarrow (c_i)`  :math:`Tr^-(c_i) = \leftrightarrow (c_i) \cup \Downarrow (\leftrightarrow (c_i))`
+**Exclusive siblings**  :math:`Tr^+(c_i) = *(c_i)`                        :math:`Tr^-(c_i) = \leftrightarrow (c_i)`
+======================  ================================================  =============================================================
 
 .. [1] Silla, C. N., & Freitas, A. A. (2011). A survey of hierarchical classification across different application domains. Data Mining and Knowledge Discovery, 22(1), 31-72.
 
