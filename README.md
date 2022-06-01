@@ -62,10 +62,10 @@ This third benchmark was also executed on the same cluster node as the previous 
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|||||
-|Local Classifier per Node|||||
-|Local Classifier per Level|||||
-|Flat Classifier|||||
+|Local Classifier per Parent Node|00:24:52|3.91|77|0.7279|
+|Local Classifier per Node|00:30:39|5.41|312|**0.7551**|
+|Local Classifier per Level|01:36:33|**3.86**|37|0.5413|
+|Flat Classifier|**00:23:54**|4.36|**13**|0.4303|
 
 Lastly, this fourth benchmark was also executed on the same cluster node as the previous benchmarks and 12 cores were provided for each model, however, the base classifier was random forest instead.
 
