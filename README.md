@@ -4,7 +4,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 
 [![Deploy PyPI](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push)](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest) [![codecov](https://codecov.io/gh/mirand863/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR)](https://codecov.io/gh/mirand863/hiclass) [![Downloads Conda](https://img.shields.io/conda/dn/conda-forge/hiclass?label=conda)](https://anaconda.org/conda-forge/hiclass) [![Downloads pypi](https://img.shields.io/pypi/dm/hiclass?label=pypi)](https://pypi.org/project/hiclass/)  [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
-✨ Here is a **demo** that show HiClass in action on hierarchical data:
+✨ Here is a **demo** that shows HiClass in action on hierarchical data:
 
 - Classify a consumer complaints dataset from the consumer financial protection bureau: [consumer-complaints](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)
 
@@ -105,7 +105,7 @@ Alternatively, HiClass and its dependencies can also be installed with conda:
 conda install -c conda-forge hiclass
 ```
 
-Further installation instructions are available on our [getting started guide](https://hiclass.readthedocs.io/en/latest/get_started/index.html).
+Further installation instructions are available on our [getting started guide](https://hiclass.readthedocs.io/en/latest/get_started/index.html). This will guide you through the process of setting up an isolated Python virtual environment with conda, venv or pipenv before installing hiclass with conda or pip, and how to verify a successful installation.
 
 ## Quick start
 
@@ -197,7 +197,7 @@ If you notice any issues with the documentation or walk-through, please let us k
 
 ### How do the hierarchical classifiers work?
 
-A detailed description on how the classifiers work is available at [https://hiclass.readthedocs.io/en/latest/algorithms/index.html](https://hiclass.readthedocs.io/en/latest/algorithms/index.html).
+A detailed description on how the classifiers work is available at the [Algorithms Overview](https://hiclass.readthedocs.io/en/latest/algorithms/index.html) section on Read the Docs.
 
 ## Support
 
