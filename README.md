@@ -189,7 +189,7 @@ This will guide you through the process of installing hiclass with conda, traini
 
 ## API documentation
 
-Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).
+Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/api/index.html).
 
 If you notice any issues with the documentation or walk-through, please let us know by opening an issue here: [https://github.com/mirand863/hiclass/issues](https://github.com/mirand863/hiclass/issues).
 
