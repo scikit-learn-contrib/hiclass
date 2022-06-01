@@ -85,7 +85,9 @@ class HierarchicalClassifier(abc.ABC):
     def _pre_fit(self, X, y):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
-        self.X_, self.y_ = check_X_y(X, y, multi_output=True, accept_sparse="csr")
+        self.X_, self.y_ = self._validate_data(
+            X, y, multi_output=True, accept_sparse="csr"
+        )
 
         # Create and configure logger
         self._create_logger()

@@ -6,13 +6,38 @@
 Welcome to hiclass' documentation!
 ===================================
 
-This is the documentation for the `hiclass repository <https://github.com/mirand863/hiclass>`_.
+.. image:: https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push
+    :target: https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml
+    :alt: Deploy PyPI
 
-For more information on setup, refer to the :code:`README.md` of the repository.
+.. image:: https://readthedocs.org/projects/hiclass/badge/?version=latest
+    :target: https://hiclass.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
+.. image:: https://codecov.io/gh/mirand863/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR
+    :target: https://codecov.io/gh/mirand863/hiclass
+    :alt: codecov
+
+.. image:: https://img.shields.io/conda/dn/conda-forge/hiclass?label=conda
+    :target: https://anaconda.org/conda-forge/hiclass
+    :alt: Downloads Conda
+
+.. image:: https://img.shields.io/pypi/dm/hiclass?label=pypi
+    :target: https://pypi.org/project/hiclass/
+    :alt: Downloads pypi
+
+.. image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
+    :target: https://opensource.org/licenses/BSD-3-Clause
+    :alt: License
+
+.. toctree::
+    :titlesonly:
+
+    introduction/index
+    get_started/index
+    algorithms/index
 
 .. toctree::
    :maxdepth: 3
 
-   code/index
-   about
+   api/index

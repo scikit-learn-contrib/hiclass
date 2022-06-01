@@ -17,11 +17,13 @@ sys.path.insert(0, os.path.abspath('./../..'))
 sys.path.insert(0, os.path.abspath('./../../hiclass'))
 print(sys.path)
 
+import sphinx_code_tabs
+
 # -- Project information -----------------------------------------------------
 
 project = 'hiclass'
-copyright = '2021, Niklas Köhnecke, Fabio Malcher Miranda'
-author = 'Niklas Köhnecke, Fabio Malcher Miranda'
+copyright = '2022, Fabio Malcher Miranda, Niklas Köhnecke'
+author = 'Fabio Malcher Miranda, Niklas Köhnecke'
 
 
 # -- General configuration ---------------------------------------------------
@@ -29,7 +31,12 @@ author = 'Niklas Köhnecke, Fabio Malcher Miranda'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autosectionlabel',
+    'sphinx_code_tabs',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

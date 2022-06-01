@@ -1,5 +1,3 @@
-.. _utils:
-
 Data Utilities
 ==============
 
@@ -71,5 +69,22 @@ ExclusiveSiblingsPolicy
 
 Hierarchical Metrics
 --------------------
-.. automodule:: metrics
-    :members:
+
+Precision
+^^^^^^^^^
+
+.. autofunction:: metrics.precision
+
+..................................
+
+Recall
+^^^^^^
+
+.. autofunction:: metrics.recall
+
+..................................
+
+F-score
+^^^^^^^
+
+.. autofunction:: metrics.f1
