@@ -88,21 +88,24 @@ We do Just-In-Time planning, and we tend to reprioritize based on your feedback.
 
 ## Install
 
-### Option 1: Conda
+### Option 1: Pip
 
-HiClass and its dependencies can be easily installed with conda:
+
+HiClass and its dependencies can be easily installed with pip:
+
+```shell
+pip install hiclass
+```
+
+### Option 2: Conda
+
+Alternatively, HiClass and its dependencies can also be installed with conda:
 
 ```shell
 conda install -c conda-forge hiclass
 ```
 
-### Option 2: Pip
-
-Alternatively, HiClass and its dependencies can also be installed with pip:
-
-```shell
-pip install hiclass
-```
+Further installation instructions are available at [https://hiclass.readthedocs.io/en/latest/get_started/index.html](https://hiclass.readthedocs.io/en/latest/get_started/index.html).
 
 ## Quick start
 
