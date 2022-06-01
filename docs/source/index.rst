@@ -35,7 +35,7 @@ Welcome to hiclass' documentation!
 
     introduction/index
     get_started/index
-    design/index
+    algorithms/index
 
 .. toctree::
    :maxdepth: 3
