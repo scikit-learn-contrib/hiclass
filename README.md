@@ -208,7 +208,7 @@ We strive to provide good support through our issue tracker on Github. However, 
 - Phone / video calls to discuss your specific use case and get recommendations
 - Private discussions over Slack or Mattermost
 
-Please reach out to us at fabio.malchermiranda@hpi.de.
+Please reach out to fabio.malchermiranda@hpi.de.
 
 ## Contributing
 
