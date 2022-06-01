@@ -92,7 +92,7 @@ We do Just-In-Time planning, and we tend to reprioritize based on your feedback.
 
 HiClass is currently being used in [HiTaC](https://gitlab.com/dacs-hpi/hitac), a hierarchical taxonomic classifier for fungal ITS sequences.
 
-If you use HiClass in one of your projects and would like to have it listed here, please send us a pull request.
+If you use HiClass in one of your projects and would like to have it listed here, please send us a pull request or contact fabio.malchermiranda@hpi.de.
 
 ## Install
 
