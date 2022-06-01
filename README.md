@@ -17,6 +17,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - [Quick start](#quick-start)
 - [Step-by-step- walk-through](#step-by-step-walk-through)
 - [API documentation](#api-documentation)
+- [FAQ](#faq)
 - [Support](#support)
 - [Contributing](#contributing)
 - [Getting the latest updates](#getting-the-latest-updates)
@@ -188,6 +189,12 @@ This will guide you through the process of installing hiclass with conda, traini
 Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).
 
 If you notice any issues with the documentation or walk-through, please let us know by opening an issue here: [https://github.com/mirand863/hiclass/issues](https://github.com/mirand863/hiclass/issues).
+
+## FAQ
+
+### How do the hierarchical classifiers work?
+
+A detailed description on how the classifiers work is available at [https://hiclass.readthedocs.io/en/latest/algorithms/index.html](https://hiclass.readthedocs.io/en/latest/algorithms/index.html).
 
 ## Support
 
