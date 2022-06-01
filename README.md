@@ -105,7 +105,7 @@ Alternatively, HiClass and its dependencies can also be installed with conda:
 conda install -c conda-forge hiclass
 ```
 
-Further installation instructions are available at [https://hiclass.readthedocs.io/en/latest/get_started/index.html](https://hiclass.readthedocs.io/en/latest/get_started/index.html).
+Further installation instructions are available on our [getting started guide](https://hiclass.readthedocs.io/en/latest/get_started/index.html).
 
 ## Quick start
 
