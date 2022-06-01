@@ -4,7 +4,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 
 [![Deploy PyPI](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push)](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest) [![codecov](https://codecov.io/gh/mirand863/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR)](https://codecov.io/gh/mirand863/hiclass) [![Downloads Conda](https://img.shields.io/conda/dn/conda-forge/hiclass?label=conda)](https://anaconda.org/conda-forge/hiclass) [![Downloads pypi](https://img.shields.io/pypi/dm/hiclass?label=pypi)](https://pypi.org/project/hiclass/)  [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
-✨ Here is a **demo** that show HiClass in action on hierarchical data:
+✨ Here is a **demo** that shows HiClass in action on hierarchical data:
 
 - Classify a consumer complaints dataset from the consumer financial protection bureau: [consumer-complaints](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)
 
@@ -13,10 +13,12 @@ HiClass is an open-source Python library for hierarchical classification compati
 - [Features](#features)
 - [Benchmarks](#benchmarks)
 - [Roadmap](#roadmap)
+- [Who is using HiClass?](#who-is-using-hiclass)
 - [Install](#install)
 - [Quick start](#quick-start)
 - [Step-by-step- walk-through](#step-by-step-walk-through)
 - [API documentation](#api-documentation)
+- [FAQ](#faq)
 - [Support](#support)
 - [Contributing](#contributing)
 - [Getting the latest updates](#getting-the-latest-updates)
@@ -52,32 +54,32 @@ cores provided by two AMD EPYC™ 7742 processors, and each model had 12 cores a
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|00:21:54|3.87|116|**0.7606**|
-|Local Classifier per Node|**00:05:33**|**3.76**|118|0.7563|
-|Local Classifier per Level|01:52:42|3.87|118|**0.7606**|
-|Flat Classifier|01:48:54|7.23|**103**|0.7553|
+|Local Classifier per Parent Node|00:21:35|3.92|117|**0.7644**|
+|Local Classifier per Node|**00:06:24**|**3.82**|118|0.7601|
+|Local Classifier per Level|01:26:13|3.93|119|0.7641|
+|Flat Classifier|01:20:55|6.48|**103**|0.7591|
 
 This third benchmark was also executed on the same cluster node as the previous benchmark and 12 cores were provided for each model, however, the base classifier was LightGBM instead.
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|**00:24:42**|3.87|77|0.7127|
-|Local Classifier per Node|00:30:50|4.87|311|**0.7503**|
-|Local Classifier per Level|01:45:57|**3.81**|29|0.5732|
-|Flat Classifier|00:28:07|4.34|**20**|0.1260|
+|Local Classifier per Parent Node|00:24:52|3.91|77|0.7279|
+|Local Classifier per Node|00:30:39|5.41|312|**0.7551**|
+|Local Classifier per Level|01:36:33|**3.86**|37|0.5413|
+|Flat Classifier|**00:23:54**|4.36|**13**|0.4303|
 
 Lastly, this fourth benchmark was also executed on the same cluster node as the previous benchmarks and 12 cores were provided for each model, however, the base classifier was random forest instead.
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (GB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|03:04:23|**34.98**|**11**|0.7133|
-|Local Classifier per Node|02:21:05|39.16|12|**0.7450**|
-|Local Classifier per Level|03:58:59|136.50|43|0.7093|
-|Flat Classifier|**00:31:02**|77.32|37|0.6405|
+|Local Classifier per Parent Node|03:17:32|**35.42**|**11**|0.7172|
+|Local Classifier per Node|02:27:11|39.68|12|**0.7479**|
+|Local Classifier per Level|04:17:55|138.19|44|0.7134|
+|Flat Classifier|**00:28:35**|78.29|37|0.6438|
 
 For reproducibility, a Snakemake pipeline was created. Instructions on how to run it and source code are available at [https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints](https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints).
 
-We would love to benchmark with larger datasets, if we can find large ones in the public domain. If you have any suggestions for hierarchical datasets that are open, please let us know by opening an issue. We would also be delighted if you are able to share benchmarks from your own large datasets. Please send us a PR!
+We would love to benchmark with larger datasets, if we can find them in the public domain. If you have any suggestions for hierarchical datasets that are public, please let us know by opening an issue. We would also be delighted if you are able to share benchmarks from your own large datasets. Please send us a pull request.
 
 ## Roadmap
 
@@ -85,23 +87,33 @@ Here is our public roadmap: https://github.com/mirand863/hiclass/projects/1.
 
 We do Just-In-Time planning, and we tend to reprioritize based on your feedback. Hence, items you see on this roadmap are subject to change. We prioritize features based on the number of people asking for it, features/fixes that are small enough and can be addressed while we work on other related features, features/fixes that help improve stability & relevance and features that address interesting use cases that excite us! If you'd like to have a request prioritized, we ask that you add a detailed use-case for it, either as a comment on an existing issue (besides a thumbs-up) or in a new issue. The detailed context helps.
 
+
+## Who is using HiClass?
+
+HiClass is currently being used in [HiTaC](https://gitlab.com/dacs-hpi/hitac), a hierarchical taxonomic classifier for fungal ITS sequences.
+
+If you use HiClass in one of your projects and would like to have it listed here, please send us a pull request or contact fabio.malchermiranda@hpi.de.
+
 ## Install
 
-### Option 1: Conda
+### Option 1: Pip
 
-HiClass and its dependencies can be easily installed with conda:
+
+HiClass and its dependencies can be easily installed with pip:
+
+```shell
+pip install hiclass
+```
+
+### Option 2: Conda
+
+Alternatively, HiClass and its dependencies can also be installed with conda:
 
 ```shell
 conda install -c conda-forge hiclass
 ```
 
-### Option 2: Pip
-
-Alternatively, HiClass and its dependencies can also be installed with pip:
-
-```shell
-pip install hiclass
-```
+Further installation instructions are available on our [getting started guide](https://hiclass.readthedocs.io/en/latest/get_started/index.html). This will guide you through the process of setting up an isolated Python virtual environment with conda, venv or pipenv before installing hiclass with conda or pip, and how to verify a successful installation.
 
 ## Quick start
 
@@ -185,9 +197,15 @@ This will guide you through the process of installing hiclass with conda, traini
 
 ## API documentation
 
-Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/).
+Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/api/index.html).
 
 If you notice any issues with the documentation or walk-through, please let us know by opening an issue here: [https://github.com/mirand863/hiclass/issues](https://github.com/mirand863/hiclass/issues).
+
+## FAQ
+
+### How do the hierarchical classifiers work?
+
+A detailed description on how the classifiers work is available at the [Algorithms Overview](https://hiclass.readthedocs.io/en/latest/algorithms/index.html) section on Read the Docs.
 
 ## Support
 
@@ -198,11 +216,11 @@ We strive to provide good support through our issue tracker on Github. However, 
 - Phone / video calls to discuss your specific use case and get recommendations
 - Private discussions over Slack or Mattermost
 
-Please reach out to us at fabio.malchermiranda@hpi.de.
+Please reach out to fabio.malchermiranda@hpi.de.
 
 ## Contributing
 
-We are a small team on a mission to democratize hierarchical classification, and we'll take all the help we can get! If you'd like to get involved, here's information on contribution guidelines and how to test the code locally: [CONTRIBUTING.md](https://github.com/mirand863/hiclass/blob/main/CONTRIBUTING.md)
+We are a small team on a mission to democratize hierarchical classification, and we'll take all the help we can get! If you'd like to get involved, here's information on [contribution guidelines and how to test the code locally](https://github.com/mirand863/hiclass/blob/main/CONTRIBUTING.md).
 
 ## Getting the latest updates
 
