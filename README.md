@@ -13,7 +13,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - [Features](#features)
 - [Benchmarks](#benchmarks)
 - [Roadmap](#roadmap)
-- [Who's using HiClass?](#whos-using-hiclass)
+- [Who is using HiClass?](#who-is-using-hiclass)
 - [Install](#install)
 - [Quick start](#quick-start)
 - [Step-by-step- walk-through](#step-by-step-walk-through)
@@ -88,7 +88,7 @@ Here is our public roadmap: https://github.com/mirand863/hiclass/projects/1.
 We do Just-In-Time planning, and we tend to reprioritize based on your feedback. Hence, items you see on this roadmap are subject to change. We prioritize features based on the number of people asking for it, features/fixes that are small enough and can be addressed while we work on other related features, features/fixes that help improve stability & relevance and features that address interesting use cases that excite us! If you'd like to have a request prioritized, we ask that you add a detailed use-case for it, either as a comment on an existing issue (besides a thumbs-up) or in a new issue. The detailed context helps.
 
 
-## Who's using HiClass?
+## Who is using HiClass?
 
 HiClass is currently being used in [HiTaC](https://gitlab.com/dacs-hpi/hitac), a hierarchical taxonomic classifier for fungal ITS sequences.
 
