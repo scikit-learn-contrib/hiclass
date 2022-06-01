@@ -7,7 +7,7 @@ The main purpose of Python virtual environments is to create an isolated environ
 
    Read more about Python Virtual Environments here: `https://realpython.com/python-virtual-environments-a-primer/ <https://realpython.com/python-virtual-environments-a-primer/>`_.
 
-Depending on your preferred installation method, you can create virtual environments for working with HiClass as follows:
+Depending on your preferred installation method, you can create virtual environments for HiClass as follows:
 
 - With :ref:`conda`, a package and environment manager program bundled with Anaconda.
 

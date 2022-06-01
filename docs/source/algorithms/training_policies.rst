@@ -30,7 +30,7 @@ Based on this notation, we can define the different policies and their sets of p
 **Exclusive siblings**  :math:`Tr^+(c_i) = *(c_i)`                        :math:`Tr^-(c_i) = \leftrightarrow (c_i)`
 ======================  ================================================  =============================================================
 
-Using as example the class 2.1 from the hierarchy represented in the image below, we have the following sets of positive and negative examples for each policy:
+Using as example the class 2.2 from the hierarchy represented in the image below, we have the following sets of positive and negative examples for each policy:
 
 .. figure:: local_classifier_per_node.svg
    :align: center

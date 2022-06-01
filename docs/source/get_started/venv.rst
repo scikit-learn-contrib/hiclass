@@ -1,7 +1,7 @@
 venv
 ====
 
-If you are using Python 3, you should already have the :literal:`venv` module installed with the standard library. Create a directory for working with HiClass within your virtual environment:
+If you are using Python 3, you should already have the :literal:`venv` module installed with the standard library. Create a directory for HiClass within your virtual environment:
 
 .. code-block:: bash
 

@@ -1,7 +1,7 @@
 Learn how to use HiClass
 ========================
 
-In the next few chapters, you will learn how to :ref:`Install HiClass` and set up your own production-ready hierarchical pipelines.
+In the next few chapters, you will learn how to :ref:`Install HiClass` and set up your own hierarchical machine learning pipelines.
 
 Once you are set up, we suggest working through our examples, including:
 

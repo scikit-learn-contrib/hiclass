@@ -1,7 +1,7 @@
 Training and Predicting
 =======================
 
-HiClass follows the same API from the popular machine learning library scikit-learn. Hence, training is as easy as calling the :literal:`fit` method on the training data:
+HiClass adheres to the same API from the popular machine learning library scikit-learn. Hence, training is as easy as calling the :literal:`fit` method on the training data:
 
 .. code-block:: python
 

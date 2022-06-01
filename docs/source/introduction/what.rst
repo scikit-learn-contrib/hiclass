@@ -6,4 +6,4 @@ It mirrors the popular API from scikit-learn to train and predict with the most 
 Implemented models include the local classifiers per node, per parent node and per level.
 HiClass is released under the simplified `BSD 3-Clause license <https://opensource.org/licenses/BSD-3-Clause>`_.
 
-For the source code, please take a look at the `repository on Github <https://github.com/mirand863/hiclass>`_.
+For the source code, please take a look at the repository on `Github <https://github.com/mirand863/hiclass>`_.

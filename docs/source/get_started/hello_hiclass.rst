@@ -7,7 +7,7 @@ You can copy the example as one chunk of code from the last page of this section
 
 .. note::
 
-    We do not use real data in this first example, but illustrate the concepts within a single ``.py`` file.
+    We do not use real data in this example, but illustrate the concepts with a single ``.py`` script.
 
 .. toctree::
     :hidden:
