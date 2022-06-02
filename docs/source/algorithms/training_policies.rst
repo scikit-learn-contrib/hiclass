@@ -35,7 +35,7 @@ Using as example the class Wolf from the hierarchy represented in the image belo
 .. figure:: local_classifier_per_node.svg
    :align: center
 
-   Visual representation of the local classifier per node approach, adapted from [1]_.
+   Visual representation of the local classifier per node approach. Pictures gratefully obtained from [4]_.
 
 ======================  ===================================  ==================================================================
 **Policy**              :math:`Tr^+(c_{2.2})`                :math:`Tr^-(c_{2.2})`
@@ -53,3 +53,5 @@ Using as example the class Wolf from the hierarchy represented in the image belo
 .. [2] Eisner, R., Poulin, B., Szafron, D., Lu, P., & Greiner, R. (2005, November). Improving protein function prediction using the hierarchical structure of the gene ontology. In 2005 IEEE symposium on computational intelligence in bioinformatics and computational biology (pp. 1-10). IEEE.
 
 .. [3] Fagni, T., & Sebastiani, F. (2007, October). On the selection of negative examples for hierarchical text categorization. In Proceedings of the 3rd language technology conference (pp. 24-28).
+
+.. [4] https://www.pexels.com/
