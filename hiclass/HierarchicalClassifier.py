@@ -6,7 +6,6 @@ import networkx as nx
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
-from sklearn.utils.validation import check_X_y
 
 
 class HierarchicalClassifier(abc.ABC):
@@ -85,8 +84,11 @@ class HierarchicalClassifier(abc.ABC):
     def _pre_fit(self, X, y):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
+
+        leveled_y = self._make_leveled(y)
+
         self.X_, self.y_ = self._validate_data(
-            X, y, multi_output=True, accept_sparse="csr"
+            X, leveled_y, multi_output=True, accept_sparse="csr"
         )
 
         # Create and configure logger
@@ -114,6 +116,22 @@ class HierarchicalClassifier(abc.ABC):
 
         # Initialize local classifiers in DAG
         self._initialize_local_classifiers()
+
+    def _make_leveled(self, y):
+        # Add empty columns if column length differs
+        depth = 0
+        for row in y:
+            try:
+                depth = max(depth, len(row))
+            except TypeError:
+                return y
+        leveled_y = []
+        for row in y:
+            new_row = [i for i in row]
+            while len(new_row) < depth:
+                new_row.append("")
+            leveled_y.append(new_row)
+        return leveled_y
 
     def _create_logger(self):
         # Create logger
@@ -167,9 +185,13 @@ class HierarchicalClassifier(abc.ABC):
             self.logger_.info(f"Creating digraph from {rows} 2D labels")
             for row in range(rows):
                 for column in range(columns - 1):
-                    self.hierarchy_.add_edge(
-                        self.y_[row, column], self.y_[row, column + 1]
-                    )
+                    # Only add edge if both parent and child are not empty
+                    parent = self.y_[row, column].split(self.separator_)[-1]
+                    child = self.y_[row, column + 1].split(self.separator_)[-1]
+                    if parent != "" and child != "":
+                        self.hierarchy_.add_edge(
+                            self.y_[row, column], self.y_[row, column + 1]
+                        )
 
         elif self.y_.ndim == 1:
             # 1D labels
