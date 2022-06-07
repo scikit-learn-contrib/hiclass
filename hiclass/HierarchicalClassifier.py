@@ -119,18 +119,11 @@ class HierarchicalClassifier(abc.ABC):
 
     def _make_leveled(self, y):
         # Add empty columns if column length differs
-        depth = 0
-        for row in y:
-            try:
-                depth = max(depth, len(row))
-            except TypeError:
-                return y
-        leveled_y = []
-        for row in y:
-            new_row = [i for i in row]
-            while len(new_row) < depth:
-                new_row.append("")
-            leveled_y.append(new_row)
+        try:
+            depth = max([len(row) for row in y])
+        except TypeError:
+            return y
+        leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
         return leveled_y
 
     def _create_logger(self):
