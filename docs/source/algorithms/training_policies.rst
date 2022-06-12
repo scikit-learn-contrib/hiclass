@@ -30,7 +30,7 @@ Based on this notation, we can define the different policies and their sets of p
 **Exclusive siblings**  :math:`Tr^+(c_i) = *(c_i)`                        :math:`Tr^-(c_i) = \leftrightarrow (c_i)`
 ======================  ================================================  =============================================================
 
-Using as example the class 2.2 from the hierarchy represented in the image below, we have the following sets of positive and negative examples for each policy:
+Using as example the class "Wolf" from the hierarchy represented in the image below, we have the following sets of positive and negative examples for each policy:
 
 .. figure:: local_classifier_per_node.svg
    :align: center
@@ -40,12 +40,12 @@ Using as example the class 2.2 from the hierarchy represented in the image below
 ======================  =====================  ===============================================
 **Policy**              :math:`Tr^+(c_{2.2})`  :math:`Tr^-(c_{2.2})`
 ----------------------  ---------------------  -----------------------------------------------
-**Exclusive**           2.2                    1, 1.1, 1.2, 2, 2.1, 2.2.1, 2.2.2
-**Less exclusive**      2.2                    1, 1.1, 1.2, 2, 2.1
-**Less inclusive**      2.2, 2.2.1, 2.2.2      1, 1.1, 1.2, 2, 2.1
-**Inclusive**           2.2, 2.2.1, 2.2.2      1, 1.1, 1.2, 2.1
-**Siblings**            2.2, 2.2.1, 2.2.2      2.1
-**Exclusive siblings**  2.2                    2.1
+**Exclusive**           Wolf                   Reptile, Snake, Lizard, Mammal, Cat, Dog
+**Less exclusive**      Wolf                   Reptile, Snake, Lizard, Mammal, Cat
+**Less inclusive**      Wolf, Dog              Reptile, Snake, Lizard, Mammal, Cat
+**Inclusive**           Wolf, Dog              Reptile, Snake, Lizard, Cat
+**Siblings**            Wolf, Dog              Cat
+**Exclusive siblings**  Wolf                   Cat
 ======================  =====================  ===============================================
 
 .. [1] Silla, C. N., & Freitas, A. A. (2011). A survey of hierarchical classification across different application domains. Data Mining and Knowledge Discovery, 22(1), 31-72.
