@@ -37,16 +37,16 @@ Using as example the class "Wolf" from the hierarchy represented in the image be
 
    Visual representation of the local classifier per node approach, adapted from [1]_.
 
-======================  =====================  ===============================================
-**Policy**              :math:`Tr^+(c_{2.2})`  :math:`Tr^-(c_{2.2})`
-----------------------  ---------------------  -----------------------------------------------
-**Exclusive**           Wolf                   Reptile, Snake, Lizard, Mammal, Cat, Dog
-**Less exclusive**      Wolf                   Reptile, Snake, Lizard, Mammal, Cat
-**Less inclusive**      Wolf, Dog              Reptile, Snake, Lizard, Mammal, Cat
-**Inclusive**           Wolf, Dog              Reptile, Snake, Lizard, Cat
-**Siblings**            Wolf, Dog              Cat
-**Exclusive siblings**  Wolf                   Cat
-======================  =====================  ===============================================
+======================  ======================  ===============================================
+**Policy**              :math:`Tr^+(c_{Wolf})`  :math:`Tr^-(c_{Wolf})`
+----------------------  ----------------------  -----------------------------------------------
+**Exclusive**           Wolf                    Reptile, Snake, Lizard, Mammal, Cat, Dog
+**Less exclusive**      Wolf                    Reptile, Snake, Lizard, Mammal, Cat
+**Less inclusive**      Wolf, Dog               Reptile, Snake, Lizard, Mammal, Cat
+**Inclusive**           Wolf, Dog               Reptile, Snake, Lizard, Cat
+**Siblings**            Wolf, Dog               Cat
+**Exclusive siblings**  Wolf                    Cat
+======================  ======================  ===============================================
 
 .. [1] Silla, C. N., & Freitas, A. A. (2011). A survey of hierarchical classification across different application domains. Data Mining and Knowledge Discovery, 22(1), 31-72.
 
