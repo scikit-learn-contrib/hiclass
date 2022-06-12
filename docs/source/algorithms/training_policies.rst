@@ -35,7 +35,7 @@ Using as example the class "Wolf" from the hierarchy represented in the image be
 .. figure:: local_classifier_per_node.svg
    :align: center
 
-   Visual representation of the local classifier per node approach, adapted from [1]_.
+   Visual representation of the local classifier per node approach.
 
 ======================  ======================  ===============================================
 **Policy**              :math:`Tr^+(c_{Wolf})`  :math:`Tr^-(c_{Wolf})`
