@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
+   xmlns:lucid="lucid"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="402.82776mm"
    height="402.11731mm"
    viewBox="0 0 402.82776 402.1173"
    version="1.1"
    id="svg956"
-   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
-   sodipodi:docname="local_classifier_per_parent_node.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:lucid="lucid">
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15, custom)"
+   sodipodi:docname="local_classifier_per_parent_node.svg">
+  <metadata
+     id="metadata281">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
   <sodipodi:namedview
      id="namedview958"
      pagecolor="#ffffff"
@@ -33,11 +45,12 @@
      inkscape:cx="799.24935"
      inkscape:cy="627.19567"
      inkscape:window-width="1920"
-     inkscape:window-height="1001"
-     inkscape:window-x="-9"
-     inkscape:window-y="-9"
+     inkscape:window-height="1137"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="g1525"
+     inkscape:document-rotation="0" />
   <defs
      id="defs953">
     <path
@@ -699,21 +712,21 @@
          stroke-width="3"
          fill="#ffffff"
          id="path1311"
-         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill:none" />
       <path
          d="m 1230.48,647.47 c 0,40.45 -32.8,73.24 -73.24,73.24 -40.45,0 -73.24,-32.78 -73.24,-73.23 0,-40.45 32.8,-73.25 73.24,-73.25 40.45,0 73.24,32.8 73.24,73.25 z"
          stroke="#666666"
          stroke-width="3"
          fill="#ffffff"
          id="path1315"
-         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill:none" />
       <path
          d="m 411.47,642.03 c 0,40.45 -32.8,73.24 -73.25,73.24 -40.45,0 -73.24,-32.8 -73.24,-73.24 0,-40.45 32.8,-73.24 73.24,-73.24 40.45,0 73.25,32.78 73.25,73.23 z"
          stroke="#666666"
          stroke-width="3"
          fill="#ffffff"
          id="path1319"
-         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill:none" />
       <path
          d="m 338.27,716.78 1.45,-0.06 v 1.6 h -3 v -1.6 z m 200.47,174.3 -1.55,-0.05 -1.46,0.05 v -1.58 h 3 z"
          stroke="#666666"
@@ -846,7 +859,7 @@
          stroke-width="3"
          fill="#ffffff"
          id="path1355"
-         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill:none" />
       <path
          d="m 1944.5602,719.59929 c 0,40.45 -32.8,73.25 -73.25,73.25 -40.45,0 -73.25,-32.8 -73.25,-73.25 0,-40.45 32.8,-73.24 73.25,-73.24 40.45,0 73.24,32.8 73.24,73.24 z"
          stroke="#666666"
@@ -862,7 +875,7 @@
          stroke-width="3"
          fill="#ffffff"
          id="path1359"
-         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill:none" />
       <path
          d="m 1341.25,1040.46 v 133.82"
          stroke="#666666"
@@ -882,21 +895,21 @@
          stroke-width="3"
          fill="#ffffff"
          id="path1367"
-         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill:none" />
       <path
          d="m 232.4,965.77 c 0,40.45 -32.8,73.25 -73.25,73.25 -40.45,0 -73.24,-32.8 -73.24,-73.25 0,-40.45 32.8,-73.24 73.25,-73.24 40.45,0 73.24,32.8 73.24,73.24 z"
          stroke="#666666"
          stroke-width="3"
          fill="#ffffff"
          id="path1371"
-         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill:none" />
       <path
          d="m 817.08,1550.56 c 0,22.65 -19.5,41 -43.54,41 -24.05,0 -43.54,-18.35 -43.54,-41 0,-22.66 19.5,-41.02 43.54,-41.02 24.05,0 43.54,18.36 43.54,41.02 z"
          stroke="#666666"
          stroke-width="3"
          fill="#ffffff"
          id="path1375"
-         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="stroke:#00070a;stroke-width:7.55906;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill:none" />
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:64px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
