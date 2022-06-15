@@ -15,15 +15,21 @@ from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
 
 @ray.remote
-def _parallel_fit(lcpl, level):
+def _parallel_fit(lcpl, level, separator):
     classifier = lcpl.local_classifiers_[level]
     X = lcpl.X_
     y = lcpl.y_[:, level]
+    # Detect empty leaf nodes
+    leaves = np.array([str(i).split(separator)[-1] for i in y])
+    mask = leaves != ""
+    # Remove rows with empty leaf nodes
+    X = X[mask]
+    y = y[mask]
     unique_y = np.unique(y)
     if len(unique_y) == 1 and lcpl.replace_classifiers:
         classifier = ConstantClassifier()
     classifier.fit(X, y)
-    return classifier
+    return mask, classifier
 
 
 class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
@@ -234,9 +240,10 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
         lcpl = ray.put(self)
         results = [
-            _parallel_fit.remote(lcpl, level)
+            _parallel_fit.remote(lcpl, level, self.separator_)
             for level in range(len(self.local_classifiers_))
         ]
         classifiers = ray.get(results)
-        for level, classifier in enumerate(classifiers):
+        for level, (mask, classifier) in enumerate(classifiers):
+            self.masks_[level] = mask
             self.local_classifiers_[level] = classifier
