@@ -8,6 +8,29 @@ from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 
 
+def _make_leveled(y):
+    """
+    Add empty columns if column length differs.
+    If rows are not iterable, returns the current y without modifications.
+
+    Parameters
+    ----------
+    y : array-like of shape (n_samples, n_levels)
+        The target values, i.e., hierarchical class labels for classification.
+
+    Returns
+    -------
+    leveled_y : array-like of shape (n_samples, n_levels)
+        The leveled target values, i.e., hierarchical class labels for classification.
+    """
+    try:
+        depth = max([len(row) for row in y])
+    except TypeError:
+        return y
+    leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
+    return leveled_y
+
+
 class HierarchicalClassifier(abc.ABC):
     """Abstract class for the local hierarchical classifiers.
 
@@ -116,15 +139,6 @@ class HierarchicalClassifier(abc.ABC):
 
         # Initialize local classifiers in DAG
         self._initialize_local_classifiers()
-
-    def _make_leveled(self, y):
-        # Add empty columns if column length differs
-        try:
-            depth = max([len(row) for row in y])
-        except TypeError:
-            return y
-        leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
-        return leveled_y
 
     def _create_logger(self):
         # Create logger

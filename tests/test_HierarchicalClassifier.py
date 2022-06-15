@@ -1,12 +1,14 @@
 import logging
+import tempfile
+
 import networkx as nx
 import numpy as np
 import pytest
-import tempfile
 from numpy.testing import assert_array_equal
 from sklearn.linear_model import LogisticRegression
 
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
+from hiclass.HierarchicalClassifier import _make_leveled
 
 
 @pytest.fixture
@@ -175,3 +177,32 @@ def test_clean_up(digraph_multiple_roots):
         assert digraph_multiple_roots.X_ is None
     with pytest.raises(AttributeError):
         assert digraph_multiple_roots.y_ is None
+
+
+@pytest.fixture
+def empty_levels():
+    y = [
+        ["a"],
+        ["b", "c"],
+        ["d", "e", "f"],
+    ]
+    return y
+
+
+def test_make_leveled(empty_levels):
+    ground_truth = [
+        ["a", "", ""],
+        ["b", "c", ""],
+        ["d", "e", "f"],
+    ]
+    assert ground_truth == _make_leveled(empty_levels)
+
+
+@pytest.fixture
+def noniterable_y():
+    y = [1, 2, 3]
+    return y
+
+
+def test_make_leveled_non_iterable_y(noniterable_y):
+    assert noniterable_y == _make_leveled(noniterable_y)
