@@ -164,6 +164,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                 highest_probabilities = [
                     np.argmax(probabilities[i], axis=0)
                     for i in range(len(probabilities))
+                    if len(probabilities[i] > 0)
                 ]
                 classes = np.array(
                     [
@@ -172,13 +173,13 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                     ],
                     dtype=object,
                 )
-                predictions = np.array(
+                classes = classes[self.masks_[level]]
+                y[self.masks_[level], level] = np.array(
                     [
                         classes[i][highest_probabilities[i]]
                         for i in range(len(highest_probabilities))
                     ]
                 )
-                y[:, level] = predictions
 
         # Convert back to 1D if there is only 1 column to pass all sklearn's checks
         if self.max_levels_ == 1:
@@ -197,6 +198,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         self.local_classifiers_ = [
             deepcopy(self.local_classifier_) for _ in range(self.y_.shape[1])
         ]
+        self.masks_ = [None for _ in range(self.y_.shape[1])]
 
     def _fit_digraph(self):
         self.logger_.info("Fitting local classifiers")
@@ -214,6 +216,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             # Remove rows with empty leaf nodes
             X = X[mask]
             y = y[mask]
+
+            # Store mask for current level
+            self.masks_[level] = mask
 
             unique_y = np.unique(y)
             if len(unique_y) == 1 and self.replace_classifiers:

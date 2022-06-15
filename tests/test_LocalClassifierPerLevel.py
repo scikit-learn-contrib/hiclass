@@ -27,6 +27,10 @@ def digraph_logistic_regression():
     digraph.logger_ = logging.getLogger("LCPL")
     digraph.root_ = "a"
     digraph.separator_ = "::HiClass::Separator::"
+    digraph.masks_ = [
+        [True, True],
+        [True, True],
+    ]
     return digraph
 
 
@@ -93,6 +97,10 @@ def fitted_logistic_regression():
     digraph.dtype_ = "<U3"
     digraph.root_ = "r"
     digraph.separator_ = "::HiClass::Separator::"
+    digraph.masks_ = [
+        [True, True, True, True],
+        [True, True, True, True],
+    ]
     classifiers = [
         LogisticRegression(),
         LogisticRegression(),
