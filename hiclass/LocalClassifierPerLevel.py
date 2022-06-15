@@ -8,7 +8,6 @@ from copy import deepcopy
 import numpy as np
 import ray
 from sklearn.base import BaseEstimator
-from sklearn.metrics import euclidean_distances
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
@@ -207,6 +206,15 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             )
             X = self.X_
             y = self.y_[:, level]
+
+            # Detect empty leaf nodes
+            leaves = np.array([str(i).split(self.separator_)[-1] for i in y])
+            mask = leaves != ""
+
+            # Remove rows with empty leaf nodes
+            X = X[mask]
+            y = y[mask]
+
             unique_y = np.unique(y)
             if len(unique_y) == 1 and self.replace_classifiers:
                 self.logger_.warning(

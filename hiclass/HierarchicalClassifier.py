@@ -10,8 +10,7 @@ from sklearn.linear_model import LogisticRegression
 
 def _make_leveled(y):
     """
-    Add empty columns if column length differs.
-    If rows are not iterable, returns the current y without modifications.
+    Add empty cells if columns' length differs.
 
     Parameters
     ----------
@@ -22,6 +21,18 @@ def _make_leveled(y):
     -------
     leveled_y : array-like of shape (n_samples, n_levels)
         The leveled target values, i.e., hierarchical class labels for classification.
+
+    Notes
+    -----
+    If rows are not iterable, returns the current y without modifications.
+
+    Examples
+    --------
+    >>> from hiclass.HierarchicalClassifier import _make_leveled
+    >>> y = [['a'], ['b', 'c']]
+    >>> leveled_y = _make_leveled(y)
+    >>> print(leveled_y)
+    >>> [['a', ''], ['b', 'c']]
     """
     try:
         depth = max([len(row) for row in y])
@@ -108,7 +119,7 @@ class HierarchicalClassifier(abc.ABC):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 
-        leveled_y = self._make_leveled(y)
+        leveled_y = _make_leveled(y)
 
         self.X_, self.y_ = self._validate_data(
             X, leveled_y, multi_output=True, accept_sparse="csr"
@@ -165,9 +176,11 @@ class HierarchicalClassifier(abc.ABC):
         if self.y_.ndim == 2:
             new_y = []
             for i in range(self.y_.shape[0]):
-                row = [self.y_[i, 0]]
+                row = [str(self.y_[i, 0])]
                 for j in range(1, self.y_.shape[1]):
-                    row.append(str(row[-1]) + self.separator_ + str(self.y_[i, j]))
+                    parent = str(row[-1])
+                    child = str(self.y_[i, j])
+                    row.append(parent + self.separator_ + child)
                 new_y.append(np.asarray(row, dtype=np.str_))
             self.y_ = np.array(new_y)
 
