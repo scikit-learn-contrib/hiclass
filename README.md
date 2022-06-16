@@ -30,7 +30,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - **Pandas Series and DataFrames:** If you prefer to use pandas, that is not an issue as HiClass also works with Pandas.
 - **Sparse matrices:** HiClass also supports features (X_train and X_test) built with sparse matrices, both for training and predicting, which can save you heaps of memory.
 - **Parallel training:** Training can be performed in parallel on the hierarchical classifiers, which allows parallelization regardless of the implementations available on scikit-learn.
-- **Building pipelines:** Since the hierarchical classifiers inherit from the BaseEstimator of scikit-learn, pipelines can be built to automate machine learning workflows.
+- **Build pipelines:** Since the hierarchical classifiers inherit from the BaseEstimator of scikit-learn, pipelines can be built to automate machine learning workflows.
 - **Hierarchical metrics:** HiClass supports the computation of hierarchical precision, recall and f-score, which are more appropriate for hierarchical data than traditional metrics.
 - **Compatible with pickle:** Easily store trained models on disk for future use.
 
