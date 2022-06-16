@@ -222,7 +222,7 @@ Please reach out to fabio.malchermiranda@hpi.de.
 
 We are a small team on a mission to democratize hierarchical classification, and we'll take all the help we can get! If you'd like to get involved, here's information on [contribution guidelines and how to test the code locally](https://github.com/mirand863/hiclass/blob/main/CONTRIBUTING.md).
 
-You can contribute in multiple ways, e.g., reporting bugs, writing or translating documentation, reviewing or refactoring code, implementing features, etc.
+You can contribute in multiple ways, e.g., reporting bugs, writing or translating documentation, reviewing or refactoring code, requesting or implementing new features, etc.
 
 ## Getting the latest updates
 
