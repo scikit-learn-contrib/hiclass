@@ -34,7 +34,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - **Hierarchical metrics:** HiClass supports the computation of hierarchical precision, recall and f-score, which are more appropriate for hierarchical data than traditional metrics.
 - **Compatible with pickle:** Easily store trained models on disk for future use.
 
-**Don't see a feature on this list?** Search our [issue tracker](https://github.com/mirand863/hiclass/issues) if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our roadmap based on user feedback, so we'd love to hear from you.
+**Any feature missing on this list?** Search our [issue tracker](https://github.com/mirand863/hiclass/issues) to see if someone has already requested it and add a comment to it explaining your use-case. Otherwise, please open a new issue describing the requested feature and possible use-case scenario. We prioritize our roadmap based on user feedback, so we would love to hear from you.
 
 ## Benchmarks
 
