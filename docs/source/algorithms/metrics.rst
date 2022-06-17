@@ -1,6 +1,6 @@
 .. _metrics-overview:
 
-Hierarchical Metrics
+Metrics
 ====================
 
 According to [1]_, the use of flat classification metrics might not be adequate to give enough insight of which algorithm is better at classifying hierarchical data. Hence, in HiClass we implemented the metrics of hierarchical precision (hP), hierarchical recall (hR) and hierarchical F-score (hF), which are extensions of the renowned metrics of precision, recall and F-score, but tailored to the hierarchical classification scenario. These hierarchical counterparts were initially proposed by [2]_, and are defined as follows:

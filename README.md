@@ -191,9 +191,9 @@ predictions = pipeline.predict(X_test)
 
 ## Step-by-step walk-through
 
-A step-by-step walk-through is available on our interactive notebook hosted on [Google Colab](https://colab.research.google.com/drive/1Idzht9dNoB85pjc9gOL24t9ksrXZEA-9?usp=sharing).
+A step-by-step walk-through is available on our documentation hosted on [Read the Docs](https://hiclass.readthedocs.io/en/latest/index.html).
 
-This will guide you through the process of installing hiclass with conda, training and predicting a small dataset.
+This will guide you through the process of installing hiclass within a virtual environment, training, predicting, persisting models and much more.
 
 ## API documentation
 
