@@ -6,10 +6,6 @@ Hello HiClass
 
 A minimalist example showing how to use HiClass to train and predict.
 """
-
-# Author: Fabio Malcher Miranda
-# License: BSD 3 clause
-
 from sklearn.ensemble import RandomForestClassifier
 
 from hiclass import LocalClassifierPerNode

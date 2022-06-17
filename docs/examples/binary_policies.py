@@ -51,10 +51,6 @@ However, the code can be easily updated by replacing lines 20-21 with the exampl
 
    Mathematical definition on the different policies is given at :ref:`Training Policies`.
 """
-
-# Author: Fabio Malcher Miranda
-# License: BSD 3 clause
-
 from sklearn.ensemble import RandomForestClassifier
 
 from hiclass import LocalClassifierPerNode
