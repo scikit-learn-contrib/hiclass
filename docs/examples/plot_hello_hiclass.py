@@ -14,10 +14,10 @@ from hiclass import LocalClassifierPerNode
 X_train = [[1], [2], [3], [4]]
 X_test = [[4], [3], [2], [1]]
 Y_train = [
-    ['Animal', 'Mammal', 'Sheep'],
-    ['Animal', 'Mammal', 'Cow'],
-    ['Animal', 'Reptile', 'Snake'],
-    ['Animal', 'Reptile', 'Lizard'],
+    ["Animal", "Mammal", "Sheep"],
+    ["Animal", "Mammal", "Cow"],
+    ["Animal", "Reptile", "Snake"],
+    ["Animal", "Reptile", "Lizard"],
 ]
 
 # Use random forest classifiers for every node

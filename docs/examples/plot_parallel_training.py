@@ -13,7 +13,15 @@ In this example, we demonstrate how to train a hierarchical classifier in parall
 .. [2] https://www.kaggle.com/datasets/kashnitsky/hierarchical-text-classification
 """
 
+from os import cpu_count
+
+import pandas as pd
 import requests
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+
+from hiclass import LocalClassifierPerParentNode
 
 
 def download(url: str, path: str) -> None:
@@ -32,7 +40,31 @@ def download(url: str, path: str) -> None:
         file.write(response.content)
 
 
+# Download training data
 training_data_url = "https://zenodo.org/record/6657410/files/train_40k.csv?download=1"
 training_data_path = "train_40k.csv"
-
 download(training_data_url, training_data_path)
+
+# Load training data into pandas dataframe
+training_data = pd.read_csv(training_data_path).fillna(" ")
+
+# We will use logistic regression classifiers for every parent node
+lr = LogisticRegression()
+
+pipeline = Pipeline(
+    [
+        ("count", CountVectorizer()),
+        ("tfidf", TfidfTransformer()),
+        (
+            "lcppn",
+            LocalClassifierPerParentNode(local_classifier=lr, n_jobs=cpu_count()),
+        ),
+    ]
+)
+
+# Select training data
+X_train = training_data["Title"]
+Y_train = training_data[["Cat1", "Cat2", "Cat3"]]
+
+# Now, let's train the local classifier per parent node
+pipeline.fit(X_train, Y_train)

@@ -18,10 +18,10 @@ from hiclass import LocalClassifierPerLevel
 X_train = [[1, 2], [3, 4], [5, 6], [7, 8]]
 X_test = [[7, 8], [5, 6], [3, 4], [1, 2]]
 Y_train = [
-    ['Animal', 'Mammal', 'Sheep'],
-    ['Animal', 'Mammal', 'Cow'],
-    ['Animal', 'Reptile', 'Snake'],
-    ['Animal', 'Reptile', 'Lizard'],
+    ["Animal", "Mammal", "Sheep"],
+    ["Animal", "Mammal", "Cow"],
+    ["Animal", "Reptile", "Snake"],
+    ["Animal", "Reptile", "Lizard"],
 ]
 
 # Use Logistic Regression classifiers for every level in the hierarchy
@@ -32,13 +32,13 @@ classifier = LocalClassifierPerLevel(local_classifier=lr)
 classifier.fit(X_train, Y_train)
 
 # Save the model to disk
-filename = 'trained_model.sav'
-pickle.dump(classifier, open(filename, 'wb'))
+filename = "trained_model.sav"
+pickle.dump(classifier, open(filename, "wb"))
 
 # Some time in the future...
 
 # Load the model from disk
-loaded_model = pickle.load(open(filename, 'rb'))
+loaded_model = pickle.load(open(filename, "rb"))
 
 # Predict
 predictions = loaded_model.predict(X_test)
