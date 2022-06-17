@@ -5,7 +5,6 @@ Hello HiClass
 =====================
 
 A minimalist example showing how to use HiClass to train and predict.
-
 """
 
 # Author: Fabio Malcher Miranda
