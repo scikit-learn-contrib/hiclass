@@ -5,3 +5,4 @@ readthedocs-sphinx-search==0.1.2
 sphinx_code_tabs==0.5.3
 sphinx-gallery==0.10.1
 matplotlib==3.5.2
+pandas==1.4.2

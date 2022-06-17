@@ -12,7 +12,7 @@ In this example, we demonstrate how to train a hierarchical classifier in parall
 .. [1] https://www.ray.io/
 .. [2] https://www.kaggle.com/datasets/kashnitsky/hierarchical-text-classification
 """
-
+import sys
 from os import cpu_count
 
 import pandas as pd
@@ -65,6 +65,11 @@ pipeline = Pipeline(
 # Select training data
 X_train = training_data["Title"]
 Y_train = training_data[["Cat1", "Cat2", "Cat3"]]
+
+# Fixes bug AttributeError: '_LoggingTee' object has no attribute 'fileno'
+# This only happens when building the documentation
+# Hence, you don't actually need it for your code to work
+sys.stdout.fileno = lambda: False
 
 # Now, let's train the local classifier per parent node
 pipeline.fit(X_train, Y_train)
