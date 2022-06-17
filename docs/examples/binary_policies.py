@@ -44,7 +44,7 @@ The siblings policy is used by default on the local classifier per node, but the
         rf = RandomForestClassifier()
         classifier = LocalClassifierPerNode(local_classifier=rf, binary_policy="exclusive_siblings")
 
-In the code below, the exclusive siblings policy is selected.
+In the code below, the inclusive policy is selected.
 However, the code can be easily updated by replacing lines 20-21 with the examples shown in the tabs above.
 
 .. seealso::
@@ -68,7 +68,7 @@ Y_train = [
 # Use random forest classifiers for every node
 # And exclusive siblings policy to select training examples for binary classifiers.
 rf = RandomForestClassifier()
-classifier = LocalClassifierPerNode(local_classifier=rf, binary_policy="exclusive_siblings")
+classifier = LocalClassifierPerNode(local_classifier=rf, binary_policy="inclusive")
 
 # Train local classifier per node
 classifier.fit(X_train, Y_train)
