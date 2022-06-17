@@ -11,8 +11,9 @@ A minimalist example showing how to use HiClass to train and predict.
 # Author: Fabio Malcher Miranda
 # License: BSD 3 clause
 
-from hiclass import LocalClassifierPerNode
 from sklearn.ensemble import RandomForestClassifier
+
+from hiclass import LocalClassifierPerNode
 
 # define data
 X_train = [[1], [2], [3], [4]]
@@ -34,4 +35,3 @@ classifier.fit(X_train, Y_train)
 # Predict
 predictions = classifier.predict(X_test)
 print(predictions)
-
