@@ -139,7 +139,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         for level, classifier in enumerate(self.local_classifiers_):
             self.logger_.info(f"Predicting level {level}")
             if level == 0:
-                y[:, level] = classifier.predict(X)
+                y[:, level] = classifier.predict(X).flatten()
             else:
                 all_probabilities = classifier.predict_proba(X)
                 successors = np.array(
