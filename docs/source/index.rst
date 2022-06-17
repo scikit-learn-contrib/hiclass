@@ -18,13 +18,13 @@ Welcome to hiclass' documentation!
     :target: https://codecov.io/gh/mirand863/hiclass
     :alt: codecov
 
+.. image:: https://static.pepy.tech/personalized-badge/hiclass?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=pypi
+    :target: https://pypi.org/project/hiclass/
+    :alt: Downloads pypi
+
 .. image:: https://img.shields.io/conda/dn/conda-forge/hiclass?label=conda
     :target: https://anaconda.org/conda-forge/hiclass
     :alt: Downloads Conda
-
-.. image:: https://img.shields.io/pypi/dm/hiclass?label=pypi
-    :target: https://pypi.org/project/hiclass/
-    :alt: Downloads pypi
 
 .. image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
     :target: https://opensource.org/licenses/BSD-3-Clause
