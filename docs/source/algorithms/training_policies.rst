@@ -48,6 +48,10 @@ Using as example the class "Wolf" from the hierarchy represented in the image be
 **Exclusive siblings**  Wolf                    Cat
 ======================  ======================  ===============================================
 
+.. seealso::
+
+   In terms of code, we explain how to select those different policies here: :ref:`Binary Training Policies`.
+
 .. [1] Silla, C. N., & Freitas, A. A. (2011). A survey of hierarchical classification across different application domains. Data Mining and Knowledge Discovery, 22(1), 31-72.
 
 .. [2] Eisner, R., Poulin, B., Szafron, D., Lu, P., & Greiner, R. (2005, November). Improving protein function prediction using the hierarchical structure of the gene ontology. In 2005 IEEE symposium on computational intelligence in bioinformatics and computational biology (pp. 1-10). IEEE.

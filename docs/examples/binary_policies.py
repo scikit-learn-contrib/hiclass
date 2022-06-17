@@ -1,4 +1,7 @@
-Selecting a training policy
+# -*- coding: utf-8 -*-
+"""
+===========================
+Binary Training Policies
 ===========================
 
 The siblings policy is used by default on the local classifier per node, but the remaining ones can be selected with the parameter :literal:`binary_policy`, for example:
@@ -40,3 +43,40 @@ The siblings policy is used by default on the local classifier per node, but the
 
         rf = RandomForestClassifier()
         classifier = LocalClassifierPerNode(local_classifier=rf, binary_policy="exclusive_siblings")
+
+In the code below, the exclusive siblings policy is selected.
+However, the code can be easily updated by replacing lines 20-21 with the examples shown in the tabs above.
+
+.. seealso::
+
+   Mathematical definition on the different policies is given at :ref:`Training Policies`.
+"""
+
+# Author: Fabio Malcher Miranda
+# License: BSD 3 clause
+
+from sklearn.ensemble import RandomForestClassifier
+
+from hiclass import LocalClassifierPerNode
+
+# Define data
+X_train = [[1], [2], [3], [4]]
+X_test = [[4], [3], [2], [1]]
+Y_train = [
+    ['Animal', 'Mammal', 'Sheep'],
+    ['Animal', 'Mammal', 'Cow'],
+    ['Animal', 'Reptile', 'Snake'],
+    ['Animal', 'Reptile', 'Lizard'],
+]
+
+# Use random forest classifiers for every node
+# And exclusive siblings policy to select training examples for binary classifiers.
+rf = RandomForestClassifier()
+classifier = LocalClassifierPerNode(local_classifier=rf, binary_policy="exclusive_siblings")
+
+# Train local classifier per node
+classifier.fit(X_train, Y_train)
+
+# Predict
+predictions = classifier.predict(X_test)
+print(predictions)
