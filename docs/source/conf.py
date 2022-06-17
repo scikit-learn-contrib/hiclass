@@ -36,6 +36,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
     'sphinx_code_tabs',
+    'sphinx_gallery.gen_gallery',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -73,3 +74,8 @@ html_theme_options = {}
 
 if not use_rtd_scheme:
     html_theme_options["sidebar_width"] = "230px"
+
+sphinx_gallery_conf = {
+    'examples_dirs': '../examples',
+    'gallery_dirs': 'auto_examples',
+}
