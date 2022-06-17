@@ -15,7 +15,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 from hiclass import LocalClassifierPerNode
 
-# define data
+# Define data
 X_train = [[1], [2], [3], [4]]
 X_test = [[4], [3], [2], [1]]
 Y_train = [

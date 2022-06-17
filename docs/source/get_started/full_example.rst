@@ -9,7 +9,7 @@ It is now time to stitch the code together. Here is the full example:
     from hiclass import LocalClassifierPerNode
     from sklearn.ensemble import RandomForestClassifier
 
-    # define data
+    # Define data
     X_train = [[1], [2], [3], [4]]
     X_test = [[4], [3], [2], [1]]
     Y_train = [
@@ -45,4 +45,4 @@ The array below should be printed on the terminal:
      ['Animal' 'Mammal' 'Cow']
      ['Animal' 'Mammal' 'Sheep']]
 
-There is more to HiClass than what is shown in this "Hello World" example, such as training with missing data points, storing trained models and computation of hierarchical metrics. These concepts are covered in the next tutorial.
+There is more to HiClass than what is shown in this "Hello World" example, such as training with missing leaf nodes, storing trained models and computation of hierarchical metrics. These concepts are covered in the :ref:`Gallery of Examples`.
