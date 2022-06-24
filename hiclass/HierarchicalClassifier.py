@@ -222,7 +222,6 @@ class HierarchicalClassifier(abc.ABC):
             self.logger_.info(f"Creating digraph from {rows} 2D labels")
             for row in range(rows):
                 for column in range(columns - 1):
-                    print(column)
                     parent = self.y_[row, column].split(self.separator_)[-1]
                     child = self.y_[row, column + 1].split(self.separator_)[-1]
                     if parent != "" and child != "":
@@ -230,6 +229,8 @@ class HierarchicalClassifier(abc.ABC):
                         self.hierarchy_.add_edge(
                             self.y_[row, column], self.y_[row, column + 1]
                         )
+                    elif parent != "" and column == 0:
+                        self.hierarchy_.add_node(parent)
 
     def _export_digraph(self):
         # Check if edge_list is set
