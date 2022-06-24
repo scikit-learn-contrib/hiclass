@@ -191,42 +191,44 @@ class HierarchicalClassifier(abc.ABC):
         # Save dtype of y_
         self.dtype_ = self.y_.dtype
 
-        # 1D disguised as 2D
+        self._create_digraph_1d()
+
+        self._create_digraph_2d()
+
+        if self.y_.ndim > 2:
+            # Unsuported dimension
+            self.logger_.error(f"y with {self.y_.ndim} dimensions detected")
+            raise ValueError(
+                f"Creating graph from y with {self.y_.ndim} dimensions is not supported"
+            )
+
+    def _create_digraph_1d(self):
+        # Flatten 1D disguised as 2D
         if self.y_.ndim == 2 and self.y_.shape[1] == 1:
             self.logger_.info("Converting y to 1D")
             self.y_ = self.y_.flatten()
-
-        # Check dimension of labels
-        if self.y_.ndim == 2:
-            # 2D labels
-            # Create max_levels variable
-            self.max_levels_ = self.y_.shape[1]
-            rows, columns = self.y_.shape
-            self.logger_.info(f"Creating digraph from {rows} 2D labels")
-            for row in range(rows):
-                for column in range(columns - 1):
-                    # Only add edge if both parent and child are not empty
-                    parent = self.y_[row, column].split(self.separator_)[-1]
-                    child = self.y_[row, column + 1].split(self.separator_)[-1]
-                    if parent != "" and child != "":
-                        self.hierarchy_.add_edge(
-                            self.y_[row, column], self.y_[row, column + 1]
-                        )
-
-        elif self.y_.ndim == 1:
-            # 1D labels
+        if self.y_.ndim == 1:
             # Create max_levels_ variable
             self.max_levels_ = 1
             self.logger_.info(f"Creating digraph from {self.y_.size} 1D labels")
             for label in self.y_:
                 self.hierarchy_.add_node(label)
 
-        else:
-            # Unsuported dimension
-            self.logger_.error(f"y with {self.y_.ndim} dimensions detected")
-            raise ValueError(
-                f"Creating graph from y with {self.y_.ndim} dimensions is not supported"
-            )
+    def _create_digraph_2d(self):
+        if self.y_.ndim == 2:
+            # Create max_levels variable
+            self.max_levels_ = self.y_.shape[1]
+            rows, columns = self.y_.shape
+            self.logger_.info(f"Creating digraph from {rows} 2D labels")
+            for row in range(rows):
+                for column in range(columns - 1):
+                    parent = self.y_[row, column].split(self.separator_)[-1]
+                    child = self.y_[row, column + 1].split(self.separator_)[-1]
+                    if parent != "" and child != "":
+                        # Only add edge if both parent and child are not empty
+                        self.hierarchy_.add_edge(
+                            self.y_[row, column], self.y_[row, column + 1]
+                        )
 
     def _export_digraph(self):
         # Check if edge_list is set
