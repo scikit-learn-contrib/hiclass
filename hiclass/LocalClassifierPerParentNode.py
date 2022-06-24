@@ -102,8 +102,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
         # TODO: Add parameter to receive hierarchy as parameter in constructor
 
-        # TODO: Add support to empty labels in some levels
-
         # Return the classifier
         return self
 
