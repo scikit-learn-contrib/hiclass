@@ -8,7 +8,8 @@ Larger datasets require more time for training.
 While by default the models in HiClass are trained using a single core,
 it is possible to train each local classifier in parallel by leveraging the library Ray [1]_.
 In this example, we demonstrate how to train a hierarchical classifier in parallel,
-using all the cores available, on a mock dataset from Kaggle [2]_.
+setting the parameter :literal:`n_jobs` to use all the cores available. Training
+is performed on a mock dataset from Kaggle [2]_.
 
 .. [1] https://www.ray.io/
 .. [2] https://www.kaggle.com/datasets/kashnitsky/hierarchical-text-classification
