@@ -222,6 +222,7 @@ class HierarchicalClassifier(abc.ABC):
             self.logger_.info(f"Creating digraph from {rows} 2D labels")
             for row in range(rows):
                 for column in range(columns - 1):
+                    print(column)
                     parent = self.y_[row, column].split(self.separator_)[-1]
                     child = self.y_[row, column + 1].split(self.separator_)[-1]
                     if parent != "" and child != "":
