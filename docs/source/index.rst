@@ -31,14 +31,11 @@ Welcome to hiclass' documentation!
     :alt: License
 
 .. toctree::
-    :titlesonly:
+    :includehidden:
+    :maxdepth: 3
 
     introduction/index
     get_started/index
     auto_examples/index
     algorithms/index
-
-.. toctree::
-   :maxdepth: 3
-
-   api/index
+    api/index
