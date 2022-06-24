@@ -190,12 +190,15 @@ def empty_levels():
 
 
 def test_make_leveled(empty_levels):
-    ground_truth = [
-        ["a", "", ""],
-        ["b", "c", ""],
-        ["d", "e", "f"],
-    ]
-    assert ground_truth == _make_leveled(empty_levels)
+    ground_truth = np.array(
+        [
+            ["a", "", ""],
+            ["b", "c", ""],
+            ["d", "e", "f"],
+        ]
+    )
+    result = _make_leveled(empty_levels)
+    assert_array_equal(ground_truth, result)
 
 
 @pytest.fixture

@@ -39,7 +39,7 @@ def _make_leveled(y):
     except TypeError:
         return y
     leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
-    return leveled_y
+    return np.array(leveled_y)
 
 
 class HierarchicalClassifier(abc.ABC):
@@ -119,11 +119,11 @@ class HierarchicalClassifier(abc.ABC):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 
-        leveled_y = _make_leveled(y)
-
         self.X_, self.y_ = self._validate_data(
-            X, leveled_y, multi_output=True, accept_sparse="csr"
+            X, y, multi_output=True, accept_sparse="csr"
         )
+
+        self.y_ = _make_leveled(self.y_)
 
         # Create and configure logger
         self._create_logger()
