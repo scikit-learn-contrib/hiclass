@@ -188,20 +188,14 @@ def test_fit_predict():
 @pytest.fixture
 def empty_levels():
     X = [
-        [1, 2],
-        [3, 4],
-        [5, 6],
-        [7, 8],
-        [9, 10],
-        [11, 12],
+        [1],
+        [2],
+        [3],
     ]
     y = [
-        ["A", "1"],
-        ["A", "2"],
-        ["A", "C", "5"],
-        ["A", "C", "6"],
-        ["B", "3"],
-        ["B", "4"],
+        ["1"],
+        ["2", "2.1"],
+        ["3", "3.1", "3.1.2"],
     ]
     return X, y
 
@@ -212,23 +206,17 @@ def test_empty_levels(empty_levels):
     lcppn.fit(X, y)
     predictions = lcppn.predict(X)
     ground_truth = [
-        ["A", "1", ""],
-        ["A", "2", ""],
-        ["A", "C", "5"],
-        ["A", "C", "6"],
-        ["B", "3", ""],
-        ["B", "4", ""],
+        ["1", "", ""],
+        ["2", "2.1", ""],
+        ["3", "3.1", "3.1.2"],
     ]
     assert list(lcppn.hierarchy_.nodes) == [
-        "A",
-        "A" + lcppn.separator_ + "1",
-        "A" + lcppn.separator_ + "2",
-        "A" + lcppn.separator_ + "C",
-        "A" + lcppn.separator_ + "C" + lcppn.separator_ + "5",
-        "A" + lcppn.separator_ + "C" + lcppn.separator_ + "6",
-        "B",
-        "B" + lcppn.separator_ + "3",
-        "B" + lcppn.separator_ + "4",
+        "1",
+        "2",
+        "2" + lcppn.separator_ + "2.1",
+        "3",
+        "3" + lcppn.separator_ + "3.1",
+        "3" + lcppn.separator_ + "3.1" + lcppn.separator_ + "3.1.2",
         lcppn.root_,
     ]
     assert_array_equal(ground_truth, predictions)
