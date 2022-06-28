@@ -29,4 +29,4 @@ jobs:
         python -m pip install .
     - name: Test with pytest
       run: |
-        pytest -v
+        pytest -v --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html
