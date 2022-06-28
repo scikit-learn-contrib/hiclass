@@ -17,10 +17,8 @@ from hiclass.HierarchicalClassifier import HierarchicalClassifier
 @ray.remote
 def _parallel_fit(lcpl, level, separator):
     classifier = lcpl.local_classifiers_[level]
-    X = lcpl.X_
-    y = lcpl.y_[:, level]
 
-    X, y = _remove_empty_leaves(separator, X, y)
+    X, y = _remove_empty_leaves(separator, lcpl.X_, lcpl.y_[:, level])
 
     unique_y = np.unique(y)
     if len(unique_y) == 1 and lcpl.replace_classifiers:
@@ -205,10 +203,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             self.logger_.info(
                 f"Fitting local classifier for level '{level + 1}' ({level + 1}/{len(self.local_classifiers_)})"
             )
-            X = self.X_
-            y = self.y_[:, level]
 
-            X, y = _remove_empty_leaves(self.separator_, X, y)
+            X, y = _remove_empty_leaves(self.separator_, self.X_, self.y_[:, level])
 
             unique_y = np.unique(y)
             if len(unique_y) == 1 and self.replace_classifiers:
