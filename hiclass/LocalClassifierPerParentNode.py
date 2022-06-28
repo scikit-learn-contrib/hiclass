@@ -216,12 +216,5 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             classifier = self.hierarchy_.nodes[node]["classifier"]
             # get children examples
             X, y = self._get_successors(node)
-            unique_y = np.unique(y)
-            if len(unique_y) == 1 and self.replace_classifiers:
-                node_name = str(node).split(self.separator_)[-1]
-                self.logger_.warning(
-                    f"Fitting ConstantClassifier for node '{node_name}'"
-                )
-                self.hierarchy_.nodes[node]["classifier"] = ConstantClassifier()
-                classifier = self.hierarchy_.nodes[node]["classifier"]
+            classifier = self._replace_constant_classifier(y, node, classifier)
             classifier.fit(X, y)

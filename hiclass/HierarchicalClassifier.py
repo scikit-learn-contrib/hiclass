@@ -7,6 +7,8 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 
+from hiclass.ConstantClassifier import ConstantClassifier
+
 
 def _make_leveled(y):
     """
@@ -275,6 +277,17 @@ class HierarchicalClassifier(abc.ABC):
             self.local_classifier_ = LogisticRegression()
         else:
             self.local_classifier_ = self.local_classifier
+
+    def _replace_constant_classifier(self, y, node, classifier):
+        unique_y = np.unique(y)
+        if len(unique_y) == 1 and self.replace_classifiers:
+            node_name = str(node).split(self.separator_)[-1]
+            self.logger_.warning(
+                f"Fitting ConstantClassifier for node '{node_name}'"
+            )
+            self.hierarchy_.nodes[node]["classifier"] = ConstantClassifier()
+            classifier = self.hierarchy_.nodes[node]["classifier"]
+        return classifier
 
     def _clean_up(self):
         self.logger_.info("Cleaning up variables that can take a lot of disk space")
