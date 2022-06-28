@@ -137,7 +137,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
         # Predict first level
         classifier = self.hierarchy_.nodes[self.root_]["classifier"]
-        y[:, 0] = classifier.predict(X)
+        y[:, 0] = classifier.predict(X).flatten()
 
         self._predict_remaining_levels(X, y)
 

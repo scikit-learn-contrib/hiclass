@@ -29,7 +29,15 @@ def _parallel_fit(lcpl, level, separator):
     if len(unique_y) == 1 and lcpl.replace_classifiers:
         classifier = ConstantClassifier()
     classifier.fit(X, y)
-    return mask, classifier
+    return classifier
+
+
+def _get_successors_probability(probabilities_dict, successors):
+    successors_probability = [
+        np.array([probabilities_dict[i][successor] for successor in successors_list])
+        for i, successors_list in enumerate(successors)
+    ]
+    return successors_probability
 
 
 class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
@@ -139,57 +147,46 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         self.logger_.info("Predicting")
 
-        for level, classifier in enumerate(self.local_classifiers_):
-            self.logger_.info(f"Predicting level {level}")
-            if level == 0:
-                y[:, level] = classifier.predict(X).flatten()
-            else:
-                all_probabilities = classifier.predict_proba(X)
-                successors = np.array(
-                    [
-                        list(self.hierarchy_.successors(node))
-                        for node in y[:, level - 1]
-                    ],
-                    dtype=object,
-                )
-                classes_masks = np.array(
-                    [
-                        np.isin(classifier.classes_, successors[i])
-                        for i in range(len(successors))
-                    ]
-                )
-                probabilities = np.array(
-                    [
-                        all_probabilities[i, classes_masks[i]]
-                        for i in range(len(classes_masks))
-                    ],
-                    dtype=object,
-                )
-                highest_probabilities = [
-                    np.argmax(probabilities[i], axis=0)
-                    for i in range(len(probabilities))
-                    if len(probabilities[i] > 0)
-                ]
-                classes = np.array(
-                    [
-                        classifier.classes_[classes_masks[i]]
-                        for i in range(len(classes_masks))
-                    ],
-                    dtype=object,
-                )
-                classes = classes[self.masks_[level]]
-                y[self.masks_[level], level] = np.array(
-                    [
-                        classes[i][highest_probabilities[i]]
-                        for i in range(len(highest_probabilities))
-                    ]
-                )
+        # Predict first level
+        classifier = self.local_classifiers_[0]
+        y[:, 0] = classifier.predict(X).flatten()
+
+        self._predict_remaining_levels(X, y)
 
         y = self._convert_to_1d(y)
 
         self._remove_separator(y)
 
         return y
+
+    def _predict_remaining_levels(self, X, y):
+        for level in range(1, y.shape[1]):
+            classifier = self.local_classifiers_[level]
+            probabilities = classifier.predict_proba(X)
+            classes = self.local_classifiers_[level].classes_
+            probabilities_dict = [dict(zip(classes, prob)) for prob in probabilities]
+            successors = self._get_successors(y[:, level - 1])
+            successors_prob = _get_successors_probability(
+                probabilities_dict, successors
+            )
+            max_probability = [
+                np.argmax(prob) if len(prob) > 0 else None for prob in successors_prob
+            ]
+            y[:, level] = [
+                successors_list[max_probability[i]]
+                if max_probability[i] is not None
+                else ""
+                for i, successors_list in enumerate(successors)
+            ]
+
+    def _get_successors(self, level):
+        successors = [
+            list(self.hierarchy_.successors(node))
+            if self.hierarchy_.has_node(node)
+            else []
+            for node in level
+        ]
+        return successors
 
     def _initialize_local_classifiers(self):
         super()._initialize_local_classifiers()
@@ -215,9 +212,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             X = X[mask]
             y = y[mask]
 
-            # Store mask for current level
-            self.masks_[level] = mask
-
             unique_y = np.unique(y)
             if len(unique_y) == 1 and self.replace_classifiers:
                 self.logger_.warning(
@@ -236,6 +230,5 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             for level in range(len(self.local_classifiers_))
         ]
         classifiers = ray.get(results)
-        for level, (mask, classifier) in enumerate(classifiers):
-            self.masks_[level] = mask
+        for level, classifier in enumerate(classifiers):
             self.local_classifiers_[level] = classifier
