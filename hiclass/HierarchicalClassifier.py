@@ -290,7 +290,7 @@ class HierarchicalClassifier(abc.ABC):
         return classifier
 
     def _convert_to_1d(self, y):
-        # Convert back to 1D if there is only 1 column to pass all sklearn's checks
+        # Convert predictions to 1D if there is only 1 column
         if self.max_levels_ == 1:
             y = y.flatten()
         return y
