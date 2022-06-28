@@ -169,12 +169,12 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             successors_prob = _get_successors_probability(
                 probabilities_dict, successors
             )
-            max_probability = [
+            index_max_probability = [
                 np.argmax(prob) if len(prob) > 0 else None for prob in successors_prob
             ]
             y[:, level] = [
-                successors_list[max_probability[i]]
-                if max_probability[i] is not None
+                successors_list[index_max_probability[i]]
+                if index_max_probability[i] is not None
                 else ""
                 for i, successors_list in enumerate(successors)
             ]
