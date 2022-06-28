@@ -128,7 +128,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # Input validation
         X = check_array(X, accept_sparse="csr")
 
-        # Initialize array with predictions
+        # Initialize array that holds predictions
         y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
 
         # TODO: Add threshold to stop prediction halfway if need be
@@ -152,7 +152,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             predecessors = set(y[:, level - 1])
             predecessors.discard("")
             for predecessor in predecessors:
-                mask = np.isin(y, predecessor).any(axis=1)
+                mask = np.isin(y[:, level - 1], predecessor)
                 predecessor_x = X[mask]
                 if predecessor_x.shape[0] > 0:
                     successors = list(self.hierarchy_.successors(predecessor))
