@@ -128,42 +128,37 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # Input validation
         X = check_array(X, accept_sparse="csr")
 
+        # Initialize array with predictions
         y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
 
         # TODO: Add threshold to stop prediction halfway if need be
 
-        bfs = nx.bfs_successors(self.hierarchy_, source=self.root_)
-
         self.logger_.info("Predicting")
 
-        for predecessor, successors in bfs:
-            if predecessor == self.root_:
-                mask = [True] * X.shape[0]
-                subset_x = X[mask]
-            else:
-                mask = np.isin(y, predecessor).any(axis=1)
-                subset_x = X[mask]
-            if subset_x.shape[0] > 0:
-                classifier = self.hierarchy_.nodes[predecessor]["classifier"]
-                prediction = classifier.predict(subset_x)
-                level = nx.shortest_path_length(
-                    self.hierarchy_, self.root_, predecessor
-                )
-                if prediction.ndim == 2 and prediction.shape[1] == 1:
-                    prediction = prediction.flatten()
-                y[mask, level] = prediction
+        # Predict first level
+        classifier = self.hierarchy_.nodes[self.root_]["classifier"]
+        y[:, 0] = classifier.predict(X)
 
-        # Convert back to 1D if there is only 1 column to pass all sklearn's checks
-        if self.max_levels_ == 1:
-            y = y.flatten()
+        self._predict_remaining_levels(X, y)
 
-        # Remove separator from predictions
-        if y.ndim == 2:
-            for i in range(y.shape[0]):
-                for j in range(1, y.shape[1]):
-                    y[i, j] = y[i, j].split(self.separator_)[-1]
+        y = self._convert_to_1d(y)
+
+        y = self._remove_separator(y)
 
         return y
+
+    def _predict_remaining_levels(self, X, y):
+        for level in range(1, y.shape[1]):
+            predecessors = set(y[:, level - 1])
+            predecessors.discard("")
+            for predecessor in predecessors:
+                mask = np.isin(y, predecessor).any(axis=1)
+                predecessor_x = X[mask]
+                if predecessor_x.shape[0] > 0:
+                    successors = list(self.hierarchy_.successors(predecessor))
+                    if len(successors) > 0:
+                        classifier = self.hierarchy_.nodes[predecessor]["classifier"]
+                        y[mask, level] = classifier.predict(predecessor_x).flatten()
 
     def _initialize_local_classifiers(self):
         super()._initialize_local_classifiers()

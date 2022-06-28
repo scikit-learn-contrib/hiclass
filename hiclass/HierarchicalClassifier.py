@@ -289,6 +289,20 @@ class HierarchicalClassifier(abc.ABC):
             classifier = self.hierarchy_.nodes[node]["classifier"]
         return classifier
 
+    def _convert_to_1d(self, y):
+        # Convert back to 1D if there is only 1 column to pass all sklearn's checks
+        if self.max_levels_ == 1:
+            y = y.flatten()
+        return y
+
+    def _remove_separator(self, y):
+        # Remove separator from predictions
+        if y.ndim == 2:
+            for i in range(y.shape[0]):
+                for j in range(1, y.shape[1]):
+                    y[i, j] = y[i, j].split(self.separator_)[-1]
+        return y
+
     def _clean_up(self):
         self.logger_.info("Cleaning up variables that can take a lot of disk space")
         del self.X_

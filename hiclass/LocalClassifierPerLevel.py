@@ -185,15 +185,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                     ]
                 )
 
-        # Convert back to 1D if there is only 1 column to pass all sklearn's checks
-        if self.max_levels_ == 1:
-            y = y.flatten()
+        y = self._convert_to_1d(y)
 
-        # Remove separator from predictions
-        if y.ndim == 2:
-            for i in range(y.shape[0]):
-                for j in range(1, y.shape[1]):
-                    y[i, j] = y[i, j].split(self.separator_)[-1]
+        y = self._remove_separator(y)
 
         return y
 
