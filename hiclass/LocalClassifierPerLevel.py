@@ -19,17 +19,21 @@ def _parallel_fit(lcpl, level, separator):
     classifier = lcpl.local_classifiers_[level]
     X = lcpl.X_
     y = lcpl.y_[:, level]
-    # Detect empty leaf nodes
-    leaves = np.array([str(i).split(separator)[-1] for i in y])
-    mask = leaves != ""
-    # Remove rows with empty leaf nodes
-    X = X[mask]
-    y = y[mask]
+
+    X, y = _remove_empty_leaves(separator, X, y)
+
     unique_y = np.unique(y)
     if len(unique_y) == 1 and lcpl.replace_classifiers:
         classifier = ConstantClassifier()
     classifier.fit(X, y)
     return classifier
+
+
+def _remove_empty_leaves(separator, X, y):
+    # Detect rows where leaves are not empty
+    leaves = np.array([str(i).split(separator)[-1] for i in y])
+    mask = leaves != ""
+    return X[mask], y[mask]
 
 
 def _get_successors_probability(probabilities_dict, successors):
@@ -204,13 +208,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             X = self.X_
             y = self.y_[:, level]
 
-            # Detect empty leaf nodes
-            leaves = np.array([str(i).split(self.separator_)[-1] for i in y])
-            mask = leaves != ""
-
-            # Remove rows with empty leaf nodes
-            X = X[mask]
-            y = y[mask]
+            X, y = _remove_empty_leaves(self.separator_, X, y)
 
             unique_y = np.unique(y)
             if len(unique_y) == 1 and self.replace_classifiers:
