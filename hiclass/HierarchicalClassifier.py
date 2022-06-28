@@ -301,7 +301,6 @@ class HierarchicalClassifier(abc.ABC):
             for i in range(y.shape[0]):
                 for j in range(1, y.shape[1]):
                     y[i, j] = y[i, j].split(self.separator_)[-1]
-        return y
 
     def _clean_up(self):
         self.logger_.info("Cleaning up variables that can take a lot of disk space")
