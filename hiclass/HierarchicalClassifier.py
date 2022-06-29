@@ -9,6 +9,40 @@ from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 
 
+def make_leveled(y):
+    """
+    Add empty cells if columns' length differs.
+
+    Parameters
+    ----------
+    y : array-like of shape (n_samples, n_levels)
+        The target values, i.e., hierarchical class labels for classification.
+
+    Returns
+    -------
+    leveled_y : array-like of shape (n_samples, n_levels)
+        The leveled target values, i.e., hierarchical class labels for classification.
+
+    Notes
+    -----
+    If rows are not iterable, returns the current y without modifications.
+
+    Examples
+    --------
+    >>> from hiclass.HierarchicalClassifier import make_leveled
+    >>> y = [['a'], ['b', 'c']]
+    >>> make_leveled(y)
+    array([['a', ''],
+       ['b', 'c']])
+    """
+    try:
+        depth = max([len(row) for row in y])
+    except TypeError:
+        return y
+    leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
+    return np.array(leveled_y)
+
+
 class HierarchicalClassifier(abc.ABC):
     """Abstract class for the local hierarchical classifiers.
 
@@ -87,7 +121,7 @@ class HierarchicalClassifier(abc.ABC):
             X, y, multi_output=True, accept_sparse="csr"
         )
 
-        self.y_ = self._make_leveled(self.y_)
+        self.y_ = make_leveled(self.y_)
 
         # Create and configure logger
         self._create_logger()
@@ -252,32 +286,6 @@ class HierarchicalClassifier(abc.ABC):
             for i in range(y.shape[0]):
                 for j in range(1, y.shape[1]):
                     y[i, j] = y[i, j].split(self.separator_)[-1]
-
-    @staticmethod
-    def _make_leveled(y):
-        """
-        Add empty cells if columns' length differs.
-
-        Parameters
-        ----------
-        y : array-like of shape (n_samples, n_levels)
-            The target values, i.e., hierarchical class labels for classification.
-
-        Returns
-        -------
-        leveled_y : array-like of shape (n_samples, n_levels)
-            The leveled target values, i.e., hierarchical class labels for classification.
-
-        Notes
-        -----
-        If rows are not iterable, returns the current y without modifications.
-        """
-        try:
-            depth = max([len(row) for row in y])
-        except TypeError:
-            return y
-        leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
-        return np.array(leveled_y)
 
     def _fit_node_classifier(self, nodes, local_mode):
         if self.n_jobs > 1:

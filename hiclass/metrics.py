@@ -2,12 +2,12 @@
 import numpy as np
 from sklearn.utils import check_array
 
-from hiclass.HierarchicalClassifier import HierarchicalClassifier
+from hiclass.HierarchicalClassifier import make_leveled
 
 
 def _validate_input(y_true, y_pred):
-    y_pred = HierarchicalClassifier()._make_leveled(y_pred)
-    y_true = HierarchicalClassifier()._make_leveled(y_true)
+    y_pred = make_leveled(y_pred)
+    y_true = make_leveled(y_true)
     assert len(y_true) == len(y_pred)
     y_true = check_array(y_true, dtype=None)
     y_pred = check_array(y_pred, dtype=None)

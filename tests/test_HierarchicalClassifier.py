@@ -7,7 +7,7 @@ import pytest
 from numpy.testing import assert_array_equal
 from sklearn.linear_model import LogisticRegression
 
-from hiclass.HierarchicalClassifier import HierarchicalClassifier
+from hiclass.HierarchicalClassifier import HierarchicalClassifier, make_leveled
 
 
 @pytest.fixture
@@ -196,7 +196,7 @@ def test_make_leveled(empty_levels):
             ["d", "e", "f"],
         ]
     )
-    result = HierarchicalClassifier._make_leveled(empty_levels)
+    result = make_leveled(empty_levels)
     assert_array_equal(ground_truth, result)
 
 
@@ -207,7 +207,7 @@ def noniterable_y():
 
 
 def test_make_leveled_non_iterable_y(noniterable_y):
-    assert noniterable_y == HierarchicalClassifier._make_leveled(noniterable_y)
+    assert noniterable_y == make_leveled(noniterable_y)
 
 
 def test_fit_classifier():
