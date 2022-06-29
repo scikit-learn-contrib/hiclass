@@ -2,6 +2,17 @@
 import numpy as np
 from sklearn.utils import check_array
 
+from hiclass.HierarchicalClassifier import HierarchicalClassifier
+
+
+def _validate_input(y_true, y_pred):
+    y_pred = HierarchicalClassifier()._make_leveled(y_pred)
+    y_true = HierarchicalClassifier()._make_leveled(y_true)
+    assert len(y_true) == len(y_pred)
+    y_true = check_array(y_true, dtype=None)
+    y_pred = check_array(y_pred, dtype=None)
+    return y_true, y_pred
+
 
 def precision(y_true: np.ndarray, y_pred: np.ndarray):
     r"""
@@ -24,17 +35,19 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray):
     precision : float
         What proportion of positive identifications was actually correct?
     """
-    assert len(y_true) == len(y_pred)
-    y_true = check_array(y_true, dtype=None)
-    y_pred = check_array(y_pred, dtype=None)
+    y_true, y_pred = _validate_input(y_true, y_pred)
     sum_intersection = 0
     sum_prediction_and_ancestors = 0
     for ground_truth, prediction in zip(y_true, y_pred):
+        ground_truth_set = set(ground_truth)
+        ground_truth_set.discard("")
+        prediction_set = set(prediction)
+        prediction_set.discard("")
         sum_intersection = sum_intersection + len(
-            set(ground_truth).intersection(set(prediction))
+            ground_truth_set.intersection(prediction_set)
         )
         sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(
-            set(prediction)
+            prediction_set
         )
     precision = sum_intersection / sum_prediction_and_ancestors
     return precision
@@ -61,17 +74,19 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray):
     recall : float
         What proportion of actual positives was identified correctly?
     """
-    assert len(y_true) == len(y_pred)
-    y_true = check_array(y_true, dtype=None)
-    y_pred = check_array(y_pred, dtype=None)
+    y_true, y_pred = _validate_input(y_true, y_pred)
     sum_intersection = 0
     sum_prediction_and_ancestors = 0
     for ground_truth, prediction in zip(y_true, y_pred):
+        ground_truth_set = set(ground_truth)
+        ground_truth_set.discard("")
+        prediction_set = set(prediction)
+        prediction_set.discard("")
         sum_intersection = sum_intersection + len(
-            set(ground_truth).intersection(set(prediction))
+            ground_truth_set.intersection(prediction_set)
         )
         sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(
-            set(ground_truth)
+            ground_truth_set
         )
     recall = sum_intersection / sum_prediction_and_ancestors
     return recall
@@ -95,9 +110,7 @@ def f1(y_true: np.ndarray, y_pred: np.ndarray):
     f1 : float
         Weighted average of the precision and recall
     """
-    assert len(y_true) == len(y_pred)
-    y_true = check_array(y_true, dtype=None)
-    y_pred = check_array(y_pred, dtype=None)
+    y_true, y_pred = _validate_input(y_true, y_pred)
     prec = precision(y_true, y_pred)
     rec = recall(y_true, y_pred)
     f1 = 2 * prec * rec / (prec + rec)
