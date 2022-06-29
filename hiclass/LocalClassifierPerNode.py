@@ -146,6 +146,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         # Input validation
         X = check_array(X, accept_sparse="csr")
 
+        # Initialize array that holds predictions
         y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
 
         # TODO: Add threshold to stop prediction halfway if need be
