@@ -14,33 +14,6 @@ from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
 
-def _fit_classifier(lcpl, level, separator):
-    classifier = lcpl.local_classifiers_[level]
-
-    X, y = _remove_empty_leaves(separator, lcpl.X_, lcpl.y_[:, level])
-
-    unique_y = np.unique(y)
-    if len(unique_y) == 1 and lcpl.replace_classifiers:
-        classifier = ConstantClassifier()
-    classifier.fit(X, y)
-    return classifier
-
-
-def _remove_empty_leaves(separator, X, y):
-    # Detect rows where leaves are not empty
-    leaves = np.array([str(i).split(separator)[-1] for i in y])
-    mask = leaves != ""
-    return X[mask], y[mask]
-
-
-def _get_successors_probability(probabilities_dict, successors):
-    successors_probability = [
-        np.array([probabilities_dict[i][successor] for successor in successors_list])
-        for i, successors_list in enumerate(successors)
-    ]
-    return successors_probability
-
-
 class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     """
     Assign local classifiers to each level of the hierarchy, except the root node.
@@ -179,7 +152,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             classes = self.local_classifiers_[level].classes_
             probabilities_dict = [dict(zip(classes, prob)) for prob in probabilities]
             successors = self._get_successors(y[:, level - 1])
-            successors_prob = _get_successors_probability(
+            successors_prob = self._get_successors_probability(
                 probabilities_dict, successors
             )
             index_max_probability = [
@@ -191,6 +164,14 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                 else ""
                 for i, successors_list in enumerate(successors)
             ]
+
+    @staticmethod
+    def _get_successors_probability(probabilities_dict, successors):
+        successors_probability = [
+            np.array([probabilities_dict[i][successor] for successor in successors_list])
+            for i, successors_list in enumerate(successors)
+        ]
+        return successors_probability
 
     def _get_successors(self, level):
         successors = [
@@ -215,7 +196,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                 num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True
             )
             lcpl = ray.put(self)
-            _parallel_fit = ray.remote(_fit_classifier)
+            _parallel_fit = ray.remote(self._fit_classifier)
             results = [
                 _parallel_fit.remote(lcpl, level, self.separator_)
                 for level in range(len(self.local_classifiers_))
@@ -223,8 +204,27 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             classifiers = ray.get(results)
         else:
             classifiers = [
-                _fit_classifier(self, level, self.separator_)
+                self._fit_classifier(self, level, self.separator_)
                 for level in range(len(self.local_classifiers_))
             ]
         for level, classifier in enumerate(classifiers):
             self.local_classifiers_[level] = classifier
+
+    @staticmethod
+    def _fit_classifier(self, level, separator):
+        classifier = self.local_classifiers_[level]
+
+        X, y = self._remove_empty_leaves(separator, self.X_, self.y_[:, level])
+
+        unique_y = np.unique(y)
+        if len(unique_y) == 1 and self.replace_classifiers:
+            classifier = ConstantClassifier()
+        classifier.fit(X, y)
+        return classifier
+
+    @staticmethod
+    def _remove_empty_leaves(separator, X, y):
+        # Detect rows where leaves are not empty
+        leaves = np.array([str(i).split(separator)[-1] for i in y])
+        mask = leaves != ""
+        return X[mask], y[mask]

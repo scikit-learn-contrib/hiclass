@@ -7,23 +7,11 @@ from copy import deepcopy
 
 import networkx as nx
 import numpy as np
-import ray
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
-
-
-def _fit_classifier(lcppn, node):
-    classifier = lcppn.hierarchy_.nodes[node]["classifier"]
-    # get children examples
-    X, y = lcppn._get_successors(node)
-    unique_y = np.unique(y)
-    if len(unique_y) == 1 and lcppn.replace_classifiers:
-        classifier = ConstantClassifier()
-    classifier.fit(X, y)
-    return classifier
 
 
 class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
@@ -200,18 +188,18 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         y = np.array(y)
         return X, y
 
+    @staticmethod
+    def _fit_classifier(self, node):
+        classifier = self.hierarchy_.nodes[node]["classifier"]
+        # get children examples
+        X, y = self._get_successors(node)
+        unique_y = np.unique(y)
+        if len(unique_y) == 1 and self.replace_classifiers:
+            classifier = ConstantClassifier()
+        classifier.fit(X, y)
+        return classifier
+
     def _fit_digraph(self, local_mode: bool = False):
         self.logger_.info("Fitting local classifiers")
         nodes = self._get_parents()
-        if self.n_jobs > 1:
-            ray.init(
-                num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True
-            )
-            lcppn = ray.put(self)
-            _parallel_fit = ray.remote(_fit_classifier)
-            results = [_parallel_fit.remote(lcppn, node) for node in nodes]
-            classifiers = ray.get(results)
-        else:
-            classifiers = [_fit_classifier(self, node) for node in nodes]
-        for classifier, node in zip(classifiers, nodes):
-            self.hierarchy_.nodes[node]["classifier"] = classifier
+        self._fit_node_classifier(nodes, local_mode)

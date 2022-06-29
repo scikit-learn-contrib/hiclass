@@ -7,23 +7,12 @@ from copy import deepcopy
 
 import networkx as nx
 import numpy as np
-import ray
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass import BinaryPolicy
 from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
-
-
-def _fit_classifier(lcpn, node):
-    classifier = lcpn.hierarchy_.nodes[node]["classifier"]
-    X, y = lcpn.binary_policy_.get_binary_examples(node)
-    unique_y = np.unique(y)
-    if len(unique_y) == 1 and lcpn.replace_classifiers:
-        classifier = ConstantClassifier()
-    classifier.fit(X, y)
-    return classifier
 
 
 class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
@@ -222,18 +211,17 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         nodes = list(self.hierarchy_.nodes)
         # Remove root because it does not need to be fitted
         nodes.remove(self.root_)
-        if self.n_jobs > 1:
-            ray.init(
-                num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True
-            )
-            lcpn = ray.put(self)
-            _parallel_fit = ray.remote(_fit_classifier)
-            results = [_parallel_fit.remote(lcpn, node) for node in nodes]
-            classifiers = ray.get(results)
-        else:
-            classifiers = [_fit_classifier(self, node) for node in nodes]
-        for classifier, node in zip(classifiers, nodes):
-            self.hierarchy_.nodes[node]["classifier"] = classifier
+        self._fit_node_classifier(nodes, local_mode)
+
+    @staticmethod
+    def _fit_classifier(self, node):
+        classifier = self.hierarchy_.nodes[node]["classifier"]
+        X, y = self.binary_policy_.get_binary_examples(node)
+        unique_y = np.unique(y)
+        if len(unique_y) == 1 and self.replace_classifiers:
+            classifier = ConstantClassifier()
+        classifier.fit(X, y)
+        return classifier
 
     def _clean_up(self):
         super()._clean_up()
