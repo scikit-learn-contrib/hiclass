@@ -208,3 +208,8 @@ def noniterable_y():
 
 def test_make_leveled_non_iterable_y(noniterable_y):
     assert noniterable_y == HierarchicalClassifier._make_leveled(noniterable_y)
+
+
+def test_fit_classifier():
+    with pytest.raises(NotImplementedError):
+        HierarchicalClassifier._fit_classifier(None, None)
