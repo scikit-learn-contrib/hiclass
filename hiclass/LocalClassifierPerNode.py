@@ -223,7 +223,9 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         # Remove root because it does not need to be fitted
         nodes.remove(self.root_)
         if self.n_jobs > 1:
-            ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
+            ray.init(
+                num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True
+            )
             lcpn = ray.put(self)
             _parallel_fit = ray.remote(_fit_classifier)
             results = [_parallel_fit.remote(lcpn, node) for node in nodes]

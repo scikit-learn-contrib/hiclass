@@ -204,7 +204,9 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         self.logger_.info("Fitting local classifiers")
         nodes = self._get_parents()
         if self.n_jobs > 1:
-            ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
+            ray.init(
+                num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True
+            )
             lcppn = ray.put(self)
             _parallel_fit = ray.remote(_fit_classifier)
             results = [_parallel_fit.remote(lcppn, node) for node in nodes]

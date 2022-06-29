@@ -211,7 +211,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     def _fit_digraph(self, local_mode: bool = False):
         self.logger_.info("Fitting local classifiers")
         if self.n_jobs > 1:
-            ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
+            ray.init(
+                num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True
+            )
             lcpl = ray.put(self)
             _parallel_fit = ray.remote(_fit_classifier)
             results = [
@@ -220,6 +222,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             ]
             classifiers = ray.get(results)
         else:
-            classifiers = [_fit_classifier(self, level, self.separator_) for level in range(len(self.local_classifiers_))]
+            classifiers = [
+                _fit_classifier(self, level, self.separator_)
+                for level in range(len(self.local_classifiers_))
+            ]
         for level, classifier in enumerate(classifiers):
             self.local_classifiers_[level] = classifier
