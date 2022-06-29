@@ -15,8 +15,7 @@ from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
 
-@ray.remote
-def _parallel_fit(lcppn, node):
+def _fit_classifier(lcppn, node):
     classifier = lcppn.hierarchy_.nodes[node]["classifier"]
     # get children examples
     X, y = lcppn._get_successors(node)
@@ -201,26 +200,16 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         y = np.array(y)
         return X, y
 
-    def _fit_digraph_parallel(self, local_mode: bool = False):
+    def _fit_digraph(self, local_mode: bool = False):
         self.logger_.info("Fitting local classifiers")
-        ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
         nodes = self._get_parents()
-        lcppn = ray.put(self)
-        results = [_parallel_fit.remote(lcppn, node) for node in nodes]
-        classifiers = ray.get(results)
+        if self.n_jobs > 1:
+            ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
+            lcppn = ray.put(self)
+            _parallel_fit = ray.remote(_fit_classifier)
+            results = [_parallel_fit.remote(lcppn, node) for node in nodes]
+            classifiers = ray.get(results)
+        else:
+            classifiers = [_fit_classifier(self, node) for node in nodes]
         for classifier, node in zip(classifiers, nodes):
             self.hierarchy_.nodes[node]["classifier"] = classifier
-
-    def _fit_digraph(self):
-        self.logger_.info("Fitting local classifiers")
-        nodes = self._get_parents()
-        for index, node in enumerate(nodes):
-            node_name = str(node).split(self.separator_)[-1]
-            self.logger_.info(
-                f"Fitting local classifier for node '{node_name}' ({index + 1}/{len(nodes)})"
-            )
-            classifier = self.hierarchy_.nodes[node]["classifier"]
-            # get children examples
-            X, y = self._get_successors(node)
-            classifier = self._replace_constant_classifier(y, node, classifier)
-            classifier.fit(X, y)

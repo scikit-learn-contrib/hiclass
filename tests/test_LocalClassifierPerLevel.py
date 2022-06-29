@@ -48,24 +48,9 @@ def test_fit_digraph(digraph_logistic_regression):
         LogisticRegression(),
         LogisticRegression(),
     ]
-    digraph_logistic_regression.local_classifiers_ = classifiers
-    digraph_logistic_regression._fit_digraph()
-    for classifier in digraph_logistic_regression.local_classifiers_:
-        try:
-            check_is_fitted(classifier)
-        except NotFittedError as e:
-            pytest.fail(repr(e))
-    assert 1
-
-
-def test_fit_digraph_parallel(digraph_logistic_regression):
-    classifiers = [
-        LogisticRegression(),
-        LogisticRegression(),
-    ]
     digraph_logistic_regression.n_jobs = 2
     digraph_logistic_regression.local_classifiers_ = classifiers
-    digraph_logistic_regression._fit_digraph_parallel(local_mode=True)
+    digraph_logistic_regression._fit_digraph(local_mode=True)
     for classifier in digraph_logistic_regression.local_classifiers_:
         try:
             check_is_fitted(classifier)

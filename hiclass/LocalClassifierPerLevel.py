@@ -14,8 +14,7 @@ from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
 
-@ray.remote
-def _parallel_fit(lcpl, level, separator):
+def _fit_classifier(lcpl, level, separator):
     classifier = lcpl.local_classifiers_[level]
 
     X, y = _remove_empty_leaves(separator, lcpl.X_, lcpl.y_[:, level])
@@ -209,32 +208,18 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         ]
         self.masks_ = [None for _ in range(self.y_.shape[1])]
 
-    def _fit_digraph(self):
+    def _fit_digraph(self, local_mode: bool = False):
         self.logger_.info("Fitting local classifiers")
-        for level, classifier in enumerate(self.local_classifiers_):
-            self.logger_.info(
-                f"Fitting local classifier for level '{level + 1}' ({level + 1}/{len(self.local_classifiers_)})"
-            )
-
-            X, y = _remove_empty_leaves(self.separator_, self.X_, self.y_[:, level])
-
-            unique_y = np.unique(y)
-            if len(unique_y) == 1 and self.replace_classifiers:
-                self.logger_.warning(
-                    f"Fitting ConstantClassifier for level '{level + 1}'"
-                )
-                self.local_classifiers_[level] = ConstantClassifier()
-                classifier = self.local_classifiers_[level]
-            classifier.fit(X, y)
-
-    def _fit_digraph_parallel(self, local_mode: bool = False):
-        self.logger_.info("Fitting local classifiers")
-        ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
-        lcpl = ray.put(self)
-        results = [
-            _parallel_fit.remote(lcpl, level, self.separator_)
-            for level in range(len(self.local_classifiers_))
-        ]
-        classifiers = ray.get(results)
+        if self.n_jobs > 1:
+            ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
+            lcpl = ray.put(self)
+            _parallel_fit = ray.remote(_fit_classifier)
+            results = [
+                _parallel_fit.remote(lcpl, level, self.separator_)
+                for level in range(len(self.local_classifiers_))
+            ]
+            classifiers = ray.get(results)
+        else:
+            classifiers = [_fit_classifier(self, level, self.separator_) for level in range(len(self.local_classifiers_))]
         for level, classifier in enumerate(classifiers):
             self.local_classifiers_[level] = classifier

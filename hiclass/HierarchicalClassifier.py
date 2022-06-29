@@ -109,10 +109,7 @@ class HierarchicalClassifier(abc.ABC):
             Fitted estimator.
         """
         # Fit local classifiers in DAG
-        if self.n_jobs > 1:
-            self._fit_digraph_parallel()
-        else:
-            self._fit_digraph()
+        self._fit_digraph()
 
         # Delete unnecessary variables
         self._clean_up()
@@ -277,15 +274,6 @@ class HierarchicalClassifier(abc.ABC):
             self.local_classifier_ = LogisticRegression()
         else:
             self.local_classifier_ = self.local_classifier
-
-    def _replace_constant_classifier(self, y, node, classifier):
-        unique_y = np.unique(y)
-        if len(unique_y) == 1 and self.replace_classifiers:
-            node_name = str(node).split(self.separator_)[-1]
-            self.logger_.warning(f"Fitting ConstantClassifier for node '{node_name}'")
-            self.hierarchy_.nodes[node]["classifier"] = ConstantClassifier()
-            classifier = self.hierarchy_.nodes[node]["classifier"]
-        return classifier
 
     def _convert_to_1d(self, y):
         # Convert predictions to 1D if there is only 1 column

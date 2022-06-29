@@ -51,27 +51,9 @@ def test_fit_digraph(digraph_logistic_regression):
     classifiers = {
         "a": {"classifier": LogisticRegression()},
     }
-    nx.set_node_attributes(digraph_logistic_regression.hierarchy_, classifiers)
-    digraph_logistic_regression._fit_digraph()
-    try:
-        check_is_fitted(digraph_logistic_regression.hierarchy_.nodes["a"]["classifier"])
-    except NotFittedError as e:
-        pytest.fail(repr(e))
-    for node in ["b", "c"]:
-        with pytest.raises(KeyError):
-            check_is_fitted(
-                digraph_logistic_regression.hierarchy_.nodes[node]["classifier"]
-            )
-    assert 1
-
-
-def test_fit_digraph_parallel(digraph_logistic_regression):
-    classifiers = {
-        "a": {"classifier": LogisticRegression()},
-    }
     digraph_logistic_regression.n_jobs = 2
     nx.set_node_attributes(digraph_logistic_regression.hierarchy_, classifiers)
-    digraph_logistic_regression._fit_digraph_parallel(local_mode=True)
+    digraph_logistic_regression._fit_digraph(local_mode=True)
     try:
         check_is_fitted(digraph_logistic_regression.hierarchy_.nodes["a"]["classifier"])
     except NotFittedError as e:

@@ -16,8 +16,7 @@ from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
 
-@ray.remote
-def _parallel_fit(lcpn, node):
+def _fit_classifier(lcpn, node):
     classifier = lcpn.hierarchy_.nodes[node]["classifier"]
     X, y = lcpn.binary_policy_.get_binary_examples(node)
     unique_y = np.unique(y)
@@ -218,32 +217,21 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 }
         nx.set_node_attributes(self.hierarchy_, local_classifiers)
 
-    def _fit_digraph_parallel(self, local_mode: bool = False):
+    def _fit_digraph(self, local_mode: bool = False):
         self.logger_.info("Fitting local classifiers")
-        ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
         nodes = list(self.hierarchy_.nodes)
         # Remove root because it does not need to be fitted
         nodes.remove(self.root_)
-        lcpn = ray.put(self)
-        results = [_parallel_fit.remote(lcpn, node) for node in nodes]
-        classifiers = ray.get(results)
+        if self.n_jobs > 1:
+            ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
+            lcpn = ray.put(self)
+            _parallel_fit = ray.remote(_fit_classifier)
+            results = [_parallel_fit.remote(lcpn, node) for node in nodes]
+            classifiers = ray.get(results)
+        else:
+            classifiers = [_fit_classifier(self, node) for node in nodes]
         for classifier, node in zip(classifiers, nodes):
             self.hierarchy_.nodes[node]["classifier"] = classifier
-
-    def _fit_digraph(self):
-        self.logger_.info("Fitting local classifiers")
-        nodes = list(self.hierarchy_.nodes)
-        # Remove root because it does not need to be fitted
-        nodes.remove(self.root_)
-        for index, node in enumerate(nodes):
-            node_name = str(node).split(self.separator_)[-1]
-            self.logger_.info(
-                f"Fitting local classifier for node '{node_name}' ({index + 1}/{len(nodes)})"
-            )
-            classifier = self.hierarchy_.nodes[node]["classifier"]
-            X, y = self.binary_policy_.get_binary_examples(node)
-            classifier = self._replace_constant_classifier(y, node, classifier)
-            classifier.fit(X, y)
 
     def _clean_up(self):
         super()._clean_up()
