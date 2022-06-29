@@ -48,6 +48,17 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
     A local classifier per level is a local hierarchical classifier that fits one local multi-class classifier
     for each level of the class hierarchy, except for the root node.
+
+    Examples
+    --------
+    >>> from hiclass import LocalClassifierPerLevel
+    >>> y = [['1', '1.1'], ['2', '2.1']]
+    >>> X = [[1, 2], [3, 4]]
+    >>> lcpl = LocalClassifierPerLevel()
+    >>> lcpl.fit(X, y)
+    >>> lcpl.predict(X)
+    array([['1', '1.1'],
+       ['2', '2.1']])
     """
 
     def __init__(

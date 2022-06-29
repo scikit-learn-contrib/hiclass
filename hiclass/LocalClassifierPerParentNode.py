@@ -33,6 +33,17 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
     A local classifier per parent node is a local hierarchical classifier that fits one multi-class classifier
     for each parent node of the class hierarchy.
+
+    Examples
+    --------
+    >>> from hiclass import LocalClassifierPerParentNode
+    >>> y = [['1', '1.1'], ['2', '2.1']]
+    >>> X = [[1, 2], [3, 4]]
+    >>> lcppn = LocalClassifierPerParentNode()
+    >>> lcppn.fit(X, y)
+    >>> lcppn.predict(X)
+    array([['1', '1.1'],
+       ['2', '2.1']])
     """
 
     def __init__(

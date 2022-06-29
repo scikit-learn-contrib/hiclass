@@ -33,6 +33,17 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
     A local classifier per node is a local hierarchical classifier that fits one local binary classifier
     for each node of the class hierarchy, except for the root node.
+
+    Examples
+    --------
+    >>> from hiclass import LocalClassifierPerNode
+    >>> y = [['1', '1.1'], ['2', '2.1']]
+    >>> X = [[1, 2], [3, 4]]
+    >>> lcpn = LocalClassifierPerNode()
+    >>> lcpn.fit(X, y)
+    >>> lcpn.predict(X)
+    array([['1', '1.1'],
+       ['2', '2.1']])
     """
 
     def __init__(
