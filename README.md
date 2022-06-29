@@ -16,7 +16,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - [Who is using HiClass?](#who-is-using-hiclass)
 - [Install](#install)
 - [Quick start](#quick-start)
-- [Step-by-step- walk-through](#step-by-step-walk-through)
+- [Step-by-step walk-through](#step-by-step-walk-through)
 - [API documentation](#api-documentation)
 - [FAQ](#faq)
 - [Support](#support)
@@ -123,7 +123,7 @@ Here's a quick example showcasing how you can train and predict using a local cl
 from hiclass import LocalClassifierPerNode
 from sklearn.ensemble import RandomForestClassifier
 
-# define data
+# Define data
 X_train = [[1], [2], [3], [4]]
 X_test = [[4], [3], [2], [1]]
 Y_train = [
@@ -152,7 +152,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
-# define data
+# Define data
 X_train = [
     'Struggling to repay loan',
     'Unable to get annual report',
