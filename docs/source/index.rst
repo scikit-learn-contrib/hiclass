@@ -30,6 +30,9 @@ Welcome to hiclass' documentation!
     :target: https://opensource.org/licenses/BSD-3-Clause
     :alt: License
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+
 .. toctree::
     :includehidden:
     :maxdepth: 3
