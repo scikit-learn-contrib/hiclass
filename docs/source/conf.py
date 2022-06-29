@@ -13,17 +13,18 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('./../..'))
-sys.path.insert(0, os.path.abspath('./../../hiclass'))
+
+sys.path.insert(0, os.path.abspath("./../.."))
+sys.path.insert(0, os.path.abspath("./../../hiclass"))
 print(sys.path)
 
 import sphinx_code_tabs
 
 # -- Project information -----------------------------------------------------
 
-project = 'hiclass'
-copyright = '2022, Fabio Malcher Miranda, Niklas Köhnecke'
-author = 'Fabio Malcher Miranda, Niklas Köhnecke'
+project = "hiclass"
+copyright = "2022, Fabio Malcher Miranda, Niklas Köhnecke"
+author = "Fabio Malcher Miranda, Niklas Köhnecke"
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,15 +33,15 @@ author = 'Fabio Malcher Miranda, Niklas Köhnecke'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.autosectionlabel',
-    'sphinx_code_tabs',
-    'sphinx_gallery.gen_gallery',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autosectionlabel",
+    "sphinx_code_tabs",
+    "sphinx_gallery.gen_gallery",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -55,12 +56,13 @@ exclude_patterns = []
 use_rtd_scheme = False
 try:
     import sphinx_rtd_theme
+
     extensions.extend(["sphinx_rtd_theme"])
     use_rtd_scheme = True
 except ImportError:
     print("sphinx_rtd_theme was not installed, using alabaster as fallback!")
 
-html_theme = 'sphinx_rtd_theme' if use_rtd_scheme else 'alabaster'
+html_theme = "sphinx_rtd_theme" if use_rtd_scheme else "alabaster"
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -76,6 +78,6 @@ if not use_rtd_scheme:
     html_theme_options["sidebar_width"] = "230px"
 
 sphinx_gallery_conf = {
-    'examples_dirs': '../examples',
-    'gallery_dirs': 'auto_examples',
+    "examples_dirs": "../examples",
+    "gallery_dirs": "auto_examples",
 }
