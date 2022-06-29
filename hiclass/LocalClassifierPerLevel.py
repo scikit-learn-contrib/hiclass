@@ -168,7 +168,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     @staticmethod
     def _get_successors_probability(probabilities_dict, successors):
         successors_probability = [
-            np.array([probabilities_dict[i][successor] for successor in successors_list])
+            np.array(
+                [probabilities_dict[i][successor] for successor in successors_list]
+            )
             for i, successors_list in enumerate(successors)
         ]
         return successors_probability
