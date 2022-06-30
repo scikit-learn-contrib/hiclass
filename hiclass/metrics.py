@@ -7,10 +7,10 @@ from hiclass.HierarchicalClassifier import make_leveled
 
 def _validate_input(y_true, y_pred):
     assert len(y_true) == len(y_pred)
-    y_true = check_array(y_true, dtype=None)
-    y_pred = check_array(y_pred, dtype=None)
     y_pred = make_leveled(y_pred)
     y_true = make_leveled(y_true)
+    y_true = check_array(y_true, dtype=None)
+    y_pred = check_array(y_pred, dtype=None)
     return y_true, y_pred
 
 
