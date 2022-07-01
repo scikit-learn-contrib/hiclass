@@ -4,7 +4,7 @@ dependencies:
   - python=3.8
   - pip=21.2.4
   - pip:
-    - hiclass==4.0.0
+    - hiclass==4.1.0
     - pandas==1.4.1
     - ray==1.12.1
     - scikit-learn==1.1.1
