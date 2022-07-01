@@ -2,7 +2,7 @@
 
 HiClass is an open-source Python library for hierarchical classification compatible with scikit-learn.
 
-[![Deploy PyPI](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push)](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest) [![codecov](https://codecov.io/gh/mirand863/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR)](https://codecov.io/gh/mirand863/hiclass) [![Downloads PyPI](https://static.pepy.tech/personalized-badge/hiclass?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=pypi)](https://pypi.org/project/hiclass/) [![Downloads Conda](https://img.shields.io/conda/dn/conda-forge/hiclass?label=conda)](https://anaconda.org/conda-forge/hiclass) [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Deploy PyPI](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push)](https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml) [![Documentation Status](https://readthedocs.org/projects/hiclass/badge/?version=latest)](https://hiclass.readthedocs.io/en/latest/?badge=latest) [![codecov](https://codecov.io/gh/mirand863/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR)](https://codecov.io/gh/mirand863/hiclass) [![Downloads PyPI](https://static.pepy.tech/personalized-badge/hiclass?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=pypi)](https://pypi.org/project/hiclass/) [![Downloads Conda](https://img.shields.io/conda/dn/conda-forge/hiclass?label=conda)](https://anaconda.org/conda-forge/hiclass) [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ✨ Here is a **demo** that shows HiClass in action on hierarchical data:
 
@@ -16,7 +16,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - [Who is using HiClass?](#who-is-using-hiclass)
 - [Install](#install)
 - [Quick start](#quick-start)
-- [Step-by-step- walk-through](#step-by-step-walk-through)
+- [Step-by-step walk-through](#step-by-step-walk-through)
 - [API documentation](#api-documentation)
 - [FAQ](#faq)
 - [Support](#support)
@@ -34,7 +34,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - **Hierarchical metrics:** HiClass supports the computation of hierarchical precision, recall and f-score, which are more appropriate for hierarchical data than traditional metrics.
 - **Compatible with pickle:** Easily store trained models on disk for future use.
 
-**Don't see a feature on this list?** Search our [issue tracker](https://github.com/mirand863/hiclass/issues) if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our roadmap based on user feedback, so we'd love to hear from you.
+**Any feature missing on this list?** Search our [issue tracker](https://github.com/mirand863/hiclass/issues) to see if someone has already requested it and add a comment to it explaining your use-case. Otherwise, please open a new issue describing the requested feature and possible use-case scenario. We prioritize our roadmap based on user feedback, so we would love to hear from you.
 
 ## Benchmarks
 
@@ -85,7 +85,7 @@ We would love to benchmark with larger datasets, if we can find them in the publ
 
 Here is our public roadmap: https://github.com/mirand863/hiclass/projects/1.
 
-We do Just-In-Time planning, and we tend to reprioritize based on your feedback. Hence, items you see on this roadmap are subject to change. We prioritize features based on the number of people asking for it, features/fixes that are small enough and can be addressed while we work on other related features, features/fixes that help improve stability & relevance and features that address interesting use cases that excite us! If you'd like to have a request prioritized, we ask that you add a detailed use-case for it, either as a comment on an existing issue (besides a thumbs-up) or in a new issue. The detailed context helps.
+We do Just-In-Time planning, and we tend to reprioritize based on your feedback. Hence, items you see on this roadmap are subject to change. We prioritize features based on the number of people asking for it, features/fixes that are small enough and can be addressed while we work on other related features, features/fixes that help improve stability & relevance and features that address interesting use cases that excite us! If you would like to have a request prioritized, we ask that you add a detailed use-case for it, either as a comment on an existing issue (besides a thumbs-up) or in a new issue. The detailed context helps.
 
 
 ## Who is using HiClass?
@@ -123,7 +123,7 @@ Here's a quick example showcasing how you can train and predict using a local cl
 from hiclass import LocalClassifierPerNode
 from sklearn.ensemble import RandomForestClassifier
 
-# define data
+# Define data
 X_train = [[1], [2], [3], [4]]
 X_test = [[4], [3], [2], [1]]
 Y_train = [
@@ -152,7 +152,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
-# define data
+# Define data
 X_train = [
     'Struggling to repay loan',
     'Unable to get annual report',
@@ -220,7 +220,9 @@ Please reach out to fabio.malchermiranda@hpi.de.
 
 ## Contributing
 
-We are a small team on a mission to democratize hierarchical classification, and we'll take all the help we can get! If you'd like to get involved, here's information on [contribution guidelines and how to test the code locally](https://github.com/mirand863/hiclass/blob/main/CONTRIBUTING.md).
+We are a small team on a mission to democratize hierarchical classification, and we will take all the help we can get! If you would like to get involved, here is information on [contribution guidelines and how to test the code locally](https://github.com/mirand863/hiclass/blob/main/CONTRIBUTING.md).
+
+You can contribute in multiple ways, e.g., reporting bugs, writing or translating documentation, reviewing or refactoring code, requesting or implementing new features, etc.
 
 ## Getting the latest updates
 

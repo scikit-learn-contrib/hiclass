@@ -51,27 +51,9 @@ def test_fit_digraph(digraph_logistic_regression):
     classifiers = {
         "a": {"classifier": LogisticRegression()},
     }
-    nx.set_node_attributes(digraph_logistic_regression.hierarchy_, classifiers)
-    digraph_logistic_regression._fit_digraph()
-    try:
-        check_is_fitted(digraph_logistic_regression.hierarchy_.nodes["a"]["classifier"])
-    except NotFittedError as e:
-        pytest.fail(repr(e))
-    for node in ["b", "c"]:
-        with pytest.raises(KeyError):
-            check_is_fitted(
-                digraph_logistic_regression.hierarchy_.nodes[node]["classifier"]
-            )
-    assert 1
-
-
-def test_fit_digraph_parallel(digraph_logistic_regression):
-    classifiers = {
-        "a": {"classifier": LogisticRegression()},
-    }
     digraph_logistic_regression.n_jobs = 2
     nx.set_node_attributes(digraph_logistic_regression.hierarchy_, classifiers)
-    digraph_logistic_regression._fit_digraph_parallel(local_mode=True)
+    digraph_logistic_regression._fit_digraph(local_mode=True)
     try:
         check_is_fitted(digraph_logistic_regression.hierarchy_.nodes["a"]["classifier"])
     except NotFittedError as e:
@@ -183,3 +165,40 @@ def test_fit_predict():
     lcppn.fit(x, y)
     predictions = lcppn.predict(x)
     assert_array_equal(y, predictions)
+
+
+@pytest.fixture
+def empty_levels():
+    X = [
+        [1],
+        [2],
+        [3],
+    ]
+    y = [
+        ["1"],
+        ["2", "2.1"],
+        ["3", "3.1", "3.1.2"],
+    ]
+    return X, y
+
+
+def test_empty_levels(empty_levels):
+    lcppn = LocalClassifierPerParentNode()
+    X, y = empty_levels
+    lcppn.fit(X, y)
+    predictions = lcppn.predict(X)
+    ground_truth = [
+        ["1", "", ""],
+        ["2", "2.1", ""],
+        ["3", "3.1", "3.1.2"],
+    ]
+    assert list(lcppn.hierarchy_.nodes) == [
+        "1",
+        "2",
+        "2" + lcppn.separator_ + "2.1",
+        "3",
+        "3" + lcppn.separator_ + "3.1",
+        "3" + lcppn.separator_ + "3.1" + lcppn.separator_ + "3.1.2",
+        lcppn.root_,
+    ]
+    assert_array_equal(ground_truth, predictions)

@@ -27,6 +27,10 @@ def digraph_logistic_regression():
     digraph.logger_ = logging.getLogger("LCPL")
     digraph.root_ = "a"
     digraph.separator_ = "::HiClass::Separator::"
+    digraph.masks_ = [
+        [True, True],
+        [True, True],
+    ]
     return digraph
 
 
@@ -44,24 +48,9 @@ def test_fit_digraph(digraph_logistic_regression):
         LogisticRegression(),
         LogisticRegression(),
     ]
-    digraph_logistic_regression.local_classifiers_ = classifiers
-    digraph_logistic_regression._fit_digraph()
-    for classifier in digraph_logistic_regression.local_classifiers_:
-        try:
-            check_is_fitted(classifier)
-        except NotFittedError as e:
-            pytest.fail(repr(e))
-    assert 1
-
-
-def test_fit_digraph_parallel(digraph_logistic_regression):
-    classifiers = [
-        LogisticRegression(),
-        LogisticRegression(),
-    ]
     digraph_logistic_regression.n_jobs = 2
     digraph_logistic_regression.local_classifiers_ = classifiers
-    digraph_logistic_regression._fit_digraph_parallel(local_mode=True)
+    digraph_logistic_regression._fit_digraph(local_mode=True)
     for classifier in digraph_logistic_regression.local_classifiers_:
         try:
             check_is_fitted(classifier)
@@ -93,6 +82,10 @@ def fitted_logistic_regression():
     digraph.dtype_ = "<U3"
     digraph.root_ = "r"
     digraph.separator_ = "::HiClass::Separator::"
+    digraph.masks_ = [
+        [True, True, True, True],
+        [True, True, True, True],
+    ]
     classifiers = [
         LogisticRegression(),
         LogisticRegression(),
@@ -133,3 +126,40 @@ def test_fit_predict():
             pytest.fail(repr(e))
     predictions = lcpl.predict(x)
     assert_array_equal(y, predictions)
+
+
+@pytest.fixture
+def empty_levels():
+    X = [
+        [1],
+        [2],
+        [3],
+    ]
+    y = [
+        ["1"],
+        ["2", "2.1"],
+        ["3", "3.1", "3.1.2"],
+    ]
+    return X, y
+
+
+def test_empty_levels(empty_levels):
+    lcppn = LocalClassifierPerLevel()
+    X, y = empty_levels
+    lcppn.fit(X, y)
+    predictions = lcppn.predict(X)
+    ground_truth = [
+        ["1", "", ""],
+        ["2", "2.1", ""],
+        ["3", "3.1", "3.1.2"],
+    ]
+    assert list(lcppn.hierarchy_.nodes) == [
+        "1",
+        "2",
+        "2" + lcppn.separator_ + "2.1",
+        "3",
+        "3" + lcppn.separator_ + "3.1",
+        "3" + lcppn.separator_ + "3.1" + lcppn.separator_ + "3.1.2",
+        lcppn.root_,
+    ]
+    assert_array_equal(ground_truth, predictions)

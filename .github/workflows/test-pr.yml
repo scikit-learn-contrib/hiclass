@@ -6,7 +6,12 @@ on:
       - main
 
 jobs:
-  build:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: psf/black@stable
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -29,4 +34,4 @@ jobs:
         python -m pip install .
     - name: Test with pytest
       run: |
-        pytest -v
+        pytest -v --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html

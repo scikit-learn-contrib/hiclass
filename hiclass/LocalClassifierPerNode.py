@@ -7,7 +7,6 @@ from copy import deepcopy
 
 import networkx as nx
 import numpy as np
-import ray
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
@@ -16,23 +15,23 @@ from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
 
-@ray.remote
-def _parallel_fit(lcpn, node):
-    classifier = lcpn.hierarchy_.nodes[node]["classifier"]
-    X, y = lcpn.binary_policy_.get_binary_examples(node)
-    unique_y = np.unique(y)
-    if len(unique_y) == 1 and lcpn.replace_classifiers:
-        classifier = ConstantClassifier()
-    classifier.fit(X, y)
-    return classifier
-
-
 class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
     """
     Assign local classifiers to each node of the graph, except the root node.
 
     A local classifier per node is a local hierarchical classifier that fits one local binary classifier
     for each node of the class hierarchy, except for the root node.
+
+    Examples
+    --------
+    >>> from hiclass import LocalClassifierPerNode
+    >>> y = [['1', '1.1'], ['2', '2.1']]
+    >>> X = [[1, 2], [3, 4]]
+    >>> lcpn = LocalClassifierPerNode()
+    >>> lcpn.fit(X, y)
+    >>> lcpn.predict(X)
+    array([['1', '1.1'],
+       ['2', '2.1']])
     """
 
     def __init__(
@@ -109,8 +108,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         # TODO: Add parameter to receive hierarchy as parameter in constructor
 
-        # TODO: Add support to empty labels in some levels
-
         # Return the classifier
         return self
 
@@ -137,6 +134,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         # Input validation
         X = check_array(X, accept_sparse="csr")
 
+        # Initialize array that holds predictions
         y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
 
         # TODO: Add threshold to stop prediction halfway if need be
@@ -172,15 +170,9 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 prediction = np.array(prediction)
                 y[mask, level] = prediction
 
-        # Convert back to 1D if there is only 1 column to pass all sklearn's checks
-        if self.max_levels_ == 1:
-            y = y.flatten()
+        y = self._convert_to_1d(y)
 
-        # Remove separator from predictions
-        if y.ndim == 2:
-            for i in range(y.shape[0]):
-                for j in range(1, y.shape[1]):
-                    y[i, j] = y[i, j].split(self.separator_)[-1]
+        self._remove_separator(y)
 
         return y
 
@@ -214,39 +206,22 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 }
         nx.set_node_attributes(self.hierarchy_, local_classifiers)
 
-    def _fit_digraph_parallel(self, local_mode: bool = False):
+    def _fit_digraph(self, local_mode: bool = False):
         self.logger_.info("Fitting local classifiers")
-        ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
         nodes = list(self.hierarchy_.nodes)
         # Remove root because it does not need to be fitted
         nodes.remove(self.root_)
-        lcpn = ray.put(self)
-        results = [_parallel_fit.remote(lcpn, node) for node in nodes]
-        classifiers = ray.get(results)
-        for classifier, node in zip(classifiers, nodes):
-            self.hierarchy_.nodes[node]["classifier"] = classifier
+        self._fit_node_classifier(nodes, local_mode)
 
-    def _fit_digraph(self):
-        self.logger_.info("Fitting local classifiers")
-        nodes = list(self.hierarchy_.nodes)
-        # Remove root because it does not need to be fitted
-        nodes.remove(self.root_)
-        for index, node in enumerate(nodes):
-            node_name = str(node).split(self.separator_)[-1]
-            self.logger_.info(
-                f"Fitting local classifier for node '{node_name}' ({index + 1}/{len(nodes)})"
-            )
-            classifier = self.hierarchy_.nodes[node]["classifier"]
-            X, y = self.binary_policy_.get_binary_examples(node)
-            unique_y = np.unique(y)
-            if len(unique_y) == 1 and self.replace_classifiers:
-                node_name = str(node).split(self.separator_)[-1]
-                self.logger_.warning(
-                    f"Fitting ConstantClassifier for node '{node_name}'"
-                )
-                self.hierarchy_.nodes[node]["classifier"] = ConstantClassifier()
-                classifier = self.hierarchy_.nodes[node]["classifier"]
-            classifier.fit(X, y)
+    @staticmethod
+    def _fit_classifier(self, node):
+        classifier = self.hierarchy_.nodes[node]["classifier"]
+        X, y = self.binary_policy_.get_binary_examples(node)
+        unique_y = np.unique(y)
+        if len(unique_y) == 1 and self.replace_classifiers:
+            classifier = ConstantClassifier()
+        classifier.fit(X, y)
+        return classifier
 
     def _clean_up(self):
         super()._clean_up()

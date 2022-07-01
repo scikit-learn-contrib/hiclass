@@ -8,23 +8,10 @@ from copy import deepcopy
 import numpy as np
 import ray
 from sklearn.base import BaseEstimator
-from sklearn.metrics import euclidean_distances
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
-
-
-@ray.remote
-def _parallel_fit(lcpl, level):
-    classifier = lcpl.local_classifiers_[level]
-    X = lcpl.X_
-    y = lcpl.y_[:, level]
-    unique_y = np.unique(y)
-    if len(unique_y) == 1 and lcpl.replace_classifiers:
-        classifier = ConstantClassifier()
-    classifier.fit(X, y)
-    return classifier
 
 
 class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
@@ -33,6 +20,17 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
     A local classifier per level is a local hierarchical classifier that fits one local multi-class classifier
     for each level of the class hierarchy, except for the root node.
+
+    Examples
+    --------
+    >>> from hiclass import LocalClassifierPerLevel
+    >>> y = [['1', '1.1'], ['2', '2.1']]
+    >>> X = [[1, 2], [3, 4]]
+    >>> lcpl = LocalClassifierPerLevel()
+    >>> lcpl.fit(X, y)
+    >>> lcpl.predict(X)
+    array([['1', '1.1'],
+       ['2', '2.1']])
     """
 
     def __init__(
@@ -102,8 +100,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         # TODO: Add parameter to receive hierarchy as parameter in constructor
 
-        # TODO: Add support to empty labels in some levels
-
         # Return the classifier
         return self
 
@@ -130,100 +126,107 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # Input validation
         X = check_array(X, accept_sparse="csr")
 
+        # Initialize array that holds predictions
         y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
 
         # TODO: Add threshold to stop prediction halfway if need be
 
         self.logger_.info("Predicting")
 
-        for level, classifier in enumerate(self.local_classifiers_):
-            self.logger_.info(f"Predicting level {level}")
-            if level == 0:
-                y[:, level] = classifier.predict(X).flatten()
-            else:
-                all_probabilities = classifier.predict_proba(X)
-                successors = np.array(
-                    [
-                        list(self.hierarchy_.successors(node))
-                        for node in y[:, level - 1]
-                    ],
-                    dtype=object,
-                )
-                classes_masks = np.array(
-                    [
-                        np.isin(classifier.classes_, successors[i])
-                        for i in range(len(successors))
-                    ]
-                )
-                probabilities = np.array(
-                    [
-                        all_probabilities[i, classes_masks[i]]
-                        for i in range(len(classes_masks))
-                    ],
-                    dtype=object,
-                )
-                highest_probabilities = [
-                    np.argmax(probabilities[i], axis=0)
-                    for i in range(len(probabilities))
-                ]
-                classes = np.array(
-                    [
-                        classifier.classes_[classes_masks[i]]
-                        for i in range(len(classes_masks))
-                    ],
-                    dtype=object,
-                )
-                predictions = np.array(
-                    [
-                        classes[i][highest_probabilities[i]]
-                        for i in range(len(highest_probabilities))
-                    ]
-                )
-                y[:, level] = predictions
+        # Predict first level
+        classifier = self.local_classifiers_[0]
+        y[:, 0] = classifier.predict(X).flatten()
 
-        # Convert back to 1D if there is only 1 column to pass all sklearn's checks
-        if self.max_levels_ == 1:
-            y = y.flatten()
+        self._predict_remaining_levels(X, y)
 
-        # Remove separator from predictions
-        if y.ndim == 2:
-            for i in range(y.shape[0]):
-                for j in range(1, y.shape[1]):
-                    y[i, j] = y[i, j].split(self.separator_)[-1]
+        y = self._convert_to_1d(y)
+
+        self._remove_separator(y)
 
         return y
+
+    def _predict_remaining_levels(self, X, y):
+        for level in range(1, y.shape[1]):
+            classifier = self.local_classifiers_[level]
+            probabilities = classifier.predict_proba(X)
+            classes = self.local_classifiers_[level].classes_
+            probabilities_dict = [dict(zip(classes, prob)) for prob in probabilities]
+            successors = self._get_successors(y[:, level - 1])
+            successors_prob = self._get_successors_probability(
+                probabilities_dict, successors
+            )
+            index_max_probability = [
+                np.argmax(prob) if len(prob) > 0 else None for prob in successors_prob
+            ]
+            y[:, level] = [
+                successors_list[index_max_probability[i]]
+                if index_max_probability[i] is not None
+                else ""
+                for i, successors_list in enumerate(successors)
+            ]
+
+    @staticmethod
+    def _get_successors_probability(probabilities_dict, successors):
+        successors_probability = [
+            np.array(
+                [probabilities_dict[i][successor] for successor in successors_list]
+            )
+            for i, successors_list in enumerate(successors)
+        ]
+        return successors_probability
+
+    def _get_successors(self, level):
+        successors = [
+            list(self.hierarchy_.successors(node))
+            if self.hierarchy_.has_node(node)
+            else []
+            for node in level
+        ]
+        return successors
 
     def _initialize_local_classifiers(self):
         super()._initialize_local_classifiers()
         self.local_classifiers_ = [
             deepcopy(self.local_classifier_) for _ in range(self.y_.shape[1])
         ]
+        self.masks_ = [None for _ in range(self.y_.shape[1])]
 
-    def _fit_digraph(self):
+    def _fit_digraph(self, local_mode: bool = False):
         self.logger_.info("Fitting local classifiers")
-        for level, classifier in enumerate(self.local_classifiers_):
-            self.logger_.info(
-                f"Fitting local classifier for level '{level + 1}' ({level + 1}/{len(self.local_classifiers_)})"
+        if self.n_jobs > 1:
+            ray.init(
+                num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True
             )
-            X = self.X_
-            y = self.y_[:, level]
-            unique_y = np.unique(y)
-            if len(unique_y) == 1 and self.replace_classifiers:
-                self.logger_.warning(
-                    f"Fitting ConstantClassifier for level '{level + 1}'"
-                )
-                self.local_classifiers_[level] = ConstantClassifier()
-                classifier = self.local_classifiers_[level]
-            classifier.fit(X, y)
-
-    def _fit_digraph_parallel(self, local_mode: bool = False):
-        self.logger_.info("Fitting local classifiers")
-        ray.init(num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True)
-        lcpl = ray.put(self)
-        results = [
-            _parallel_fit.remote(lcpl, level)
-            for level in range(len(self.local_classifiers_))
-        ]
-        classifiers = ray.get(results)
+            lcpl = ray.put(self)
+            _parallel_fit = ray.remote(self._fit_classifier)
+            results = [
+                _parallel_fit.remote(lcpl, level, self.separator_)
+                for level in range(len(self.local_classifiers_))
+            ]
+            classifiers = ray.get(results)
+        else:
+            classifiers = [
+                self._fit_classifier(self, level, self.separator_)
+                for level in range(len(self.local_classifiers_))
+            ]
         for level, classifier in enumerate(classifiers):
             self.local_classifiers_[level] = classifier
+
+    @staticmethod
+    def _fit_classifier(self, level, separator):
+        classifier = self.local_classifiers_[level]
+
+        X, y = self._remove_empty_leaves(separator, self.X_, self.y_[:, level])
+
+        unique_y = np.unique(y)
+        if len(unique_y) == 1 and self.replace_classifiers:
+            classifier = ConstantClassifier()
+        classifier.fit(X, y)
+        return classifier
+
+    @staticmethod
+    def _remove_empty_leaves(separator, X, y):
+        # Detect rows where leaves are not empty
+        leaves = np.array([str(i).split(separator)[-1] for i in y])
+        mask = leaves != ""
+        return X[mask], y[mask]

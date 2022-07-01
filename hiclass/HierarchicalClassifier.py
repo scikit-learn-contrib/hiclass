@@ -4,9 +4,44 @@ import logging
 
 import networkx as nx
 import numpy as np
+import ray
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
-from sklearn.utils.validation import check_X_y
+
+
+def make_leveled(y):
+    """
+    Add empty cells if columns' length differs.
+
+    Parameters
+    ----------
+    y : array-like of shape (n_samples, n_levels)
+        The target values, i.e., hierarchical class labels for classification.
+
+    Returns
+    -------
+    leveled_y : array-like of shape (n_samples, n_levels)
+        The leveled target values, i.e., hierarchical class labels for classification.
+
+    Notes
+    -----
+    If rows are not iterable, returns the current y without modifications.
+
+    Examples
+    --------
+    >>> from hiclass.HierarchicalClassifier import make_leveled
+    >>> y = [['a'], ['b', 'c']]
+    >>> make_leveled(y)
+    array([['a', ''],
+       ['b', 'c']])
+    """
+    try:
+        depth = max([len(row) for row in y])
+    except TypeError:
+        return y
+    y = np.array(y)
+    leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
+    return np.array(leveled_y)
 
 
 class HierarchicalClassifier(abc.ABC):
@@ -74,10 +109,7 @@ class HierarchicalClassifier(abc.ABC):
             Fitted estimator.
         """
         # Fit local classifiers in DAG
-        if self.n_jobs > 1:
-            self._fit_digraph_parallel()
-        else:
-            self._fit_digraph()
+        self._fit_digraph()
 
         # Delete unnecessary variables
         self._clean_up()
@@ -85,9 +117,12 @@ class HierarchicalClassifier(abc.ABC):
     def _pre_fit(self, X, y):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
+
         self.X_, self.y_ = self._validate_data(
             X, y, multi_output=True, accept_sparse="csr"
         )
+
+        self.y_ = make_leveled(self.y_)
 
         # Create and configure logger
         self._create_logger()
@@ -140,9 +175,11 @@ class HierarchicalClassifier(abc.ABC):
         if self.y_.ndim == 2:
             new_y = []
             for i in range(self.y_.shape[0]):
-                row = [self.y_[i, 0]]
+                row = [str(self.y_[i, 0])]
                 for j in range(1, self.y_.shape[1]):
-                    row.append(str(row[-1]) + self.separator_ + str(self.y_[i, j]))
+                    parent = str(row[-1])
+                    child = str(self.y_[i, j])
+                    row.append(parent + self.separator_ + child)
                 new_y.append(np.asarray(row, dtype=np.str_))
             self.y_ = np.array(new_y)
 
@@ -153,38 +190,46 @@ class HierarchicalClassifier(abc.ABC):
         # Save dtype of y_
         self.dtype_ = self.y_.dtype
 
-        # 1D disguised as 2D
+        self._create_digraph_1d()
+
+        self._create_digraph_2d()
+
+        if self.y_.ndim > 2:
+            # Unsuported dimension
+            self.logger_.error(f"y with {self.y_.ndim} dimensions detected")
+            raise ValueError(
+                f"Creating graph from y with {self.y_.ndim} dimensions is not supported"
+            )
+
+    def _create_digraph_1d(self):
+        # Flatten 1D disguised as 2D
         if self.y_.ndim == 2 and self.y_.shape[1] == 1:
             self.logger_.info("Converting y to 1D")
             self.y_ = self.y_.flatten()
-
-        # Check dimension of labels
-        if self.y_.ndim == 2:
-            # 2D labels
-            # Create max_levels variable
-            self.max_levels_ = self.y_.shape[1]
-            rows, columns = self.y_.shape
-            self.logger_.info(f"Creating digraph from {rows} 2D labels")
-            for row in range(rows):
-                for column in range(columns - 1):
-                    self.hierarchy_.add_edge(
-                        self.y_[row, column], self.y_[row, column + 1]
-                    )
-
-        elif self.y_.ndim == 1:
-            # 1D labels
+        if self.y_.ndim == 1:
             # Create max_levels_ variable
             self.max_levels_ = 1
             self.logger_.info(f"Creating digraph from {self.y_.size} 1D labels")
             for label in self.y_:
                 self.hierarchy_.add_node(label)
 
-        else:
-            # Unsuported dimension
-            self.logger_.error(f"y with {self.y_.ndim} dimensions detected")
-            raise ValueError(
-                f"Creating graph from y with {self.y_.ndim} dimensions is not supported"
-            )
+    def _create_digraph_2d(self):
+        if self.y_.ndim == 2:
+            # Create max_levels variable
+            self.max_levels_ = self.y_.shape[1]
+            rows, columns = self.y_.shape
+            self.logger_.info(f"Creating digraph from {rows} 2D labels")
+            for row in range(rows):
+                for column in range(columns - 1):
+                    parent = self.y_[row, column].split(self.separator_)[-1]
+                    child = self.y_[row, column + 1].split(self.separator_)[-1]
+                    if parent != "" and child != "":
+                        # Only add edge if both parent and child are not empty
+                        self.hierarchy_.add_edge(
+                            self.y_[row, column], self.y_[row, column + 1]
+                        )
+                    elif parent != "" and column == 0:
+                        self.hierarchy_.add_node(parent)
 
     def _export_digraph(self):
         # Check if edge_list is set
@@ -229,6 +274,37 @@ class HierarchicalClassifier(abc.ABC):
             self.local_classifier_ = LogisticRegression()
         else:
             self.local_classifier_ = self.local_classifier
+
+    def _convert_to_1d(self, y):
+        # Convert predictions to 1D if there is only 1 column
+        if self.max_levels_ == 1:
+            y = y.flatten()
+        return y
+
+    def _remove_separator(self, y):
+        # Remove separator from predictions
+        if y.ndim == 2:
+            for i in range(y.shape[0]):
+                for j in range(1, y.shape[1]):
+                    y[i, j] = y[i, j].split(self.separator_)[-1]
+
+    def _fit_node_classifier(self, nodes, local_mode):
+        if self.n_jobs > 1:
+            ray.init(
+                num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True
+            )
+            lcppn = ray.put(self)
+            _parallel_fit = ray.remote(self._fit_classifier)
+            results = [_parallel_fit.remote(lcppn, node) for node in nodes]
+            classifiers = ray.get(results)
+        else:
+            classifiers = [self._fit_classifier(self, node) for node in nodes]
+        for classifier, node in zip(classifiers, nodes):
+            self.hierarchy_.nodes[node]["classifier"] = classifier
+
+    @staticmethod
+    def _fit_classifier(self, node):
+        raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
 
     def _clean_up(self):
         self.logger_.info("Cleaning up variables that can take a lot of disk space")

@@ -30,15 +30,15 @@ Welcome to hiclass' documentation!
     :target: https://opensource.org/licenses/BSD-3-Clause
     :alt: License
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+
 .. toctree::
-    :titlesonly:
+    :includehidden:
+    :maxdepth: 3
 
     introduction/index
     get_started/index
     auto_examples/index
     algorithms/index
-
-.. toctree::
-   :maxdepth: 3
-
-   api/index
+    api/index
