@@ -44,10 +44,10 @@ This first benchmark was executed on Google Colab with only 1 core, using Logist
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|00:52:58|5.28|121|0.7689|
-|[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|00:33:02|4.87|123|0.7647|
+|[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|00:52:58|5.28|121|**0.7689**|
+|[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|**00:33:02**|**4.87**|123|0.7647|
 |[Local Classifier per Level](https://colab.research.google.com/drive/1b_Qb2d6RhSO7ICYTIsxH6ZqCVgeKWmll?usp=sharing)|04:14:45|10.71|123|0.7684|
-|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|03:20:26|9.57|107|0.7636|
+|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|03:20:26|9.57|**107**|0.7636|
 
 This second benchmark is similar to the last one, except that it was executed on a cluster node running GNU/Linux with 512 GB physical memory and 128
 cores provided by two AMD EPYC™ 7742 processors, and each model had 12 cores available for training.
