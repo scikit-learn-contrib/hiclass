@@ -54,10 +54,10 @@ cores provided by two AMD EPYC™ 7742 processors, and each model had 12 cores a
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|00:21:35|3.92|117|**0.7644**|
-|Local Classifier per Node|**00:06:24**|**3.82**|118|0.7601|
-|Local Classifier per Level|01:26:13|3.93|119|0.7641|
-|Flat Classifier|01:20:55|6.48|**103**|0.7591|
+|Local Classifier per Parent Node|00:19:26|4.08|118|**0.7688**|
+|Local Classifier per Node|**00:06:21**|**3.97**|120|0.7648|
+|Local Classifier per Level|01:22:51|4.08|120|0.7684|
+|Flat Classifier|01:38:19|6.63|**104**|0.7634|
 
 This third benchmark was also executed on the same cluster node as the previous benchmark and 12 cores were provided for each model, however, the base classifier was LightGBM instead.
 
