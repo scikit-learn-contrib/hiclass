@@ -63,19 +63,19 @@ This third benchmark was also executed on the same cluster node as the previous 
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|00:24:52|3.91|77|0.7279|
-|Local Classifier per Node|00:30:39|5.41|312|**0.7551**|
-|Local Classifier per Level|01:36:33|**3.86**|37|0.5413|
-|Flat Classifier|**00:23:54**|4.36|**13**|0.4303|
+|Local Classifier per Parent Node|||||
+|Local Classifier per Node|||||
+|Local Classifier per Level|||||
+|Flat Classifier|||||
 
 Lastly, this fourth benchmark was also executed on the same cluster node as the previous benchmarks and 12 cores were provided for each model, however, the base classifier was random forest instead.
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (GB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|03:17:32|**35.42**|**11**|0.7172|
-|Local Classifier per Node|02:27:11|39.68|12|**0.7479**|
-|Local Classifier per Level|04:17:55|138.19|44|0.7134|
-|Flat Classifier|**00:28:35**|78.29|37|0.6438|
+|Local Classifier per Parent Node|||||
+|Local Classifier per Node|||||
+|Local Classifier per Level|||||
+|Flat Classifier|||||
 
 For reproducibility, a Snakemake pipeline was created. Instructions on how to run it and source code are available at [https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints](https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints).
 
