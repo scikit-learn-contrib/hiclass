@@ -23,5 +23,5 @@ pip install -e .
 To run the tests simply execute:
 
 ```
-pytest -v --cov=hiclass --cov-report term-missing --cov-report html
+pytest -v --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html
 ```

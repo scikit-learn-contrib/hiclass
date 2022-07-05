@@ -44,38 +44,38 @@ This first benchmark was executed on Google Colab with only 1 core, using Logist
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|01:00:01|5.21|118|**0.7630**|
-|[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|**00:21:14**|**4.70**|120|0.7587|
-|[Local Classifier per Level](https://colab.research.google.com/drive/1b_Qb2d6RhSO7ICYTIsxH6ZqCVgeKWmll?usp=sharing)|03:11:42|9.69|120|0.7626|
-|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|03:09:35|8.98|**104**|0.7565|
+|[Local Classifier per Parent Node](https://colab.research.google.com/drive/1yZlQ9UnBEGdkIpnJ3pBwvbZ-U0SXL-UG?usp=sharing)|00:52:58|5.28|121|**0.7689**|
+|[Local Classifier per Node](https://colab.research.google.com/drive/1rQTDxWcck-PH4saKzrofQ7Sg9W23lYZv?usp=sharing)|**00:33:02**|**4.87**|123|0.7647|
+|[Local Classifier per Level](https://colab.research.google.com/drive/1b_Qb2d6RhSO7ICYTIsxH6ZqCVgeKWmll?usp=sharing)|04:14:45|10.71|123|0.7684|
+|[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|03:20:26|9.57|**107**|0.7636|
 
 This second benchmark is similar to the last one, except that it was executed on a cluster node running GNU/Linux with 512 GB physical memory and 128
 cores provided by two AMD EPYC™ 7742 processors, and each model had 12 cores available for training.
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|00:21:35|3.92|117|**0.7644**|
-|Local Classifier per Node|**00:06:24**|**3.82**|118|0.7601|
-|Local Classifier per Level|01:26:13|3.93|119|0.7641|
-|Flat Classifier|01:20:55|6.48|**103**|0.7591|
+|Local Classifier per Parent Node|00:19:26|4.08|118|**0.7688**|
+|Local Classifier per Node|**00:06:21**|**3.97**|120|0.7648|
+|Local Classifier per Level|01:22:51|4.08|120|0.7684|
+|Flat Classifier|01:38:19|6.63|**104**|0.7634|
 
 This third benchmark was also executed on the same cluster node as the previous benchmark and 12 cores were provided for each model, however, the base classifier was LightGBM instead.
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|00:24:52|3.91|77|0.7279|
-|Local Classifier per Node|00:30:39|5.41|312|**0.7551**|
-|Local Classifier per Level|01:36:33|**3.86**|37|0.5413|
-|Flat Classifier|**00:23:54**|4.36|**13**|0.4303|
+|Local Classifier per Parent Node|00:31:16|4.06|80|0.7062|
+|Local Classifier per Node|**00:24:21**|5.58|318|**0.7603**|
+|Local Classifier per Level|01:55:27|**4.02**|40|0.6382|
+|Flat Classifier|00:26:16|4.44|**32**|0.4788|
 
 Lastly, this fourth benchmark was also executed on the same cluster node as the previous benchmarks and 12 cores were provided for each model, however, the base classifier was random forest instead.
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (GB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|03:17:32|**35.42**|**11**|0.7172|
-|Local Classifier per Node|02:27:11|39.68|12|**0.7479**|
-|Local Classifier per Level|04:17:55|138.19|44|0.7134|
-|Flat Classifier|**00:28:35**|78.29|37|0.6438|
+|Local Classifier per Parent Node|03:23:02|**36.43**|**11**|0.7245|
+|Local Classifier per Node|02:19:45|40.98|13|**0.7519**|
+|Local Classifier per Level|04:25:45|142.28|45|0.7208|
+|Flat Classifier|**00:29:26**|80.47|38|0.6515|
 
 For reproducibility, a Snakemake pipeline was created. Instructions on how to run it and source code are available at [https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints](https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints).
 
