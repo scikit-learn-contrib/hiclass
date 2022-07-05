@@ -72,10 +72,10 @@ Lastly, this fourth benchmark was also executed on the same cluster node as the 
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (GB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|||||
-|Local Classifier per Node|||||
-|Local Classifier per Level|||||
-|Flat Classifier|||||
+|Local Classifier per Parent Node|03:23:02|**36.43**|**11**|0.7245|
+|Local Classifier per Node|02:19:45|40.98|13|**0.7519**|
+|Local Classifier per Level|04:25:45|142.28|45|0.7208|
+|Flat Classifier|**00:29:26**|80.47|38|0.6515|
 
 For reproducibility, a Snakemake pipeline was created. Instructions on how to run it and source code are available at [https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints](https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints).
 
