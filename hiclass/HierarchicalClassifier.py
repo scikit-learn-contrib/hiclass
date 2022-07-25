@@ -4,7 +4,14 @@ import logging
 
 import networkx as nx
 import numpy as np
-import ray
+
+try:
+    import ray
+except ImportError:
+    _has_ray = False
+    from joblib import Parallel, delayed, effective_n_jobs
+else:
+    _has_ray = True
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 
@@ -290,13 +297,21 @@ class HierarchicalClassifier(abc.ABC):
 
     def _fit_node_classifier(self, nodes, local_mode):
         if self.n_jobs > 1:
-            ray.init(
-                num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True
-            )
-            lcppn = ray.put(self)
-            _parallel_fit = ray.remote(self._fit_classifier)
-            results = [_parallel_fit.remote(lcppn, node) for node in nodes]
-            classifiers = ray.get(results)
+            if _has_ray:
+                ray.init(
+                    num_cpus=self.n_jobs,
+                    local_mode=local_mode,
+                    ignore_reinit_error=True,
+                )
+                lcppn = ray.put(self)
+                _parallel_fit = ray.remote(self._fit_classifier)
+                results = [_parallel_fit.remote(lcppn, node) for node in nodes]
+                classifiers = ray.get(results)
+            else:
+                classifiers = Parallel(n_jobs=self.n_jobs)(
+                    delayed(self._fit_classifier)(self, node) for node in nodes
+                )
+
         else:
             classifiers = [self._fit_classifier(self, node) for node in nodes]
         for classifier, node in zip(classifiers, nodes):
