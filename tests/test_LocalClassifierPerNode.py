@@ -112,7 +112,7 @@ def test_fit_digraph(digraph_logistic_regression):
 
 def test_fit_digraph_joblib_multiplrocessing(digraph_logistic_regression):
     from joblib import Parallel, delayed
-    _has_ray = False
+    LocalClassifierPerNode._has_ray = False
 
     classifiers = {
         "b": {"classifier": LogisticRegression()},
