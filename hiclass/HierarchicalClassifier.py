@@ -278,7 +278,7 @@ class HierarchicalClassifier(abc.ABC):
 
     def _convert_to_1d(self, y):
         # Convert predictions to 1D if there is only 1 column
-        if self.max_levels_ == 1:
+        if self.max_levels_ == 1 or y.shape[0] == 1:
             y = y.flatten()
         return y
 
@@ -288,6 +288,10 @@ class HierarchicalClassifier(abc.ABC):
             for i in range(y.shape[0]):
                 for j in range(1, y.shape[1]):
                     y[i, j] = y[i, j].split(self.separator_)[-1]
+        else:
+            for i in range(y.shape[0]):
+                if isinstance(y[i], str):
+                    y[i] = y[i].split(self.separator_)[-1]
 
     def _fit_node_classifier(self, nodes, local_mode):
         if self.n_jobs > 1:

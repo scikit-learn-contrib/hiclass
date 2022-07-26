@@ -115,7 +115,7 @@ def test_fit_1_class():
     lcpn = LocalClassifierPerNode(local_classifier=LogisticRegression(), n_jobs=2)
     y = np.array([["1", "2"]])
     X = np.array([[1, 2]])
-    ground_truth = np.array([["1", "2"]])
+    ground_truth = np.array(["1", "2"])
     lcpn.fit(X, y)
     prediction = lcpn.predict(X)
     assert_array_equal(ground_truth, prediction)

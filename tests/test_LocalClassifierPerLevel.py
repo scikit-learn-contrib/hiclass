@@ -63,7 +63,7 @@ def test_fit_1_class():
     lcpl = LocalClassifierPerLevel(local_classifier=LogisticRegression(), n_jobs=2)
     y = np.array([["1", "2"]])
     X = np.array([[1, 2]])
-    ground_truth = np.array([["1", "2"]])
+    ground_truth = np.array(["1", "2"])
     lcpl.fit(X, y)
     prediction = lcpl.predict(X)
     assert_array_equal(ground_truth, prediction)

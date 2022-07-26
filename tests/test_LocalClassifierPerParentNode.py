@@ -72,7 +72,7 @@ def test_fit_1_class():
     )
     y = np.array([["1", "2"]])
     X = np.array([[1, 2]])
-    ground_truth = np.array([["1", "2"]])
+    ground_truth = np.array(["1", "2"])
     lcppn.fit(X, y)
     prediction = lcppn.predict(X)
     assert_array_equal(ground_truth, prediction)
