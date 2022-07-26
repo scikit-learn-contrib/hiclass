@@ -163,19 +163,20 @@ class HierarchicalClassifier(abc.ABC):
         self.logger_.setLevel(self.verbose)
 
         # Create console handler and set verbose level
-        ch = logging.StreamHandler()
-        ch.setLevel(self.verbose)
+        if not self.logger_.hasHandlers():
+            ch = logging.StreamHandler()
+            ch.setLevel(self.verbose)
 
-        # Create formatter
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+            # Create formatter
+            formatter = logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            )
 
-        # Add formatter to ch
-        ch.setFormatter(formatter)
+            # Add formatter to ch
+            ch.setFormatter(formatter)
 
-        # Add ch to logger
-        self.logger_.addHandler(ch)
+            # Add ch to logger
+            self.logger_.addHandler(ch)
 
     def _disambiguate(self):
         self.separator_ = "::HiClass::Separator::"
