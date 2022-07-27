@@ -58,8 +58,10 @@ def test_fit_digraph(digraph_logistic_regression):
             pytest.fail(repr(e))
     assert 1
 
+
 def test_fit_digraph_joblib_multiprocessing(digraph_logistic_regression):
     from joblib import Parallel, delayed
+
     LocalClassifierPerLevel._has_ray = False
 
     classifiers = [
@@ -69,6 +71,7 @@ def test_fit_digraph_joblib_multiprocessing(digraph_logistic_regression):
     digraph_logistic_regression.n_jobs = 2
     digraph_logistic_regression.local_classifiers_ = classifiers
     from joblib import Parallel, delayed, effective_n_jobs
+
     digraph_logistic_regression._fit_digraph(local_mode=True)
     for classifier in digraph_logistic_regression.local_classifiers_:
         try:
@@ -86,10 +89,6 @@ def test_fit_1_class():
     lcpl.fit(X, y)
     prediction = lcpl.predict(X)
     assert_array_equal(ground_truth, prediction)
-
-
-
-
 
 
 @pytest.fixture
