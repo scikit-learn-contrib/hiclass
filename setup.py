@@ -30,7 +30,7 @@ REQUIRED = ["networkx", "numpy", "scikit-learn", "protobuf<4.0"]
 
 # What packages are optional?
 # 'fancy feature': ['django'],}
-EXTRAS = {"ray"}
+EXTRAS = {"ray": ["ray>=1.11.0"]}
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
