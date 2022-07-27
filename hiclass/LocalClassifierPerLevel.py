@@ -6,7 +6,14 @@ Numeric and string output labels are both handled.
 from copy import deepcopy
 
 import numpy as np
-import ray
+
+try:
+    import ray
+except ImportError:
+    _has_ray = False
+    from joblib import Parallel, delayed, effective_n_jobs
+else:
+    _has_ray = True
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
@@ -194,16 +201,24 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     def _fit_digraph(self, local_mode: bool = False):
         self.logger_.info("Fitting local classifiers")
         if self.n_jobs > 1:
-            ray.init(
-                num_cpus=self.n_jobs, local_mode=local_mode, ignore_reinit_error=True
-            )
-            lcpl = ray.put(self)
-            _parallel_fit = ray.remote(self._fit_classifier)
-            results = [
-                _parallel_fit.remote(lcpl, level, self.separator_)
-                for level in range(len(self.local_classifiers_))
-            ]
-            classifiers = ray.get(results)
+            if _has_ray:
+                ray.init(
+                    num_cpus=self.n_jobs,
+                    local_mode=local_mode,
+                    ignore_reinit_error=True,
+                )
+                lcpl = ray.put(self)
+                _parallel_fit = ray.remote(self._fit_classifier)
+                results = [
+                    _parallel_fit.remote(lcpl, level, self.separator_)
+                    for level in range(len(self.local_classifiers_))
+                ]
+                classifiers = ray.get(results)
+            else:
+                classifiers = Parallel(n_jobs=self.n_jobs)(
+                    delayed(self._fit_classifier)(self, level, self.separator_)
+                    for level in range(len(self.local_classifiers_))
+                )
         else:
             classifiers = [
                 self._fit_classifier(self, level, self.separator_)

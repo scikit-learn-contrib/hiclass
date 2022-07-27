@@ -7,7 +7,6 @@ name = "pypi"
 networkx = "*"
 numpy = "*"
 scikit-learn = "*"
-ray = "*"
 
 [dev-packages]
 pytest = "*"
@@ -17,3 +16,6 @@ pytest-cov = "*"
 twine = "*"
 sphinx = "4.1.1"
 sphinx-rtd-theme = "0.5.2"
+
+[extras]
+ray = "*"
