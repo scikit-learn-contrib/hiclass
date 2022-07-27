@@ -58,7 +58,7 @@ def test_fit_digraph(digraph_logistic_regression):
             pytest.fail(repr(e))
     assert 1
 
-def test_fit_digraph_joblib_parallel(digraph_logistic_regression):
+def test_fit_digraph_joblib_multiprocessing(digraph_logistic_regression):
     from joblib import Parallel, delayed
     LocalClassifierPerLevel._has_ray = False
 
