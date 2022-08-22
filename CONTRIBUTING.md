@@ -13,11 +13,12 @@ Please make sure all tests pass before submitting a pull request. It is also goo
 To test the code locally you need to install the dependencies for the library in the current environment. Additionally, you need to install the following dependencies for testing:
 
 ```
-pip install pytest
-pip install pytest-flake8
-pip install pytest-pydocstyle
-pip install pytest-cov
-pip install -e .
+pip install flake8==4.0.1
+pip install pytest==7.1.2
+pip install pytest-flake8==1.1.1
+pip install pytest-pydocstyle==2.3.0
+pip install pytest-cov==3.0.0
+pip install .
 ```
 
 To run the tests simply execute:
