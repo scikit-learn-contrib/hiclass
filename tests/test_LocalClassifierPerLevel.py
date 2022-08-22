@@ -66,7 +66,7 @@ def test_fit_digraph_joblib_multiprocessing(digraph_logistic_regression):
     digraph_logistic_regression.n_jobs = 2
     digraph_logistic_regression.local_classifiers_ = classifiers
 
-    digraph_logistic_regression._fit_digraph(local_mode=True, _has_ray=False)
+    digraph_logistic_regression._fit_digraph(local_mode=True, use_joblib=True)
     for classifier in digraph_logistic_regression.local_classifiers_:
         try:
             check_is_fitted(classifier)

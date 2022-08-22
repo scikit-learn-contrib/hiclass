@@ -199,7 +199,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         classifier.fit(X, y)
         return classifier
 
-    def _fit_digraph(self, local_mode: bool = False, _has_ray: bool = True):
+    def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local classifiers")
         nodes = self._get_parents()
-        self._fit_node_classifier(nodes, local_mode, _has_ray)
+        self._fit_node_classifier(nodes, local_mode, use_joblib)

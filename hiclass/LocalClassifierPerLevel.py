@@ -198,10 +198,10 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         ]
         self.masks_ = [None for _ in range(self.y_.shape[1])]
 
-    def _fit_digraph(self, local_mode: bool = False, _has_ray: bool = True):
+    def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local classifiers")
         if self.n_jobs > 1:
-            if _has_ray:
+            if _has_ray and not use_joblib:
                 ray.init(
                     num_cpus=self.n_jobs,
                     local_mode=local_mode,

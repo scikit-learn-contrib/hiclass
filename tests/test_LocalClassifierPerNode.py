@@ -118,7 +118,7 @@ def test_fit_digraph_joblib_multiprocessing(digraph_logistic_regression):
     }
     digraph_logistic_regression.n_jobs = 2
     nx.set_node_attributes(digraph_logistic_regression.hierarchy_, classifiers)
-    digraph_logistic_regression._fit_digraph(local_mode=True, _has_ray=False)
+    digraph_logistic_regression._fit_digraph(local_mode=True, use_joblib=True)
     with pytest.raises(KeyError):
         check_is_fitted(digraph_logistic_regression.hierarchy_.nodes["a"]["classifier"])
     for node in ["b", "c"]:

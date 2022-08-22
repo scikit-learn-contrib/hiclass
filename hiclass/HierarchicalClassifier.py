@@ -296,9 +296,9 @@ class HierarchicalClassifier(abc.ABC):
                 for j in range(1, y.shape[1]):
                     y[i, j] = y[i, j].split(self.separator_)[-1]
 
-    def _fit_node_classifier(self, nodes, local_mode: bool = False, _has_ray: bool = True):
+    def _fit_node_classifier(self, nodes, local_mode: bool = False, use_joblib: bool = False):
         if self.n_jobs > 1:
-            if _has_ray:
+            if _has_ray and not use_joblib:
                 ray.init(
                     num_cpus=self.n_jobs,
                     local_mode=local_mode,
