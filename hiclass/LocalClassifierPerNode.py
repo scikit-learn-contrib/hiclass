@@ -54,12 +54,12 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         binary_policy : {"exclusive", "less_exclusive", "exclusive_siblings", "inclusive", "less_inclusive", "siblings"}, str, default="siblings"
             Specify the rule for defining positive and negative training examples, using one of the following options:
 
-            - `exclusive`
-            - `less_exclusive`
-            - `exclusive_siblings`
-            - `inclusive`
-            - `less_inclusive`
-            - `siblings`
+            - `exclusive`: Positive examples belong only to the class being considered. All classes are negative examples, except for the selected class;
+            - `less_exclusive`: Positive examples belong only to the class being considered. All classes are negative examples, except for the selected class and its descendants;
+            - `exclusive_siblings`: Positive examples belong only to the class being considered. All sibling classes are negative examples;
+            - `inclusive`: Positive examples belong only to the class being considered and its descendants. All classes are negative examples, except for the selected class, its descendants and ancestors;
+            - `less_inclusive`: Positive examples belong only to the class being considered and its descendants. All classes are negative examples, except for the selected class and its descendants;
+            - `siblings`: Positive examples belong only to the class being considered and its descendants. All siblings and their descendant classes are negative examples.
 
             See :ref:`Training Policies` for more information about the different policies.
         verbose : int, default=0
