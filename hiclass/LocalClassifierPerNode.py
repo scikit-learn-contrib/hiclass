@@ -206,12 +206,12 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 }
         nx.set_node_attributes(self.hierarchy_, local_classifiers)
 
-    def _fit_digraph(self, local_mode: bool = False):
+    def _fit_digraph(self, local_mode: bool = False, _has_ray: bool = True):
         self.logger_.info("Fitting local classifiers")
         nodes = list(self.hierarchy_.nodes)
         # Remove root because it does not need to be fitted
         nodes.remove(self.root_)
-        self._fit_node_classifier(nodes, local_mode)
+        self._fit_node_classifier(nodes, local_mode, _has_ray)
 
     @staticmethod
     def _fit_classifier(self, node):

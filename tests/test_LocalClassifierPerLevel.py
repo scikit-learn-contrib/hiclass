@@ -9,7 +9,6 @@ from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
-
 from hiclass import LocalClassifierPerLevel
 
 
@@ -60,8 +59,6 @@ def test_fit_digraph(digraph_logistic_regression):
 
 
 def test_fit_digraph_joblib_multiprocessing(digraph_logistic_regression):
-    LocalClassifierPerLevel._has_ray = False
-
     classifiers = [
         LogisticRegression(),
         LogisticRegression(),
@@ -69,7 +66,7 @@ def test_fit_digraph_joblib_multiprocessing(digraph_logistic_regression):
     digraph_logistic_regression.n_jobs = 2
     digraph_logistic_regression.local_classifiers_ = classifiers
 
-    digraph_logistic_regression._fit_digraph(local_mode=True)
+    digraph_logistic_regression._fit_digraph(local_mode=True, _has_ray=False)
     for classifier in digraph_logistic_regression.local_classifiers_:
         try:
             check_is_fitted(classifier)
