@@ -51,8 +51,9 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         local_classifier : BaseEstimator, default=LogisticRegression
             The local_classifier used to create the collection of local classifiers. Needs to have fit, predict and
             clone methods.
-        binary_policy : str, default="siblings"
+        binary_policy : {'exclusive', 'less_exclusive', 'exclusive_siblings', 'inclusive', 'less_inclusive', 'siblings'}, default="siblings"
             Rules for defining positive and negative training examples.
+            See :ref:`Training Policies` for more information.
         verbose : int, default=0
             Controls the verbosity when fitting and predicting.
             See https://verboselogs.readthedocs.io/en/latest/readme.html#overview-of-logging-levels
