@@ -67,6 +67,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             a single unique class.
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
+            If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
         """
         super().__init__(
             local_classifier=local_classifier,

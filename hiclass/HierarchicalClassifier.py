@@ -85,6 +85,7 @@ class HierarchicalClassifier(abc.ABC):
             a single unique class.
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
+            If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
         classifier_abbreviation : str, default=""
             The abbreviation of the local hierarchical classifier to be displayed during logging.
         """
