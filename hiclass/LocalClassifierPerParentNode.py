@@ -71,7 +71,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             classifier_abbreviation="LCPPN",
         )
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         """
         Fit a local classifier per parent node.
 
@@ -83,6 +83,9 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             converted into a sparse ``csc_matrix``.
         y : array-like of shape (n_samples, n_levels)
             The target values, i.e., hierarchical class labels for classification.
+        sample_weight : array-like of shape (n_samples,), default=None
+            Array of weights that are assigned to individual samples.
+            If not provided, then each sample is given unit weight.
 
         Returns
         -------
