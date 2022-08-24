@@ -60,6 +60,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             a single unique class.
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
+            If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -199,7 +200,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         classifier.fit(X, y)
         return classifier
 
-    def _fit_digraph(self, local_mode: bool = False):
+    def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local classifiers")
         nodes = self._get_parents()
-        self._fit_node_classifier(nodes, local_mode)
+        self._fit_node_classifier(nodes, local_mode, use_joblib)

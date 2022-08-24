@@ -51,8 +51,17 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         local_classifier : BaseEstimator, default=LogisticRegression
             The local_classifier used to create the collection of local classifiers. Needs to have fit, predict and
             clone methods.
-        binary_policy : str, default="siblings"
-            Rules for defining positive and negative training examples.
+        binary_policy : {"exclusive", "less_exclusive", "exclusive_siblings", "inclusive", "less_inclusive", "siblings"}, str, default="siblings"
+            Specify the rule for defining positive and negative training examples, using one of the following options:
+
+            - `exclusive`: Positive examples belong only to the class being considered. All classes are negative examples, except for the selected class;
+            - `less_exclusive`: Positive examples belong only to the class being considered. All classes are negative examples, except for the selected class and its descendants;
+            - `exclusive_siblings`: Positive examples belong only to the class being considered. All sibling classes are negative examples;
+            - `inclusive`: Positive examples belong only to the class being considered and its descendants. All classes are negative examples, except for the selected class, its descendants and ancestors;
+            - `less_inclusive`: Positive examples belong only to the class being considered and its descendants. All classes are negative examples, except for the selected class and its descendants;
+            - `siblings`: Positive examples belong only to the class being considered and its descendants. All siblings and their descendant classes are negative examples.
+
+            See :ref:`Training Policies` for more information about the different policies.
         verbose : int, default=0
             Controls the verbosity when fitting and predicting.
             See https://verboselogs.readthedocs.io/en/latest/readme.html#overview-of-logging-levels
@@ -64,6 +73,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             a single unique class.
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
+            If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -206,12 +216,12 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 }
         nx.set_node_attributes(self.hierarchy_, local_classifiers)
 
-    def _fit_digraph(self, local_mode: bool = False):
+    def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local classifiers")
         nodes = list(self.hierarchy_.nodes)
         # Remove root because it does not need to be fitted
         nodes.remove(self.root_)
-        self._fit_node_classifier(nodes, local_mode)
+        self._fit_node_classifier(nodes, local_mode, use_joblib)
 
     @staticmethod
     def _fit_classifier(self, node):

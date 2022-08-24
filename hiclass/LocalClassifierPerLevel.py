@@ -6,19 +6,19 @@ Numeric and string output labels are both handled.
 from copy import deepcopy
 
 import numpy as np
-
-try:
-    import ray
-except ImportError:
-    _has_ray = False
-    from joblib import Parallel, delayed, effective_n_jobs
-else:
-    _has_ray = True
+from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
+
+try:
+    import ray
+except ImportError:
+    _has_ray = False
+else:
+    _has_ray = True
 
 
 class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
@@ -67,6 +67,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             a single unique class.
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
+            If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -198,10 +199,10 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         ]
         self.masks_ = [None for _ in range(self.y_.shape[1])]
 
-    def _fit_digraph(self, local_mode: bool = False):
+    def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local classifiers")
         if self.n_jobs > 1:
-            if _has_ray:
+            if _has_ray and not use_joblib:
                 ray.init(
                     num_cpus=self.n_jobs,
                     local_mode=local_mode,

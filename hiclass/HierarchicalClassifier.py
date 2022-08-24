@@ -4,16 +4,16 @@ import logging
 
 import networkx as nx
 import numpy as np
+from joblib import Parallel, delayed
+from sklearn.base import BaseEstimator
+from sklearn.linear_model import LogisticRegression
 
 try:
     import ray
 except ImportError:
     _has_ray = False
-    from joblib import Parallel, delayed, effective_n_jobs
 else:
     _has_ray = True
-from sklearn.base import BaseEstimator
-from sklearn.linear_model import LogisticRegression
 
 
 def make_leveled(y):
@@ -85,6 +85,7 @@ class HierarchicalClassifier(abc.ABC):
             a single unique class.
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
+            If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
         classifier_abbreviation : str, default=""
             The abbreviation of the local hierarchical classifier to be displayed during logging.
         """
@@ -296,9 +297,11 @@ class HierarchicalClassifier(abc.ABC):
                 for j in range(1, y.shape[1]):
                     y[i, j] = y[i, j].split(self.separator_)[-1]
 
-    def _fit_node_classifier(self, nodes, local_mode):
+    def _fit_node_classifier(
+        self, nodes, local_mode: bool = False, use_joblib: bool = False
+    ):
         if self.n_jobs > 1:
-            if _has_ray:
+            if _has_ray and not use_joblib:
                 ray.init(
                     num_cpus=self.n_jobs,
                     local_mode=local_mode,
