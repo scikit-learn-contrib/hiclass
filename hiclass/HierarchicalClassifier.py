@@ -7,6 +7,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
+from sklearn.utils.validation import _check_sample_weight
 
 try:
     import ray
@@ -125,13 +126,18 @@ class HierarchicalClassifier(abc.ABC):
         # Delete unnecessary variables
         self._clean_up()
 
-    def _pre_fit(self, X, y):
+    def _pre_fit(self, X, y, sample_weight):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 
         self.X_, self.y_ = self._validate_data(
             X, y, multi_output=True, accept_sparse="csr"
         )
+
+        if sample_weight is not None:
+            self.sample_weight_ = _check_sample_weight(sample_weight, X)
+        else:
+            self.sample_weight_ = None
 
         self.y_ = make_leveled(self.y_)
 
@@ -332,3 +338,5 @@ class HierarchicalClassifier(abc.ABC):
         self.logger_.info("Cleaning up variables that can take a lot of disk space")
         del self.X_
         del self.y_
+        if self.sample_weight_ is not None:
+            del self.sample_weight_

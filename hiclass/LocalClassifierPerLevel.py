@@ -100,7 +100,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             Fitted estimator.
         """
         # Execute common methods necessary before fitting
-        super()._pre_fit(X, y)
+        super()._pre_fit(X, y, sample_weight)
 
         # Fit local classifiers in DAG
         super().fit(X, y)
@@ -235,17 +235,23 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     def _fit_classifier(self, level, separator):
         classifier = self.local_classifiers_[level]
 
-        X, y = self._remove_empty_leaves(separator, self.X_, self.y_[:, level])
+        X, y, sample_weight = self._remove_empty_leaves(separator, self.X_, self.y_[:, level], self.sample_weight_)
 
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
-        classifier.fit(X, y)
+        if sample_weight is not None:
+            classifier.fit(X, y, sample_weight)
+        else:
+            classifier.fit(X, y)
         return classifier
 
     @staticmethod
-    def _remove_empty_leaves(separator, X, y):
+    def _remove_empty_leaves(separator, X, y, sample_weight):
         # Detect rows where leaves are not empty
         leaves = np.array([str(i).split(separator)[-1] for i in y])
         mask = leaves != ""
-        return X[mask], y[mask]
+        if sample_weight is not None:
+            return X[mask], y[mask], sample_weight[mask]
+        else:
+            return X[mask], y[mask], None
