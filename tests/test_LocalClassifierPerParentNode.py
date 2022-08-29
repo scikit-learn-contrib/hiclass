@@ -129,15 +129,18 @@ def x_and_y_arrays():
 
 
 def test_get_successors(x_and_y_arrays):
-    x, y, _ = x_and_y_arrays._get_successors("a")
+    x, y, weights = x_and_y_arrays._get_successors("a")
     assert_array_equal(x_and_y_arrays.X_[0:2], x)
     assert_array_equal(["b", "e"], y)
-    x, y, _ = x_and_y_arrays._get_successors("d")
+    assert weights is None
+    x, y, weights = x_and_y_arrays._get_successors("d")
     assert_array_equal([x_and_y_arrays.X_[-1]], x)
     assert_array_equal(["g"], y)
-    x, y, _ = x_and_y_arrays._get_successors("b")
+    assert weights is None
+    x, y, weights = x_and_y_arrays._get_successors("b")
     assert_array_equal([x_and_y_arrays.X_[0]], x)
     assert_array_equal(["c"], y)
+    assert weights is None
 
 
 @pytest.fixture

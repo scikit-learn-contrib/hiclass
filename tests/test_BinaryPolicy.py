@@ -284,27 +284,30 @@ def test_siblings_get_binary_examples_1d_1(digraph, features_1d, labels):
     policy = SiblingsPolicy(digraph, features_1d, labels)
     ground_truth_x = [1, 2, 3, 4, 5, 6, 7, 8]
     ground_truth_y = [1, 1, 0, 0, 0, 0, 0, 0]
-    x, y = policy.get_binary_examples("1")
+    x, y, weights = policy.get_binary_examples("1")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
+    assert weights is None
 
 
 def test_siblings_get_binary_examples_1d_2(digraph, features_1d, labels):
     policy = SiblingsPolicy(digraph, features_1d, labels)
     ground_truth_x = [3, 4, 5, 6, 7, 8, 1, 2]
     ground_truth_y = [1, 1, 1, 1, 1, 1, 0, 0]
-    x, y = policy.get_binary_examples("2")
+    x, y, weights = policy.get_binary_examples("2")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
+    assert weights is None
 
 
 def test_siblings_get_binary_examples_1d_3(digraph, features_1d, labels):
     policy = SiblingsPolicy(digraph, features_1d, labels)
     ground_truth_x = [3, 5, 6, 4, 7, 8]
     ground_truth_y = [1, 1, 1, 0, 0, 0]
-    x, y = policy.get_binary_examples("2.1")
+    x, y, weights = policy.get_binary_examples("2.1")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
+    assert weights is None
 
 
 def test_siblings_get_binary_examples_2d_1(digraph, features_2d, labels):
@@ -320,9 +323,10 @@ def test_siblings_get_binary_examples_2d_1(digraph, features_2d, labels):
         [15, 16],
     ]
     ground_truth_y = [1, 1, 0, 0, 0, 0, 0, 0]
-    x, y = policy.get_binary_examples("1")
+    x, y, weights = policy.get_binary_examples("1")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
+    assert weights is None
 
 
 def test_siblings_get_binary_examples_2d_2(digraph, features_2d, labels):
@@ -338,18 +342,20 @@ def test_siblings_get_binary_examples_2d_2(digraph, features_2d, labels):
         [3, 4],
     ]
     ground_truth_y = [1, 1, 1, 1, 1, 1, 0, 0]
-    x, y = policy.get_binary_examples("2")
+    x, y, weights = policy.get_binary_examples("2")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
+    assert weights is None
 
 
 def test_siblings_get_binary_examples_2d_3(digraph, features_2d, labels):
     policy = SiblingsPolicy(digraph, features_2d, labels)
     ground_truth_x = [[5, 6], [9, 10], [11, 12], [7, 8], [13, 14], [15, 16]]
     ground_truth_y = [1, 1, 1, 0, 0, 0]
-    x, y = policy.get_binary_examples("2.1")
+    x, y, weights = policy.get_binary_examples("2.1")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
+    assert weights is None
 
 
 def test_siblings_get_binary_examples_sparse_1(digraph, features_sparse, labels):
@@ -365,9 +371,10 @@ def test_siblings_get_binary_examples_sparse_1(digraph, features_sparse, labels)
         [15, 16],
     ]
     ground_truth_y = [1, 1, 0, 0, 0, 0, 0, 0]
-    x, y = policy.get_binary_examples("1")
+    x, y, weights = policy.get_binary_examples("1")
     assert_array_equal(ground_truth_x, x.todense())
     assert_array_equal(ground_truth_y, y)
+    assert weights is None
 
 
 def test_siblings_get_binary_examples_sparse_2(digraph, features_sparse, labels):
@@ -383,15 +390,17 @@ def test_siblings_get_binary_examples_sparse_2(digraph, features_sparse, labels)
         [3, 4],
     ]
     ground_truth_y = [1, 1, 1, 1, 1, 1, 0, 0]
-    x, y = policy.get_binary_examples("2")
+    x, y, weights = policy.get_binary_examples("2")
     assert_array_equal(ground_truth_x, x.todense())
     assert_array_equal(ground_truth_y, y)
+    assert weights is None
 
 
 def test_siblings_get_binary_examples_sparse_3(digraph, features_sparse, labels):
     policy = SiblingsPolicy(digraph, features_sparse, labels)
     ground_truth_x = [[5, 6], [9, 10], [11, 12], [7, 8], [13, 14], [15, 16]]
     ground_truth_y = [1, 1, 1, 0, 0, 0]
-    x, y = policy.get_binary_examples("2.1")
+    x, y, weights = policy.get_binary_examples("2.1")
     assert_array_equal(ground_truth_x, x.todense())
     assert_array_equal(ground_truth_y, y)
+    assert weights is None
