@@ -154,6 +154,7 @@ def digraph_multiple_roots():
     classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("c", "d"), ("e", "f")])
     classifier.X_ = np.array([[1, 2], [3, 4], [5, 6]])
     classifier.y_ = np.array([["a", "b"], ["c", "d"], ["e", "f"]])
+    classifier.sample_weight_ = None
     return classifier
 
 

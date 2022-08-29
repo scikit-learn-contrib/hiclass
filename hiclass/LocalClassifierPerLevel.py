@@ -235,7 +235,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     def _fit_classifier(self, level, separator):
         classifier = self.local_classifiers_[level]
 
-        X, y, sample_weight = self._remove_empty_leaves(separator, self.X_, self.y_[:, level], self.sample_weight_)
+        X, y, sample_weight = self._remove_empty_leaves(
+            separator, self.X_, self.y_[:, level], self.sample_weight_
+        )
 
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
