@@ -13,7 +13,7 @@ class BinaryPolicy(ABC):
     Every policy should implement the methods positive_examples and negative_examples.
     """
 
-    def __init__(self, digraph: nx.DiGraph, X: np.ndarray, y: np.ndarray):
+    def __init__(self, digraph: nx.DiGraph, X: np.ndarray, y: np.ndarray, sample_weight=None):
         """
         Initialize a BinaryPolicy with the required data.
 
@@ -26,10 +26,14 @@ class BinaryPolicy(ABC):
         y : np.ndarray
             Labels which will be assigned to the different samples.
             Has to be 2D array.
+        sample_weight : array-like of shape (n_samples,), default=None
+            Array of weights that are assigned to individual samples.
+            If not provided, then each sample is given unit weight.
         """
         self.digraph = digraph
         self.X = X
         self.y = y
+        self.sample_weight = sample_weight
 
     def positive_examples(self, node) -> np.ndarray:
         """
@@ -128,15 +132,19 @@ class BinaryPolicy(ABC):
         negative_examples = self.negative_examples(node)
         positive_x = self.X[positive_examples]
         negative_x = self.X[negative_examples]
+        positive_weights = self.sample_weight[positive_examples] if self.sample_weight is not None else None
+        negative_weights = self.sample_weight[negative_examples] if self.sample_weight is not None else None
         if isinstance(self.X, np.ndarray):
             X = np.concatenate([positive_x, negative_x])
+            sample_weights = np.concatenate([positive_weights, negative_weights]) if self.sample_weight is not None else None
             y = np.zeros(len(X))
             y[: len(positive_x)] = 1
         elif isinstance(self.X, csr_matrix):
             X = vstack([positive_x, negative_x])
+            sample_weights = vstack([positive_weights, negative_weights]) if self.sample_weight is not None else None
             y = np.zeros(X.shape[0])
             y[: positive_x.shape[0]] = 1
-        return X, y
+        return X, y, sample_weights
 
 
 class ExclusivePolicy(BinaryPolicy):

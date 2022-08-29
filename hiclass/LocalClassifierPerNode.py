@@ -107,7 +107,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             Fitted estimator.
         """
         # Execute common methods necessary before fitting
-        super()._pre_fit(X, y)
+        super()._pre_fit(X, y, sample_weight)
 
         # Initialize policy
         self._initialize_binary_policy()
@@ -195,7 +195,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             try:
                 self.binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
                     self.binary_policy.lower()
-                ](self.hierarchy_, self.X_, self.y_)
+                ](self.hierarchy_, self.X_, self.y_, self.sample_weight_)
             except KeyError:
                 self.logger_.error(
                     f"Policy {self.binary_policy} not implemented. Available policies are:\n"
@@ -229,11 +229,14 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
     @staticmethod
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
-        X, y = self.binary_policy_.get_binary_examples(node)
+        X, y, sample_weight = self.binary_policy_.get_binary_examples(node)
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
-        classifier.fit(X, y)
+        if self.sample_weight_ is not None:
+            classifier.fit(X, y, sample_weight)
+        else:
+            classifier.fit(X, y)
         return classifier
 
     def _clean_up(self):
