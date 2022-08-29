@@ -242,10 +242,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
-        if sample_weight is not None:
-            classifier.fit(X, y, sample_weight)
-        else:
-            classifier.fit(X, y)
+        classifier.fit(X, y, sample_weight)
         return classifier
 
     @staticmethod
