@@ -25,6 +25,7 @@ def digraph_logistic_regression():
     digraph.X_ = np.array([[1, 2], [3, 4]])
     digraph.logger_ = logging.getLogger("LCPL")
     digraph.root_ = "a"
+    digraph.sample_weight_ = None
     digraph.separator_ = "::HiClass::Separator::"
     digraph.masks_ = [
         [True, True],
