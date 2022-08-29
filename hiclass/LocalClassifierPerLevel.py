@@ -251,7 +251,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # Detect rows where leaves are not empty
         leaves = np.array([str(i).split(separator)[-1] for i in y])
         mask = leaves != ""
-        if sample_weight is not None:
-            return X[mask], y[mask], sample_weight[mask]
-        else:
-            return X[mask], y[mask], None
+        X = X[mask]
+        y = y[mask]
+        sample_weight = sample_weight[mask] if sample_weight is not None else None
+        return X, y, sample_weight

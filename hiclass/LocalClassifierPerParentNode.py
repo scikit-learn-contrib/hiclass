@@ -93,7 +93,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             Fitted estimator.
         """
         # Execute common methods necessary before fitting
-        super()._pre_fit(X, y)
+        super()._pre_fit(X, y, sample_weight)
 
         # Fit local classifiers in DAG
         super().fit(X, y)
@@ -190,17 +190,21 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             else:
                 y.append(row[np.where(row == node)[0][0] + 1])
         y = np.array(y)
-        return X, y
+        sample_weight = self.sample_weight_[mask] if self.sample_weight_ is not None else None
+        return X, y, sample_weight
 
     @staticmethod
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
         # get children examples
-        X, y = self._get_successors(node)
+        X, y, sample_weight = self._get_successors(node)
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
-        classifier.fit(X, y)
+        if sample_weight is not None:
+            classifier.fit(X, y, sample_weight)
+        else:
+            classifier.fit(X, y)
         return classifier
 
     def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
