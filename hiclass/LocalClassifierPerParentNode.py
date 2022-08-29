@@ -71,7 +71,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             classifier_abbreviation="LCPPN",
         )
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         """
         Fit a local classifier per parent node.
 
@@ -83,6 +83,9 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             converted into a sparse ``csc_matrix``.
         y : array-like of shape (n_samples, n_levels)
             The target values, i.e., hierarchical class labels for classification.
+        sample_weight : array-like of shape (n_samples,), default=None
+            Array of weights that are assigned to individual samples.
+            If not provided, then each sample is given unit weight.
 
         Returns
         -------
@@ -90,7 +93,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             Fitted estimator.
         """
         # Execute common methods necessary before fitting
-        super()._pre_fit(X, y)
+        super()._pre_fit(X, y, sample_weight)
 
         # Fit local classifiers in DAG
         super().fit(X, y)
@@ -187,17 +190,20 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             else:
                 y.append(row[np.where(row == node)[0][0] + 1])
         y = np.array(y)
-        return X, y
+        sample_weight = (
+            self.sample_weight_[mask] if self.sample_weight_ is not None else None
+        )
+        return X, y, sample_weight
 
     @staticmethod
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
         # get children examples
-        X, y = self._get_successors(node)
+        X, y, sample_weight = self._get_successors(node)
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
-        classifier.fit(X, y)
+        classifier.fit(X, y, sample_weight)
         return classifier
 
     def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):

@@ -26,6 +26,7 @@ def digraph_with_policy():
     digraph.X_ = np.array([1, 2])
     digraph.y_ = np.array(["a", "b"])
     digraph.logger_ = logging.getLogger("LCPN")
+    digraph.sample_weight_ = None
     return digraph
 
 
@@ -72,6 +73,7 @@ def digraph_logistic_regression():
     digraph.root_ = "a"
     digraph.separator_ = "::HiClass::Separator::"
     digraph.binary_policy_ = ExclusivePolicy(digraph.hierarchy_, digraph.X_, digraph.y_)
+    digraph.sample_weight_ = None
     return digraph
 
 

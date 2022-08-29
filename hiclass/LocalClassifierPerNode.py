@@ -85,7 +85,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         )
         self.binary_policy = binary_policy
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         """
         Fit a local classifier per node.
 
@@ -97,6 +97,9 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             converted into a sparse ``csc_matrix``.
         y : array-like of shape (n_samples, n_levels)
             The target values, i.e., hierarchical class labels for classification.
+        sample_weight : array-like of shape (n_samples,), default=None
+            Array of weights that are assigned to individual samples.
+            If not provided, then each sample is given unit weight.
 
         Returns
         -------
@@ -104,7 +107,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             Fitted estimator.
         """
         # Execute common methods necessary before fitting
-        super()._pre_fit(X, y)
+        super()._pre_fit(X, y, sample_weight)
 
         # Initialize policy
         self._initialize_binary_policy()
@@ -192,7 +195,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             try:
                 self.binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
                     self.binary_policy.lower()
-                ](self.hierarchy_, self.X_, self.y_)
+                ](self.hierarchy_, self.X_, self.y_, self.sample_weight_)
             except KeyError:
                 self.logger_.error(
                     f"Policy {self.binary_policy} not implemented. Available policies are:\n"
@@ -226,11 +229,11 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
     @staticmethod
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
-        X, y = self.binary_policy_.get_binary_examples(node)
+        X, y, sample_weight = self.binary_policy_.get_binary_examples(node)
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
-        classifier.fit(X, y)
+        classifier.fit(X, y, sample_weight)
         return classifier
 
     def _clean_up(self):

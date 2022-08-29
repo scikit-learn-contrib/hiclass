@@ -28,6 +28,7 @@ def digraph_logistic_regression():
     digraph.logger_ = logging.getLogger("LCPPN")
     digraph.root_ = "a"
     digraph.separator_ = "::HiClass::Separator::"
+    digraph.sample_weight_ = None
     return digraph
 
 
@@ -123,19 +124,23 @@ def x_and_y_arrays():
         [("a", "b"), ("b", "c"), ("a", "e"), ("e", "f"), ("d", "g"), ("g", "h")]
     )
     graph.root_ = "r"
+    graph.sample_weight_ = None
     return graph
 
 
 def test_get_successors(x_and_y_arrays):
-    x, y = x_and_y_arrays._get_successors("a")
+    x, y, weights = x_and_y_arrays._get_successors("a")
     assert_array_equal(x_and_y_arrays.X_[0:2], x)
     assert_array_equal(["b", "e"], y)
-    x, y = x_and_y_arrays._get_successors("d")
+    assert weights is None
+    x, y, weights = x_and_y_arrays._get_successors("d")
     assert_array_equal([x_and_y_arrays.X_[-1]], x)
     assert_array_equal(["g"], y)
-    x, y = x_and_y_arrays._get_successors("b")
+    assert weights is None
+    x, y, weights = x_and_y_arrays._get_successors("b")
     assert_array_equal([x_and_y_arrays.X_[0]], x)
     assert_array_equal(["c"], y)
+    assert weights is None
 
 
 @pytest.fixture
