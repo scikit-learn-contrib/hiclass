@@ -7,7 +7,7 @@ data: 'https://files.consumerfinance.gov/ccdb/complaints.csv.zip'
 random_state: 42
 
 # Uncomment the next line to use a subset of the data
-nrows: 1000
+#nrows: 1000
 
 classifiers:
   - logistic_regression
@@ -23,24 +23,33 @@ models:
 tuning:
   logistic_regression: [
     {
-      "classifier__solver": ["newton-cg"],
+      "classifier__solver": ["newton-cg", "lbfgs", "sag"],
       "classifier__penalty": ["l2", "none"],
       "classifier__tol": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
       "classifier__C": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
       "classifier__fit_intercept": [True, False],
       "classifier__class_weight": ["balanced", ""],
       "classifier__max_iter": [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000],
-      "classifier__multi_class": ["ovr", "multinomial"],
+    },
+    {
+      "classifier__solver": ["liblinear"],
+      "classifier__penalty": ["l1", "l2"],
+      "classifier__dual": [True, False],
+      "classifier__tol": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
+      "classifier__C": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
+      "classifier__fit_intercept": [True, False],
+      "classifier__class_weight": ["balanced", ""],
+      "classifier__max_iter": [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000],
+    },
+    {
+      "classifier__solver": ["saga"],
+      "classifier__penalty": ["elasticnet", "l1", "l2", "none"],
+      "classifier__tol": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
+      "classifier__C": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
+      "classifier__fit_intercept": [True, False],
+      "classifier__intercept_scaling": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
+      "classifier__class_weight": ["balanced", ""],
+      "classifier__max_iter": [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000],
+      "classifier__l1_ratio": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     },
   ]
-#    classifier__penalty: ["l1", "l2", "elasticnet", "none"]
-#    classifier__dual: [True, False]
-#    classifier__tol: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
-#    classifier__C: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
-#    classifier__fit_intercept: [True, False]
-#    classifier__intercept_scaling: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
-#    classifier__class_weight: ["balanced", None]
-#    classifier__solver: ["newton-cg", "lbfgs", "liblinear", "sag", "saga"]
-#    classifier__max_iter: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000]
-#    classifier__multi_class: ["ovr", "multinomial"]
-#    classifier__l1_ratio: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
