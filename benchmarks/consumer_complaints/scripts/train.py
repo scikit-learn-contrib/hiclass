@@ -12,6 +12,7 @@ from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import make_scorer
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.pipeline import Pipeline
 
@@ -207,14 +208,13 @@ def main():  # pragma: no cover
     grid = RandomizedSearchCV(
         estimator=pipeline,
         param_distributions=param_distributions,
-        scoring=f1,
+        scoring=make_scorer(f1),
         n_jobs=args.n_jobs,
         verbose=3,
         random_state=args.random_state
     )
     grid.fit(x_train, y_train)
-    print("Classifier:", args.classifier)
-    print("Model:", args.model)
+    print("Classifier:", args.classifier, args.model)
     print("Best score:", grid.best_score_)
     print("Best parameters:", grid.best_params_)
     pickle.dump(grid, open(args.trained_model, "wb"))

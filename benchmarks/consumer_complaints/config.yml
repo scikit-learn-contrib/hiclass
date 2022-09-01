@@ -30,7 +30,7 @@ tuning:
       "classifier__fit_intercept": [True, False],
       "classifier__class_weight": ["balanced", ""],
       "classifier__max_iter": [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000],
-      "classifier__multi_class": ["ovr", "multinomial"]
+      "classifier__multi_class": ["ovr", "multinomial"],
     },
   ]
 #    classifier__penalty: ["l1", "l2", "elasticnet", "none"]
