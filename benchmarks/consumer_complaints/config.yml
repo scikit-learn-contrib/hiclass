@@ -7,15 +7,29 @@ data: 'https://files.consumerfinance.gov/ccdb/complaints.csv.zip'
 random_state: 42
 
 # Uncomment the next line to use a subset of the data
-#nrows: 1000
+nrows: 1000
 
 classifiers:
   - logistic_regression
-  - random_forest
-  - lightgbm
+#  - random_forest
+#  - lightgbm
 
 models:
   - flat
-  - local_classifier_per_node
-  - local_classifier_per_parent_node
-  - local_classifier_per_level
+#  - local_classifier_per_node
+#  - local_classifier_per_parent_node
+#  - local_classifier_per_level
+
+tuning:
+  - logistic_regression:
+      - penalty: ["l1", "l2", "elasticnet", "none"]
+      - dual: [True, False]
+      - tol: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
+      - C: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
+      - fit_intercept: [True, False]
+      - intercept_scaling: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
+      - class_weight: ["balanced", None]
+      - solver: ["newton-cg", "lbfgs", "liblinear", "sag", "saga"]
+      - max_iter: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000]
+      - multi_class: ["ovr", "multinomial"]
+      - l1_ratio: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]

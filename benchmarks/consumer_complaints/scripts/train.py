@@ -89,12 +89,6 @@ def parse_args(args: list) -> Namespace:
         help="Algorithm used for fitting, e.g., logistic_regression or random_forest",
     )
     parser.add_argument(
-        "--random-state",
-        type=int,
-        required=True,
-        help="Random state to enable reproducibility",
-    )
-    parser.add_argument(
         "--model",
         type=str,
         required=True,
@@ -126,7 +120,6 @@ def join(y: pd.DataFrame, separator: str = ":sep:") -> pd.Series:
 def get_flat_classifier(
     n_jobs: int,
     base_classifier: str,
-    random_state: int,
 ) -> BaseEstimator:
     """
     Build flat classifier for pipeline.
@@ -137,8 +130,6 @@ def get_flat_classifier(
         Number of threads to fit in parallel.
     base_classifier : str
         Classifier used for fitting.
-    random_state : int
-        Random state to enable reproducibility.
 
     Returns
     -------
@@ -146,7 +137,7 @@ def get_flat_classifier(
         Flat classifier.
     """
     model = classifiers[base_classifier]
-    model.set_params(n_jobs=n_jobs, random_state=random_state)
+    model.set_params(n_jobs=n_jobs)
     return model
 
 
@@ -154,7 +145,6 @@ def get_hierarchical_classifier(
     n_jobs: int,
     local_classifier: str,
     hierarchical_classifier: str,
-    random_state: int,
 ) -> BaseEstimator:
     """
     Build hierarchical classifier for pipeline.
@@ -167,8 +157,6 @@ def get_hierarchical_classifier(
         Classifier used for fitting.
     hierarchical_classifier : str
         Classifier used for hierarchical classification.
-    random_state : int
-        Random state to enable reproducibility.
 
     Returns
     -------
@@ -176,7 +164,6 @@ def get_hierarchical_classifier(
         Hierarchical classifier.
     """
     local_classifier = classifiers[local_classifier]
-    local_classifier.set_params(random_state=random_state)
     model = hierarchical_classifiers[hierarchical_classifier]
     model.set_params(local_classifier=local_classifier, n_jobs=n_jobs)
     return model
@@ -190,14 +177,13 @@ def main():  # pragma: no cover
     if args.model == "flat":
         y_train = join(y_train)
         classifier = get_flat_classifier(
-            args.n_jobs, args.classifier, args.random_state
+            args.n_jobs, args.classifier
         )
     else:
         classifier = get_hierarchical_classifier(
             args.n_jobs,
             args.classifier,
             args.model,
-            args.random_state,
         )
     pipeline = Pipeline(
         [

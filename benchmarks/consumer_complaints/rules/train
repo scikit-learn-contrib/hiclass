@@ -7,8 +7,7 @@ rule train:
         benchmark = "results/{model}/{classifier}/training_benchmark.txt"
     params:
         classifier = "{classifier}",
-        model = "{model}",
-        random_state = config["random_state"]
+        model = "{model}"
     conda:
         "../envs/hiclass.yml"
     threads:
@@ -23,6 +22,5 @@ rule train:
         --y-train {input.y_train} \
         --trained-model {output.trained_model} \
         --classifier {params.classifier} \
-        --model {params.model} \
-        --random-state {params.random_state}
+        --model {params.model}
         """
