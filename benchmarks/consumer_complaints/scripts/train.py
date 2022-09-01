@@ -6,11 +6,13 @@ import sys
 from argparse import Namespace
 
 import pandas as pd
+import yaml
 from lightgbm import LGBMClassifier
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 
 from data import load_dataframe
@@ -21,6 +23,8 @@ from hiclass import (
 )
 
 # Base classifiers used for building models
+from hiclass.metrics import f1
+
 classifiers = {
     "logistic_regression": LogisticRegression(
         max_iter=10000,
@@ -192,8 +196,23 @@ def main():  # pragma: no cover
             ("classifier", classifier),
         ]
     )
-    pipeline.fit(x_train, y_train)
-    pickle.dump(pipeline, open(args.trained_model, "wb"))
+    with open("config.yml", "r") as stream:
+        config = yaml.load(stream, Loader=yaml.SafeLoader)
+    param_grid = config["tuning"][args.classifier]
+    grid = GridSearchCV(
+        estimator=pipeline,
+        param_grid=param_grid,
+        scoring=f1,
+        n_jobs=args.n_jobs,
+        verbose=3,
+    )
+    grid.fit(x_train, y_train)
+    print("Classifier:", args.classifier)
+    print("Model:", args.model)
+    print("Best score:", grid.best_score_)
+    print("Best parameters:", grid.best_params_)
+    # pipeline.fit(x_train, y_train)
+    # pickle.dump(pipeline, open(args.trained_model, "wb"))
 
 
 if __name__ == "__main__":

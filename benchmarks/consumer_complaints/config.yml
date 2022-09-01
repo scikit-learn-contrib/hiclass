@@ -21,15 +21,15 @@ models:
 #  - local_classifier_per_level
 
 tuning:
-  - logistic_regression:
-      - penalty: ["l1", "l2", "elasticnet", "none"]
-      - dual: [True, False]
-      - tol: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
-      - C: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
-      - fit_intercept: [True, False]
-      - intercept_scaling: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
-      - class_weight: ["balanced", None]
-      - solver: ["newton-cg", "lbfgs", "liblinear", "sag", "saga"]
-      - max_iter: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000]
-      - multi_class: ["ovr", "multinomial"]
-      - l1_ratio: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+  logistic_regression:
+    classifier__penalty: ["l1", "l2", "elasticnet", "none"]
+    classifier__dual: [True, False]
+    classifier__tol: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
+    classifier__C: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
+    classifier__fit_intercept: [True, False]
+    classifier__intercept_scaling: [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
+    classifier__class_weight: ["balanced", None]
+    classifier__solver: ["newton-cg", "lbfgs", "liblinear", "sag", "saga"]
+    classifier__max_iter: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000]
+    classifier__multi_class: ["ovr", "multinomial"]
+    classifier__l1_ratio: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
