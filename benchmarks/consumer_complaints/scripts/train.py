@@ -12,7 +12,7 @@ from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.pipeline import Pipeline
 
 from data import load_dataframe
@@ -21,7 +21,6 @@ from hiclass import (
     LocalClassifierPerParentNode,
     LocalClassifierPerLevel,
 )
-
 # Base classifiers used for building models
 from hiclass.metrics import f1
 
@@ -97,6 +96,12 @@ def parse_args(args: list) -> Namespace:
         type=str,
         required=True,
         help="Model used for training, e.g., flat, lcpl, lcpn or lcppn",
+    )
+    parser.add_argument(
+        "--random-state",
+        type=int,
+        required=True,
+        help="Random state to enable reproducibility",
     )
     return parser.parse_args(args)
 
@@ -198,21 +203,21 @@ def main():  # pragma: no cover
     )
     with open("config.yml", "r") as stream:
         config = yaml.load(stream, Loader=yaml.SafeLoader)
-    param_grid = config["tuning"][args.classifier]
-    grid = GridSearchCV(
+    param_distributions = config["tuning"][args.classifier]
+    grid = RandomizedSearchCV(
         estimator=pipeline,
-        param_grid=param_grid,
+        param_distributions=param_distributions,
         scoring=f1,
         n_jobs=args.n_jobs,
         verbose=3,
+        random_state=args.random_state
     )
     grid.fit(x_train, y_train)
     print("Classifier:", args.classifier)
     print("Model:", args.model)
     print("Best score:", grid.best_score_)
     print("Best parameters:", grid.best_params_)
-    # pipeline.fit(x_train, y_train)
-    # pickle.dump(pipeline, open(args.trained_model, "wb"))
+    pickle.dump(grid, open(args.trained_model, "wb"))
 
 
 if __name__ == "__main__":
