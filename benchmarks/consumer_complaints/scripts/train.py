@@ -69,12 +69,6 @@ def parse_args(args: list) -> Namespace:
         help="Number of jobs to run training in parallel",
     )
     parser.add_argument(
-        "--n-iter",
-        type=int,
-        required=True,
-        help="Number of parameter settings that are sampled",
-    )
-    parser.add_argument(
         "--x-train",
         type=str,
         required=True,
@@ -217,7 +211,7 @@ def main():  # pragma: no cover
             scoring=make_scorer(f1),
             n_jobs=args.n_jobs,
             # n_iter=args.n_iter,
-            verbose=3,
+            verbose=10,
             # random_state=args.random_state
         )
         grid.fit(x_train, y_train)
