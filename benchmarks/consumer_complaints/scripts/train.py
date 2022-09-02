@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import make_scorer
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
 from sklearn.pipeline import Pipeline
 
 from data import load_dataframe
@@ -67,6 +67,12 @@ def parse_args(args: list) -> Namespace:
         type=int,
         required=True,
         help="Number of jobs to run training in parallel",
+    )
+    parser.add_argument(
+        "--n-iter",
+        type=int,
+        required=True,
+        help="Number of parameter settings that are sampled",
     )
     parser.add_argument(
         "--x-train",
@@ -204,20 +210,21 @@ def main():  # pragma: no cover
     )
     with open("config.yml", "r") as stream:
         config = yaml.load(stream, Loader=yaml.SafeLoader)
-    param_distributions = config["tuning"][args.classifier]
-    grid = RandomizedSearchCV(
-        estimator=pipeline,
-        param_distributions=param_distributions,
-        scoring=make_scorer(f1),
-        n_jobs=args.n_jobs,
-        verbose=3,
-        random_state=args.random_state
-    )
-    grid.fit(x_train, y_train)
-    print("Classifier:", args.classifier, args.model)
-    print("Best score:", grid.best_score_)
-    print("Best parameters:", grid.best_params_)
-    pickle.dump(grid, open(args.trained_model, "wb"))
+        param_distributions = config["tuning"][args.classifier]
+        grid = GridSearchCV(
+            estimator=pipeline,
+            param_grid=param_distributions,
+            scoring=make_scorer(f1),
+            n_jobs=args.n_jobs,
+            # n_iter=args.n_iter,
+            verbose=3,
+            # random_state=args.random_state
+        )
+        grid.fit(x_train, y_train)
+        print("Classifier:", args.classifier, args.model)
+        print("Best score:", grid.best_score_)
+        print("Best parameters:", grid.best_params_)
+        pickle.dump(grid, open(args.trained_model, "wb"))
 
 
 if __name__ == "__main__":
