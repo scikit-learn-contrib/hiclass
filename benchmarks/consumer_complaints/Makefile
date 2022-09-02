@@ -28,3 +28,9 @@ clean:  ## delete temporary files from pipeline
 .PHONY: delete-results
 delete-results:  ## delete results from pipeline
 	-rm -rf results
+
+.PHONY: git
+git:  ## Update local repository
+	-git reset --hard
+	-git fetch
+	-git pull
