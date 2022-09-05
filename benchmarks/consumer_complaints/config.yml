@@ -21,17 +21,20 @@ models:
 #  - local_classifier_per_level
 
 tuning:
-  logistic_regression: [
-    {
-      "classifier__solver": ["newton-cg", "lbfgs", "liblinear", "sag", "saga"],
-      "classifier__penalty": ["l1", "l2", "elasticnet", "none"],
-      "classifier__dual": [True, False],
-      "classifier__tol": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
-      "classifier__C": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
-      "classifier__fit_intercept": [True, False],
-      "classifier__intercept_scaling": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
-      "classifier__class_weight": ["balanced", ""],
-      "classifier__max_iter": [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000],
-      "classifier__l1_ratio": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    },
-  ]
+  iterations:
+    logistic_regression: 1000
+  parameters:
+    logistic_regression: [
+      {
+        "classifier__solver": ["newton-cg", "lbfgs", "liblinear", "sag", "saga"],
+        "classifier__penalty": ["l2"],
+        "classifier__dual": [False],
+        "classifier__tol": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
+        "classifier__C": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
+        "classifier__fit_intercept": [True, False],
+        "classifier__intercept_scaling": [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
+        "classifier__class_weight": ["balanced", ""],
+        "classifier__max_iter": [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000],
+        "classifier__l1_ratio": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+      },
+    ]

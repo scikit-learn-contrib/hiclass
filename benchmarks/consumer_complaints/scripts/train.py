@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import make_scorer
-from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.pipeline import Pipeline
 
 from data import load_dataframe
@@ -22,7 +22,6 @@ from hiclass import (
     LocalClassifierPerParentNode,
     LocalClassifierPerLevel,
 )
-# Base classifiers used for building models
 from hiclass.metrics import f1
 
 classifiers = {
@@ -204,15 +203,16 @@ def main():  # pragma: no cover
     )
     with open("config.yml", "r") as stream:
         config = yaml.load(stream, Loader=yaml.SafeLoader)
-        param_distributions = config["tuning"][args.classifier]
-        grid = GridSearchCV(
+        n_iter = config["tuning"]["iterations"][args.classifier]
+        param_distributions = config["tuning"]["parameters"][args.classifier]
+        grid = RandomizedSearchCV(
             estimator=pipeline,
-            param_grid=param_distributions,
+            param_distributions=param_distributions,
             scoring=make_scorer(f1),
             n_jobs=args.n_jobs,
-            # n_iter=args.n_iter,
+            n_iter=n_iter,
             verbose=10,
-            # random_state=args.random_state
+            random_state=args.random_state
         )
         grid.fit(x_train, y_train)
         print("Classifier:", args.classifier, args.model)
