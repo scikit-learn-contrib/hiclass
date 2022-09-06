@@ -1,6 +1,6 @@
 workdir: /home/fabio/Desktop/hiclass/benchmarks/consumer_complaints
 
-threads: 256
+threads: 12
 
 data: 'https://files.consumerfinance.gov/ccdb/complaints.csv.zip'
 
