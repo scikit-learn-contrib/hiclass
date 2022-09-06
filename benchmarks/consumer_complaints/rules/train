@@ -8,7 +8,7 @@ rule train:
     params:
         classifier = "{classifier}",
         model = "{model}",
-        random_state = config["random_state"],
+        # random_state = config["random_state"],
     conda:
         "../envs/hiclass.yml"
     threads:
@@ -23,6 +23,5 @@ rule train:
         --y-train {input.y_train} \
         --trained-model {output.trained_model} \
         --classifier {params.classifier} \
-        --model {params.model} \
-        --random-state {params.random_state}
+        --model {params.model}
         """

@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import make_scorer
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 
 from data import load_dataframe
@@ -97,12 +97,12 @@ def parse_args(args: list) -> Namespace:
         required=True,
         help="Model used for training, e.g., flat, lcpl, lcpn or lcppn",
     )
-    parser.add_argument(
-        "--random-state",
-        type=int,
-        required=True,
-        help="Random state to enable reproducibility",
-    )
+    # parser.add_argument(
+    #     "--random-state",
+    #     type=int,
+    #     required=True,
+    #     help="Random state to enable reproducibility",
+    # )
     return parser.parse_args(args)
 
 
@@ -178,6 +178,20 @@ def get_hierarchical_classifier(
     return model
 
 
+def tune(classifier, pipeline, n_jobs):
+    with open("config.yml", "r") as stream:
+        config = yaml.load(stream, Loader=yaml.SafeLoader)
+        param_grid = config["tuning"][classifier]
+        grid = GridSearchCV(
+            estimator=pipeline,
+            param_grid=param_grid,
+            scoring=make_scorer(f1),
+            n_jobs=n_jobs,
+            verbose=10,
+        )
+        return grid
+
+
 def main():  # pragma: no cover
     """Train with flat or hierarchical approaches."""
     args = parse_args(sys.argv[1:])
@@ -185,9 +199,7 @@ def main():  # pragma: no cover
     y_train = load_dataframe(args.y_train)
     if args.model == "flat":
         y_train = join(y_train)
-        classifier = get_flat_classifier(
-            args.n_jobs, args.classifier
-        )
+        classifier = get_flat_classifier(args.n_jobs, args.classifier)
     else:
         classifier = get_hierarchical_classifier(
             args.n_jobs,
@@ -201,24 +213,13 @@ def main():  # pragma: no cover
             ("classifier", classifier),
         ]
     )
-    with open("config.yml", "r") as stream:
-        config = yaml.load(stream, Loader=yaml.SafeLoader)
-        n_iter = config["tuning"]["iterations"][args.classifier]
-        param_distributions = config["tuning"]["parameters"][args.classifier]
-        grid = RandomizedSearchCV(
-            estimator=pipeline,
-            param_distributions=param_distributions,
-            scoring=make_scorer(f1),
-            n_jobs=args.n_jobs,
-            n_iter=n_iter,
-            verbose=10,
-            random_state=args.random_state
-        )
-        grid.fit(x_train, y_train)
-        print("Classifier:", args.classifier, args.model)
-        print("Best score:", grid.best_score_)
-        print("Best parameters:", grid.best_params_)
-        pickle.dump(grid, open(args.trained_model, "wb"))
+    pipeline = (
+        tune(args.classifier, pipeline, args.n_jobs)
+        if args.model == "flat"
+        else pipeline
+    )
+    pipeline.fit(x_train, y_train)
+    pickle.dump(pipeline, open(args.trained_model, "wb"))
 
 
 if __name__ == "__main__":

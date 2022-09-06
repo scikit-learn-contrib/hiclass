@@ -11,22 +11,31 @@ random_state: 42
 
 classifiers:
   - logistic_regression
-#  - random_forest
-#  - lightgbm
+  - random_forest
+  - lightgbm
 
 models:
   - flat
-#  - local_classifier_per_node
-#  - local_classifier_per_parent_node
-#  - local_classifier_per_level
+  - local_classifier_per_node
+  - local_classifier_per_parent_node
+  - local_classifier_per_level
 
 tuning:
-  iterations:
-    logistic_regression: 1000
-  parameters:
-    logistic_regression: [
-      {
-        "classifier__solver": ["newton-cg", "lbfgs", "liblinear", "sag", "saga"],
-        "classifier__max_iter": [10000],
-      },
-    ]
+  logistic_regression: [
+    {
+      "classifier__solver": ["newton-cg", "lbfgs", "liblinear", "sag", "saga"],
+      "classifier__max_iter": [10000],
+    }
+  ]
+  random_forest: [
+    {
+      "classifier__n_estimators": [100, 1000],
+      "classifier__criterion": ["gini", "entropy", "log_loss"],
+    }
+  ]
+  lightgbm: [
+    {
+      "classifier__num_leaves": [31, 62, 124],
+      "classifier__min_data_in_leaf": [20, 40, 60],
+    }
+  ]
