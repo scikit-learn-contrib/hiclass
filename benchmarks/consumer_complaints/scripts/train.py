@@ -174,6 +174,23 @@ def get_hierarchical_classifier(
 
 
 def tune(classifier, pipeline, n_jobs):
+    """
+    Tune hyperparameters of flat classifier.
+
+    Parameters
+    ----------
+    classifier: str
+        Classifier used for fitting.
+    pipeline: Pipeline
+        Machine learning pipeline for training.
+    n_jobs: int
+        Number of threads to fit in parallel.
+
+    Returns
+    -------
+    grid: GridSearchCV
+        Grid to perform hyperparameter tuning.
+    """
     with open("config.yml", "r") as stream:
         config = yaml.load(stream, Loader=yaml.SafeLoader)
         param_grid = config["tuning"][classifier]
