@@ -24,6 +24,7 @@ from hiclass import (
 )
 from hiclass.metrics import f1
 
+# Base classifiers used for building models
 classifiers = {
     "logistic_regression": LogisticRegression(
         max_iter=10000,
@@ -97,12 +98,6 @@ def parse_args(args: list) -> Namespace:
         required=True,
         help="Model used for training, e.g., flat, lcpl, lcpn or lcppn",
     )
-    # parser.add_argument(
-    #     "--random-state",
-    #     type=int,
-    #     required=True,
-    #     help="Random state to enable reproducibility",
-    # )
     return parser.parse_args(args)
 
 
