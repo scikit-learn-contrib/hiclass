@@ -1,0 +1,9 @@
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8
+  - pip
+  - pip:
+      - hydra-core==1.2.0
+      - hydra-optuna-sweeper==1.2.0
+      - hydra-submitit-launcher==1.2.0

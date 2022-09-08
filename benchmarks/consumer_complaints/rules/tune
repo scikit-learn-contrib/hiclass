@@ -1,0 +1,25 @@
+rule tune:
+    input:
+        x_train = "results/split_data/x_train.csv.zip",
+        y_train = "results/split_data/y_train.csv.zip"
+    output:
+        trained_model = "results/{model}/{classifier}/tuned_parameters.yml"
+    params:
+        classifier = "{classifier}",
+        model = "{model}",
+        random_state = config["random_state"]
+    conda:
+        "../envs/hydra.yml"
+    threads:
+        config["threads"]
+    shell:
+        """
+        python scripts/tune.py \
+        --n-jobs {threads} \
+        --x-train {input.x_train} \
+        --y-train {input.y_train} \
+        --trained-model {output.trained_model} \
+        --classifier {params.classifier} \
+        --model {params.model} \
+        --random-state {params.random_state}
+        """
