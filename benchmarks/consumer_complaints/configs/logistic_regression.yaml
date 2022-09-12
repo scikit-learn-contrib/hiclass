@@ -1,0 +1,12 @@
+defaults:
+  - _self_
+  - hydra
+
+hydra:
+  sweeper:
+    params:
+      classifier__solver: choice("newton-cg", "lbfgs", "liblinear", "sag", "saga")
+      classifier__max_iter: choice(10000)
+
+classifier__solver: 1
+classifier__max_iter: 1

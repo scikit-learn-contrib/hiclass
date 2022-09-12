@@ -16,11 +16,10 @@ rule tune:
         config["threads"]
     shell:
         """
-        python scripts/tune.py hydra/launcher=submitit_slurm --cfg hydra -p hydra.launcher
-        # python scripts/tune.py \
-        # --config-path {params.config_path}/configs \
-        # --config-name {params.config} \
-        # hydra/sweeper=optuna --cfg hydra -p hydra.sweeper
+        python scripts/tune.py \
+        --config-name {params.config} \
+        --multirun
+        # --cfg hydra -p hydra.launcher
         # --n-jobs {threads} \
         # --x-train {input.x_train} \
         # --y-train {input.y_train} \
