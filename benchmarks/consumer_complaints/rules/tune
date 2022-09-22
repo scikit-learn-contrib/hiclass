@@ -11,18 +11,20 @@ rule tune:
         config_path = config["workdir"],
         config = "{classifier}",
     conda:
-        "../envs/tune.yml"
+        "../envs/hydra.yml"
     threads:
         config["threads"]
     shell:
         """
         python scripts/tune.py \
-        --n-jobs {threads} \
-        --x-train {input.x_train} \
-        --y-train {input.y_train} \
-        --best-parameters {output.best_parameters} \
-        --classifier {params.classifier} \
-        --model {params.model} \
-        --random-state {params.random_state} \
-        --config {params.config_path}/{params.config}.yml
+        --config-name {params.config} \
+        --multirun
+        # --cfg hydra -p hydra.launcher
+        # --n-jobs {threads} \
+        # --x-train {input.x_train} \
+        # --y-train {input.y_train} \
+        # --trained-model {output.best_parameters} \
+        # --classifier {params.classifier} \
+        # --model {params.model} \
+        # --random-state {params.random_state}
         """
