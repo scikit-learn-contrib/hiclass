@@ -6,7 +6,7 @@ defaults:
 
 hydra:
   launcher:
-    mem_gb: 490
+    mem_gb: 450
     account: renard
     timeout_min: 1440
     partition: magic
