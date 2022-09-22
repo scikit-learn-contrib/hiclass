@@ -3,7 +3,7 @@ rule tune:
         x_train = "results/split_data/x_train.csv.zip",
         y_train = "results/split_data/y_train.csv.zip"
     output:
-        trained_model = "results/{model}/{classifier}/tuned_parameters.yml"
+        best_parameters = "results/{model}/{classifier}/tuned_parameters.yml"
     params:
         classifier = "{classifier}",
         model = "{model}",
@@ -11,20 +11,18 @@ rule tune:
         config_path = config["workdir"],
         config = "{classifier}",
     conda:
-        "../envs/hydra.yml"
+        "../envs/tune.yml"
     threads:
         config["threads"]
     shell:
         """
         python scripts/tune.py \
-        --config-name {params.config} \
-        --multirun
-        # --cfg hydra -p hydra.launcher
-        # --n-jobs {threads} \
-        # --x-train {input.x_train} \
-        # --y-train {input.y_train} \
-        # --trained-model {output.trained_model} \
-        # --classifier {params.classifier} \
-        # --model {params.model} \
-        # --random-state {params.random_state}
+        --n-jobs {threads} \
+        --x-train {input.x_train} \
+        --y-train {input.y_train} \
+        --best-parameters {output.best_parameters} \
+        --classifier {params.classifier} \
+        --model {params.model} \
+        --random-state {params.random_state} \
+        --config {params.config_path}/{params.config}.yml
         """

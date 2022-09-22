@@ -5,8 +5,10 @@ defaults:
 hydra:
   sweeper:
     params:
+      classifier: choice("logistic_regression")
       classifier__solver: choice("newton-cg", "lbfgs", "liblinear", "sag", "saga")
       classifier__max_iter: choice(10000)
 
+classifier: 1
 classifier__solver: 1
 classifier__max_iter: 1

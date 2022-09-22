@@ -1,15 +1,15 @@
 defaults:
-  - override hydra/launcher: submitit_slurm
-#  - override hydra/launcher: submitit_local
+#  - override hydra/launcher: submitit_slurm
+  - override hydra/launcher: submitit_local
   - override hydra/sweeper: optuna
   - override hydra/sweeper/sampler: tpe
 
 hydra:
   launcher:
     mem_gb: 450
-    account: renard
+#    account: renard
     timeout_min: 1440
-    partition: magic
+#    partition: magic
   sweeper:
     n_trials: 5
     n_jobs: 256

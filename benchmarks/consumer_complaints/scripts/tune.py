@@ -1,11 +1,15 @@
-import hydra
-from omegaconf import DictConfig, OmegaConf
+import submitit
+from time import sleep
 
-@hydra.main(config_path="../configs", config_name="logistic_regression")
-def optimize(cfg : DictConfig) -> float:
-    classifier__solver: str = cfg.classifier__solver
-    classifier__max_iter: int = cfg.classifier__max_iter
-    return 1
+def add(a, b):
+    sleep(5)
+    return a + b
 
-if __name__ == "__main__":
-    optimize()
+# executor is the submission interface (logs are dumped in the folder)
+executor = submitit.AutoExecutor(folder="log_test")
+# set timeout in min, and partition for running the job
+executor.update_parameters(timeout_min=1, slurm_partition="magic", slurm_array_parallelism=2)
+a = [1, 2, 3, 4]
+b = [10, 20, 30, 40]
+jobs = executor.map_array(add, a, b)  # just a list of jobs
+print([job.result() for job in jobs])

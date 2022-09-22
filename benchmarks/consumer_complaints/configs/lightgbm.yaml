@@ -1,0 +1,14 @@
+defaults:
+  - _self_
+  - hydra
+
+hydra:
+  sweeper:
+    params:
+      classifier: choice("lightgbm")
+      classifier__num_leaves: choice(31, 62, 124)
+      classifier__min_data_in_leaf: choice(20, 40, 60)
+
+classifier: 1
+classifier__num_leaves: 1
+classifier__min_data_in_leaf: 1
