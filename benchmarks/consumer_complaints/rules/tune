@@ -1,7 +1,7 @@
 rule tune:
     input:
-        x_train = "results/split_data/x_train.csv.zip",
-        y_train = "results/split_data/y_train.csv.zip"
+        x_train = f"{config['workdir']}/results/split_data/x_train.csv.zip",
+        y_train = f"{config['workdir']}/results/split_data/y_train.csv.zip"
     output:
         best_parameters = "results/{model}/{classifier}/tuned_parameters.yml"
     params:
@@ -16,15 +16,20 @@ rule tune:
         config["threads"]
     shell:
         """
+        # Update x_train path
+        sed -i \
+        's?      x_train: choice.*?      x_train: choice("{input.x_train}")?' \
+        {params.config_path}/configs/{params.config}.yaml
+        
+        # Update y_train path
+        sed -i \
+        's?      y_train: choice.*?      y_train: choice("{input.y_train}")?' \
+        {params.config_path}/configs/{params.config}.yaml
+        
         python scripts/tune.py \
         --config-name {params.config} \
         --multirun
-        'x=choice("{input.x_train}")' \
-        'y=choice("{input.y_train}")'
         # --cfg hydra -p hydra.launcher
-        # --n-jobs {threads} \
-        # --x-train {input.x_train} \
-        # --y-train {input.y_train} \
         # --trained-model {output.best_parameters} \
         # --classifier {params.classifier} \
         # --model {params.model} \

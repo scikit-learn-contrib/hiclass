@@ -11,7 +11,7 @@ nrows: 1000
 
 classifiers:
   - logistic_regression
-#  - random_forest
+  - random_forest
   - lightgbm
 
 models:
