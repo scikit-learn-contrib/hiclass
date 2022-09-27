@@ -19,6 +19,8 @@ rule tune:
         python scripts/tune.py \
         --config-name {params.config} \
         --multirun
+        'x=choice("{input.x_train}")' \
+        'y=choice("{input.y_train}")'
         # --cfg hydra -p hydra.launcher
         # --n-jobs {threads} \
         # --x-train {input.x_train} \
