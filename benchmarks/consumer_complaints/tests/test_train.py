@@ -1,7 +1,5 @@
-import pandas as pd
 from lightgbm import LGBMClassifier
-from pandas.testing import assert_series_equal
-from scripts.train import join, get_flat_classifier, get_hierarchical_classifier
+from scripts.train import get_flat_classifier, get_hierarchical_classifier
 from scripts.train import parse_args
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -46,41 +44,6 @@ def test_parser():
     assert 0 == parser.random_state
     assert parser.model is not None
     assert "flat" == parser.model
-
-
-def test_join_1():
-    y = pd.DataFrame(
-        {
-            "Product": ["Debt collection", "Checking or savings account"],
-            "Sub-product": ["I do not know", "Checking account"],
-        }
-    )
-    flat_y = join(y)
-    ground_truth = pd.Series(
-        [
-            "Debt collection:sep:I do not know",
-            "Checking or savings account:sep:Checking account",
-        ]
-    )
-    assert_series_equal(ground_truth, flat_y)
-
-
-def test_join_2():
-    y = pd.DataFrame(
-        {
-            "Product": ["Debt collection", "Checking or savings account"],
-            "Sub-product": ["I do not know", "Checking account"],
-        }
-    )
-    separator = ","
-    flat_y = join(y, separator)
-    ground_truth = pd.Series(
-        [
-            "Debt collection,I do not know",
-            "Checking or savings account,Checking account",
-        ]
-    )
-    assert_series_equal(ground_truth, flat_y)
 
 
 def test_get_flat_classifier():

@@ -1,9 +1,7 @@
-from os import chdir
-from typing import TextIO
-
+#!/usr/bin/env python3
+"""Script to perform hyper-parameter tuning for flat or hierarchical approaches."""
 import hydra
 import numpy as np
-import pandas as pd
 from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
 from sklearn.base import BaseEstimator
@@ -14,49 +12,13 @@ from sklearn.metrics import make_scorer
 from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
 
+from data import load_dataframe, join
 from hiclass.metrics import f1
-
-
-def load_dataframe(path: TextIO) -> pd.DataFrame:
-    """
-    Load a dataframe from a CSV file.
-
-    Parameters
-    ----------
-    path : TextIO
-        Path to CSV file.
-
-    Returns
-    -------
-    df : pd.DataFrame
-        Loaded dataframe.
-    """
-    return pd.read_csv(path, compression="infer", header=0, sep=",", low_memory=False)
-
-
-def join(y: pd.DataFrame, separator: str = ":sep:") -> pd.Series:
-    """
-    Join hierarchical labels into a single column.
-
-    Parameters
-    ----------
-    y : pd.DataFrame
-        hierarchical labels.
-    separator : str, default=":sep:"
-        Separator used to differentiate between columns.
-
-    Returns
-    -------
-    y : pd.Series
-        Joined labels.
-    """
-    y = y[y.columns].apply(lambda x: separator.join(x.dropna().astype(str)), axis=1)
-    return y
 
 
 def configure_lightgbm(cfg: DictConfig) -> BaseEstimator:
     """
-    Setup LightGBM with parameters passed as argument.
+    Configure LightGBM with parameters passed as argument.
 
     Parameters
     ----------
@@ -78,7 +40,7 @@ def configure_lightgbm(cfg: DictConfig) -> BaseEstimator:
 
 def configure_logistic_regression(cfg: DictConfig) -> BaseEstimator:
     """
-    Setup LogisticRegression with parameters passed as argument.
+    Configure LogisticRegression with parameters passed as argument.
 
     Parameters
     ----------
@@ -100,7 +62,7 @@ def configure_logistic_regression(cfg: DictConfig) -> BaseEstimator:
 
 def configure_random_forest(cfg: DictConfig) -> BaseEstimator:
     """
-    Setup RandomForest with parameters passed as argument.
+    Configure RandomForest with parameters passed as argument.
 
     Parameters
     ----------

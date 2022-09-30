@@ -5,7 +5,6 @@ import pickle
 import sys
 from argparse import Namespace
 
-import pandas as pd
 from lightgbm import LGBMClassifier
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
@@ -13,7 +12,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
-from data import load_dataframe
+from data import load_dataframe, join
 from hiclass import (
     LocalClassifierPerNode,
     LocalClassifierPerParentNode,
@@ -101,26 +100,6 @@ def parse_args(args: list) -> Namespace:
         help="Model used for training, e.g., flat, lcpl, lcpn or lcppn",
     )
     return parser.parse_args(args)
-
-
-def join(y: pd.DataFrame, separator: str = ":sep:") -> pd.Series:
-    """
-    Join hierarchical labels into a single column.
-
-    Parameters
-    ----------
-    y : pd.DataFrame
-        hierarchical labels.
-    separator : str, default=":sep:"
-        Separator used to differentiate between columns.
-
-    Returns
-    -------
-    y : pd.Series
-        Joined labels.
-    """
-    y = y[y.columns].apply(lambda x: separator.join(x.dropna().astype(str)), axis=1)
-    return y
 
 
 def get_flat_classifier(

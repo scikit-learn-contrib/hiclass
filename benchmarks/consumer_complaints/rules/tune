@@ -9,19 +9,24 @@ rule tune:
         model = "{model}",
         random_state = config["random_state"],
         output_dir = "results/{model}/{classifier}",
+        scripts_dir = config["workdir"] + "/scripts",
     conda:
         "../envs/hydra.yml"
     threads:
         1
     shell:
         """
+        export PYTHONPATH={params.scripts_dir}
+        
         python scripts/tune.py \
         --config-name {params.classifier} \
         --multirun \
         'classifier={params.classifier}' \
+        'model={params.model}' \
         'n_jobs={threads}' \
         'x_train={input.x_train}' \
         'y_train={input.y_train}' \
+        'scripts_dir={params.scripts_dir}' \
         hydra.sweeper.sampler.seed={params.random_state} \
         hydra.sweep.dir={params.output_dir} \
         # --trained-model {output.best_parameters} \
