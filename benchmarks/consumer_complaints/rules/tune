@@ -5,18 +5,20 @@ rule tune:
     output:
         best_parameters = "results/{model}/{classifier}/tuned_parameters.yml"
     params:
+        classifier = "{classifier}",
         model = "{model}",
         random_state = config["random_state"],
-        config_name = "{classifier}",
     conda:
         "../envs/hydra.yml"
     threads:
-        config["threads"]
+        1
     shell:
         """
         python scripts/tune.py \
-        --config-name {params.config_name} \
+        --config-name {params.classifier} \
         --multirun \
+        'classifier={params.classifier}' \
+        'n_jobs={threads}' \
         'x_train={input.x_train}' \
         'y_train={input.y_train}' \
         hydra.sweeper.sampler.seed={params.random_state} \
