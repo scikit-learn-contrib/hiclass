@@ -16,6 +16,6 @@ classifiers:
 
 models:
   - flat
-#  - local_classifier_per_node
-#  - local_classifier_per_parent_node
-#  - local_classifier_per_level
+  - local_classifier_per_node
+  - local_classifier_per_parent_node
+  - local_classifier_per_level

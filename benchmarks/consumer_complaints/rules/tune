@@ -28,8 +28,5 @@ rule tune:
         'y_train={input.y_train}' \
         'scripts_dir={params.scripts_dir}' \
         hydra.sweeper.sampler.seed={params.random_state} \
-        hydra.sweep.dir={params.output_dir} \
-        # --trained-model {output.best_parameters} \
-        # --model {params.model} \
-        # --random-state {params.random_state}
+        hydra.sweep.dir={params.output_dir}
         """

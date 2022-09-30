@@ -13,6 +13,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
 
 from data import load_dataframe, join
+from hiclass import LocalClassifierPerNode, LocalClassifierPerParentNode, LocalClassifierPerLevel
 from hiclass.metrics import f1
 
 
@@ -82,16 +83,31 @@ def configure_random_forest(cfg: DictConfig) -> BaseEstimator:
     return classifier
 
 
+configure_flat = {
+    "lightgbm": configure_lightgbm,
+    "logistic_regression": configure_logistic_regression,
+    "random_forest": configure_random_forest,
+}
+
+
+configure_hierarchical = {
+    "local_classifier_per_node": LocalClassifierPerNode(),
+    "local_classifier_per_parent_node": LocalClassifierPerParentNode(),
+    "local_classifier_per_level": LocalClassifierPerLevel(),
+}
+
+
 @hydra.main(config_path="../configs", config_name="logistic_regression", version_base="1.2")
-def optimize(cfg: DictConfig) -> float:
-    configure = {
-        "lightgbm": configure_lightgbm,
-        "logistic_regression": configure_logistic_regression,
-        "random_forest": configure_random_forest,
-    }
-    classifier = configure[cfg.classifier](cfg)
+def optimize(cfg: DictConfig) -> np.ndarray:
     x_train = load_dataframe(cfg.x_train).squeeze()
-    y_train = join(load_dataframe(cfg.y_train))
+    y_train = load_dataframe(cfg.y_train)
+    if cfg.model == "flat":
+        y_train = join(y_train)
+        classifier = configure_flat[cfg.classifier](cfg)
+    else:
+        local_classifier = configure_flat[cfg.classifier](cfg)
+        classifier = configure_hierarchical[cfg.model]
+        classifier.set_params(local_classifier=local_classifier)
     pipeline = Pipeline(
         [
             ("count", CountVectorizer()),

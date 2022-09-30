@@ -10,7 +10,7 @@ hydra:
   launcher:
     mem_gb: 450
 #    account: renard  # uncomment this line to run on slurm
-    timeout_min: 1440
+    timeout_min: 4320
 #    partition: magic  # uncomment this line to run on slurm
   sweeper:
     n_trials: 5
