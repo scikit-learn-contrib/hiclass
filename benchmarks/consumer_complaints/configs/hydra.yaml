@@ -10,7 +10,7 @@ hydra:
   launcher:
     account: renard  # uncomment this line to run on slurm
     timeout_min: 4320
-    partition: magic  # uncomment this line to run on slurm
+    partition: cauldron  # uncomment this line to run on slurm
     mem_gb: 480
     nodes: 1
     tasks_per_node: 10
