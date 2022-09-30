@@ -15,7 +15,6 @@ hydra:
       solver: choice("newton-cg", "lbfgs", "liblinear", "sag", "saga")
       max_iter: choice(100, 1000, 10000)
       multi_class: choice("auto")
-      l1_ratio: choice(None)
 
 penalty: 1
 dual: 1
@@ -27,4 +26,3 @@ class_weight: 1
 solver: 1
 max_iter: 1
 multi_class: 1
-l1_ratio: 1

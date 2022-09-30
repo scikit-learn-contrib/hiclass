@@ -1,6 +1,6 @@
 defaults:
-#  - override hydra/launcher: submitit_slurm  # uncomment this line to run on slurm
-  - override hydra/launcher: submitit_local  # uncomment this line to run locally
+  - override hydra/launcher: submitit_slurm  # uncomment this line to run on slurm
+#  - override hydra/launcher: submitit_local  # uncomment this line to run locally
   - override hydra/sweeper: optuna
   - override hydra/sweeper/sampler: tpe
   - override hydra/job_logging: colorlog
@@ -9,12 +9,12 @@ defaults:
 hydra:
   launcher:
     mem_gb: 450
-#    account: renard  # uncomment this line to run on slurm
+    account: renard  # uncomment this line to run on slurm
     timeout_min: 4320
-#    partition: magic  # uncomment this line to run on slurm
+    partition: magic  # uncomment this line to run on slurm
   sweeper:
-    n_trials: 100
-    n_jobs: 100
+    n_trials: 1000
+    n_jobs: 21
     direction: maximize
     params:
       classifier: choice(None)

@@ -7,15 +7,15 @@ data: 'https://files.consumerfinance.gov/ccdb/complaints.csv.zip'
 random_state: 42
 
 # Uncomment the next line to use a subset of the data
-nrows: 100
+#nrows: 100
 
 classifiers:
-#  - logistic_regression
-#  - random_forest
+  - logistic_regression
+  - random_forest
   - lightgbm
 
 models:
   - flat
-#  - local_classifier_per_node
-#  - local_classifier_per_parent_node
-#  - local_classifier_per_level
+  - local_classifier_per_node
+  - local_classifier_per_parent_node
+  - local_classifier_per_level

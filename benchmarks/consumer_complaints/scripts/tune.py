@@ -80,7 +80,6 @@ def configure_logistic_regression(cfg: DictConfig) -> BaseEstimator:
         solver=cfg.solver,
         max_iter=cfg.max_iter,
         multi_class=cfg.multi_class,
-        l1_ratio=cfg.l1_ratio,
     )
     return classifier
 
