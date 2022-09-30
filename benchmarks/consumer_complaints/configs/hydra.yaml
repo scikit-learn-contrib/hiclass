@@ -12,6 +12,7 @@ hydra:
     timeout_min: 4320
     partition: magic  # uncomment this line to run on slurm
     mem_gb: 40
+    cpus_per_task: 1
     nodes: 1
     tasks_per_node: 10
     name: hydra
