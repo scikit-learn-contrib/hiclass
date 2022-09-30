@@ -14,7 +14,7 @@ hydra:
       class_weight: choice("balanced")
       solver: choice("newton-cg", "lbfgs", "liblinear", "sag", "saga")
       max_iter: choice(100, 1000, 10000)
-      multi_class: choice("auto", "ovr", "multinomial")
+      multi_class: choice("auto")
       l1_ratio: choice(None)
 
 penalty: 1

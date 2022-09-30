@@ -7,12 +7,10 @@ hydra:
     params:
       n_estimators: choice(100, 1000, 10000)
       criterion: choice("gini", "entropy", "log_loss")
-      max_depth: choice(None)
       min_samples_split: choice(2, 4, 6, 8, 10)
       min_samples_leaf: choice(1, 2, 4, 6, 8, 10)
       min_weight_fraction_leaf: choice(0.0, 0.1, 0.2, 0.3, 0.4, 0.5)
       max_features: choice(None, "sqrt", "log2")
-      max_leaf_nodes: choice(None)
       min_impurity_decrease: choice(0.0, 0.1, 0.2, 0.3, 0.4, 0.5)
       bootstrap: choice(True)
       oob_score: choice(True, False)
@@ -21,12 +19,10 @@ hydra:
 
 n_estimators: 1
 criterion: 1
-max_depth: 1
 min_samples_split: 1
 min_samples_leaf: 1
 min_weight_fraction_leaf: 1
 max_features: 1
-max_leaf_nodes: 1
 min_impurity_decrease: 1
 bootstrap: 1
 oob_score: 1
