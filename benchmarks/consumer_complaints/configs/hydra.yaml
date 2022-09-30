@@ -8,13 +8,13 @@ defaults:
 
 hydra:
   launcher:
-    mem_gb: 450
     account: renard  # uncomment this line to run on slurm
     timeout_min: 4320
     partition: magic  # uncomment this line to run on slurm
+    nodes: 2
   sweeper:
     n_trials: 1000
-    n_jobs: 21
+    n_jobs: 42
     direction: maximize
     params:
       classifier: choice(None)
