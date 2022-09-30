@@ -11,11 +11,13 @@ hydra:
     account: renard  # uncomment this line to run on slurm
     timeout_min: 4320
     partition: magic  # uncomment this line to run on slurm
-    mem_gb: 450
+    mem_gb: 500
     nodes: 1
+    tasks_per_node: 10
+    name: hydra
   sweeper:
     n_trials: 100
-    n_jobs: 12
+    n_jobs: 10
     direction: maximize
     params:
       classifier: choice(None)
