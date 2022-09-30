@@ -1,13 +1,14 @@
 rule tune:
     input:
-        x_train = f"{config['workdir']}/results/split_data/x_train.csv.zip",
-        y_train = f"{config['workdir']}/results/split_data/y_train.csv.zip"
+        x_train = "results/split_data/x_train.csv.zip",
+        y_train = "results/split_data/y_train.csv.zip"
     output:
-        best_parameters = "results/{model}/{classifier}/tuned_parameters.yml"
+        best_parameters = "results/{model}/{classifier}/optimization_results.yaml"
     params:
         classifier = "{classifier}",
         model = "{model}",
         random_state = config["random_state"],
+        output_dir = "results/{model}/{classifier}",
     conda:
         "../envs/hydra.yml"
     threads:
@@ -22,6 +23,7 @@ rule tune:
         'x_train={input.x_train}' \
         'y_train={input.y_train}' \
         hydra.sweeper.sampler.seed={params.random_state} \
+        hydra.sweep.dir={params.output_dir} \
         # --trained-model {output.best_parameters} \
         # --model {params.model} \
         # --random-state {params.random_state}

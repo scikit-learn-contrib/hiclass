@@ -7,6 +7,7 @@ dependencies:
       - hydra-core==1.2.0
       - hydra-optuna-sweeper==1.2.0
       - hydra-submitit-launcher==1.2.0
+      - hydra-colorlog==1.2.0
       - scikit-learn==1.1.1
       - lightgbm==3.3.2
       - hiclass==4.1.0
