@@ -5,33 +5,22 @@ rule tune:
     output:
         best_parameters = "results/{model}/{classifier}/tuned_parameters.yml"
     params:
-        classifier = "{classifier}",
         model = "{model}",
         random_state = config["random_state"],
-        config_path = config["workdir"],
-        config = "{classifier}",
+        config_name = "{classifier}",
     conda:
         "../envs/hydra.yml"
     threads:
         config["threads"]
     shell:
         """
-        # Update x_train path
-        sed -i \
-        's?      x_train: choice.*?      x_train: choice("{input.x_train}")?' \
-        {params.config_path}/configs/{params.config}.yaml
-        
-        # Update y_train path
-        sed -i \
-        's?      y_train: choice.*?      y_train: choice("{input.y_train}")?' \
-        {params.config_path}/configs/{params.config}.yaml
-        
         python scripts/tune.py \
-        --config-name {params.config} \
-        --multirun
-        # --cfg hydra -p hydra.launcher
+        --config-name {params.config_name} \
+        --multirun \
+        'x_train={input.x_train}' \
+        'y_train={input.y_train}' \
+        hydra.sweeper.sampler.seed={params.random_state} \
         # --trained-model {output.best_parameters} \
-        # --classifier {params.classifier} \
         # --model {params.model} \
         # --random-state {params.random_state}
         """

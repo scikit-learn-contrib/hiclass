@@ -9,8 +9,8 @@ hydra:
       n_jobs: choice(1)
       num_leaves: choice(31, 62, 124)
       min_data_in_leaf: choice(20, 40, 60)
-      x_train: choice("/home/fabio/Desktop/hiclass/benchmarks/consumer_complaints/results/split_data/x_train.csv.zip")
-      y_train: choice("/home/fabio/Desktop/hiclass/benchmarks/consumer_complaints/results/split_data/y_train.csv.zip")
+      x_train: choice(None)
+      y_train: choice(None)
 
 classifier: 1
 n_jobs: 1
