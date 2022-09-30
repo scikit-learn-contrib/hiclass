@@ -5,8 +5,26 @@ defaults:
 hydra:
   sweeper:
     params:
+      penalty: choice("l2")
+      dual: choice(False)
+      tol: choice(1e-4, 1e-5, 1e-6)
+      C: choice(1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001)
+      fit_intercept: choice(True, False)
+      intercept_scaling: choice(1, 2, 3, 4, 5)
+      class_weight: choice("balanced")
       solver: choice("newton-cg", "lbfgs", "liblinear", "sag", "saga")
-      max_iter: choice(10000)
+      max_iter: choice(100, 1000, 10000)
+      multi_class: choice("auto", "ovr", "multinomial")
+      l1_ratio: choice(None)
 
+penalty: 1
+dual: 1
+tol: 1
+C: 1
+fit_intercept: 1
+intercept_scaling: 1
+class_weight: 1
 solver: 1
 max_iter: 1
+multi_class: 1
+l1_ratio: 1

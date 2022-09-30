@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Script to perform hyper-parameter tuning for flat or hierarchical approaches."""
+import sys
+
 import hydra
 import numpy as np
 from lightgbm import LGBMClassifier
@@ -33,8 +35,21 @@ def configure_lightgbm(cfg: DictConfig) -> BaseEstimator:
     """
     classifier = LGBMClassifier(
         n_jobs=cfg.n_jobs,
+        boosting_type=cfg.boosting_type,
         num_leaves=cfg.num_leaves,
-        min_data_in_leaf=cfg.min_data_in_leaf,
+        learning_rate=cfg.learning_rate,
+        n_estimators=cfg.n_estimators,
+        subsample_for_bin=cfg.subsample_for_bin,
+        objective=cfg.objective,
+        class_weight=cfg.class_weight,
+        min_split_gain=cfg.min_split_gain,
+        min_child_weight=cfg.min_child_weight,
+        min_child_samples=cfg.min_child_samples,
+        subsample=cfg.subsample,
+        subsample_freq=cfg.subsample_freq,
+        colsample_bytree=cfg.colsample_bytree,
+        reg_alpha=cfg.reg_alpha,
+        reg_lambda=cfg.reg_lambda,
     )
     return classifier
 
@@ -55,8 +70,17 @@ def configure_logistic_regression(cfg: DictConfig) -> BaseEstimator:
     """
     classifier = LogisticRegression(
         n_jobs=cfg.n_jobs,
+        penalty=cfg.penalty,
+        dual=cfg.dual,
+        tol=cfg.tol,
+        C=cfg.C,
+        fit_intercept=cfg.fit_intercept,
+        intercept_scaling=cfg.intercept_scaling,
+        class_weight=cfg.class_weight,
         solver=cfg.solver,
         max_iter=cfg.max_iter,
+        multi_class=cfg.multi_class,
+        l1_ratio=cfg.l1_ratio,
     )
     return classifier
 
@@ -79,6 +103,17 @@ def configure_random_forest(cfg: DictConfig) -> BaseEstimator:
         n_jobs=cfg.n_jobs,
         n_estimators=cfg.n_estimators,
         criterion=cfg.criterion,
+        max_depth=cfg.max_depth,
+        min_samples_split=cfg.min_samples_split,
+        min_samples_leaf=cfg.min_samples_leaf,
+        min_weight_fraction_leaf=cfg.min_weight_fraction_leaf,
+        max_features=cfg.max_features,
+        max_leaf_nodes=cfg.max_leaf_nodes,
+        min_impurity_decrease=cfg.min_impurity_decrease,
+        bootstrap=cfg.bootstrap,
+        oob_score=cfg.oob_score,
+        class_weight=cfg.class_weight,
+        ccp_alpha=cfg.ccp_alpha,
     )
     return classifier
 
