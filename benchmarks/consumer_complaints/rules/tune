@@ -13,7 +13,7 @@ rule tune:
     conda:
         "../envs/hydra.yml"
     threads:
-        1
+        config["threads"]
     shell:
         """
         export PYTHONPATH={params.scripts_dir}
@@ -23,7 +23,7 @@ rule tune:
         --multirun \
         'classifier={params.classifier}' \
         'model={params.model}' \
-        'n_jobs={threads}' \
+        'n_jobs=1' \
         'x_train={input.x_train}' \
         'y_train={input.y_train}' \
         'scripts_dir={params.scripts_dir}' \
