@@ -1,5 +1,5 @@
 def get_mem_gb(wildcards, attempt):
-    return attempt * 50
+    return attempt * 100
 
 
 rule tune:
