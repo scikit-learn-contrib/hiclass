@@ -14,11 +14,11 @@ hydra:
     mem_gb: 50
     cpus_per_task: 1
     nodes: 1
-    tasks_per_node: 10
+    tasks_per_node: 1
     name: hydra
   sweeper:
     n_trials: 100
-    n_jobs: 10
+    n_jobs: 1
     direction: maximize
     params:
       classifier: choice(None)
