@@ -1,3 +1,7 @@
+def get_mem_gb(wildcards, attempt):
+    return attempt * 50
+
+
 rule tune:
     input:
         x_train = "results/split_data/x_train.csv.zip",
@@ -14,6 +18,8 @@ rule tune:
         "../envs/hydra.yml"
     threads:
         config["threads"]
+    resources:
+        mem_gb = get_mem_gb
     shell:
         """
         export PYTHONPATH={params.scripts_dir}
@@ -29,4 +35,5 @@ rule tune:
         'scripts_dir={params.scripts_dir}' \
         hydra.sweeper.sampler.seed={params.random_state} \
         hydra.sweep.dir={params.output_dir}
+        hydra.launcher.mem_gb={resources.mem_gb} \
         """
