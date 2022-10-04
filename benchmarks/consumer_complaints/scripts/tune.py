@@ -40,7 +40,6 @@ def configure_lightgbm(cfg: DictConfig) -> BaseEstimator:
         learning_rate=cfg.learning_rate,
         n_estimators=cfg.n_estimators,
         subsample_for_bin=cfg.subsample_for_bin,
-        objective=cfg.objective,
         class_weight=cfg.class_weight,
         min_split_gain=cfg.min_split_gain,
         min_child_weight=cfg.min_child_weight,
