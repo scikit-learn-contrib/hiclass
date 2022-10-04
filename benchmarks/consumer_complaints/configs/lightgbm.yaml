@@ -10,7 +10,6 @@ hydra:
       learning_rate: choice(0.1, 0.2, 0.3)
       n_estimators: choice(100, 500, 1000)
       subsample_for_bin: choice(200000, 400000, 600000)
-      objective: choice("regression", "binary", "multiclass")
       class_weight: choice("balanced")
       min_split_gain: choice(0.0, 0.1, 0.2)
       min_child_weight: choice(0.001, 0.01, 0.1)
