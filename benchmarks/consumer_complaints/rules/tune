@@ -31,13 +31,12 @@ rule tune:
         --multirun \
         'classifier={params.classifier}' \
         'model={params.model}' \
-        'n_jobs=1' \
+        'n_jobs={threads}' \
         'x_train={input.x_train}' \
         'y_train={input.y_train}' \
         'scripts_dir={params.scripts_dir}' \
         hydra.sweeper.sampler.seed={params.random_state} \
         hydra.sweep.dir={params.output_dir} \
-        hydra.launcher.mem_gb={resources.mem_gb} \
         hydra.sweeper.study_name={params.study_name} \
         hydra.sweeper.storage={output.storage} \
         """
