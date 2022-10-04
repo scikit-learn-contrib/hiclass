@@ -139,7 +139,6 @@ def optimize(cfg: DictConfig) -> np.ndarray:
     else:
         local_classifier = configure_flat[cfg.classifier](cfg)
         local_classifier.set_params(n_jobs=1)
-        print(local_classifier)
         classifier = configure_hierarchical[cfg.model]
         classifier.set_params(local_classifier=local_classifier, n_jobs=cfg.n_jobs)
     pipeline = Pipeline(
