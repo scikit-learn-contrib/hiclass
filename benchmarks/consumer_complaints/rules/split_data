@@ -11,7 +11,7 @@ rule split_data:
         nrows = config["nrows"] if "nrows" in config else None,
         random_state = config["random_state"]
     conda:
-        "../envs/hiclass.yml"
+        "../envs/hydra.yml"
     shell:
         """
         /usr/bin/time -v \

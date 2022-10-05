@@ -1,14 +1,9 @@
-from lightgbm import LGBMClassifier
-from scripts.train import get_flat_classifier, get_hierarchical_classifier
-from scripts.train import parse_args
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
+from io import StringIO
 
-from hiclass import (
-    LocalClassifierPerNode,
-    LocalClassifierPerParentNode,
-    LocalClassifierPerLevel,
-)
+import pytest
+from omegaconf import DictConfig
+from pyfakefs.fake_filesystem_unittest import Patcher
+from scripts.train import parse_args, load_parameters
 
 
 def test_parser():
@@ -28,6 +23,8 @@ def test_parser():
             "0",
             "--model",
             "flat",
+            "--best-parameters",
+            "best_parameters.yml",
         ]
     )
     assert parser.n_jobs is not None
@@ -44,46 +41,46 @@ def test_parser():
     assert 0 == parser.random_state
     assert parser.model is not None
     assert "flat" == parser.model
+    assert parser.best_parameters is not None
+    assert "best_parameters.yml" == parser.best_parameters
 
 
-def test_get_flat_classifier():
-    n_jobs = 1
-    base_classifier = "logistic_regression"
-    random_state = 0
-    flat = get_flat_classifier(n_jobs, base_classifier, random_state)
-    assert flat is not None
-    assert isinstance(flat, LogisticRegression)
-    base_classifier = "random_forest"
-    flat = get_flat_classifier(n_jobs, base_classifier, random_state)
-    assert flat is not None
-    assert isinstance(flat, RandomForestClassifier)
-    base_classifier = "lightgbm"
-    flat = get_flat_classifier(n_jobs, base_classifier, random_state)
-    assert flat is not None
-    assert isinstance(flat, LGBMClassifier)
+@pytest.fixture
+def tuned_parameters():
+    cfg = StringIO()
+    cfg.write("name: optuna\n")
+    cfg.write("best_params:\n")
+    cfg.write("  C: 0.001\n")
+    cfg.write("  class_weight: balanced\n")
+    cfg.write("  dual: false\n")
+    cfg.write("  fit_intercept: false\n")
+    cfg.write("  intercept_scaling: 3\n")
+    cfg.write("  max_iter: 100\n")
+    cfg.write("  multi_class: auto\n")
+    cfg.write("  penalty: l2\n")
+    cfg.write("  solver: liblinear\n")
+    cfg.write("  tol: 1.0e-06\n")
+    cfg.write("best_value: 0.9387345438252911\n")
+    cfg.seek(0)
+    return cfg
 
 
-def test_get_hierarchical_classifier():
-    n_jobs = 1
-    local_classifier = "logistic_regression"
-    hierarchical_classifier = "local_classifier_per_node"
-    random_state = 0
-    model = get_hierarchical_classifier(
-        n_jobs, local_classifier, hierarchical_classifier, random_state
+def test_load_parameters(tuned_parameters):
+    expected = DictConfig(
+        {
+            "C": 0.001,
+            "class_weight": "balanced",
+            "dual": False,
+            "fit_intercept": False,
+            "intercept_scaling": 3,
+            "max_iter": 100,
+            "multi_class": "auto",
+            "penalty": "l2",
+            "solver": "liblinear",
+            "tol": 1.0e-06,
+        }
     )
-    assert model is not None
-    assert isinstance(model, LocalClassifierPerNode)
-    local_classifier = "random_forest"
-    hierarchical_classifier = "local_classifier_per_parent_node"
-    model = get_hierarchical_classifier(
-        n_jobs, local_classifier, hierarchical_classifier, random_state
-    )
-    assert model is not None
-    assert isinstance(model, LocalClassifierPerParentNode)
-    local_classifier = "lightgbm"
-    hierarchical_classifier = "local_classifier_per_level"
-    model = get_hierarchical_classifier(
-        n_jobs, local_classifier, hierarchical_classifier, random_state
-    )
-    assert model is not None
-    assert isinstance(model, LocalClassifierPerLevel)
+    with Patcher() as patcher:
+        patcher.fs.create_file("best_parameters.yml", contents=tuned_parameters.read())
+        parameters = load_parameters("best_parameters.yml")
+    assert expected == parameters

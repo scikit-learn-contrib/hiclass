@@ -8,7 +8,7 @@ rule metrics:
         classifier = "{classifier}",
         model = "{model}",
     conda:
-        "../envs/hiclass.yml"
+        "../envs/hydra.yml"
     shell:
         """
         python scripts/metrics.py \

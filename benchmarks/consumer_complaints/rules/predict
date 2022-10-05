@@ -8,7 +8,7 @@ rule predict:
     params:
         model = "{model}"
     conda:
-        "../envs/hiclass.yml"
+        "../envs/hydra.yml"
     threads:
         config["threads"]
     shell:

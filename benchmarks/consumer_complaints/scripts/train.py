@@ -4,42 +4,12 @@ import argparse
 import pickle
 import sys
 from argparse import Namespace
+from typing import TextIO
 
-from lightgbm import LGBMClassifier
-from sklearn.base import BaseEstimator
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
+from omegaconf import DictConfig, OmegaConf
 
 from data import load_dataframe, join
-from hiclass import (
-    LocalClassifierPerNode,
-    LocalClassifierPerParentNode,
-    LocalClassifierPerLevel,
-)
-
-# Base classifiers used for building models
-classifiers = {
-    "logistic_regression": LogisticRegression(
-        max_iter=10000,
-        n_jobs=1,
-    ),
-    "random_forest": RandomForestClassifier(
-        n_jobs=1,
-    ),
-    "lightgbm": LGBMClassifier(
-        n_jobs=1,
-    ),
-}
-
-
-# Hierarchical classifiers used for training
-hierarchical_classifiers = {
-    "local_classifier_per_node": LocalClassifierPerNode(),
-    "local_classifier_per_parent_node": LocalClassifierPerParentNode(),
-    "local_classifier_per_level": LocalClassifierPerLevel(),
-}
+from tune import configure_pipeline
 
 
 def parse_args(args: list) -> Namespace:
@@ -99,66 +69,31 @@ def parse_args(args: list) -> Namespace:
         required=True,
         help="Model used for training, e.g., flat, lcpl, lcpn or lcppn",
     )
+    parser.add_argument(
+        "--best-parameters",
+        type=str,
+        required=True,
+        help="Path to optuna's tuned parameters",
+    )
     return parser.parse_args(args)
 
 
-def get_flat_classifier(
-    n_jobs: int,
-    base_classifier: str,
-    random_state: int,
-) -> BaseEstimator:
+def load_parameters(yml: str) -> DictConfig:
     """
-    Build flat classifier for pipeline.
+    Load parameters from a YAML file.
 
     Parameters
     ----------
-    n_jobs : int
-        Number of threads to fit in parallel.
-    base_classifier : str
-        Classifier used for fitting.
-    random_state : int
-        Random state to enable reproducibility.
+    yml : str
+        Path to YAML file containing tuned parameters.
 
     Returns
     -------
-    classifier : BaseEstimator
-        Flat classifier.
+    cfg : DictConfig
+        Dictionary containing all configuration information.
     """
-    model = classifiers[base_classifier]
-    model.set_params(n_jobs=n_jobs, random_state=random_state)
-    return model
-
-
-def get_hierarchical_classifier(
-    n_jobs: int,
-    local_classifier: str,
-    hierarchical_classifier: str,
-    random_state: int,
-) -> BaseEstimator:
-    """
-    Build hierarchical classifier for pipeline.
-
-    Parameters
-    ----------
-    n_jobs : int
-        Number of threads to fit in parallel.
-    local_classifier : str
-        Classifier used for fitting.
-    hierarchical_classifier : str
-        Classifier used for hierarchical classification.
-    random_state : int
-        Random state to enable reproducibility.
-
-    Returns
-    -------
-    classifier: BaseEstimator
-        Hierarchical classifier.
-    """
-    local_classifier = classifiers[local_classifier]
-    local_classifier.set_params(random_state=random_state)
-    model = hierarchical_classifiers[hierarchical_classifier]
-    model.set_params(local_classifier=local_classifier, n_jobs=n_jobs)
-    return model
+    cfg = OmegaConf.load(yml)
+    return cfg['best_params']
 
 
 def main():  # pragma: no cover
@@ -168,23 +103,11 @@ def main():  # pragma: no cover
     y_train = load_dataframe(args.y_train)
     if args.model == "flat":
         y_train = join(y_train)
-        classifier = get_flat_classifier(
-            args.n_jobs, args.classifier, args.random_state
-        )
-    else:
-        classifier = get_hierarchical_classifier(
-            args.n_jobs,
-            args.classifier,
-            args.model,
-            args.random_state,
-        )
-    pipeline = Pipeline(
-        [
-            ("count", CountVectorizer()),
-            ("tfidf", TfidfTransformer()),
-            ("classifier", classifier),
-        ]
-    )
+    cfg = load_parameters(args.best_parameters)
+    cfg.model = args.model
+    cfg.classifier = args.classifier
+    cfg.n_jobs = args.n_jobs
+    pipeline = configure_pipeline(cfg)
     pipeline.fit(x_train, y_train)
     pickle.dump(pipeline, open(args.trained_model, "wb"))
 
