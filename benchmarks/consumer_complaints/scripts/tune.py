@@ -15,7 +15,11 @@ from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
 
 from data import load_dataframe, join
-from hiclass import LocalClassifierPerNode, LocalClassifierPerParentNode, LocalClassifierPerLevel
+from hiclass import (
+    LocalClassifierPerNode,
+    LocalClassifierPerParentNode,
+    LocalClassifierPerLevel,
+)
 from hiclass.metrics import f1
 
 
@@ -128,7 +132,9 @@ configure_hierarchical = {
 }
 
 
-@hydra.main(config_path="../configs", config_name="logistic_regression", version_base="1.2")
+@hydra.main(
+    config_path="../configs", config_name="logistic_regression", version_base="1.2"
+)
 def optimize(cfg: DictConfig) -> np.ndarray:
     x_train = load_dataframe(cfg.x_train).squeeze()
     y_train = load_dataframe(cfg.y_train)
