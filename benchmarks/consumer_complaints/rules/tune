@@ -13,7 +13,6 @@ rule tune:
         model = "{model}",
         random_state = config["random_state"],
         output_dir = "results/{model}/{classifier}",
-        scripts_dir = config["workdir"] + "/scripts",
         study_name = "{model}_{classifier}",
         storage = "sqlite:///results/{model}/{classifier}/optimization_study.sqlite",
     conda:
@@ -24,8 +23,6 @@ rule tune:
         mem_gb = get_mem_gb
     shell:
         """
-        export PYTHONPATH={params.scripts_dir}
-        
         python scripts/tune.py \
         --config-name {params.classifier} \
         --multirun \
@@ -34,7 +31,6 @@ rule tune:
         'n_jobs={threads}' \
         'x_train={input.x_train}' \
         'y_train={input.y_train}' \
-        'scripts_dir={params.scripts_dir}' \
         hydra.sweeper.sampler.seed={params.random_state} \
         hydra.sweep.dir={params.output_dir} \
         hydra.sweeper.study_name={params.study_name} \

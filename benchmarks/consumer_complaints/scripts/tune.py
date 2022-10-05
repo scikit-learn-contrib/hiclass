@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""Script to perform hyper-parameter tuning for flat or hierarchical approaches."""
-from typing import Tuple
+"""Script to perform hyper-parameter tuning for flat and hierarchical approaches."""
 
 import hydra
 import numpy as np
-import pandas as pd
 from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
 from sklearn.base import BaseEstimator
