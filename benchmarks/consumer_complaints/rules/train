@@ -1,3 +1,7 @@
+def get_mem_gb(wildcards, attempt):
+    return attempt * 40
+
+
 rule train:
     input:
         x_train = "results/split_data/x_train.csv.zip",
@@ -14,6 +18,8 @@ rule train:
         "../envs/hydra.yml"
     threads:
         config["threads"]
+    resources:
+        mem_gb = get_mem_gb
     shell:
         """
         /usr/bin/time -v \
