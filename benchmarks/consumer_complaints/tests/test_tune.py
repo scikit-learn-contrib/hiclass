@@ -1,6 +1,11 @@
 from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
-from scripts.tune import configure_lightgbm, configure_logistic_regression
+from scripts.tune import (
+    configure_lightgbm,
+    configure_logistic_regression,
+    configure_random_forest,
+)
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 
@@ -48,3 +53,24 @@ def test_configure_logistic_regression():
     classifier = configure_logistic_regression(cfg)
     assert classifier is not None
     assert isinstance(classifier, LogisticRegression)
+
+
+def test_configure_random_forest():
+    cfg = DictConfig(
+        {
+            "n_jobs": 1,
+            "n_estimators": 100,
+            "criterion": "entropy",
+            "min_samples_split": 6,
+            "min_samples_leaf": 2,
+            "min_weight_fraction_leaf": 0.5,
+            "min_impurity_decrease": 0.4,
+            "bootstrap": True,
+            "oob_score": False,
+            "class_weight": "balanced",
+            "ccp_alpha": 0.3,
+        }
+    )
+    classifier = configure_random_forest(cfg)
+    assert classifier is not None
+    assert isinstance(classifier, RandomForestClassifier)

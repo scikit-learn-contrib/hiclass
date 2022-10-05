@@ -133,7 +133,7 @@ configure_hierarchical = {
 @hydra.main(
     config_path="../configs", config_name="logistic_regression", version_base="1.2"
 )
-def optimize(cfg: DictConfig) -> np.ndarray:
+def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
     """
     Perform hyper-parameter tuning.
 
