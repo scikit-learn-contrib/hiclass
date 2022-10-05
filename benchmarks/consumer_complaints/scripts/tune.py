@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Script to perform hyper-parameter tuning for flat or hierarchical approaches."""
-import sys
 
 import hydra
 import numpy as np
@@ -135,6 +134,19 @@ configure_hierarchical = {
     config_path="../configs", config_name="logistic_regression", version_base="1.2"
 )
 def optimize(cfg: DictConfig) -> np.ndarray:
+    """
+    Perform hyper-parameter tuning.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Dictionary containing all configuration information.
+
+    Returns
+    -------
+    score : np.ndarray
+        Array containing the mean cross-validation score.
+    """
     x_train = load_dataframe(cfg.x_train).squeeze()
     y_train = load_dataframe(cfg.y_train)
     if cfg.model == "flat":
