@@ -8,7 +8,6 @@ rule tune:
         y_train = "results/split_data/y_train.csv.zip"
     output:
         best_parameters = "results/{model}/{classifier}/optimization_results.yaml",
-        storage = "sqlite:///results/{model}/{classifier}/optimization_results.sqlite"
     params:
         classifier = "{classifier}",
         model = "{model}",
@@ -16,6 +15,7 @@ rule tune:
         output_dir = "results/{model}/{classifier}",
         scripts_dir = config["workdir"] + "/scripts",
         study_name = "{model}_{classifier}",
+        storage = "sqlite:///results/{model}/{classifier}/optimization_results.sqlite",
     conda:
         "../envs/hydra.yml"
     threads:
@@ -38,5 +38,5 @@ rule tune:
         hydra.sweeper.sampler.seed={params.random_state} \
         hydra.sweep.dir={params.output_dir} \
         hydra.sweeper.study_name={params.study_name} \
-        hydra.sweeper.storage={output.storage} \
+        hydra.sweeper.storage={params.storage} \
         """
