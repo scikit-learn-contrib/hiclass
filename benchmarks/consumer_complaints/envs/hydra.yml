@@ -10,5 +10,5 @@ dependencies:
       - hydra-colorlog==1.2.0
       - scikit-learn==1.1.1
       - lightgbm==3.3.2
-      - hiclass==4.1.0
+      - hiclass==4.2.2
       - pandas==1.4.1
