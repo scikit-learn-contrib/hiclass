@@ -4,7 +4,6 @@ import argparse
 import pickle
 import sys
 from argparse import Namespace
-from typing import TextIO
 
 from omegaconf import DictConfig, OmegaConf
 
@@ -93,7 +92,7 @@ def load_parameters(yml: str) -> DictConfig:
         Dictionary containing all configuration information.
     """
     cfg = OmegaConf.load(yml)
-    return cfg['best_params']
+    return cfg["best_params"]
 
 
 def main():  # pragma: no cover
