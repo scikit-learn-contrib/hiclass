@@ -1,12 +1,15 @@
+import pytest
 from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
 from scripts.tune import (
     configure_lightgbm,
     configure_logistic_regression,
     configure_random_forest,
+    configure_pipeline,
 )
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
 
 
 def test_configure_lightgbm():
@@ -34,30 +37,12 @@ def test_configure_lightgbm():
     assert isinstance(classifier, LGBMClassifier)
 
 
-def test_configure_logistic_regression():
+@pytest.fixture
+def random_forest_config():
     cfg = DictConfig(
         {
-            "n_jobs": 1,
-            "penalty": "l2",
-            "dual": False,
-            "tol": 1e-6,
-            "C": 0.1,
-            "fit_intercept": True,
-            "intercept_scaling": 5,
-            "class_weight": "balanced",
-            "solver": "lbfgs",
-            "max_iter": 100,
-            "multi_class": "auto",
-        }
-    )
-    classifier = configure_logistic_regression(cfg)
-    assert classifier is not None
-    assert isinstance(classifier, LogisticRegression)
-
-
-def test_configure_random_forest():
-    cfg = DictConfig(
-        {
+            "model": "flat",
+            "classifier": "random_forest",
             "n_jobs": 1,
             "n_estimators": 100,
             "criterion": "entropy",
@@ -71,6 +56,50 @@ def test_configure_random_forest():
             "ccp_alpha": 0.3,
         }
     )
-    classifier = configure_random_forest(cfg)
+    return cfg
+
+
+def test_configure_random_forest(random_forest_config):
+    classifier = configure_random_forest(random_forest_config)
     assert classifier is not None
     assert isinstance(classifier, RandomForestClassifier)
+
+
+def test_configure_pipeline_1(random_forest_config):
+    classifier = configure_pipeline(random_forest_config)
+    assert classifier is not None
+    assert isinstance(classifier, Pipeline)
+
+
+@pytest.fixture
+def logistic_regression_config():
+    cfg = DictConfig(
+        {
+            "model": "local_classifier_per_node",
+            "classifier": "logistic_regression",
+            "n_jobs": 1,
+            "penalty": "l2",
+            "dual": False,
+            "tol": 1e-6,
+            "C": 0.1,
+            "fit_intercept": True,
+            "intercept_scaling": 5,
+            "class_weight": "balanced",
+            "solver": "lbfgs",
+            "max_iter": 100,
+            "multi_class": "auto",
+        }
+    )
+    return cfg
+
+
+def test_configure_logistic_regression(logistic_regression_config):
+    classifier = configure_logistic_regression(logistic_regression_config)
+    assert classifier is not None
+    assert isinstance(classifier, LogisticRegression)
+
+
+def test_configure_pipeline_2(logistic_regression_config):
+    classifier = configure_pipeline(logistic_regression_config)
+    assert classifier is not None
+    assert isinstance(classifier, Pipeline)

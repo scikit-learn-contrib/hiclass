@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Script to perform hyper-parameter tuning for flat or hierarchical approaches."""
+from typing import Tuple
 
 import hydra
 import numpy as np
+import pandas as pd
 from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
 from sklearn.base import BaseEstimator
@@ -130,6 +132,37 @@ configure_hierarchical = {
 }
 
 
+def configure_pipeline(cfg: DictConfig) -> Pipeline:
+    """
+    Configure pipeline with parameters passed as argument.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Dictionary containing all configuration information.
+
+    Returns
+    -------
+    pipeline : Pipeline
+        Pipeline with hyper-parameters configured.
+    """
+    if cfg.model == "flat":
+        classifier = configure_flat[cfg.classifier](cfg)
+    else:
+        local_classifier = configure_flat[cfg.classifier](cfg)
+        local_classifier.set_params(n_jobs=1)
+        classifier = configure_hierarchical[cfg.model]
+        classifier.set_params(local_classifier=local_classifier, n_jobs=cfg.n_jobs)
+    pipeline = Pipeline(
+        [
+            ("count", CountVectorizer()),
+            ("tfidf", TfidfTransformer()),
+            ("classifier", classifier),
+        ]
+    )
+    return pipeline
+
+
 @hydra.main(
     config_path="../configs", config_name="logistic_regression", version_base="1.2"
 )
@@ -151,22 +184,10 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
     y_train = load_dataframe(cfg.y_train)
     if cfg.model == "flat":
         y_train = join(y_train)
-        classifier = configure_flat[cfg.classifier](cfg)
-    else:
-        local_classifier = configure_flat[cfg.classifier](cfg)
-        local_classifier.set_params(n_jobs=1)
-        classifier = configure_hierarchical[cfg.model]
-        classifier.set_params(local_classifier=local_classifier, n_jobs=cfg.n_jobs)
-    pipeline = Pipeline(
-        [
-            ("count", CountVectorizer()),
-            ("tfidf", TfidfTransformer()),
-            ("classifier", classifier),
-        ]
-    )
+    pipeline = configure_pipeline(cfg)
     score = cross_val_score(pipeline, x_train, y_train, scoring=make_scorer(f1))
     return np.mean(score)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     optimize()
