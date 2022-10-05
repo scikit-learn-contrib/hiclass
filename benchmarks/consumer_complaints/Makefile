@@ -19,7 +19,7 @@ laptop:  ## Run methods pipeline on laptop
 .PHONY: delab
 delab:  ## Run methods pipeline on delab
 	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
-	-srun -A renard --mem=450G --cpus-per-task=48 --time=120:0:0 -p magic snakemake --keep-going --printshellcmds --reason --use-conda --cores 48 --restart-times 5 --conda-frontend mamba
+	-srun -A renard --mem=450G --cpus-per-task=256 --time=120:0:0 -p magic snakemake --keep-going --printshellcmds --reason --use-conda --cores 256 --restart-times 10 --resources mem_gb=450 --conda-frontend mamba
 
 .PHONY: clean
 clean:  ## delete temporary files from pipeline

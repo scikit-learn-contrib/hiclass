@@ -1,5 +1,5 @@
 def get_mem_gb(wildcards, attempt):
-    return attempt * 100
+    return attempt * 50
 
 
 rule tune:
@@ -15,7 +15,7 @@ rule tune:
         output_dir = "results/{model}/{classifier}",
         scripts_dir = config["workdir"] + "/scripts",
         study_name = "{model}_{classifier}",
-        storage = "sqlite:///results/{model}/{classifier}/optimization_results.sqlite",
+        storage = "sqlite:///results/{model}/{classifier}/optimization_study.sqlite",
     conda:
         "../envs/hydra.yml"
     threads:

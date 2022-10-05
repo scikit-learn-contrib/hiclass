@@ -108,7 +108,6 @@ def configure_random_forest(cfg: DictConfig) -> BaseEstimator:
         min_samples_split=cfg.min_samples_split,
         min_samples_leaf=cfg.min_samples_leaf,
         min_weight_fraction_leaf=cfg.min_weight_fraction_leaf,
-        max_features=cfg.max_features,
         min_impurity_decrease=cfg.min_impurity_decrease,
         bootstrap=cfg.bootstrap,
         oob_score=cfg.oob_score,
