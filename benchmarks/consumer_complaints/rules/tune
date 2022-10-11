@@ -1,5 +1,5 @@
-def get_mem_mb(_, attempt):
-    return attempt * 40960
+def get_mem_gb(_, attempt):
+    return attempt * 40
 
 
 rule tune:
@@ -15,14 +15,17 @@ rule tune:
         output_dir = "results/{model}/{classifier}",
         study_name = "{model}_{classifier}",
         storage = "sqlite:///results/{model}/{classifier}/optimization_study.sqlite",
+        scripts_dir = config["workdir"] + "/scripts",
     conda:
         "../envs/hydra.yml"
     threads:
         config["threads"]
     resources:
-        mem_mb = get_mem_mb
+        mem_gb = get_mem_gb
     shell:
         """
+        export PYTHONPATH={params.scripts_dir}
+        
         python scripts/tune.py \
         --config-name {params.classifier} \
         --multirun \
@@ -35,4 +38,5 @@ rule tune:
         hydra.sweep.dir={params.output_dir} \
         hydra.sweeper.study_name={params.study_name} \
         hydra.sweeper.storage={params.storage} \
+        hydra.launcher.mem_gb={resources.mem_gb} \
         """
