@@ -25,7 +25,7 @@ delab:  ## Run methods pipeline on delab
 	-sed -i 's/^#//' configs/hydra.yaml
 	-sed -i '/^  \- override hydra\/launcher: submitit\_local/ s/./#&/' configs/hydra.yaml
 	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
-	-srun -A renard --mem=60G --cpus-per-task=144 --time=120:0:0 -p magic snakemake --keep-going --printshellcmds --reason --use-conda --cores 144 --restart-times 12 --resources mem_gb=5400 --conda-frontend mamba
+	-srun -A renard --mem=20G --cpus-per-task=48 --time=120:0:0 -p magic snakemake --keep-going --printshellcmds --reason --use-conda --cores 48 --restart-times 4 --resources mem_gb=1920 --conda-frontend mamba
 
 .PHONY: clean
 clean:  ## delete temporary files from pipeline
