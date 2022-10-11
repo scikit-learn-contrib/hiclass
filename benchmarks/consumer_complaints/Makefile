@@ -17,14 +17,14 @@ local:  ## Run pipeline without slurm
 	-sed -i '/^  \- override hydra\/launcher: submitit\_slurm/ s/./#&/' configs/hydra.yaml
 	-sed -i '/^    account: renard/ s/./#&/' configs/hydra.yaml
 	-sed -i '/^    partition: magic/ s/./#&/' configs/hydra.yaml
-	-sed -i "s?workdir.*?workdir: `pwd`?" configs/hydra.yaml
+	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
 	-snakemake --keep-going --printshellcmds --reason --use-conda --cores 12 --conda-frontend mamba
 
 .PHONY: delab
 delab:  ## Run methods pipeline on delab
 	-sed -i 's/^#//' configs/hydra.yaml
 	-sed -i '/^  \- override hydra\/launcher: submitit\_local/ s/./#&/' configs/hydra.yaml
-	-sed -i "s?workdir.*?workdir: `pwd`?" configs/hydra.yaml
+	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
 	-srun -A renard --mem=5G --cpus-per-task=12 --time=120:0:0 -p magic snakemake --keep-going --printshellcmds --reason --use-conda --cores 12 --restart-times 12 --resources mem_gb=1440 --conda-frontend mamba
 
 .PHONY: clean
