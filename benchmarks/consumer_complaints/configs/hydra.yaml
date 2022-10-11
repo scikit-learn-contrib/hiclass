@@ -17,7 +17,6 @@ hydra:
     cpus_per_task: 12
     stderr_to_stdout: true
     name: hydra
-    exclude: "armnode-[01-08],node[22-32],nvram-[01-06]"
   sweeper:
     n_trials: 100
     n_jobs: 1
