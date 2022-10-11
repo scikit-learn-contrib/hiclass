@@ -12,7 +12,7 @@ hydra:
     timeout_min: 10
 #    partition: magic
     mem_gb: 40
-    nodes: 1
+    nodes: 6
     tasks_per_node: 10
     cpus_per_task: 10
     stderr_to_stdout: true
