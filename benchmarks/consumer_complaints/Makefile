@@ -23,7 +23,7 @@ local:  ## Run pipeline without slurm
 	-snakemake --keep-going --printshellcmds --reason --use-conda --cores 12 --conda-frontend mamba
 
 .PHONY: delab
-delab:  ## Run methods pipeline on delab
+delab:  ## Run pipeline on delab with slurm
 	-sed -i 's/^#//' configs/hydra.yaml
 	-sed -i '/^  \- override hydra\/launcher: submitit\_local/ s/./#&/' configs/hydra.yaml
 	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
@@ -32,7 +32,7 @@ delab:  ## Run methods pipeline on delab
 	-srun -A renard --mem=20G --cpus-per-task=48 --time=120:0:0 -p magic snakemake --keep-going --printshellcmds --reason --use-conda --cores 48 --restart-times 4 --resources mem_gb=1600 --conda-frontend mamba
 
 .PHONY: clean
-clean:  ## delete temporary files from pipeline
+clean:  ## delete temporary files from Snakemake
 	-rm -rf .snakemake
 
 .PHONY: delete-results

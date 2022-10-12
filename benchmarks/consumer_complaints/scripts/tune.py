@@ -96,14 +96,6 @@ def configure_random_forest(cfg: DictConfig) -> BaseEstimator:
         n_jobs=cfg.n_jobs,
         n_estimators=cfg.n_estimators,
         criterion=cfg.criterion,
-        min_samples_split=cfg.min_samples_split,
-        min_samples_leaf=cfg.min_samples_leaf,
-        min_weight_fraction_leaf=cfg.min_weight_fraction_leaf,
-        min_impurity_decrease=cfg.min_impurity_decrease,
-        bootstrap=cfg.bootstrap,
-        oob_score=cfg.oob_score,
-        class_weight=cfg.class_weight,
-        ccp_alpha=cfg.ccp_alpha,
     )
     return classifier
 
