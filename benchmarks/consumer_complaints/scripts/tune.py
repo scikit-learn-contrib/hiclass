@@ -72,16 +72,8 @@ def configure_logistic_regression(cfg: DictConfig) -> BaseEstimator:
     """
     classifier = LogisticRegression(
         n_jobs=cfg.n_jobs,
-        penalty=cfg.penalty,
-        dual=cfg.dual,
-        tol=cfg.tol,
-        C=cfg.C,
-        fit_intercept=cfg.fit_intercept,
-        intercept_scaling=cfg.intercept_scaling,
-        class_weight=cfg.class_weight,
         solver=cfg.solver,
         max_iter=cfg.max_iter,
-        multi_class=cfg.multi_class,
     )
     return classifier
 
@@ -183,7 +175,7 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
     if cfg.model == "flat":
         y_train = join(y_train)
     pipeline = configure_pipeline(cfg)
-    score = cross_val_score(pipeline, x_train, y_train, scoring=make_scorer(f1))
+    score = cross_val_score(pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1)
     return np.mean(score)
 
 

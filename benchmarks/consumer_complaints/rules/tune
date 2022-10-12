@@ -11,7 +11,6 @@ rule tune:
     params:
         classifier = "{classifier}",
         model = "{model}",
-        random_state = config["random_state"],
         output_dir = "results/{model}/{classifier}",
         study_name = "{model}_{classifier}",
         storage = "sqlite:///results/{model}/{classifier}/optimization_study.sqlite",
@@ -34,7 +33,6 @@ rule tune:
         'n_jobs={threads}' \
         'x_train={input.x_train}' \
         'y_train={input.y_train}' \
-        hydra.sweeper.sampler.seed={params.random_state} \
         hydra.sweep.dir={params.output_dir} \
         hydra.sweeper.study_name={params.study_name} \
         hydra.sweeper.storage={params.storage} \
