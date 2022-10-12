@@ -156,7 +156,9 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
     if cfg.model == "flat":
         y_train = join(y_train)
     pipeline = configure_pipeline(cfg)
-    score = cross_val_score(pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1)
+    score = cross_val_score(
+        pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1
+    )
     return np.mean(score)
 
 
