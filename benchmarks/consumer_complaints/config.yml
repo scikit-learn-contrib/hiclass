@@ -1,13 +1,13 @@
 workdir: /home/fabio/Desktop/hiclass/benchmarks/consumer_complaints
 
-threads: 1
+threads: 12
 
 data: 'https://files.consumerfinance.gov/ccdb/complaints.csv.zip'
 
 random_state: 42
 
 # Uncomment the next line to use a subset of the data
-nrows: 1000
+#nrows: 1000
 
 classifiers:
   - logistic_regression

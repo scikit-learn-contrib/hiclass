@@ -1,6 +1,6 @@
 defaults:
-#  - override hydra/launcher: submitit_slurm
-  - override hydra/launcher: submitit_local
+  - override hydra/launcher: submitit_slurm
+#  - override hydra/launcher: submitit_local
   - override hydra/sweeper: optuna
   - override hydra/sweeper/sampler: grid
   - override hydra/job_logging: colorlog
@@ -8,9 +8,9 @@ defaults:
 
 hydra:
   launcher:
-#    account: renard
+    account: renard
     timeout_min: 7200
-#    partition: magic
+    partition: magic
     mem_gb: 400
     nodes: 1
     tasks_per_node: 12
