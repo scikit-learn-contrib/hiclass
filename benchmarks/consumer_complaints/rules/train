@@ -1,5 +1,5 @@
-def get_mem_mb(_, attempt):
-    return attempt * 40960
+def get_mem_gb(_, attempt):
+    return attempt * 100
 
 
 rule train:
@@ -19,7 +19,7 @@ rule train:
     threads:
         config["threads"]
     resources:
-        mem_mb = get_mem_mb
+        mem_gb = get_mem_gb
     shell:
         """
         /usr/bin/time -v \

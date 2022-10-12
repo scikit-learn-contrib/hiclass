@@ -38,20 +38,9 @@ def configure_lightgbm(cfg: DictConfig) -> BaseEstimator:
     """
     classifier = LGBMClassifier(
         n_jobs=cfg.n_jobs,
-        boosting_type=cfg.boosting_type,
         num_leaves=cfg.num_leaves,
-        learning_rate=cfg.learning_rate,
         n_estimators=cfg.n_estimators,
-        subsample_for_bin=cfg.subsample_for_bin,
-        class_weight=cfg.class_weight,
-        min_split_gain=cfg.min_split_gain,
-        min_child_weight=cfg.min_child_weight,
         min_child_samples=cfg.min_child_samples,
-        subsample=cfg.subsample,
-        subsample_freq=cfg.subsample_freq,
-        colsample_bytree=cfg.colsample_bytree,
-        reg_alpha=cfg.reg_alpha,
-        reg_lambda=cfg.reg_lambda,
     )
     return classifier
 

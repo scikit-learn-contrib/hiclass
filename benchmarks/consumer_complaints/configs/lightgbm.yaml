@@ -5,33 +5,10 @@ defaults:
 hydra:
   sweeper:
     params:
-      boosting_type: choice("gbdt", "dart")
       num_leaves: choice(31, 62, 124)
-      learning_rate: choice(0.1, 0.2, 0.3)
       n_estimators: choice(100, 500, 1000)
-      subsample_for_bin: choice(200000, 400000, 600000)
-      class_weight: choice("balanced")
-      min_split_gain: choice(0.0, 0.1, 0.2)
-      min_child_weight: choice(0.001, 0.01, 0.1)
       min_child_samples: choice(20, 40, 60)
-      subsample: choice(0.8, 0.9, 1.0)
-      subsample_freq: choice(0, 1, 2)
-      colsample_bytree: choice(0.6, 0.8, 1.0)
-      reg_alpha: choice(0.0, 0.1, 0.2)
-      reg_lambda: choice(0.0, 0.1, 0.2)
 
-
-boosting_type: 1
 num_leaves: 1
-learning_rate: 1
 n_estimators: 1
-subsample_for_bin: 1
-class_weight: 1
-min_split_gain: 1
-min_child_weight: 1
 min_child_samples: 1
-subsample: 1
-subsample_freq: 1
-colsample_bytree: 1
-reg_alpha: 1
-reg_lambda: 1
