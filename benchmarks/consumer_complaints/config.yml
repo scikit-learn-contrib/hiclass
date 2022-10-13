@@ -11,11 +11,11 @@ nrows: 1000
 
 classifiers:
   - logistic_regression
-#  - random_forest
-#  - lightgbm
+  - random_forest
+  - lightgbm
 
 models:
   - flat
-#  - local_classifier_per_node
-#  - local_classifier_per_parent_node
-#  - local_classifier_per_level
+  - local_classifier_per_node
+  - local_classifier_per_parent_node
+  - local_classifier_per_level

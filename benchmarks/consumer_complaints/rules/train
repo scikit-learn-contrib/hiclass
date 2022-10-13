@@ -1,5 +1,5 @@
 def get_mem_gb(_, attempt):
-    return attempt * 100
+    return attempt * 450
 
 
 rule train:
@@ -36,5 +36,6 @@ rule train:
         'classifier={params.classifier}' \
         'model={params.model}' \
         'random_state={params.random_state}' \
-        'best_parameters={input.best_parameters}'
+        'best_parameters={input.best_parameters}' \
+        hydra.launcher.mem_gb={resources.mem_gb} \
         """

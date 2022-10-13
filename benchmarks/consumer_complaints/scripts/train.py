@@ -44,7 +44,6 @@ def train(cfg: DictConfig) -> None:  # pragma: no cover
     pipeline = configure_pipeline(best_params)
     pipeline.fit(x_train, y_train)
     pickle.dump(pipeline, open(cfg.trained_model, "wb"))
-    return 1
 
 
 if __name__ == "__main__":

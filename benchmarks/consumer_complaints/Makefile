@@ -13,10 +13,10 @@ snakemake:  ## install snakemake
 
 .PHONY: local
 local:  ## Run pipeline without slurm
-	-sed -i 's/^#//' configs/hydra.yaml
-	-sed -i '/^  \- override hydra\/launcher: submitit\_slurm/ s/./#&/' configs/hydra.yaml
-	-sed -i '/^    account: renard/ s/./#&/' configs/hydra.yaml
-	-sed -i '/^    partition: magic/ s/./#&/' configs/hydra.yaml
+	-sed -i 's/^#//' configs/submitit.yaml
+	-sed -i '/^  \- override hydra\/launcher: submitit\_slurm/ s/./#&/' configs/submitit.yaml
+	-sed -i '/^    account: renard/ s/./#&/' configs/submitit.yaml
+	-sed -i '/^    partition: magic/ s/./#&/' configs/submitit.yaml
 	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
 	-sed -i "s?threads.*?threads: 1?" config.yml
 	-sed -i "s?#nrows.*?nrows: 1000?" config.yml
@@ -24,8 +24,8 @@ local:  ## Run pipeline without slurm
 
 .PHONY: delab
 delab:  ## Run pipeline on delab with slurm
-	-sed -i 's/^#//' configs/hydra.yaml
-	-sed -i '/^  \- override hydra\/launcher: submitit\_local/ s/./#&/' configs/hydra.yaml
+	-sed -i 's/^#//' configs/submitit.yaml
+	-sed -i '/^  \- override hydra\/launcher: submitit\_local/ s/./#&/' configs/submitit.yaml
 	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
 	-sed -i "s?threads.*?threads: 12?" config.yml
 	-sed -i "s?nrows.*?#nrows: 1000?" config.yml
