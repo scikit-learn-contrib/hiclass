@@ -5,76 +5,11 @@ import pickle
 import sys
 from argparse import Namespace
 
+import hydra
 from omegaconf import DictConfig, OmegaConf
 
 from data import load_dataframe, join
 from tune import configure_pipeline
-
-
-def parse_args(args: list) -> Namespace:
-    """
-    Parse a list of arguments.
-
-    Parameters
-    ----------
-    args : list
-        Arguments to parse.
-
-    Returns
-    -------
-    _ : Namespace
-        Parsed arguments.
-    """
-    parser = argparse.ArgumentParser(description="Train classifier")
-    parser.add_argument(
-        "--n-jobs",
-        type=int,
-        required=True,
-        help="Number of jobs to run training in parallel",
-    )
-    parser.add_argument(
-        "--x-train",
-        type=str,
-        required=True,
-        help="Input CSV file with training features",
-    )
-    parser.add_argument(
-        "--y-train",
-        type=str,
-        required=True,
-        help="Input CSV file with training labels",
-    )
-    parser.add_argument(
-        "--trained-model",
-        type=str,
-        required=True,
-        help="Path to store trained model",
-    )
-    parser.add_argument(
-        "--classifier",
-        type=str,
-        required=True,
-        help="Algorithm used for fitting, e.g., logistic_regression or random_forest",
-    )
-    parser.add_argument(
-        "--random-state",
-        type=int,
-        required=True,
-        help="Random state to enable reproducibility",
-    )
-    parser.add_argument(
-        "--model",
-        type=str,
-        required=True,
-        help="Model used for training, e.g., flat, lcpl, lcpn or lcppn",
-    )
-    parser.add_argument(
-        "--best-parameters",
-        type=str,
-        required=True,
-        help="Path to optuna's tuned parameters",
-    )
-    return parser.parse_args(args)
 
 
 def load_parameters(yml: str) -> DictConfig:
@@ -95,21 +30,22 @@ def load_parameters(yml: str) -> DictConfig:
     return cfg["best_params"]
 
 
-def main():  # pragma: no cover
+@hydra.main(version_base="1.2", config_path="../configs", config_name="submitit")
+def train(cfg: DictConfig) -> None:  # pragma: no cover
     """Train with flat or hierarchical approaches."""
-    args = parse_args(sys.argv[1:])
-    x_train = load_dataframe(args.x_train).squeeze()
-    y_train = load_dataframe(args.y_train)
-    if args.model == "flat":
+    x_train = load_dataframe(cfg.x_train).squeeze()
+    y_train = load_dataframe(cfg.y_train)
+    if cfg.model == "flat":
         y_train = join(y_train)
-    cfg = load_parameters(args.best_parameters)
-    cfg.model = args.model
-    cfg.classifier = args.classifier
-    cfg.n_jobs = args.n_jobs
-    pipeline = configure_pipeline(cfg)
+    best_params = load_parameters(cfg.best_parameters)
+    best_params.model = cfg.model
+    best_params.classifier = cfg.classifier
+    best_params.n_jobs = cfg.n_jobs
+    pipeline = configure_pipeline(best_params)
     pipeline.fit(x_train, y_train)
-    pickle.dump(pipeline, open(args.trained_model, "wb"))
+    pickle.dump(pipeline, open(cfg.trained_model, "wb"))
+    return 1
 
 
 if __name__ == "__main__":
-    main()  # pragma: no cover
+    train()  # pragma: no cover

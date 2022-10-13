@@ -1,22 +1,8 @@
 defaults:
-  - override hydra/launcher: submitit_slurm
-#  - override hydra/launcher: submitit_local
   - override hydra/sweeper: optuna
   - override hydra/sweeper/sampler: grid
-  - override hydra/job_logging: colorlog
-  - override hydra/hydra_logging: colorlog
 
 hydra:
-  launcher:
-    account: renard
-    timeout_min: 7200
-    partition: magic
-    mem_gb: 400
-    nodes: 1
-    tasks_per_node: 12
-    cpus_per_task: 12
-    stderr_to_stdout: true
-    name: hydra
   sweeper:
     n_trials: 100
     n_jobs: 1
@@ -27,9 +13,15 @@ hydra:
       n_jobs: choice(1)
       x_train: choice(None)
       y_train: choice(None)
+      trained_model: choice(None)
+      random_state: choice(None)
+      best_parameters: choice(None)
 
 classifier: 1
 model: 1
 n_jobs: 1
 x_train: 1
 y_train: 1
+trained_model: 1
+random_state: 1
+best_parameters: 1
