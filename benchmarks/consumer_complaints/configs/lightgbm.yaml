@@ -6,9 +6,9 @@ defaults:
 hydra:
   sweeper:
     params:
-      num_leaves: choice(31, 62, 124)
-      n_estimators: choice(100, 500, 1000)
-      min_child_samples: choice(20, 40, 60)
+      num_leaves: choice(31, 62)
+      n_estimators: choice(100, 200)
+      min_child_samples: choice(20, 40)
 
 num_leaves: 1
 n_estimators: 1

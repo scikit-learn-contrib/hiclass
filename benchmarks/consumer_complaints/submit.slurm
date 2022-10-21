@@ -7,7 +7,7 @@
 #SBATCH --nodes=1                                  # Run all processes on a single node
 #SBATCH --ntasks=72                                # Number of processes
 #SBATCH --mem=30gb                                 # Total memory limit
-#SBATCH --time=336:00:00                           # Time limit hrs:min:sec
+#SBATCH --time=30-00:00:00                           # Time limit hrs:min:sec
 #SBATCH --output=snakemake_%j.log # Standard output and error log
 date && hostname && pwd
 

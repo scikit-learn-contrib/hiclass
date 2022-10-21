@@ -140,12 +140,38 @@ def configure_pipeline(cfg: DictConfig) -> Pipeline:
 
 
 def compute_md5(cfg: DictConfig) -> str:
+    """
+    Compute MD5 hash of configuration.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Dictionary containing all configuration information.
+
+    Returns
+    -------
+    md5 : str
+        MD5 hash of configuration.
+
+    """
     dictionary = OmegaConf.to_object(cfg)
-    md5 = hashlib.md5(json.dumps(dictionary, sort_keys=True).encode("utf-8")).hexdigest()
+    md5 = hashlib.md5(
+        json.dumps(dictionary, sort_keys=True).encode("utf-8")
+    ).hexdigest()
     return md5
 
 
 def save_trial(cfg: DictConfig, score: List[float]) -> None:
+    """
+    Save trial information.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Dictionary containing all configuration information.
+    score : List[float]
+        List of scores for each fold.
+    """
     md5 = compute_md5(cfg)
     filename = f"{cfg.output_dir}/{md5}.sav"
     pickle.dump((cfg, score), open(filename, "wb"))
@@ -173,19 +199,19 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
     if os.path.exists(filename):
         (_, score) = pickle.load(open(filename, "rb"))
         return np.mean(score)
-    try:
-        x_train = load_dataframe(cfg.x_train).squeeze()
-        y_train = load_dataframe(cfg.y_train)
-        if cfg.model == "flat":
-            y_train = join(y_train)
-        pipeline = configure_pipeline(cfg)
-        score = cross_val_score(
-            pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1
-        )
-        save_trial(cfg, score)
-        return np.mean(score)
-    except:
-        return 0
+    # try:
+    x_train = load_dataframe(cfg.x_train).squeeze()
+    y_train = load_dataframe(cfg.y_train)
+    if cfg.model == "flat":
+        y_train = join(y_train)
+    pipeline = configure_pipeline(cfg)
+    score = cross_val_score(
+        pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1
+    )
+    save_trial(cfg, score)
+    return np.mean(score)
+    # except:
+    #     return 0
 
 
 if __name__ == "__main__":  # pragma: no cover
