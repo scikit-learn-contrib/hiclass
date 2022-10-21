@@ -25,9 +25,6 @@ rule tune:
         """
         export PYTHONPATH={params.scripts_dir}
         
-        ulimit -m 471859200
-        ulimit -v 471859200
-        
         python scripts/tune.py \
         --config-name {params.classifier} \
         --multirun \
