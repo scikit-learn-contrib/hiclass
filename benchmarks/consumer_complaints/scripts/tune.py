@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """Script to perform hyper-parameter tuning for flat and hierarchical approaches."""
+import hashlib
+import json
+import os
+import pickle
+from typing import List
 
 import hydra
 import numpy as np
 from lightgbm import LGBMClassifier
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
@@ -134,6 +139,18 @@ def configure_pipeline(cfg: DictConfig) -> Pipeline:
     return pipeline
 
 
+def compute_md5(cfg: DictConfig) -> str:
+    dictionary = OmegaConf.to_object(cfg)
+    md5 = hashlib.md5(json.dumps(dictionary, sort_keys=True).encode("utf-8")).hexdigest()
+    return md5
+
+
+def save_trial(cfg: DictConfig, score: List[float]) -> None:
+    md5 = compute_md5(cfg)
+    filename = f"{cfg.output_dir}/{md5}.sav"
+    pickle.dump((cfg, score), open(filename, "wb"))
+
+
 @hydra.main(
     config_path="../configs", config_name="logistic_regression", version_base="1.2"
 )
@@ -151,6 +168,11 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
     score : np.ndarray
         Array containing the mean cross-validation score.
     """
+    md5 = compute_md5(cfg)
+    filename = f"{cfg.output_dir}/{md5}.sav"
+    if os.path.exists(filename):
+        (_, score) = pickle.load(open(filename, "rb"))
+        return np.mean(score)
     try:
         x_train = load_dataframe(cfg.x_train).squeeze()
         y_train = load_dataframe(cfg.y_train)
@@ -160,6 +182,7 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
         score = cross_val_score(
             pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1
         )
+        save_trial(cfg, score)
         return np.mean(score)
     except:
         return 0

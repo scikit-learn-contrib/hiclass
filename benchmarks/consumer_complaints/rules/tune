@@ -33,6 +33,7 @@ rule tune:
         'n_jobs={threads}' \
         'x_train={input.x_train}' \
         'y_train={input.y_train}' \
+        'output_dir={params.output_dir}' \
         hydra.sweep.dir={params.output_dir} \
         hydra.sweeper.study_name={params.study_name} \
         hydra.sweeper.storage={params.storage} \
