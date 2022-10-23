@@ -213,20 +213,20 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
     if os.path.exists(filename):
         (_, score) = pickle.load(open(filename, "rb"))
         return np.mean(score)
-    try:
-        limit_memory(cfg.mem_gb)
-        x_train = load_dataframe(cfg.x_train).squeeze()
-        y_train = load_dataframe(cfg.y_train)
-        if cfg.model == "flat":
-            y_train = join(y_train)
-        pipeline = configure_pipeline(cfg)
-        score = cross_val_score(
-            pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1
-        )
-        save_trial(cfg, score)
-        return np.mean(score)
-    except MemoryError:
-        return 0
+    # try:
+    limit_memory(cfg.mem_gb)
+    x_train = load_dataframe(cfg.x_train).squeeze()
+    y_train = load_dataframe(cfg.y_train)
+    if cfg.model == "flat":
+        y_train = join(y_train)
+    pipeline = configure_pipeline(cfg)
+    score = cross_val_score(
+        pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1
+    )
+    save_trial(cfg, score)
+    return np.mean(score)
+    # except MemoryError:
+    #     return 0
 
 
 if __name__ == "__main__":  # pragma: no cover
