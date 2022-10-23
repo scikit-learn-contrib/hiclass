@@ -6,6 +6,7 @@ import sys
 from argparse import Namespace
 
 import hydra
+from joblib import parallel_backend
 from omegaconf import DictConfig, OmegaConf
 
 from data import load_dataframe, join
@@ -42,7 +43,8 @@ def train(cfg: DictConfig) -> None:  # pragma: no cover
     best_params.classifier = cfg.classifier
     best_params.n_jobs = cfg.n_jobs
     pipeline = configure_pipeline(best_params)
-    pipeline.fit(x_train, y_train)
+    with parallel_backend("threading", n_jobs=cfg.n_jobs):
+        pipeline.fit(x_train, y_train)
     pickle.dump(pipeline, open(cfg.trained_model, "wb"))
 
 

@@ -9,6 +9,7 @@ from typing import List
 
 import hydra
 import numpy as np
+from joblib import parallel_backend
 from lightgbm import LGBMClassifier
 from omegaconf import DictConfig, OmegaConf
 from sklearn.base import BaseEstimator
@@ -178,20 +179,17 @@ def save_trial(cfg: DictConfig, score: List[float]) -> None:
     pickle.dump((cfg, score), open(filename, "wb"))
 
 
-def limit_memory(cfg: DictConfig) -> None:
+def limit_memory(mem_gb: int) -> None:
     """
     Limit memory usage.
 
     Parameters
     ----------
-    cfg : DictConfig
-        Dictionary containing all configuration information.
+    mem_gb : int
+        Memory limit in GB.
     """
-    mem_gb = cfg.mem_gb
-    children = cfg.n_jobs
-    mem_bytes = mem_gb / (children + 1) * 1024**3
+    mem_bytes = mem_gb * 1024 ** 3
     resource.setrlimit(resource.RLIMIT_AS, (mem_bytes, mem_bytes))
-    resource.setrlimit(resource.RLIMIT_RSS, (mem_bytes, mem_bytes))
 
 
 @hydra.main(
@@ -217,15 +215,16 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
         (_, score) = pickle.load(open(filename, "rb"))
         return np.mean(score)
     try:
-        limit_memory(cfg)
+        limit_memory(cfg.mem_gb)
         x_train = load_dataframe(cfg.x_train).squeeze()
         y_train = load_dataframe(cfg.y_train)
         if cfg.model == "flat":
             y_train = join(y_train)
         pipeline = configure_pipeline(cfg)
-        score = cross_val_score(
-            pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1
-        )
+        with parallel_backend("threading", n_jobs=cfg.n_jobs):
+            score = cross_val_score(
+                pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1
+            )
         save_trial(cfg, score)
         return np.mean(score)
     except MemoryError:
