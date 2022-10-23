@@ -5,7 +5,7 @@ import json
 import os
 import pickle
 import resource
-from typing import List, Union
+from typing import List, Union, Tuple
 
 import hydra
 import numpy as np
@@ -164,7 +164,7 @@ def compute_md5(cfg: DictConfig) -> str:
     return md5
 
 
-def save_trial(cfg: DictConfig, score: List[float]) -> None:
+def save_trial(cfg: DictConfig, scores: List[float]) -> None:
     """
     Save trial information.
 
@@ -172,12 +172,36 @@ def save_trial(cfg: DictConfig, score: List[float]) -> None:
     ----------
     cfg : DictConfig
         Dictionary containing all configuration information.
-    score : List[float]
+    scores : List[float]
         List of scores for each fold.
     """
     md5 = compute_md5(cfg)
     filename = f"{cfg.output_dir}/{md5}.sav"
-    pickle.dump((cfg, score), open(filename, "wb"))
+    with open(filename, "wb") as file:
+        pickle.dump((cfg, scores), file)
+
+
+def load_trial(cfg: DictConfig) -> Union[np.ndarray, None]:
+    """
+    Load trial information.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Dictionary containing all configuration information.
+
+    Returns
+    -------
+    scores : Union[np.ndarray, None]
+        Tuple containing the configuration and scores or None if file does not exist.
+    """
+    md5 = compute_md5(cfg)
+    filename = f"{cfg.output_dir}/{md5}.sav"
+    if os.path.exists(filename):
+        (_, scores) = pickle.load(open(filename, "rb"))
+        return scores
+    else:
+        return None
 
 
 def limit_memory(mem_gb: int) -> None:
@@ -210,11 +234,9 @@ def optimize(cfg: DictConfig) -> Union[np.ndarray, float]:  # pragma: no cover
     score : Union[np.ndarray, float]
         The mean cross-validation score.
     """
-    md5 = compute_md5(cfg)
-    filename = f"{cfg.output_dir}/{md5}.sav"
-    if os.path.exists(filename):
-        (_, score) = pickle.load(open(filename, "rb"))
-        return np.mean(score)
+    scores = load_trial(cfg)
+    if scores is not None:
+        return np.mean(scores)
     try:
         limit_memory(cfg.mem_gb)
         x_train = load_dataframe(cfg.x_train).squeeze()

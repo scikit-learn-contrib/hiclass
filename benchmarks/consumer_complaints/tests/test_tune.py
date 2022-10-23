@@ -1,12 +1,18 @@
+import os
+import pickle
+
 import pytest
 from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
+from pyfakefs.fake_filesystem_unittest import Patcher
 from scripts.tune import (
     configure_lightgbm,
     configure_logistic_regression,
     configure_random_forest,
     configure_pipeline,
     compute_md5,
+    save_trial,
+    load_trial,
 )
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -78,6 +84,14 @@ def test_compute_md5_1(random_forest_config):
     assert expected == md5
 
 
+def test_save_and_load_trial_1(random_forest_config):
+    random_forest_config.output_dir = "."
+    with Patcher():
+        save_trial(random_forest_config, [1, 2, 3])
+        scores = load_trial(random_forest_config)
+        assert [1, 2, 3] == scores
+
+
 @pytest.fixture
 def logistic_regression_config():
     cfg = DictConfig(
@@ -116,3 +130,11 @@ def test_compute_md5_2(logistic_regression_config):
     md5 = compute_md5(logistic_regression_config)
     expected = "ec072c7a92187ba58487d55ac6633332"
     assert expected == md5
+
+
+def test_save_and_load_trial_2(logistic_regression_config):
+    logistic_regression_config.output_dir = "."
+    with Patcher():
+        save_trial(logistic_regression_config, [4, 5, 6])
+        scores = load_trial(logistic_regression_config)
+        assert [4, 5, 6] == scores
