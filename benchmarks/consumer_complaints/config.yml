@@ -13,8 +13,8 @@ mem_gb: 5
 nrows: 1000
 
 classifiers:
-  - logistic_regression
-#  - random_forest
+#  - logistic_regression
+  - random_forest
 #  - lightgbm
 
 models:
