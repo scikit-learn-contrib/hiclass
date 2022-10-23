@@ -11,6 +11,7 @@ import hydra
 import numpy as np
 from joblib import parallel_backend
 from lightgbm import LGBMClassifier
+from numpy.core._exceptions import _ArrayMemoryError
 from omegaconf import DictConfig, OmegaConf
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
@@ -228,7 +229,7 @@ def optimize(cfg: DictConfig) -> Union[np.ndarray, float]:  # pragma: no cover
             )
         save_trial(cfg, score)
         return np.mean(score)
-    except MemoryError:
+    except (ValueError, MemoryError, _ArrayMemoryError):
         return 0
 
 

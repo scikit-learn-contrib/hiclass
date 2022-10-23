@@ -20,7 +20,7 @@ local:  ## Run pipeline without slurm
 	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
 	-sed -i "s?threads.*?threads: 12?" config.yml
 	-sed -i "s?#nrows.*?nrows: 1000?" config.yml
-	-snakemake --keep-going --printshellcmds --reason --use-conda --cores 12 --conda-frontend mamba
+	-snakemake --printshellcmds --reason --use-conda --cores 12 --conda-frontend mamba
 
 .PHONY: delab
 delab:  ## Run pipeline on delab with slurm

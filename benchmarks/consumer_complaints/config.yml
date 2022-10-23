@@ -10,7 +10,7 @@ random_state: 42
 mem_gb: 450
 
 # Uncomment the next line to use a subset of the data
-nrows: 1000
+#nrows: 1000
 
 classifiers:
   - logistic_regression
