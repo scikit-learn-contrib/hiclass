@@ -13,7 +13,6 @@ rule tune:
         output_dir = "results/{model}/{classifier}",
         study_name = "{model}_{classifier}",
         storage = "sqlite:///results/{model}/{classifier}/optimization_study.sqlite",
-        scripts_dir = config["workdir"] + "/scripts",
         account = config["account"],
         timeout = config["timeout_days"],
         partition = config["partition"],
@@ -25,8 +24,6 @@ rule tune:
         mem_gb = config["mem_gb"]
     shell:
         """
-        export PYTHONPATH={params.scripts_dir}
-        
         srun \
         -A {params.account} \
         --mem={resources.mem_gb}G \
@@ -47,5 +44,3 @@ rule tune:
         hydra.sweeper.study_name={params.study_name} \
         hydra.sweeper.storage={params.storage} \
         """
-
-#        hydra.launcher.mem_gb = {resources.mem_gb}
