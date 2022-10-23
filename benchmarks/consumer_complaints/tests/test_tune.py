@@ -6,6 +6,7 @@ from scripts.tune import (
     configure_logistic_regression,
     configure_random_forest,
     configure_pipeline,
+    compute_md5,
 )
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -71,6 +72,12 @@ def test_configure_pipeline_1(random_forest_config):
     assert isinstance(classifier, Pipeline)
 
 
+def test_compute_md5_1(random_forest_config):
+    md5 = compute_md5(random_forest_config)
+    expected = "bce939a7765a18f23cb1133ae9eb2cac"
+    assert expected == md5
+
+
 @pytest.fixture
 def logistic_regression_config():
     cfg = DictConfig(
@@ -103,3 +110,9 @@ def test_configure_pipeline_2(logistic_regression_config):
     classifier = configure_pipeline(logistic_regression_config)
     assert classifier is not None
     assert isinstance(classifier, Pipeline)
+
+
+def test_compute_md5_2(logistic_regression_config):
+    md5 = compute_md5(logistic_regression_config)
+    expected = "ec072c7a92187ba58487d55ac6633332"
+    assert expected == md5
