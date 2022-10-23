@@ -21,6 +21,7 @@ local:  ## Run pipeline without slurm
 	-sed -i "s?threads.*?threads: 12?" config.yml
 	-sed -i "s?#nrows.*?nrows: 1000?" config.yml
 	-snakemake --printshellcmds --reason --use-conda --cores 12 --conda-frontend mamba
+	-sed -i "s?nrows.*?#nrows: 1000?" config.yml
 
 .PHONY: delab
 delab:  ## Run pipeline on delab with slurm
