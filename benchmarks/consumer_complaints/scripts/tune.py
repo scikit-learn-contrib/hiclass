@@ -178,16 +178,18 @@ def save_trial(cfg: DictConfig, score: List[float]) -> None:
     pickle.dump((cfg, score), open(filename, "wb"))
 
 
-def limit_memory(mem_gb: int) -> None:
+def limit_memory(cfg: DictConfig) -> None:
     """
     Limit memory usage.
 
     Parameters
     ----------
-    mem_gb : int
-        Memory limit in GB.
+    cfg : DictConfig
+        Dictionary containing all configuration information.
     """
-    mem_bytes = (mem_gb - 2) * 1024**3
+    mem_gb = cfg.mem_gb
+    children = cfg.n_jobs
+    mem_bytes = mem_gb / (children + 1) * 1024**3
     resource.setrlimit(resource.RLIMIT_AS, (mem_bytes, mem_bytes))
     resource.setrlimit(resource.RLIMIT_RSS, (mem_bytes, mem_bytes))
 
@@ -215,7 +217,7 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
         (_, score) = pickle.load(open(filename, "rb"))
         return np.mean(score)
     try:
-        limit_memory(cfg.mem_gb)
+        limit_memory(cfg)
         x_train = load_dataframe(cfg.x_train).squeeze()
         y_train = load_dataframe(cfg.y_train)
         if cfg.model == "flat":
