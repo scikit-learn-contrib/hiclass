@@ -1,4 +1,4 @@
-configfile: "config.yml"
+configfile: "configs/snakemake.yml"
 
 workdir: config["workdir"]
 

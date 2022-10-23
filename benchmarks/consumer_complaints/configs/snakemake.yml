@@ -14,8 +14,8 @@ mem_gb: 450
 
 classifiers:
   - logistic_regression
-  - random_forest
-  - lightgbm
+#  - random_forest
+#  - lightgbm
 
 models:
   - flat

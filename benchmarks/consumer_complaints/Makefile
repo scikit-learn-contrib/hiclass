@@ -13,23 +13,17 @@ snakemake:  ## install snakemake
 
 .PHONY: local
 local:  ## Run pipeline without slurm
-	-sed -i 's/^#//' configs/submitit.yaml
-	-sed -i '/^  \- override hydra\/launcher: submitit\_slurm/ s/./#&/' configs/submitit.yaml
-	-sed -i '/^    account: renard/ s/./#&/' configs/submitit.yaml
-	-sed -i '/^    partition: magic/ s/./#&/' configs/submitit.yaml
-	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
-	-sed -i "s?threads.*?threads: 12?" config.yml
-	-sed -i "s?#nrows.*?nrows: 1000?" config.yml
+	-sed -i "s?workdir.*?workdir: `pwd`?" configs/snakemake.yml
+	-sed -i "s?threads.*?threads: 12?" configs/snakemake.yml
+	-sed -i "s?#nrows.*?nrows: 1000?" configs/snakemake.yml
 	-snakemake --printshellcmds --reason --use-conda --cores 12 --conda-frontend mamba
-	-sed -i "s?nrows.*?#nrows: 1000?" config.yml
+	-sed -i "s?nrows.*?#nrows: 1000?" configs/snakemake.yml
 
 .PHONY: delab
 delab:  ## Run pipeline on delab with slurm
-	-sed -i 's/^#//' configs/submitit.yaml
-	-sed -i '/^  \- override hydra\/launcher: submitit\_local/ s/./#&/' configs/submitit.yaml
-	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
-	-sed -i "s?threads.*?threads: 12?" config.yml
-	-sed -i "s?nrows.*?#nrows: 1000?" config.yml
+	-sed -i "s?workdir.*?workdir: `pwd`?" configs/snakemake.yml
+	-sed -i "s?threads.*?threads: 12?" configs/snakemake.yml
+	-sed -i "s?nrows.*?#nrows: 1000?" configs/snakemake.yml
 	- srun -A renard --mem=30G --cpus-per-task=12 --time=30-00:00:00 -p cauldron snakemake --keep-going --printshellcmds --reason --use-conda --cores 1 --resources mem_gb=2700 --jobs 6 --cluster "sbatch -A renard -p magic --mem=450G --cpus-per-task=12 --time=5-00:00:00"
 
 .PHONY: clean
