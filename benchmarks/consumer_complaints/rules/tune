@@ -9,7 +9,6 @@ rule tune:
         model = "{model}",
         output_dir = "results/{model}/{classifier}",
         study_name = "{model}_{classifier}",
-        storage = "sqlite:///results/{model}/{classifier}/optimization_study.sqlite",
     conda:
         "../envs/hydra.yml"
     threads:
@@ -30,5 +29,4 @@ rule tune:
         'mem_gb={resources.mem_gb}' \
         hydra.sweep.dir={params.output_dir} \
         hydra.sweeper.study_name={params.study_name} \
-        hydra.sweeper.storage={params.storage} \
         """
