@@ -187,7 +187,7 @@ def limit_memory(mem_gb: int) -> None:
     mem_gb : int
         Memory limit in GB.
     """
-    mem_bytes = (mem_gb - 2) * 1024 ** 3
+    mem_bytes = (mem_gb - 2) * 1024**3
     resource.setrlimit(resource.RLIMIT_AS, (mem_bytes, mem_bytes))
     resource.setrlimit(resource.RLIMIT_RSS, (mem_bytes, mem_bytes))
 
