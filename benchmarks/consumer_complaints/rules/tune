@@ -22,7 +22,7 @@ rule tune:
     threads:
         config["threads"]
     resources:
-        mem_gb = config["hydra"]["launcher"]["mem_gb"]
+        mem_gb = config["mem_gb"]
     shell:
         """
         export PYTHONPATH={params.scripts_dir}
