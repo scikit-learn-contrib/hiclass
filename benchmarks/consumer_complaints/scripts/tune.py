@@ -206,7 +206,7 @@ def load_trial(cfg: DictConfig) -> Union[np.ndarray, None]:
 
 def limit_memory(mem_gb: int) -> None:
     """
-    Limit memory usage to -50 GB than allocated by slurm.
+    Limit memory usage to avoid job being killed by slurm.
 
     Parameters
     ----------
