@@ -188,7 +188,7 @@ def limit_memory(mem_gb: int) -> None:
     mem_gb : int
         Memory limit in GB.
     """
-    mem_bytes = (mem_gb - 50) * 1024**3
+    mem_bytes = mem_gb * 1024**3
     resource.setrlimit(resource.RLIMIT_AS, (mem_bytes, mem_bytes))
 
 
@@ -222,14 +222,15 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
             y_train = join(y_train)
         pipeline = configure_pipeline(cfg)
         with parallel_backend("threading", n_jobs=cfg.n_jobs):
+            print("Starting cross-validation")
             score = cross_val_score(
                 pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1
             )
         save_trial(cfg, score)
         return np.mean(score)
     except MemoryError:
-        raise MemoryError("Memory limit exceeded.")
-        # return 0
+        raise MemoryError("Memory limit exceeded!")
+        # return np.array(0)
 
 
 if __name__ == "__main__":  # pragma: no cover

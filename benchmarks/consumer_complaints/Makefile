@@ -18,8 +18,8 @@ local:  ## Run pipeline without slurm
 	-sed -i '/^    account: renard/ s/./#&/' configs/submitit.yaml
 	-sed -i '/^    partition: magic/ s/./#&/' configs/submitit.yaml
 	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
-	-sed -i "s?threads.*?threads: 1?" config.yml
-	-sed -i "s?#nrows.*?nrows: 1000?" config.yml
+	-sed -i "s?threads.*?threads: 12?" config.yml
+#	-sed -i "s?#nrows.*?nrows: 1000?" config.yml
 	-snakemake --keep-going --printshellcmds --reason --use-conda --cores 12 --conda-frontend mamba
 
 .PHONY: delab
