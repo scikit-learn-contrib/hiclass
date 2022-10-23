@@ -3,7 +3,46 @@ from io import StringIO
 import pytest
 from omegaconf import DictConfig
 from pyfakefs.fake_filesystem_unittest import Patcher
-from scripts.train import load_parameters
+from scripts.train import parse_args, load_parameters
+
+
+def test_parser():
+    parser = parse_args(
+        [
+            "--n-jobs",
+            "8",
+            "--x-train",
+            "x_train.csv.zip",
+            "--y-train",
+            "y_train.csv.zip",
+            "--trained-model",
+            "model.sav",
+            "--classifier",
+            "lightgbm",
+            "--random-state",
+            "0",
+            "--model",
+            "flat",
+            "--best-parameters",
+            "best_parameters.yml",
+        ]
+    )
+    assert parser.n_jobs is not None
+    assert 8 == parser.n_jobs
+    assert parser.x_train is not None
+    assert "x_train.csv.zip" == parser.x_train
+    assert parser.y_train is not None
+    assert "y_train.csv.zip" == parser.y_train
+    assert parser.trained_model is not None
+    assert "model.sav" == parser.trained_model
+    assert parser.classifier is not None
+    assert "lightgbm" == parser.classifier
+    assert parser.random_state is not None
+    assert 0 == parser.random_state
+    assert parser.model is not None
+    assert "flat" == parser.model
+    assert parser.best_parameters is not None
+    assert "best_parameters.yml" == parser.best_parameters
 
 
 @pytest.fixture

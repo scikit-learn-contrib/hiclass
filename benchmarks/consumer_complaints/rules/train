@@ -21,14 +21,12 @@ rule train:
         /usr/bin/time -v \
         -o {output.benchmark} \
         python scripts/train.py \
-        --multirun \
-        'n_jobs={threads}' \
-        'x_train={input.x_train}' \
-        'y_train={input.y_train}' \
-        'trained_model={output.trained_model}' \
-        'classifier={params.classifier}' \
-        'model={params.model}' \
-        'random_state={params.random_state}' \
-        'best_parameters={input.best_parameters}' \
-        hydra.launcher.mem_gb={resources.mem_gb} \
+        --n-jobs {threads} \
+        --x-train {input.x_train} \
+        --y-train {input.y_train} \
+        --trained-model {output.trained_model} \
+        --classifier {params.classifier} \
+        --model {params.model} \
+        --random-state {params.random_state} \
+        --best-parameters {input.best_parameters}
         """

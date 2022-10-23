@@ -5,7 +5,7 @@ import json
 import os
 import pickle
 import resource
-from typing import List
+from typing import List, Union
 
 import hydra
 import numpy as np
@@ -195,7 +195,7 @@ def limit_memory(mem_gb: int) -> None:
 @hydra.main(
     config_path="../configs", config_name="logistic_regression", version_base="1.2"
 )
-def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
+def optimize(cfg: DictConfig) -> Union[np.ndarray, float]:  # pragma: no cover
     """
     Perform hyper-parameter tuning.
 
@@ -206,8 +206,8 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
 
     Returns
     -------
-    score : np.ndarray
-        Array containing the mean cross-validation score.
+    score : Union[np.ndarray, float]
+        The mean cross-validation score.
     """
     md5 = compute_md5(cfg)
     filename = f"{cfg.output_dir}/{md5}.sav"
@@ -229,8 +229,7 @@ def optimize(cfg: DictConfig) -> np.ndarray:  # pragma: no cover
         save_trial(cfg, score)
         return np.mean(score)
     except MemoryError:
-        raise MemoryError("Memory limit exceeded!")
-        # return np.array(0)
+        return 0
 
 
 if __name__ == "__main__":  # pragma: no cover
