@@ -245,7 +245,6 @@ def optimize(cfg: DictConfig) -> Union[np.ndarray, float]:  # pragma: no cover
             y_train = join(y_train)
         pipeline = configure_pipeline(cfg)
         with parallel_backend("threading", n_jobs=cfg.n_jobs):
-            print("Starting cross-validation")
             score = cross_val_score(
                 pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1
             )
