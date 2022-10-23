@@ -1,5 +1,4 @@
-def get_mem_gb(_, attempt):
-    return attempt * 450
+configfile: "configs/submitit.yaml"
 
 
 rule tune:
@@ -20,7 +19,7 @@ rule tune:
     threads:
         config["threads"]
     resources:
-        mem_gb = get_mem_gb
+        mem_gb = config["hydra"]["launcher"]["mem_gb"]
     shell:
         """
         export PYTHONPATH={params.scripts_dir}
@@ -34,6 +33,7 @@ rule tune:
         'x_train={input.x_train}' \
         'y_train={input.y_train}' \
         'output_dir={params.output_dir}' \
+        'mem_gb={resources.mem_gb}' \
         hydra.sweep.dir={params.output_dir} \
         hydra.sweeper.study_name={params.study_name} \
         hydra.sweeper.storage={params.storage} \

@@ -1,5 +1,4 @@
-def get_mem_gb(_, attempt):
-    return attempt * 450
+configfile: "configs/submitit.yaml"
 
 
 rule train:
@@ -20,7 +19,7 @@ rule train:
     threads:
         config["threads"]
     resources:
-        mem_gb = get_mem_gb
+        mem_gb = config["hydra"]["launcher"]["mem_gb"]
     shell:
         """
         export PYTHONPATH={params.scripts_dir}
