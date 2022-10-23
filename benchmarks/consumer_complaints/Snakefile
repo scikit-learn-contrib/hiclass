@@ -11,6 +11,4 @@ include: "rules/metrics"
 
 rule all:
     input:
-        # trained_model = [f"results/{model}/{classifier}/trained_model.sav" for classifier in config["classifiers"] for model in config["models"]]
-        # tune = [f"results/{model}/{classifier}/optimization_results.yaml" for classifier in config["classifiers"] for model in config["models"]]
         metrics = [f"results/{model}/{classifier}/metrics.csv" for classifier in config["classifiers"] for model in config["models"]]
