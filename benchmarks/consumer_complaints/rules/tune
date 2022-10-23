@@ -10,7 +10,7 @@ rule tune:
         output_dir = "results/{model}/{classifier}",
         study_name = "{model}_{classifier}",
     conda:
-        "../envs/hydra.yml"
+        "../envs/hiclass.yml"
     threads:
         config["threads"]
     resources:

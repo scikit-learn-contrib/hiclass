@@ -11,7 +11,7 @@ rule train:
         model = "{model}",
         random_state = config["random_state"],
     conda:
-        "../envs/hydra.yml"
+        "../envs/hiclass.yml"
     threads:
         config["threads"]
     resources:
