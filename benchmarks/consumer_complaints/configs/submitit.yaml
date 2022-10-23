@@ -1,26 +1,4 @@
-defaults:
-#  - override hydra/launcher: submitit_slurm
-  - override hydra/launcher: submitit_local
-  - override hydra/job_logging: colorlog
-  - override hydra/hydra_logging: colorlog
-
-hydra:
-  launcher:
-#    account: renard
-    timeout_min: 7200
-#    partition: magic
-    mem_gb: 5
-    nodes: 1
-    tasks_per_node: 12
-    cpus_per_task: 12
-    stderr_to_stdout: true
-    name: hydra
-
-classifier: 1
-model: 1
-n_jobs: 1
-x_train: 1
-y_train: 1
-trained_model: 1
-random_state: 1
-best_parameters: 1
+account: renard
+timeout_days: 5
+partition: magic
+mem_gb: 450

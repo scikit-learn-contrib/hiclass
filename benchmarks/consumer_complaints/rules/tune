@@ -14,9 +14,9 @@ rule tune:
         study_name = "{model}_{classifier}",
         storage = "sqlite:///results/{model}/{classifier}/optimization_study.sqlite",
         scripts_dir = config["workdir"] + "/scripts",
-        account = config["hydra"]["launcher"]["account"],
-        timeout = config["hydra"]["launcher"]["timeout_min"],
-        partition = config["hydra"]["launcher"]["partition"],
+        account = config["account"],
+        timeout = config["timeout_days"],
+        partition = config["partition"],
     conda:
         "../envs/hydra.yml"
     threads:
@@ -31,7 +31,7 @@ rule tune:
         -A {params.account} \
         --mem={resources.mem_gb}G \
         --cpus-per-task={threads} \
-        --time=0:{params.timeout}:0 \
+        --time={params.timeout}-00:00:00 \
         -p {params.partition} \
         python scripts/tune.py \
         --config-name {params.classifier} \
