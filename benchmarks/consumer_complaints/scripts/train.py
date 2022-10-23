@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 """Script to train with flat or hierarchical approaches."""
-import argparse
 import pickle
-import sys
-from argparse import Namespace
 
-import hydra
 from joblib import parallel_backend
 from omegaconf import DictConfig, OmegaConf
 
@@ -31,7 +27,6 @@ def load_parameters(yml: str) -> DictConfig:
     return cfg["best_params"]
 
 
-@hydra.main(version_base="1.2", config_path="../configs", config_name="submitit")
 def train(cfg: DictConfig) -> None:  # pragma: no cover
     """Train with flat or hierarchical approaches."""
     x_train = load_dataframe(cfg.x_train).squeeze()

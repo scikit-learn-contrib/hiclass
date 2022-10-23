@@ -1,6 +1,3 @@
-configfile: "configs/submitit.yaml"
-
-
 rule tune:
     input:
         x_train = "results/split_data/x_train.csv.zip",
@@ -13,9 +10,6 @@ rule tune:
         output_dir = "results/{model}/{classifier}",
         study_name = "{model}_{classifier}",
         storage = "sqlite:///results/{model}/{classifier}/optimization_study.sqlite",
-        account = config["account"],
-        timeout = config["timeout_days"],
-        partition = config["partition"],
     conda:
         "../envs/hydra.yml"
     threads:
@@ -24,12 +18,6 @@ rule tune:
         mem_gb = config["mem_gb"]
     shell:
         """
-        srun \
-        -A {params.account} \
-        --mem={resources.mem_gb}G \
-        --cpus-per-task={threads} \
-        --time={params.timeout}-00:00:00 \
-        -p {params.partition} \
         python scripts/tune.py \
         --config-name {params.classifier} \
         --multirun \

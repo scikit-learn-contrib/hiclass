@@ -6,12 +6,15 @@ data: 'https://files.consumerfinance.gov/ccdb/complaints.csv.zip'
 
 random_state: 42
 
+# Memory allocated for tune and train rules
+mem_gb: 5
+
 # Uncomment the next line to use a subset of the data
-#nrows: 1000
+nrows: 1000
 
 classifiers:
-#  - logistic_regression
-  - random_forest
+  - logistic_regression
+#  - random_forest
 #  - lightgbm
 
 models:

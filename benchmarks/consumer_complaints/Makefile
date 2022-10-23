@@ -19,7 +19,7 @@ local:  ## Run pipeline without slurm
 	-sed -i '/^    partition: magic/ s/./#&/' configs/submitit.yaml
 	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
 	-sed -i "s?threads.*?threads: 12?" config.yml
-#	-sed -i "s?#nrows.*?nrows: 1000?" config.yml
+	-sed -i "s?#nrows.*?nrows: 1000?" config.yml
 	-snakemake --keep-going --printshellcmds --reason --use-conda --cores 12 --conda-frontend mamba
 
 .PHONY: delab
@@ -29,8 +29,7 @@ delab:  ## Run pipeline on delab with slurm
 	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
 	-sed -i "s?threads.*?threads: 12?" config.yml
 	-sed -i "s?nrows.*?#nrows: 1000?" config.yml
-	- srun -A renard --mem=30G --cpus-per-task=12 --time=30-00:00:00 -p cauldron snakemake --keep-going --printshellcmds --reason --use-conda --cores 72 --resources mem_gb=2700 --conda-frontend mamba
-#	-sbatch submit.slurm
+	- srun -A renard --mem=30G --cpus-per-task=12 --time=30-00:00:00 -p cauldron snakemake --keep-going --printshellcmds --reason --use-conda --cores 1 --resources mem_gb=2700 --jobs 6 --cluster "sbatch -A renard -p magic --mem=450G --cpus-per-task=12 --time=5-00:00:00"
 
 .PHONY: clean
 clean:  ## delete temporary files from Snakemake

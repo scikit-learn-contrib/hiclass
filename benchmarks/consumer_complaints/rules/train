@@ -1,6 +1,3 @@
-configfile: "configs/submitit.yaml"
-
-
 rule train:
     input:
         x_train = "results/split_data/x_train.csv.zip",
@@ -13,7 +10,6 @@ rule train:
         classifier = "{classifier}",
         model = "{model}",
         random_state = config["random_state"],
-        scripts_dir = config["workdir"] + "/scripts",
     conda:
         "../envs/hydra.yml"
     threads:
@@ -22,8 +18,6 @@ rule train:
         mem_gb = config["mem_gb"]
     shell:
         """
-        export PYTHONPATH={params.scripts_dir}
-
         /usr/bin/time -v \
         -o {output.benchmark} \
         python scripts/train.py \

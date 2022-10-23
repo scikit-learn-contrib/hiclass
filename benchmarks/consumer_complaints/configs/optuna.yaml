@@ -15,9 +15,6 @@ hydra:
       y_train: choice(None)
       output_dir: choice(None)
       mem_gb: choice(None)
-      trained_model: choice(None)
-      random_state: choice(None)
-      best_parameters: choice(None)
 
 classifier: 1
 model: 1
@@ -26,6 +23,3 @@ x_train: 1
 y_train: 1
 output_dir: 1
 mem_gb: 1
-trained_model: 1
-random_state: 1
-best_parameters: 1

@@ -1,7 +1,6 @@
 defaults:
   - _self_
   - optuna
-#  - submitit
 
 hydra:
   sweeper:
