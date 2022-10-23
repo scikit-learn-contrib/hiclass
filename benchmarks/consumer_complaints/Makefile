@@ -29,7 +29,8 @@ delab:  ## Run pipeline on delab with slurm
 	-sed -i "s?workdir.*?workdir: `pwd`?" config.yml
 	-sed -i "s?threads.*?threads: 12?" config.yml
 	-sed -i "s?nrows.*?#nrows: 1000?" config.yml
-	-sbatch submit.slurm
+	- srun -A renard --mem=30G --ntasks=72 --time=30-00:00:00 -p cauldron snakemake --keep-going --printshellcmds --reason --use-conda --cores 72 --resources mem_gb=2700 --conda-frontend mamba
+#	-sbatch submit.slurm
 
 .PHONY: clean
 clean:  ## delete temporary files from Snakemake

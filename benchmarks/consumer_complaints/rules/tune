@@ -27,7 +27,7 @@ rule tune:
         srun \
         -A {params.account} \
         --mem={resources.mem_gb}G \
-        --cpus-per-task={threads} \
+        --n-tasks={threads} \
         --time={params.timeout}-00:00:00 \
         -p {params.partition} \
         python scripts/tune.py \
