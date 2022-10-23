@@ -5,7 +5,7 @@ import json
 import os
 import pickle
 import resource
-from typing import List, Union, Tuple
+from typing import List, Union
 
 import hydra
 import numpy as np

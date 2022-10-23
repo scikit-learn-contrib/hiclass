@@ -1,5 +1,4 @@
-import os
-import pickle
+import resource
 
 import pytest
 from lightgbm import LGBMClassifier
@@ -13,6 +12,7 @@ from scripts.tune import (
     compute_md5,
     save_trial,
     load_trial,
+    limit_memory,
 )
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -138,3 +138,18 @@ def test_save_and_load_trial_2(logistic_regression_config):
         save_trial(logistic_regression_config, [4, 5, 6])
         scores = load_trial(logistic_regression_config)
         assert [4, 5, 6] == scores
+
+
+def test_load_trial(logistic_regression_config):
+    logistic_regression_config.output_dir = "."
+    with Patcher():
+        scores = load_trial(logistic_regression_config)
+        assert scores is None
+
+
+def test_limit_memory():
+    limit_memory(2)
+    expected = 2 * 1024**3
+    soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+    assert expected == soft
+    assert expected == hard
