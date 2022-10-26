@@ -238,6 +238,7 @@ def optimize(cfg: DictConfig) -> Union[np.ndarray, float]:  # pragma: no cover
     if scores is not None:
         return np.mean(scores)
     try:
+        save_trial(cfg, [0] * 5)
         limit_memory(cfg.mem_gb)
         x_train = load_dataframe(cfg.x_train).squeeze()
         y_train = load_dataframe(cfg.y_train)
