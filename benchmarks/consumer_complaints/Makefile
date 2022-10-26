@@ -24,7 +24,7 @@ delab:  ## Run pipeline on delab with slurm
 	-sed -i "s?workdir.*?workdir: `pwd`?" configs/snakemake.yml
 	-sed -i "s?threads.*?threads: 12?" configs/snakemake.yml
 	-sed -i "s?nrows.*?#nrows: 1000?" configs/snakemake.yml
-	- srun -A renard --mem=30G --cpus-per-task=12 --time=30-00:00:00 -p cauldron snakemake --keep-going --printshellcmds --reason --use-conda --cores 1 --resources mem_gb=2700 --restart-times 5 --jobs 6 --cluster "sbatch -A renard -p magic --mem=450G --cpus-per-task=12 --time=5-00:00:00 --exclude=armnode-0[1-8],nvram-0[1-4],node-0[1-9],node-1[0-6]"
+	- srun -A renard --mem=30G --cpus-per-task=12 --time=30-00:00:00 -p cauldron snakemake --keep-going --printshellcmds --reason --use-conda --cores 1 --resources mem_gb=2700 --restart-times 5 --jobs 6 --cluster "sbatch -A renard -p magic --mem=450G --cpus-per-task=12 --time=5-00:00:00 --exclude=armnode-01,armnode-02,armnode-03,armnode-04,armnode-05,armnode-06,armnode-07,armnode-08,nvram-01,nvram-02,nvram-03,nvram-04,node-01,node-02,node-03,node-04,node-05,node-06,node-07,node-08,node-09,node-10,node-11,node-12,node-13,node-14,node-15,node-16"
 
 .PHONY: clean
 clean:  ## delete temporary files from Snakemake
