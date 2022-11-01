@@ -2,6 +2,7 @@
 """Script to perform hyper-parameter tuning for flat and hierarchical approaches."""
 import hashlib
 import json
+import logging
 import os
 import pickle
 import resource
@@ -218,6 +219,9 @@ def limit_memory(mem_gb: int) -> None:
     resource.setrlimit(resource.RLIMIT_AS, (mem_bytes, mem_bytes))
 
 
+log = logging.getLogger("TUNE")
+
+
 @hydra.main(
     config_path="../configs", config_name="logistic_regression", version_base="1.2"
 )
@@ -235,9 +239,6 @@ def optimize(cfg: DictConfig) -> Union[np.ndarray, float]:  # pragma: no cover
     score : Union[np.ndarray, float]
         The mean cross-validation score.
     """
-    scores = load_trial(cfg)
-    if scores is not None:
-        return np.mean(scores)
     try:
         limit_memory(cfg.mem_gb)
         X = load_dataframe(cfg.x_train).squeeze()
@@ -245,21 +246,36 @@ def optimize(cfg: DictConfig) -> Union[np.ndarray, float]:  # pragma: no cover
         if cfg.model == "flat":
             y = flatten_labels(y)
         pipeline = configure_pipeline(cfg)
-        scores = []
+
+        # Load trial if it has already been computed
+        scores = load_trial(cfg)
+        if scores is None:
+            scores = []
+        else:
+            log.info(f"Loaded trial with scores {scores}")
+
+        # Perform cross-validation
         with parallel_backend("threading", n_jobs=cfg.n_jobs):
             kf = KFold(
                 n_splits=cfg.n_splits,
             )
+            index = 0
             for train_index, test_index in kf.split(X):
-                X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-                y_train, y_test = y.iloc[train_index], y.iloc[test_index]
-                pipeline.fit(X_train, y_train)
-                y_pred = pipeline.predict(X_test)
-                if cfg.model == "flat":
-                    y_pred = unflatten_labels(y_pred)
-                    y_test = unflatten_labels(y_test)
-                scores.append(f1(y_test, y_pred))
-        save_trial(cfg, scores)
+                # Skip fold if it has already been computed
+                if index >= len(scores):
+                    X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+                    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+                    pipeline.fit(X_train, y_train)
+                    y_pred = pipeline.predict(X_test)
+                    if cfg.model == "flat":
+                        y_pred = unflatten_labels(y_pred)
+                        y_test = unflatten_labels(y_test)
+                    scores.append(f1(y_test, y_pred))
+                    save_trial(cfg, scores)
+                    log.info(f"Fold {index} obtained F-score: {scores[index]}")
+                else:
+                    log.info(f"Skipping fold {index}")
+                index += 1
         return np.mean(scores)
     except (ValueError, MemoryError, _ArrayMemoryError):
         return 0
