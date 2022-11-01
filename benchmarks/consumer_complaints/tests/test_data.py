@@ -40,22 +40,23 @@ def test_concatenator_1():
     assert_series_equal(ground_truth, flat_y)
 
 
-# def test_join_2():
-#     y = pd.DataFrame(
-#         {
-#             "Product": ["Debt collection", "Checking or savings account"],
-#             "Sub-product": ["I do not know", "Checking account"],
-#         }
-#     )
-#     separator = ","
-#     flat_y = join(y, separator)
-#     ground_truth = pd.Series(
-#         [
-#             "Debt collection,I do not know",
-#             "Checking or savings account,Checking account",
-#         ]
-#     )
-#     assert_series_equal(ground_truth, flat_y)
+def test_concatenator_2():
+    y = pd.DataFrame(
+        {
+            "Product": ["Debt collection", "Checking or savings account"],
+            "Sub-product": ["I do not know", "Checking account"],
+        }
+    )
+    separator = ","
+    concatenator = LabelConcatenator()
+    flat_y = concatenator.transform(y, separator)
+    ground_truth = pd.Series(
+        [
+            "Debt collection,I do not know",
+            "Checking or savings account,Checking account",
+        ]
+    )
+    assert_series_equal(ground_truth, flat_y)
 
 
 def test_save_dataframe():

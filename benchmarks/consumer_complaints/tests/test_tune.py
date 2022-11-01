@@ -1,5 +1,6 @@
 import resource
 
+import pandas as pd
 import pytest
 from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
@@ -80,14 +81,23 @@ def test_configure_pipeline_1(random_forest_config):
 
 def test_configure_pipeline_2(random_forest_config):
     X = [[0, 0], [1, 1]]
-    y = [
-        ["animal", "mammal", "rabbit"],
-        ["animal", "mammal", "dog"],
-    ]
+    y = pd.DataFrame(
+        {
+            "Product": ["Debt collection", "Checking or savings account"],
+            "Sub-product": ["I do not know", "Checking account"],
+        }
+    )
+    ground_truth = pd.Series(
+        [
+            "Debt collection,I do not know",
+            "Checking or savings account,Checking account",
+        ]
+    )
     classifier = configure_pipeline(random_forest_config)
+    print(classifier)
     classifier.fit(X, y)
     predicted = classifier.predict(X)
-    assert predicted == y
+    assert predicted == ground_truth
 
 
 def test_compute_md5_1(random_forest_config):

@@ -44,6 +44,26 @@ class LabelConcatenator(TransformerMixin, BaseEstimator):
         """
         return self
 
+    def fit_transform(self, y, separator: str = ":sep:"):
+        """
+        Join hierarchical labels into a single column.
+
+        Parameters
+        ----------
+        y : pd.DataFrame
+            hierarchical labels.
+        separator : str, default=":sep:"
+            Separator used to differentiate between columns.
+
+        Returns
+        -------
+        y : pd.Series
+            Joined labels.
+        """
+        print(y)
+        y = y[y.columns].apply(lambda x: separator.join(x.dropna().astype(str)), axis=1)
+        return y
+
     def transform(self, y, separator: str = ":sep:"):
         """
         Join hierarchical labels into a single column.
@@ -62,6 +82,9 @@ class LabelConcatenator(TransformerMixin, BaseEstimator):
         """
         y = y[y.columns].apply(lambda x: separator.join(x.dropna().astype(str)), axis=1)
         return y
+
+    def _more_tags(self):
+        return {"X_types": ["1dlabels"]}
 
 
 def save_dataframe(dataframe: pd.DataFrame, file_path: TextIO) -> None:

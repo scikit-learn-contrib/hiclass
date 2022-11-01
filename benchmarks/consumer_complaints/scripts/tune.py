@@ -129,9 +129,9 @@ def configure_pipeline(cfg: DictConfig) -> Pipeline:
         classifier = configure_flat[cfg.classifier](cfg)
         pipeline = Pipeline(
             [
+                ("concatenate", LabelConcatenator()),
                 ("count", CountVectorizer()),
                 ("tfidf", TfidfTransformer()),
-                ("join", LabelConcatenator()),
                 ("classifier", classifier),
             ]
         )
