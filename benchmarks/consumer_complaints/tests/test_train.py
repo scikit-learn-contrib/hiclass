@@ -19,8 +19,6 @@ def test_parser():
             "model.sav",
             "--classifier",
             "lightgbm",
-            "--random-state",
-            "0",
             "--model",
             "flat",
             "--best-parameters",
@@ -37,8 +35,6 @@ def test_parser():
     assert "model.sav" == parser.trained_model
     assert parser.classifier is not None
     assert "lightgbm" == parser.classifier
-    assert parser.random_state is not None
-    assert 0 == parser.random_state
     assert parser.model is not None
     assert "flat" == parser.model
     assert parser.best_parameters is not None
