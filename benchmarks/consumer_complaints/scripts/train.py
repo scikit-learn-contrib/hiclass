@@ -58,12 +58,6 @@ def parse_args(args: list) -> Namespace:
         help="Algorithm used for fitting, e.g., logistic_regression or random_forest",
     )
     parser.add_argument(
-        "--random-state",
-        type=int,
-        required=True,
-        help="Random state to enable reproducibility",
-    )
-    parser.add_argument(
         "--model",
         type=str,
         required=True,
