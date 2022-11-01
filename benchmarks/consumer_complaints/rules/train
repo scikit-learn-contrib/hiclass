@@ -9,7 +9,6 @@ rule train:
     params:
         classifier = "{classifier}",
         model = "{model}",
-        random_state = config["random_state"],
     conda:
         "../envs/hiclass.yml"
     threads:
