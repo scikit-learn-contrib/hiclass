@@ -8,7 +8,7 @@ from argparse import Namespace
 from joblib import parallel_backend
 from omegaconf import DictConfig, OmegaConf
 
-from data import load_dataframe, join
+from data import load_dataframe
 from tune import configure_pipeline
 
 
@@ -95,8 +95,6 @@ def train() -> None:  # pragma: no cover
     args = parse_args(sys.argv[1:])
     x_train = load_dataframe(args.x_train).squeeze()
     y_train = load_dataframe(args.y_train)
-    if args.model == "flat":
-        y_train = join(y_train)
     best_params = load_parameters(args.best_parameters)
     best_params.model = args.model
     best_params.classifier = args.classifier

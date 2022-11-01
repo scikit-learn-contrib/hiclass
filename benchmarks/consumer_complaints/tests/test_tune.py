@@ -78,6 +78,18 @@ def test_configure_pipeline_1(random_forest_config):
     assert isinstance(classifier, Pipeline)
 
 
+def test_configure_pipeline_2(random_forest_config):
+    X = [[0, 0], [1, 1]]
+    y = [
+        ["animal", "mammal", "rabbit"],
+        ["animal", "mammal", "dog"],
+    ]
+    classifier = configure_pipeline(random_forest_config)
+    classifier.fit(X, y)
+    predicted = classifier.predict(X)
+    assert predicted == y
+
+
 def test_compute_md5_1(random_forest_config):
     md5 = compute_md5(random_forest_config)
     expected = "bce939a7765a18f23cb1133ae9eb2cac"
@@ -120,7 +132,7 @@ def test_configure_logistic_regression(logistic_regression_config):
     assert isinstance(classifier, LogisticRegression)
 
 
-def test_configure_pipeline_2(logistic_regression_config):
+def test_configure_pipeline_3(logistic_regression_config):
     classifier = configure_pipeline(logistic_regression_config)
     assert classifier is not None
     assert isinstance(classifier, Pipeline)

@@ -4,6 +4,8 @@ import csv
 from typing import TextIO
 
 import pandas as pd
+from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.utils.validation import check_is_fitted
 
 
 def load_dataframe(path: TextIO) -> pd.DataFrame:
@@ -23,24 +25,43 @@ def load_dataframe(path: TextIO) -> pd.DataFrame:
     return pd.read_csv(path, compression="infer", header=0, sep=",", low_memory=False)
 
 
-def join(y: pd.DataFrame, separator: str = ":sep:") -> pd.Series:
-    """
-    Join hierarchical labels into a single column.
+class LabelConcatenator(TransformerMixin, BaseEstimator):
+    """Concatenate target labels for flat classification."""
 
-    Parameters
-    ----------
-    y : pd.DataFrame
-        hierarchical labels.
-    separator : str, default=":sep:"
-        Separator used to differentiate between columns.
+    def fit(self, y):
+        """
+        Fit label concatenator.
 
-    Returns
-    -------
-    y : pd.Series
-        Joined labels.
-    """
-    y = y[y.columns].apply(lambda x: separator.join(x.dropna().astype(str)), axis=1)
-    return y
+        Parameters
+        ----------
+        y : pd.DataFrame
+            Hierarchical labels.
+
+        Returns
+        -------
+        self : LabelConcatenator
+            Fitted label concatenator.
+        """
+        return self
+
+    def transform(self, y, separator: str = ":sep:"):
+        """
+        Join hierarchical labels into a single column.
+
+        Parameters
+        ----------
+        y : pd.DataFrame
+            hierarchical labels.
+        separator : str, default=":sep:"
+            Separator used to differentiate between columns.
+
+        Returns
+        -------
+        y : pd.Series
+            Joined labels.
+        """
+        y = y[y.columns].apply(lambda x: separator.join(x.dropna().astype(str)), axis=1)
+        return y
 
 
 def save_dataframe(dataframe: pd.DataFrame, file_path: TextIO) -> None:

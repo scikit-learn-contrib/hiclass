@@ -21,7 +21,7 @@ from sklearn.metrics import make_scorer
 from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
 
-from data import load_dataframe, join
+from data import load_dataframe, LabelConcatenator
 from hiclass import (
     LocalClassifierPerNode,
     LocalClassifierPerParentNode,
@@ -127,18 +127,26 @@ def configure_pipeline(cfg: DictConfig) -> Pipeline:
     """
     if cfg.model == "flat":
         classifier = configure_flat[cfg.classifier](cfg)
+        pipeline = Pipeline(
+            [
+                ("count", CountVectorizer()),
+                ("tfidf", TfidfTransformer()),
+                ("join", LabelConcatenator()),
+                ("classifier", classifier),
+            ]
+        )
     else:
         local_classifier = configure_flat[cfg.classifier](cfg)
         local_classifier.set_params(n_jobs=1)
         classifier = configure_hierarchical[cfg.model]
         classifier.set_params(local_classifier=local_classifier, n_jobs=cfg.n_jobs)
-    pipeline = Pipeline(
-        [
-            ("count", CountVectorizer()),
-            ("tfidf", TfidfTransformer()),
-            ("classifier", classifier),
-        ]
-    )
+        pipeline = Pipeline(
+            [
+                ("count", CountVectorizer()),
+                ("tfidf", TfidfTransformer()),
+                ("classifier", classifier),
+            ]
+        )
     return pipeline
 
 
@@ -242,8 +250,6 @@ def optimize(cfg: DictConfig) -> Union[np.ndarray, float]:  # pragma: no cover
         limit_memory(cfg.mem_gb)
         x_train = load_dataframe(cfg.x_train).squeeze()
         y_train = load_dataframe(cfg.y_train)
-        if cfg.model == "flat":
-            y_train = join(y_train)
         pipeline = configure_pipeline(cfg)
         with parallel_backend("threading", n_jobs=cfg.n_jobs):
             score = cross_val_score(
