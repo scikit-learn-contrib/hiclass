@@ -5,10 +5,8 @@ defaults:
 hydra:
   sweeper:
     params:
-      n_estimators: choice(100)
-      criterion: choice('gini')
-#      n_estimators: choice(100, 500, 1000)
-#      criterion: choice("gini", "entropy", "log_loss")
+      n_estimators: choice(100, 500, 1000)
+      criterion: choice("gini", "entropy", "log_loss")
 
 n_estimators: 1
 criterion: 1
