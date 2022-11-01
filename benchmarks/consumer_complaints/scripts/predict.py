@@ -5,10 +5,9 @@ import pickle
 import sys
 from argparse import Namespace
 
-import numpy as np
 import pandas as pd
 
-from data import load_dataframe, save_dataframe
+from data import load_dataframe, save_dataframe, unflatten_labels
 
 
 def parse_args(args: list) -> Namespace:
@@ -53,30 +52,6 @@ def parse_args(args: list) -> Namespace:
     return parser.parse_args(args)
 
 
-def separate(y: np.ndarray, separator: str = ":sep:") -> pd.DataFrame:
-    """
-    Separate flat labels back into hierarchical labels.
-
-    Parameters
-    ----------
-    y : np.ndarray
-        Flat labels.
-    separator : str, default=":sep:"
-        Separator used to differentiate between columns.
-
-    Returns
-    -------
-    y : pd.DataFrame
-        Hierarchical labels.
-    """
-    y = pd.Series(y)
-    y = y.str.split(
-        separator,
-        expand=True,
-    )
-    return y
-
-
 def main():  # pragma: no cover
     """Predict with flat approach."""
     args = parse_args(sys.argv[1:])
@@ -84,7 +59,7 @@ def main():  # pragma: no cover
     x_test = load_dataframe(args.x_test).squeeze()
     predictions = classifier.predict(x_test)
     if args.classifier == "flat":
-        predictions = separate(predictions)
+        predictions = unflatten_labels(predictions)
     else:
         predictions = pd.DataFrame(predictions)
     save_dataframe(predictions, args.predictions)

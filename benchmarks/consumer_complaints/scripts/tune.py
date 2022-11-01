@@ -17,11 +17,10 @@ from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import make_scorer
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 
-from data import load_dataframe, LabelConcatenator
+from data import load_dataframe, flatten_labels, unflatten_labels
 from hiclass import (
     LocalClassifierPerNode,
     LocalClassifierPerParentNode,
@@ -127,26 +126,20 @@ def configure_pipeline(cfg: DictConfig) -> Pipeline:
     """
     if cfg.model == "flat":
         classifier = configure_flat[cfg.classifier](cfg)
-        pipeline = Pipeline(
-            [
-                ("concatenate", LabelConcatenator()),
-                ("count", CountVectorizer()),
-                ("tfidf", TfidfTransformer()),
-                ("classifier", classifier),
-            ]
-        )
     else:
         local_classifier = configure_flat[cfg.classifier](cfg)
         local_classifier.set_params(n_jobs=1)
         classifier = configure_hierarchical[cfg.model]
-        classifier.set_params(local_classifier=local_classifier, n_jobs=cfg.n_jobs)
-        pipeline = Pipeline(
-            [
-                ("count", CountVectorizer()),
-                ("tfidf", TfidfTransformer()),
-                ("classifier", classifier),
-            ]
+        classifier.set_params(
+            local_classifier=local_classifier, n_jobs=cfg.n_jobs, verbose=30
         )
+    pipeline = Pipeline(
+        [
+            ("count", CountVectorizer()),
+            ("tfidf", TfidfTransformer()),
+            ("classifier", classifier),
+        ]
+    )
     return pipeline
 
 
@@ -246,17 +239,28 @@ def optimize(cfg: DictConfig) -> Union[np.ndarray, float]:  # pragma: no cover
     if scores is not None:
         return np.mean(scores)
     try:
-        save_trial(cfg, [0] * 5)
         limit_memory(cfg.mem_gb)
-        x_train = load_dataframe(cfg.x_train).squeeze()
-        y_train = load_dataframe(cfg.y_train)
+        X = load_dataframe(cfg.x_train).squeeze()
+        y = load_dataframe(cfg.y_train)
+        if cfg.model == "flat":
+            y = flatten_labels(y)
         pipeline = configure_pipeline(cfg)
+        scores = []
         with parallel_backend("threading", n_jobs=cfg.n_jobs):
-            score = cross_val_score(
-                pipeline, x_train, y_train, scoring=make_scorer(f1), n_jobs=1
+            kf = KFold(
+                n_splits=cfg.n_splits,
             )
-        save_trial(cfg, score)
-        return np.mean(score)
+            for train_index, test_index in kf.split(X):
+                X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+                y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+                pipeline.fit(X_train, y_train)
+                y_pred = pipeline.predict(X_test)
+                if cfg.model == "flat":
+                    y_pred = unflatten_labels(y_pred)
+                    y_test = unflatten_labels(y_test)
+                scores.append(f1(y_test, y_pred))
+        save_trial(cfg, scores)
+        return np.mean(scores)
     except (ValueError, MemoryError, _ArrayMemoryError):
         return 0
 

@@ -1,8 +1,4 @@
-import numpy as np
-import pandas as pd
-from pandas.testing import assert_frame_equal
-
-from scripts.predict import separate, parse_args
+from scripts.predict import parse_args
 
 
 def test_parser():
@@ -26,38 +22,3 @@ def test_parser():
     assert "predictions.csv.zip" == parser.predictions
     assert parser.classifier is not None
     assert "hist_gradient" == parser.classifier
-
-
-def test_separate_1():
-    y = np.array(
-        [
-            "Debt collection:sep:I do not know",
-            "Checking or savings account:sep:Checking account",
-        ]
-    )
-    y = separate(y)
-    ground_truth = pd.DataFrame(
-        [
-            ["Debt collection", "I do not know"],
-            ["Checking or savings account", "Checking account"],
-        ]
-    )
-    assert_frame_equal(ground_truth, y)
-
-
-def test_separate_2():
-    y = np.array(
-        [
-            "Debt collection/I do not know",
-            "Checking or savings account/Checking account",
-        ]
-    )
-    separator = "/"
-    y = separate(y, separator)
-    ground_truth = pd.DataFrame(
-        [
-            ["Debt collection", "I do not know"],
-            ["Checking or savings account", "Checking account"],
-        ]
-    )
-    assert_frame_equal(ground_truth, y)

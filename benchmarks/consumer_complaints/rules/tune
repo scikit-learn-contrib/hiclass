@@ -9,6 +9,7 @@ rule tune:
         model = "{model}",
         output_dir = "results/{model}/{classifier}",
         study_name = "{model}_{classifier}",
+        n_splits = config["n_splits"],
     conda:
         "../envs/hiclass.yml"
     threads:
@@ -27,6 +28,7 @@ rule tune:
         'y_train={input.y_train}' \
         'output_dir={params.output_dir}' \
         'mem_gb={resources.mem_gb}' \
+        'n_splits={params.n_splits}' \
         hydra.sweep.dir={params.output_dir} \
         hydra.sweeper.study_name={params.study_name} \
         """

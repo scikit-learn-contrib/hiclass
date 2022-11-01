@@ -1,5 +1,6 @@
 from io import StringIO
 
+import numpy as np
 import pandas as pd
 from pandas._testing import assert_series_equal
 from pandas.testing import assert_frame_equal
@@ -7,7 +8,8 @@ from pandas.testing import assert_frame_equal
 from scripts.data import (
     load_dataframe,
     save_dataframe,
-    LabelConcatenator,
+    flatten_labels,
+    unflatten_labels,
 )
 
 
@@ -22,15 +24,14 @@ def test_load_dataframe():
     assert_frame_equal(ground_truth, metadata)
 
 
-def test_concatenator_1():
+def test_flatten_labels_1():
     y = pd.DataFrame(
         {
             "Product": ["Debt collection", "Checking or savings account"],
             "Sub-product": ["I do not know", "Checking account"],
         }
     )
-    concatenator = LabelConcatenator()
-    flat_y = concatenator.transform(y)
+    flat_y = flatten_labels(y)
     ground_truth = pd.Series(
         [
             "Debt collection:sep:I do not know",
@@ -40,7 +41,7 @@ def test_concatenator_1():
     assert_series_equal(ground_truth, flat_y)
 
 
-def test_concatenator_2():
+def test_flatten_labels_2():
     y = pd.DataFrame(
         {
             "Product": ["Debt collection", "Checking or savings account"],
@@ -48,8 +49,7 @@ def test_concatenator_2():
         }
     )
     separator = ","
-    concatenator = LabelConcatenator()
-    flat_y = concatenator.transform(y, separator)
+    flat_y = flatten_labels(y, separator)
     ground_truth = pd.Series(
         [
             "Debt collection,I do not know",
@@ -57,6 +57,41 @@ def test_concatenator_2():
         ]
     )
     assert_series_equal(ground_truth, flat_y)
+
+
+def test_unflatten_labels_1():
+    y = np.array(
+        [
+            "Debt collection:sep:I do not know",
+            "Checking or savings account:sep:Checking account",
+        ]
+    )
+    y = unflatten_labels(y)
+    ground_truth = pd.DataFrame(
+        [
+            ["Debt collection", "I do not know"],
+            ["Checking or savings account", "Checking account"],
+        ]
+    )
+    assert_frame_equal(ground_truth, y)
+
+
+def test_separate_2():
+    y = np.array(
+        [
+            "Debt collection/I do not know",
+            "Checking or savings account/Checking account",
+        ]
+    )
+    separator = "/"
+    y = unflatten_labels(y, separator)
+    ground_truth = pd.DataFrame(
+        [
+            ["Debt collection", "I do not know"],
+            ["Checking or savings account", "Checking account"],
+        ]
+    )
+    assert_frame_equal(ground_truth, y)
 
 
 def test_save_dataframe():

@@ -3,9 +3,8 @@
 import csv
 from typing import TextIO
 
+import numpy as np
 import pandas as pd
-from sklearn.base import TransformerMixin, BaseEstimator
-from sklearn.utils.validation import check_is_fitted
 
 
 def load_dataframe(path: TextIO) -> pd.DataFrame:
@@ -25,66 +24,48 @@ def load_dataframe(path: TextIO) -> pd.DataFrame:
     return pd.read_csv(path, compression="infer", header=0, sep=",", low_memory=False)
 
 
-class LabelConcatenator(TransformerMixin, BaseEstimator):
-    """Concatenate target labels for flat classification."""
+def flatten_labels(y, separator: str = ":sep:"):
+    """
+    Flatten hierarchical labels into a single column.
 
-    def fit(self, y):
-        """
-        Fit label concatenator.
+    Parameters
+    ----------
+    y : pd.DataFrame
+        hierarchical labels.
+    separator : str, default=":sep:"
+        Separator used to differentiate between columns.
 
-        Parameters
-        ----------
-        y : pd.DataFrame
-            Hierarchical labels.
+    Returns
+    -------
+    y : pd.Series
+        Joined labels.
+    """
+    y = y[y.columns].apply(lambda x: separator.join(x.dropna().astype(str)), axis=1)
+    return y
 
-        Returns
-        -------
-        self : LabelConcatenator
-            Fitted label concatenator.
-        """
-        return self
 
-    def fit_transform(self, y, separator: str = ":sep:"):
-        """
-        Join hierarchical labels into a single column.
+def unflatten_labels(y: np.ndarray, separator: str = ":sep:") -> pd.DataFrame:
+    """
+    Separate flat labels back into hierarchical labels.
 
-        Parameters
-        ----------
-        y : pd.DataFrame
-            hierarchical labels.
-        separator : str, default=":sep:"
-            Separator used to differentiate between columns.
+    Parameters
+    ----------
+    y : np.ndarray
+        Flat labels.
+    separator : str, default=":sep:"
+        Separator used to differentiate between columns.
 
-        Returns
-        -------
-        y : pd.Series
-            Joined labels.
-        """
-        print(y)
-        y = y[y.columns].apply(lambda x: separator.join(x.dropna().astype(str)), axis=1)
-        return y
-
-    def transform(self, y, separator: str = ":sep:"):
-        """
-        Join hierarchical labels into a single column.
-
-        Parameters
-        ----------
-        y : pd.DataFrame
-            hierarchical labels.
-        separator : str, default=":sep:"
-            Separator used to differentiate between columns.
-
-        Returns
-        -------
-        y : pd.Series
-            Joined labels.
-        """
-        y = y[y.columns].apply(lambda x: separator.join(x.dropna().astype(str)), axis=1)
-        return y
-
-    def _more_tags(self):
-        return {"X_types": ["1dlabels"]}
+    Returns
+    -------
+    y : pd.DataFrame
+        Hierarchical labels.
+    """
+    y = pd.Series(y)
+    y = y.str.split(
+        separator,
+        expand=True,
+    )
+    return y
 
 
 def save_dataframe(dataframe: pd.DataFrame, file_path: TextIO) -> None:
