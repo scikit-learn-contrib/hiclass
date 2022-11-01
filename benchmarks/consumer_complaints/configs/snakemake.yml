@@ -17,12 +17,12 @@ mem_gb: 450
 #nrows: 2000
 
 classifiers:
-  - logistic_regression
+#  - logistic_regression
   - random_forest
-  - lightgbm
+#  - lightgbm
 
 models:
   - flat
-  - local_classifier_per_node
-  - local_classifier_per_parent_node
-  - local_classifier_per_level
+#  - local_classifier_per_node
+#  - local_classifier_per_parent_node
+#  - local_classifier_per_level

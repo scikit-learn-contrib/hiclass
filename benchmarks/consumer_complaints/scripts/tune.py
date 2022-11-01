@@ -10,6 +10,7 @@ from typing import List, Union
 
 import hydra
 import numpy as np
+import pandas as pd
 from joblib import parallel_backend
 from lightgbm import LGBMClassifier
 from numpy.core._exceptions import _ArrayMemoryError
@@ -28,6 +29,9 @@ from hiclass import (
     LocalClassifierPerLevel,
 )
 from hiclass.metrics import f1
+
+
+log = logging.getLogger("TUNE")
 
 
 def configure_lightgbm(cfg: DictConfig) -> BaseEstimator:
@@ -219,7 +223,65 @@ def limit_memory(mem_gb: int) -> None:
     resource.setrlimit(resource.RLIMIT_AS, (mem_bytes, mem_bytes))
 
 
-log = logging.getLogger("TUNE")
+def load_scores(cfg: DictConfig) -> List[float]:
+    """
+    Load scores from file.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Dictionary containing all configuration information.
+
+    Returns
+    -------
+    scores : List[float]
+        List of scores for each fold.
+    """
+    scores = load_trial(cfg)
+    if scores is None:
+        scores = []
+    else:
+        log.info(f"Loaded trial with F-scores {scores}")
+    return scores
+
+
+def cross_validate(cfg: DictConfig, X: pd.DataFrame, y: pd.DataFrame) -> List[float]:
+    """
+    Cross validate pipeline, skipping folds that have already been computed.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Dictionary containing all configuration information.
+    X : pd.DataFrame
+        Dataframe containing the features.
+    y : pd.DataFrame
+        Dataframe containing the labels.
+
+    Returns
+    -------
+    scores : List[float]
+        List of scores for each fold.
+    """
+    pipeline = configure_pipeline(cfg)
+    scores = load_scores(cfg)
+    with parallel_backend("threading", n_jobs=cfg.n_jobs):
+        kf = KFold(n_splits=cfg.n_splits)
+        fold = 0
+        for train_index, test_index in kf.split(X):
+            if fold >= len(scores):
+                X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+                y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+                pipeline.fit(X_train, y_train)
+                y_pred = pipeline.predict(X_test)
+                if cfg.model == "flat":
+                    y_pred = unflatten_labels(y_pred)
+                    y_test = unflatten_labels(y_test)
+                scores.append(f1(y_test, y_pred))
+                save_trial(cfg, scores)
+                log.info(f"Fold #{fold} obtained F-score: {scores[fold]}")
+            fold += 1
+    return scores
 
 
 @hydra.main(
@@ -245,37 +307,7 @@ def optimize(cfg: DictConfig) -> Union[np.ndarray, float]:  # pragma: no cover
         y = load_dataframe(cfg.y_train)
         if cfg.model == "flat":
             y = flatten_labels(y)
-        pipeline = configure_pipeline(cfg)
-
-        # Load trial if it has already been computed
-        scores = load_trial(cfg)
-        if scores is None:
-            scores = []
-        else:
-            log.info(f"Loaded trial with scores {scores}")
-
-        # Perform cross-validation
-        with parallel_backend("threading", n_jobs=cfg.n_jobs):
-            kf = KFold(
-                n_splits=cfg.n_splits,
-            )
-            index = 0
-            for train_index, test_index in kf.split(X):
-                # Skip fold if it has already been computed
-                if index >= len(scores):
-                    X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-                    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
-                    pipeline.fit(X_train, y_train)
-                    y_pred = pipeline.predict(X_test)
-                    if cfg.model == "flat":
-                        y_pred = unflatten_labels(y_pred)
-                        y_test = unflatten_labels(y_test)
-                    scores.append(f1(y_test, y_pred))
-                    save_trial(cfg, scores)
-                    log.info(f"Fold {index} obtained F-score: {scores[index]}")
-                else:
-                    log.info(f"Skipping fold {index}")
-                index += 1
+        scores = cross_validate(cfg, X, y)
         return np.mean(scores)
     except (ValueError, MemoryError, _ArrayMemoryError):
         return 0
