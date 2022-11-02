@@ -1,9 +1,11 @@
 import resource
 
+import pandas as pd
 import pytest
 from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
 from pyfakefs.fake_filesystem_unittest import Patcher
+from scripts.data import flatten_labels
 from scripts.tune import (
     configure_lightgbm,
     configure_logistic_regression,
@@ -13,6 +15,7 @@ from scripts.tune import (
     save_trial,
     load_trial,
     limit_memory,
+    cross_validate,
 )
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -61,6 +64,8 @@ def random_forest_config():
             "oob_score": False,
             "class_weight": "balanced",
             "ccp_alpha": 0.3,
+            "output_dir": ".",
+            "n_splits": 2,
         }
     )
     return cfg
@@ -80,7 +85,7 @@ def test_configure_pipeline_1(random_forest_config):
 
 def test_compute_md5_1(random_forest_config):
     md5 = compute_md5(random_forest_config)
-    expected = "bce939a7765a18f23cb1133ae9eb2cac"
+    expected = "407b164147fd7e78c41acc215d9c28fe"
     assert expected == md5
 
 
@@ -109,6 +114,8 @@ def logistic_regression_config():
             "solver": "lbfgs",
             "max_iter": 100,
             "multi_class": "auto",
+            "output_dir": ".",
+            "n_splits": 2,
         }
     )
     return cfg
@@ -128,7 +135,7 @@ def test_configure_pipeline_2(logistic_regression_config):
 
 def test_compute_md5_2(logistic_regression_config):
     md5 = compute_md5(logistic_regression_config)
-    expected = "ec072c7a92187ba58487d55ac6633332"
+    expected = "739b6346f16b738eb36967e6d82ade41"
     assert expected == md5
 
 
@@ -153,3 +160,38 @@ def test_limit_memory():
     soft, hard = resource.getrlimit(resource.RLIMIT_AS)
     assert expected == soft
     assert expected == hard
+
+
+@pytest.fixture
+def X():
+    X = pd.Series([
+        "I am a complaint",
+        "I am another complaint",
+        "I am a third complaint",
+        "I am a fourth complaint",
+    ])
+    return X
+
+
+@pytest.fixture
+def y():
+    y = pd.DataFrame(
+        {
+            "Product": ["a", "a", "a", "a"],
+            "Sub-product": ["b", "b", "b", "b"],
+        }
+    )
+    return y
+
+
+def test_cross_validate_1(logistic_regression_config, X, y):
+    with Patcher():
+        scores = cross_validate(logistic_regression_config, X, y)
+        assert [1.0, 1.0] == scores
+
+
+def test_cross_validate_2(random_forest_config, X, y):
+    with Patcher():
+        y = flatten_labels(y)
+        scores = cross_validate(random_forest_config, X, y)
+        assert [1.0, 1.0] == scores
