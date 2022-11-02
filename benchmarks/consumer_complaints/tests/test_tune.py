@@ -206,7 +206,7 @@ def test_cross_validate_3(logistic_regression_config, X, y):
         assert [0.5, 0.5] == scores
 
 
-def test_cross_validate_3(logistic_regression_config, X, y):
+def test_cross_validate_4(logistic_regression_config, X, y):
     with Patcher():
         save_trial(logistic_regression_config, [0.5])
         scores = cross_validate(logistic_regression_config, X, y)
