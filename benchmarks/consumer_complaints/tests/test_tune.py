@@ -197,3 +197,17 @@ def test_cross_validate_2(random_forest_config, X, y):
         y = flatten_labels(y)
         scores = cross_validate(random_forest_config, X, y)
         assert [1.0, 1.0] == scores
+
+
+def test_cross_validate_3(logistic_regression_config, X, y):
+    with Patcher():
+        save_trial(logistic_regression_config, [0.5, 0.5])
+        scores = cross_validate(logistic_regression_config, X, y)
+        assert [0.5, 0.5] == scores
+
+
+def test_cross_validate_3(logistic_regression_config, X, y):
+    with Patcher():
+        save_trial(logistic_regression_config, [0.5])
+        scores = cross_validate(logistic_regression_config, X, y)
+        assert [0.5, 1.0] == scores
