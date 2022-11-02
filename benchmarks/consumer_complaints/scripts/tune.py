@@ -187,7 +187,7 @@ def save_trial(cfg: DictConfig, scores: List[float]) -> None:
         pickle.dump((cfg, scores), file)
 
 
-def load_trial(cfg: DictConfig) -> Union[np.ndarray, None]:
+def load_trial(cfg: DictConfig) -> List[float]:
     """
     Load trial information.
 
@@ -198,16 +198,17 @@ def load_trial(cfg: DictConfig) -> Union[np.ndarray, None]:
 
     Returns
     -------
-    scores : Union[np.ndarray, None]
-        Tuple containing the configuration and scores or None if file does not exist.
+    scores : List[float]
+        The cross-validation scores or empty list if file does not exist.
     """
     md5 = compute_md5(cfg)
     filename = f"{cfg.output_dir}/{md5}.sav"
     if os.path.exists(filename):
         (_, scores) = pickle.load(open(filename, "rb"))
+        log.info(f"Loaded trial with F-scores {scores}")
         return scores
     else:
-        return None
+        return []
 
 
 def limit_memory(mem_gb: int) -> None:
@@ -221,28 +222,6 @@ def limit_memory(mem_gb: int) -> None:
     """
     mem_bytes = mem_gb * 1024**3
     resource.setrlimit(resource.RLIMIT_AS, (mem_bytes, mem_bytes))
-
-
-def load_scores(cfg: DictConfig) -> List[float]:
-    """
-    Load scores from file.
-
-    Parameters
-    ----------
-    cfg : DictConfig
-        Dictionary containing all configuration information.
-
-    Returns
-    -------
-    scores : List[float]
-        List of scores for each fold.
-    """
-    scores = load_trial(cfg)
-    if scores is None:
-        scores = []
-    else:
-        log.info(f"Loaded trial with F-scores {scores}")
-    return scores
 
 
 def cross_validate(cfg: DictConfig, X: pd.DataFrame, y: pd.DataFrame) -> List[float]:
@@ -264,7 +243,7 @@ def cross_validate(cfg: DictConfig, X: pd.DataFrame, y: pd.DataFrame) -> List[fl
         List of scores for each fold.
     """
     pipeline = configure_pipeline(cfg)
-    scores = load_scores(cfg)
+    scores = load_trial(cfg)
     with parallel_backend("threading", n_jobs=cfg.n_jobs):
         kf = KFold(n_splits=cfg.n_splits)
         fold = 0

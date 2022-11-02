@@ -1,6 +1,5 @@
 import resource
 
-import pandas as pd
 import pytest
 from lightgbm import LGBMClassifier
 from omegaconf import DictConfig
@@ -145,7 +144,7 @@ def test_load_trial(logistic_regression_config):
     logistic_regression_config.output_dir = "."
     with Patcher():
         scores = load_trial(logistic_regression_config)
-        assert scores is None
+        assert [] == scores
 
 
 def test_limit_memory():
