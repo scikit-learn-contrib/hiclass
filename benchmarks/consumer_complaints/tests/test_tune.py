@@ -164,12 +164,14 @@ def test_limit_memory():
 
 @pytest.fixture
 def X():
-    X = pd.Series([
-        "I am a complaint",
-        "I am another complaint",
-        "I am a third complaint",
-        "I am a fourth complaint",
-    ])
+    X = pd.Series(
+        [
+            "I am a complaint",
+            "I am another complaint",
+            "I am a third complaint",
+            "I am a fourth complaint",
+        ]
+    )
     return X
 
 
