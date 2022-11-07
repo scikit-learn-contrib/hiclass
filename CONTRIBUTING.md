@@ -35,4 +35,4 @@ Lastly, you can set up the git hooks scripts to fix formatting errors locally du
 pre-commit install
 ```
 
-If black is not executed locally, the CI/CD pipeline will fail.
+If black is not executed locally and there are formatting errors, the CI/CD pipeline will fail.
