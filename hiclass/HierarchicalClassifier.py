@@ -188,18 +188,6 @@ class HierarchicalClassifier(abc.ABC):
             # Add ch to logger
             self.logger_.addHandler(ch)
 
-    def _disambiguate(self):
-        self.separator_ = "::HiClass::Separator::"
-        if self.y_.ndim == 2:
-            new_y = []
-            for i in range(self.y_.shape[0]):
-                row = [str(self.y_[i, 0])]
-                for j in range(1, self.y_.shape[1]):
-                    parent = str(row[-1])
-                    child = str(self.y_[i, j])
-                    row.append(parent + self.separator_ + child)
-                new_y.append(np.asarray(row, dtype=np.str_))
-            self.y_ = np.array(new_y)
 
     def _create_digraph(self):
         # Create DiGraph
