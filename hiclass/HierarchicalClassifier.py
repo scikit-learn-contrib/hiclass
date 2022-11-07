@@ -131,7 +131,7 @@ class HierarchicalClassifier(abc.ABC):
         # and convert them to np.ndarray if need be
 
         self.X_, self.y_ = self._validate_data(
-            X, y, multi_output=True, accept_sparse='csr'
+            X, y, multi_output=True, accept_sparse="csr"
         )
 
         if sample_weight is not None:
@@ -189,7 +189,7 @@ class HierarchicalClassifier(abc.ABC):
             self.logger_.addHandler(ch)
 
     def _disambiguate(self):
-        self.separator_ = '::HiClass::Separator::'
+        self.separator_ = "::HiClass::Separator::"
         if self.y_.ndim == 2:
             new_y = []
             for i in range(self.y_.shape[0]):
