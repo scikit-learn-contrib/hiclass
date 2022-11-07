@@ -28,3 +28,9 @@ To run the tests simply execute:
 ```
 pytest -v --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html
 ```
+
+Lastly, you can set up the git hooks scrtips to check for formatting and linting errors:
+
+```
+pre-commit install
+```
