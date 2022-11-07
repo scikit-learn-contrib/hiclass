@@ -1,6 +1,6 @@
 ## General guidelines
 
-To contribute fork the repository and send a pull request.
+To contribute, fork the repository and send a pull request.
 
 When submitting code, please make every effort to follow existing conventions and style in order to keep the code as readable as possible.
 
@@ -18,6 +18,7 @@ pip install pytest==7.1.2
 pip install pytest-flake8==1.1.1
 pip install pytest-pydocstyle==2.3.0
 pip install pytest-cov==3.0.0
+pip install black==22.10.0
 pip install -e .
 ```
 

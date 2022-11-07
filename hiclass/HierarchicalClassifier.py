@@ -179,7 +179,7 @@ class HierarchicalClassifier(abc.ABC):
 
             # Create formatter
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
             )
 
             # Add formatter to ch
