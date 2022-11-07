@@ -189,7 +189,7 @@ class HierarchicalClassifier(abc.ABC):
             self.logger_.addHandler(ch)
 
     def _disambiguate(self):
-        self.separator_ = "::HiClass::Separator::"
+        self.separator_ = '::HiClass::Separator::'
         if self.y_.ndim == 2:
             new_y = []
             for i in range(self.y_.shape[0]):
