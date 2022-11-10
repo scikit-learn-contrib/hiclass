@@ -11,7 +11,7 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 
 from hiclass import LocalClassifierPerNode
-from hiclass.BinaryPolicy import ExclusivePolicy
+from hiclass.BinaryPolicy import ExclusivePolicy, IMPLEMENTED_POLICIES
 
 
 @parametrize_with_checks([LocalClassifierPerNode()])
@@ -71,7 +71,6 @@ def digraph_logistic_regression():
     digraph.X_ = np.array([[1, 2], [3, 4]])
     digraph.logger_ = logging.getLogger("LCPN")
     digraph.root_ = "a"
-    digraph.separator_ = "::HiClass::Separator::"
     digraph.binary_policy_ = ExclusivePolicy(digraph.hierarchy_, digraph.X_, digraph.y_)
     digraph.sample_weight_ = None
     return digraph
@@ -165,7 +164,6 @@ def fitted_logistic_regression():
     digraph.max_levels_ = 2
     digraph.dtype_ = "<U3"
     digraph.root_ = "r"
-    digraph.separator_ = "::HiClass::Separator::"
     classifiers = {
         "1": {"classifier": LogisticRegression()},
         "1.1": {"classifier": LogisticRegression()},
@@ -198,12 +196,20 @@ def test_predict_sparse(fitted_logistic_regression):
     assert_array_equal(ground_truth, prediction)
 
 
-def test_fit_predict():
-    lcpn = LocalClassifierPerNode(local_classifier=LogisticRegression())
-    x = np.array([[1, 2], [3, 4]])
-    y = np.array([["a", "b"], ["b", "c"]])
+@pytest.mark.parametrize("binary_policy", IMPLEMENTED_POLICIES.keys())
+def test_fit_predict(binary_policy):
+    lcpn = LocalClassifierPerNode(
+        local_classifier=LogisticRegression(), binary_policy=binary_policy
+    )
+    
+    x = np.array([[0], [1], [2], [3]])
+    y = np.array([["a", ""], ["a", "b"], ["b", ""],  ["b", "c"], ])
     lcpn.fit(x, y)
-    predictions = lcpn.predict(x)
+
+    # TODO: why can I not access lcpn.binary_policy_?
+    # TODO: what is the correct prediction?
+
+    predictions = lcpn.predict(x) 
     assert_array_equal(y, predictions)
 
 
@@ -235,10 +241,10 @@ def test_empty_levels(empty_levels):
     assert list(lcppn.hierarchy_.nodes) == [
         "1",
         "2",
-        "2" + lcppn.separator_ + "2.1",
+        "2.1",
         "3",
-        "3" + lcppn.separator_ + "3.1",
-        "3" + lcppn.separator_ + "3.1" + lcppn.separator_ + "3.1.2",
+        "3.1",
+        "3.1.2",
         lcppn.root_,
     ]
     assert_array_equal(ground_truth, predictions)

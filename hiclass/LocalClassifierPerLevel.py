@@ -152,7 +152,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         y = self._convert_to_1d(y)
 
-        self._remove_separator(y)
 
         return y
 

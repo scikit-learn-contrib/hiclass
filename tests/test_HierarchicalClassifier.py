@@ -7,37 +7,9 @@ import pytest
 from numpy.testing import assert_array_equal
 from sklearn.linear_model import LogisticRegression
 
-from hiclass.HierarchicalClassifier import HierarchicalClassifier, make_leveled
+from hiclass.HierarchicalClassifier import HierarchicalClassifier, make_leveled, ARTIFICIAL_ROOT
 
 
-@pytest.fixture
-def ambiguous_node_str():
-    classifier = HierarchicalClassifier()
-    classifier.y_ = np.array([["a", "b"], ["b", "c"]])
-    return classifier
-
-
-def test_disambiguate_str(ambiguous_node_str):
-    ground_truth = np.array(
-        [["a", "a::HiClass::Separator::b"], ["b", "b::HiClass::Separator::c"]]
-    )
-    ambiguous_node_str._disambiguate()
-    assert_array_equal(ground_truth, ambiguous_node_str.y_)
-
-
-@pytest.fixture
-def ambiguous_node_int():
-    classifier = HierarchicalClassifier()
-    classifier.y_ = np.array([[1, 2], [2, 3]])
-    return classifier
-
-
-def test_disambiguate_int(ambiguous_node_int):
-    ground_truth = np.array(
-        [["1", "1::HiClass::Separator::2"], ["2", "2::HiClass::Separator::3"]]
-    )
-    ambiguous_node_int._disambiguate()
-    assert_array_equal(ground_truth, ambiguous_node_int.y_)
 
 
 @pytest.fixture
@@ -81,14 +53,13 @@ def digraph_2d():
     classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
     classifier.logger_ = logging.getLogger("HC")
     classifier.edge_list = tempfile.TemporaryFile()
-    classifier.separator_ = "::HiClass::Separator::"
     return classifier
 
 
 def test_create_digraph_2d(digraph_2d):
     ground_truth = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
     digraph_2d._create_digraph()
-    assert nx.is_isomorphic(ground_truth, digraph_2d.hierarchy_)
+    # assert nx.is_isomorphic(ground_truth, digraph_2d.hierarchy_)
     assert list(ground_truth.nodes) == list(digraph_2d.hierarchy_.nodes)
     assert list(ground_truth.edges) == list(digraph_2d.hierarchy_.edges)
 
@@ -136,15 +107,16 @@ def test_convert_1d_y_to_2d(graph_1d):
 def digraph_one_root():
     classifier = HierarchicalClassifier()
     classifier.logger_ = logging.getLogger("HC")
-    classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("c", "d")])
+    classifier.hierarchy_ = nx.DiGraph([("a", "b")])
+    classifier.y_ = np.array([["a", "b"]] )
     return classifier
 
 
 def test_add_artificial_root(digraph_one_root):
     digraph_one_root._add_artificial_root()
-    successors = list(digraph_one_root.hierarchy_.successors("hiclass::root"))
+    successors = list(digraph_one_root.hierarchy_.successors(ARTIFICIAL_ROOT))
     assert ["a"] == successors
-    assert "hiclass::root" == digraph_one_root.root_
+    assert ARTIFICIAL_ROOT == digraph_one_root.root_
 
 
 @pytest.fixture
@@ -160,9 +132,9 @@ def digraph_multiple_roots():
 
 def test_add_artificial_root_multiple_roots(digraph_multiple_roots):
     digraph_multiple_roots._add_artificial_root()
-    successors = list(digraph_multiple_roots.hierarchy_.successors("hiclass::root"))
-    assert ["a", "c", "e"] == successors
-    assert "hiclass::root" == digraph_multiple_roots.root_
+    successors = list(digraph_multiple_roots.hierarchy_.successors(ARTIFICIAL_ROOT))
+    assert ["a", "c", "e"] == sorted(successors)
+    assert ARTIFICIAL_ROOT == digraph_multiple_roots.root_
 
 
 def test_initialize_local_classifiers_2(digraph_multiple_roots):
@@ -177,6 +149,23 @@ def test_clean_up(digraph_multiple_roots):
         assert digraph_multiple_roots.X_ is None
     with pytest.raises(AttributeError):
         assert digraph_multiple_roots.y_ is None
+
+@pytest.fixture
+def digraph_multiple_roots_dag():
+    classifier = HierarchicalClassifier()
+    classifier.logger_ = logging.getLogger("HC")
+    classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c")])
+    classifier.X_ = np.array([[1, 2], [3, 4], [5, 6]])
+    classifier.y_ = np.array([["a", "b"], ["b", "c"]])
+    classifier.sample_weight_ = None
+    return classifier
+
+
+def test_add_artificial_root_multiple_roots_dag(digraph_multiple_roots_dag):
+    digraph_multiple_roots_dag._add_artificial_root()
+    successors = list(digraph_multiple_roots_dag.hierarchy_.successors(ARTIFICIAL_ROOT))
+    assert ["a", "b"] == sorted(successors)
+    assert ARTIFICIAL_ROOT == digraph_multiple_roots_dag.root_
 
 
 @pytest.fixture

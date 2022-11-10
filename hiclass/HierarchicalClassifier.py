@@ -15,6 +15,9 @@ except ImportError:
     _has_ray = False
 else:
     _has_ray = True
+    
+
+ARTIFICIAL_ROOT = "hiclass::root"
 
 
 def make_leveled(y):
@@ -146,7 +149,7 @@ class HierarchicalClassifier(abc.ABC):
 
         # Avoids creating more columns in prediction if edges are a->b and b->c,
         # which would generate the prediction a->b->c
-        self._disambiguate()
+        # self._disambiguate()
 
         # Create DAG from self.y_ and store to self.hierarchy_
         self._create_digraph()
@@ -188,7 +191,6 @@ class HierarchicalClassifier(abc.ABC):
             # Add ch to logger
             self.logger_.addHandler(ch)
 
-
     def _create_digraph(self):
         # Create DiGraph
         self.hierarchy_ = nx.DiGraph()
@@ -221,20 +223,25 @@ class HierarchicalClassifier(abc.ABC):
 
     def _create_digraph_2d(self):
         if self.y_.ndim == 2:
-            # Create max_levels variable
-            self.max_levels_ = self.y_.shape[1]
             rows, columns = self.y_.shape
+            # Create max_levels variable
+            self.max_levels_ = columns
+
             self.logger_.info(f"Creating digraph from {rows} 2D labels")
+
             for row in range(rows):
-                for column in range(columns - 1):
-                    parent = self.y_[row, column].split(self.separator_)[-1]
-                    child = self.y_[row, column + 1].split(self.separator_)[-1]
+                for column in range(0, columns - 1):
+                    
+                    parent = self.y_[row, column] 
+                    child = self.y_[row, column + 1 ]
+
                     if parent != "" and child != "":
                         # Only add edge if both parent and child are not empty
                         self.hierarchy_.add_edge(
-                            self.y_[row, column], self.y_[row, column + 1]
+                            parent, child
                         )
-                    elif parent != "" and column == 0:
+                    if parent != "" and column == 0:
+                        # Add parent node e
                         self.hierarchy_.add_node(parent)
 
     def _export_digraph(self):
@@ -243,7 +250,7 @@ class HierarchicalClassifier(abc.ABC):
             # Add quotes to all nodes in case the text has commas
             mapping = {}
             for node in self.hierarchy_:
-                mapping[node] = '"{}"'.format(node.split(self.separator_)[-1])
+                mapping[node] = '"{}"'.format(node)
             hierarchy = nx.relabel_nodes(self.hierarchy_, mapping, copy=True)
             # Export DAG to CSV file
             self.logger_.info(f"Writing edge list to file {self.edge_list}")
@@ -261,14 +268,22 @@ class HierarchicalClassifier(abc.ABC):
             self.y_ = np.reshape(self.y_, (-1, 1))
 
     def _add_artificial_root(self):
+
         # Detect root(s)
-        roots = [
-            node for node, in_degree in self.hierarchy_.in_degree() if in_degree == 0
-        ]
+        columns = self.y_.shape[1]
+
+        if columns > 1:
+            # roots are the first column of y
+            roots = set(self.y_[:,0])
+        else:
+            roots = [
+                node for node, in_degree in self.hierarchy_.in_degree() if in_degree == 0
+            ]
+
         self.logger_.info(f"Detected {len(roots)} roots")
 
         # Add artificial root as predecessor to root(s) detected
-        self.root_ = "hiclass::root"
+        self.root_ = ARTIFICIAL_ROOT
         for old_root in roots:
             self.hierarchy_.add_edge(self.root_, old_root)
 
@@ -287,12 +302,12 @@ class HierarchicalClassifier(abc.ABC):
             y = y.flatten()
         return y
 
-    def _remove_separator(self, y):
-        # Remove separator from predictions
-        if y.ndim == 2:
-            for i in range(y.shape[0]):
-                for j in range(1, y.shape[1]):
-                    y[i, j] = y[i, j].split(self.separator_)[-1]
+    # def _remove_separator(self, y):
+    #     # Remove separator from predictions
+    #     if y.ndim == 2:
+    #         for i in range(y.shape[0]):
+    #             for j in range(1, y.shape[1]):
+    #                 y[i, j] = y[i, j].split(self.separator_)[-1]
 
     def _fit_node_classifier(
         self, nodes, local_mode: bool = False, use_joblib: bool = False
