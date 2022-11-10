@@ -1,6 +1,6 @@
 ## General guidelines
 
-To contribute fork the repository and send a pull request.
+To contribute, fork the repository and send a pull request.
 
 When submitting code, please make every effort to follow existing conventions and style in order to keep the code as readable as possible.
 
@@ -18,6 +18,8 @@ pip install pytest==7.1.2
 pip install pytest-flake8==1.1.1
 pip install pytest-pydocstyle==2.3.0
 pip install pytest-cov==3.0.0
+pip install black==22.10.0
+pip install pre-commit==2.20.0
 pip install -e .
 ```
 
@@ -26,3 +28,11 @@ To run the tests simply execute:
 ```
 pytest -v --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html
 ```
+
+Lastly, you can set up the git hooks scripts to fix formatting errors locally during commits:
+
+```
+pre-commit install
+```
+
+If black is not executed locally and there are formatting errors, the CI/CD pipeline will fail.

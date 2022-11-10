@@ -211,3 +211,5 @@ def test_cross_validate_4(logistic_regression_config, X, y):
         save_trial(logistic_regression_config, [0.5])
         scores = cross_validate(logistic_regression_config, X, y)
         assert [0.5, 1.0] == scores
+        scores = load_trial(logistic_regression_config)
+        assert [0.5, 1.0] == scores
