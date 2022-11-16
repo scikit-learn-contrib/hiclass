@@ -8,7 +8,7 @@ The main requirement to run this pipeline is Anaconda 3. Please, install the lat
 
 With Anaconda installed, you can create a new environment with snakemake by running the following commands:
 
-```
+```shell
 git clone https://github.com/mirand863/hiclass.git
 cd hiclass/benchmarks/consumer_complaints
 conda env create --name snakemake --file envs/snakemake.yml
@@ -26,7 +26,7 @@ The file `configs/snakemake.yml` holds configuration information to run the pipe
 
 For the purpose of this tutorial, we will keep most parameters intact and modify only the working directory. In order to do that, run the command `pwd` and update the `workdir` parameter with the output from `pwd`. Alternatively, execute the following command to update the working directory automatically:
 
-```
+```shell
 sed -i "s?workdir.*?workdir: `pwd`?" configs/snakemake.yml
 ```
 
@@ -55,7 +55,7 @@ The intervals for testing can be defined with the functions `range` or `choice`,
 
 After a successful installation, you can activate the newly created environment and run the pipeline locally (please don't forget to modify the config file with your working directory as described in the last section).
 
-```
+```shell
 conda activate snakemake
 snakemake --keep-going --printshellcmds --reason --use-conda --cores 48
 ```
