@@ -2,13 +2,15 @@ configfile: "configs/snakemake.yml"
 
 workdir: config["workdir"]
 
-include: "rules/download"
-include: "rules/split_data"
-include: "rules/tune"
-include: "rules/train"
-include: "rules/predict"
-include: "rules/metrics"
+include: "rules/download.smk"
+include: "rules/split_data.smk"
+include: "rules/tune.smk"
+include: "rules/train.smk"
+include: "rules/predict.smk"
+include: "rules/metrics.smk"
+include: "rules/statistics.smk"
 
 rule all:
     input:
-        metrics = [f"results/{model}/{classifier}/metrics.csv" for classifier in config["classifiers"] for model in config["models"]]
+        metrics = [f"results/{model}/{classifier}/metrics.csv" for classifier in config["classifiers"] for model in config["models"]],
+        statistics = "results/statistics/statistics.csv"
