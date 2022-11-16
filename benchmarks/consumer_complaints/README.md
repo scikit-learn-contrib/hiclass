@@ -30,6 +30,27 @@ For the purpose of this tutorial, we will keep most parameters intact and modify
 sed -i "s?workdir.*?workdir: `pwd`?" configs/snakemake.yml
 ```
 
+## Hyperparameter tuning
+
+The hyperparameters tested during the tuning stage are defined in the files [lightgbm.yaml](configs/lightgbm.yaml), [logistic_regression.yaml](configs/logistic_regression.yaml) and [random_forest.yaml](configs/random_forest.yaml). For example, for random forest we used the following `yaml` file:
+
+```yml
+defaults:
+  - _self_
+  - optuna
+
+hydra:
+  sweeper:
+    params:
+      n_estimators: choice(100, 200)
+      criterion: choice("gini", "entropy", "log_loss")
+
+n_estimators: 1
+criterion: 1
+```
+
+The intervals for testing can be defined with the functions `range` or `choice`, as described on [Hydra's documentation](https://hydra.cc/docs/plugins/optuna_sweeper/). If you wish to add more parameters for testing, you can simply add the parameter name inside the `params` field and at the end of the file set it to 1 in order to enable its usage in Hydra. Additionally, you would need to modify one of the functions `configure_lightgbm`, `configure_logistic_regression` or `configure_random_forest` (whichever is appropriate) inside the script [tune.py](scripts/tune.py) to enable the new hyperparameter.
+
 ## Running locally
 
 After a successful installation, you can activate the newly created environment and run the pipeline locally (please don't forget to modify the config file with your working directory as described in the last section).
@@ -47,7 +68,7 @@ The trained models, predictions and benchmarks for each model are saved in the r
 
 Running the pipeline on a Slurm cluster requires using more parameters in order to inform Snakemake the rules for submitting jobs:
 
-```
+```shell
 srun \
 --account <name> \
 --mem=<memory-snakemake>G \
