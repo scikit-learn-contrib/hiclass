@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Script to store basic statistical information."""
 import argparse
+import os
 from argparse import Namespace
+from datetime import datetime
 
 
 def parse_args(args: list) -> Namespace:
@@ -56,3 +58,21 @@ def parse_args(args: list) -> Namespace:
         help="Path to store statistics in CSV format",
     )
     return parser.parse_args(args)
+
+
+def get_file_modification(file_path: str) -> str:
+    """
+    Get the modification date of a file.
+
+    Parameters
+    ----------
+    file_path : str
+        Path to file.
+
+    Returns
+    -------
+    _ : str
+        Modification date.
+    """
+    date = datetime.fromtimestamp(os.path.getmtime(file_path)).strftime("%d/%m/%Y")
+    return date

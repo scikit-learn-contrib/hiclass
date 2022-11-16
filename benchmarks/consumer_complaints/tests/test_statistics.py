@@ -1,4 +1,9 @@
+from datetime import date
+
+from pyfakefs.fake_filesystem_unittest import Patcher
 from scripts.statistics import parse_args
+
+from scripts.statistics import get_file_modification
 
 
 def test_parser():
@@ -30,3 +35,11 @@ def test_parser():
     assert "y_test.csv.zip" == parser.y_test
     assert parser.statistics is not None
     assert "statistics.csv" == parser.statistics
+
+
+def test_get_file_modification():
+    with Patcher() as patcher:
+        patcher.fs.create_file("complaints.csv.zip")
+        assert date.today().strftime("%d/%m/%Y") == get_file_modification(
+            "complaints.csv.zip"
+        )
