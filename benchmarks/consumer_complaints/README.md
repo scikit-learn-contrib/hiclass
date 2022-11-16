@@ -112,7 +112,7 @@ Regarding the parameters for Snakemake, they have the following meanings:
 - `--jobs` the number of jobs that can be submitted simultaneously;
 - `--cluster` the parameters for individual jobs can be set inside the quotation marks.
 
-These parameters inside quotation marks describe the rules for each individual job submitted by Snakemake:
+The parameters inside quotation marks describe the rules for each individual job submitted by Snakemake, i.e.:
 - `--account` the account to submit jobs;
 - `--partition` the partition to run jobs;
 - `--mem` memory allocated for each job. This parameter is combined with the number of retries as `retry * mem`. For example, if we initially allocate 500GB for each job, then at the third retry it will allocate `3 * 500GB = 1.5TB`. Snakemake is careful not to exceed the maximum memory usage specified in the parameter `--resources mem_gb`;
