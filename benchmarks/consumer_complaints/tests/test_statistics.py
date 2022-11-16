@@ -1,9 +1,12 @@
 from datetime import date
 
+import pandas as pd
+import pytest
+from pandas._testing import assert_frame_equal
 from pyfakefs.fake_filesystem_unittest import Patcher
 from scripts.statistics import parse_args
 
-from scripts.statistics import get_file_modification
+from scripts.statistics import get_file_modification, create_dataframe, save_statistics
 
 
 def test_parser():
@@ -43,3 +46,31 @@ def test_get_file_modification():
         assert date.today().strftime("%d/%m/%Y") == get_file_modification(
             "complaints.csv.zip"
         )
+
+
+def test_create_dataframe():
+    statistics = create_dataframe("2021-01-01", 70, 30)
+    assert (1, 3) == statistics.shape
+    assert "2021-01-01" == statistics["Snapshot"].values[0]
+    assert 70 == statistics["Training set size"].values[0]
+    assert 30 == statistics["Test set size"].values[0]
+
+
+@pytest.fixture
+def statistics():
+    statistics = pd.DataFrame(
+        {
+            "Snapshot": ["02/11/2020"],
+            "Training set size": [70],
+            "Test set size": [30],
+        }
+    )
+    return statistics
+
+
+def test_save_statistics(statistics):
+    with Patcher() as patcher:
+        save_statistics(statistics, "statistics.csv")
+        assert patcher.fs.exists("statistics.csv")
+        result = pd.read_csv("statistics.csv")
+        assert_frame_equal(statistics, result)
