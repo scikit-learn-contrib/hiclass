@@ -14,7 +14,15 @@ cd hiclass/benchmarks/consumer_complaints
 conda env create --name snakemake --file envs/snakemake.yml
 ```
 
-The file `configs/snakemake.yml` holds configuration information to run the pipeline, e.g., working directory, number of threads to run tasks in parallel, random seed to enable reproducibility when splitting the dataset, number of splits for k-fold cross validation, allocated memory in GB for tuning and training the models, number of rows to run the pipeline on a subset of the data, the base classifiers from scikit-learn and the hierarchical and flat models.
+The file `configs/snakemake.yml` holds configuration information to run the pipeline, e.g.:
+- working directory;
+- number of threads to run tasks in parallel;
+- random seed to enable reproducibility when splitting the dataset;
+- number of splits for k-fold cross validation;
+- allocated memory in GB for tuning and training the models;
+- number of rows to run the pipeline on a subset of the data;
+- the base classifiers from scikit-learn;
+- the hierarchical and flat models.
 
 For the purpose of this tutorial, we will keep most parameters intact and modify only the working directory. In order to do that, run the command `pwd` and update the `workdir` parameter with the output from `pwd`. Alternatively, execute the following command to update the working directory automatically:
 
@@ -37,7 +45,7 @@ The trained models, predictions and benchmarks for each model are saved in the r
 
 ## Running on clusters
 
-Running the pipeline on a Slurm cluster requires using more parameters in order to inform Snakemake the rules to submit jobs:
+Running the pipeline on a Slurm cluster requires using more parameters in order to inform Snakemake the rules for submitting jobs:
 
 ```
 srun \
@@ -66,26 +74,28 @@ snakemake \
 
 `srun` is the command used to submit Snakemake to Slurm. The parameters have the following meanings:
 
-- --account specifies which account to use when submitting jobs to Slurm;
-- --mem specifies how much memory should be used by Snakemake (not necessary to be a large value since individual jobs will have more memory allocated later);
-- --cpus-per-task is the number of cores used by Snakemake;
-- --time states how long the Snakemake job should run for;
-- --partition designates the partition to run the job.
+- `--account` specifies which account to use when submitting jobs to Slurm;
+- `--mem` specifies how much memory should be used by Snakemake (not necessary to be a large value since individual jobs will have more memory allocated in another parameter that will be described later);
+- `--cpus-per-task` is the number of cores used by Snakemake;
+- `--time` states how long the Snakemake job should run for;
+- `--partition` designates the partition to run the job.
 
 Regarding the parameters for Snakemake, they have the following meanings:
-- --keep-going forces Snakemake to keep executing independent tasks if an unrelated one fails;
-- --printshellcmds enables printing the commands that will be executed;
-- --reason makes Snakemake print the reason for each executed rule;
-- --use-conda is necessary to indicate that conda will be used to manage the software dependencies of the pipeline;
-- --cores tells Snakemake how many cpus can be used overall (the more cpus you can spare, the faster the pipeline will finish). For a cluster execution, 12 cores is more than enough since individual jobs will have more CPUs allocated later;
-- --resources mem_gb specifies the total ammount of RAM that should be allocated for all jobs (only used during tuning and training);
-- --restart-times defines how many times the pipeline should restart a job if it fails. This could be useful if the reason for failing is out of memory, since each retry will allocate more memory for the failed job;
-- --jobs the number of jobs that can be submitted simultaneously;
-- --cluster the parameters for individual jobs can be set inside the quotation marks;
-- --account the account to submit jobs;
-- --partition the partition to run jobs;
-- --mem memory allocated for each job. This parameter is combined with the number of retries as `retry * mem`. For example, if we initially allocate 500GB for each job, then at the third retry it will allocate `3 * 500GB = 1.5TB`. Snakemake is careful not to exceed the maximum memory usage specified in the parameter `--resources mem_gb`;
-- --cpus-per-task the number of CPUs allocated for each job submitted by Snakemake;
-- --time how long each job can run for;
+- `--keep-going` forces Snakemake to keep executing independent tasks if an unrelated one fails;
+- `--printshellcmds` enables printing the commands that will be executed;
+- `--reason` makes Snakemake print the reason for each executed rule;
+- `--use-conda` is necessary to indicate that conda will be used to manage the software dependencies of the pipeline;
+- `--cores` tells Snakemake how many cpus can be used overall (the more cpus you can spare, the faster the pipeline will finish). For a cluster execution, 12 cores is more than enough since individual jobs will have more CPUs allocated later;
+- `--resources mem_gb` specifies the total ammount of RAM that should be allocated for all jobs (only used during tuning and training);
+- `--restart-times` defines how many times the pipeline should restart a job if it fails. This could be useful if the reason for failing is out of memory, since each retry will allocate more memory for the failed job;
+- `--jobs` the number of jobs that can be submitted simultaneously;
+- `--cluster` the parameters for individual jobs can be set inside the quotation marks.
 
-Here is more information on how to run Snakemake using other [cluster engines](https://snakemake.readthedocs.io/en/stable/executing/cluster.html) and the [cloud](https://snakemake.readthedocs.io/en/stable/executing/cloud.html). In the [Makefile](Makefile) are specified the parameters used to submit jobs in our cluster.
+These parameters inside quotation marks describe the rules for each individual job submitted by Snakemake:
+- `--account` the account to submit jobs;
+- `--partition` the partition to run jobs;
+- `--mem` memory allocated for each job. This parameter is combined with the number of retries as `retry * mem`. For example, if we initially allocate 500GB for each job, then at the third retry it will allocate `3 * 500GB = 1.5TB`. Snakemake is careful not to exceed the maximum memory usage specified in the parameter `--resources mem_gb`;
+- `--cpus-per-task` the number of CPUs allocated for each job submitted by Snakemake;
+- `--time` how long each job can run for;
+
+Here is more information on how to run Snakemake using other [cluster engines](https://snakemake.readthedocs.io/en/stable/executing/cluster.html) and the [cloud](https://snakemake.readthedocs.io/en/stable/executing/cloud.html). In the [Makefile](Makefile) you can check the parameters we used to submit jobs to our cluster.
