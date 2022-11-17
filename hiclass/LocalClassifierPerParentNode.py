@@ -145,8 +145,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
         y = self._convert_to_1d(y)
 
-        self._remove_separator(y)
-
         return y
 
     def _predict_remaining_levels(self, X, y):
@@ -181,15 +179,20 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
     def _get_successors(self, node):
         successors = list(self.hierarchy_.successors(node))
-        mask = np.isin(self.y_, successors).any(axis=1)
+        if node == self.root_:
+            mask = np.isin(self.y_, successors).any(axis=1)
+            y = self.y_[mask][:, 0]
+        else:
+            y = []
+            mask = np.full((len(self.X_)), False)
+            for successor in successors:
+                rows, cols = np.where(self.y_ == successor)
+                for row, col in zip(rows, cols):
+                    if col > 0 and self.y_[row, col - 1] == node:
+                        y.append(self.y_[row, col])
+                        mask[row] = True
+            y = np.array(y)
         X = self.X_[mask]
-        y = []
-        for row in self.y_[mask]:
-            if node == self.root_:
-                y.append(row[0])
-            else:
-                y.append(row[np.where(row == node)[0][0] + 1])
-        y = np.array(y)
         sample_weight = (
             self.sample_weight_[mask] if self.sample_weight_ is not None else None
         )
