@@ -188,12 +188,11 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             for successor in successors:
                 rows, cols = np.where(self.y_ == successor)
                 for row, col in zip(rows, cols):
-                    if col > 0:
-                        if self.y_[row, col - 1] == node:
-                            y.append(self.y_[row, col])
-                            mask[row] = True
+                    if col > 0 and self.y_[row, col - 1] == node:
+                        y.append(self.y_[row, col])
+                        mask[row] = True
+            y = np.array(y)
         X = self.X_[mask]
-        y = np.array(y)
         sample_weight = (
             self.sample_weight_[mask] if self.sample_weight_ is not None else None
         )

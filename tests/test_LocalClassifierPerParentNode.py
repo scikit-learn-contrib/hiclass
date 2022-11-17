@@ -219,10 +219,10 @@ def test_empty_levels(empty_levels):
     assert list(lcppn.hierarchy_.nodes) == [
         "1",
         "2",
-        "2" + lcppn.separator_ + "2.1",
+        "2.1",
         "3",
-        "3" + lcppn.separator_ + "3.1",
-        "3" + lcppn.separator_ + "3.1" + lcppn.separator_ + "3.1.2",
+        "3.1",
+        "3.1.2",
         lcppn.root_,
     ]
     assert_array_equal(ground_truth, predictions)
