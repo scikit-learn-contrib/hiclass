@@ -206,9 +206,6 @@ def test_fit_predict(binary_policy):
     y = np.array([["a", ""], ["a", "b"], ["b", ""],  ["b", "c"], ]) 
     lcpn.fit(x, y)
 
-    # TODO: what is the correct prediction?
-    # TODO: Continue here!
-
     expected = np.array([["a", "b"], ["a", "b"], ["b", "c"],  ["b", "c"], ]) # TODO: is this the correct result?
     predictions = lcpn.predict(x) 
     assert_array_equal(expected, predictions)
