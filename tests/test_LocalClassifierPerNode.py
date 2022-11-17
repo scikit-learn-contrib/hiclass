@@ -197,7 +197,7 @@ def test_predict_sparse(fitted_logistic_regression):
 
 
 @pytest.mark.parametrize("binary_policy", IMPLEMENTED_POLICIES.keys())
-def test_fit_predict(binary_policy):
+def test_fit_predict(binary_policy="exclusive"):
     lcpn = LocalClassifierPerNode(
         local_classifier=LogisticRegression(), binary_policy=binary_policy
     )
@@ -206,8 +206,8 @@ def test_fit_predict(binary_policy):
     y = np.array([["a", ""], ["a", "b"], ["b", ""],  ["b", "c"], ])
     lcpn.fit(x, y)
 
-    # TODO: why can I not access lcpn.binary_policy_?
     # TODO: what is the correct prediction?
+    # TODO: Continue here!
 
     predictions = lcpn.predict(x) 
     assert_array_equal(y, predictions)

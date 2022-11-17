@@ -14,6 +14,8 @@ from hiclass import BinaryPolicy
 from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
 
+from collections import defaultdict 
+
 
 class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
     """
@@ -153,41 +155,64 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         # TODO: Add threshold to stop prediction halfway if need be
 
-        bfs = nx.bfs_successors(self.hierarchy_, source=self.root_)
 
         self.logger_.info("Predicting")
-
-        for predecessor, successors in bfs:
-            if predecessor == self.root_:
-                mask = [True] * X.shape[0]
-                subset_x = X[mask]
+        
+        def graph_iterator(graph: nx.DiGraph, root):
+            # iterate over graph by visiting each successor of node (even if this means mutliple times)
+            # and keeping track the distance from the root
+            tuple_list = lambda it,i: [(node, i) for node in it]
+            queue = []
+            if root not in graph.nodes:
+                raise ValueError(f"{root} not in graph")
             else:
-                mask = np.isin(y, predecessor).any(axis=1)
-                subset_x = X[mask]
-            if subset_x.shape[0] > 0:
-                probabilities = np.zeros((subset_x.shape[0], len(successors)))
-                for i, successor in enumerate(successors):
-                    successor_name = str(successor)
-                    self.logger_.info(f"Predicting for node '{successor_name}'")
-                    classifier = self.hierarchy_.nodes[successor]["classifier"]
-                    positive_index = np.where(classifier.classes_ == 1)[0]
-                    probabilities[:, i] = classifier.predict_proba(subset_x)[
-                        :, positive_index
-                    ][:, 0]
-                highest_probability = np.argmax(probabilities, axis=1)
-                prediction = []
-                for i in highest_probability:
-                    prediction.append(successors[i])
-                level = nx.shortest_path_length(
-                    self.hierarchy_, self.root_, predecessor
-                )
-                prediction = np.array(prediction)
-                y[mask, level] = prediction
+                queue = tuple_list(graph.successors(root), 0)
+                while queue:
+                    node, i = queue.pop(0)
+                    yield (node, i)
+                    queue.extend(tuple_list(graph.successors(node), i+1))
 
+
+        prediction_probs = {} # since we can visit a graph multiple times in our iterator we store the prediction results to only calculate them once
+        depths = defaultdict(lambda: []) 
+        for node, depth in graph_iterator(self.hierarchy_, self.root_):
+            depths[depth].append(node)
+
+            if node not in prediction_probs.keys():
+
+                self.logger_.info(f"Predicting for node '{node}'")
+                
+                classifier = self.hierarchy_.nodes[node]["classifier"]
+                positive_index = np.where(classifier.classes_ == 1)[0]
+                
+                prediction_probs[node] = classifier.predict_proba(X)[
+                    :, positive_index
+                ][:, 0] # we need to double index because positive_index is an array not a single value... should it be though?
+
+        for level in range(self.max_levels_):
+            nodes = depths[level]
+            probabilities = np.array([prediction_probs[node] for node in nodes]).T
+            nodes_index = {n: nodes.index(n) for n in nodes}
+
+            if level >= 1:
+                predictions_level_before = y[:, level-1]
+
+                # get a list of children per row in the predictions of the previous level
+                nodes_to_consider_list = [list(self.hierarchy_.successors(predecessor)) for predecessor in predictions_level_before] 
+
+                # TODO: edge case nodes_to_consider is empty?
+                for probs, nodes_to_consider in zip(probabilities, nodes_to_consider_list):
+                    indices = np.array([nodes_index[n] for n in nodes_to_consider])
+                    probs[~indices] = 0 # unreachable nodes get 0 probability
+                                
+            highest_probability_index = np.argmax(probabilities, axis=1)
+            
+            predictions = np.array([nodes[i] for i in highest_probability_index])
+            y[:, level] = predictions
+                 
         y = self._convert_to_1d(y)
-
-
         return y
+
 
     def _initialize_binary_policy(self):
         if isinstance(self.binary_policy, str):
@@ -236,6 +261,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         classifier.fit(X, y, sample_weight)
         return classifier
 
-    def _clean_up(self):
-        super()._clean_up()
-        del self.binary_policy_
+    # def _clean_up(self):
+        # super()._clean_up()
+        # del self.binary_policy_ 
