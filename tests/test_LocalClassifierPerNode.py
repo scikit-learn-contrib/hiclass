@@ -197,20 +197,21 @@ def test_predict_sparse(fitted_logistic_regression):
 
 
 @pytest.mark.parametrize("binary_policy", IMPLEMENTED_POLICIES.keys())
-def test_fit_predict(binary_policy="exclusive"):
+def test_fit_predict(binary_policy):
     lcpn = LocalClassifierPerNode(
         local_classifier=LogisticRegression(), binary_policy=binary_policy
     )
     
-    x = np.array([[0], [1], [2], [3]])
-    y = np.array([["a", ""], ["a", "b"], ["b", ""],  ["b", "c"], ])
+    x = np.array([[-10], [0], [10], [100]])
+    y = np.array([["a", ""], ["a", "b"], ["b", ""],  ["b", "c"], ]) 
     lcpn.fit(x, y)
 
     # TODO: what is the correct prediction?
     # TODO: Continue here!
 
+    expected = np.array([["a", "b"], ["a", "b"], ["b", "c"],  ["b", "c"], ]) # TODO: is this the correct result?
     predictions = lcpn.predict(x) 
-    assert_array_equal(y, predictions)
+    assert_array_equal(expected, predictions)
 
 
 @pytest.fixture
