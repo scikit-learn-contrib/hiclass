@@ -26,7 +26,6 @@ def digraph_logistic_regression():
     digraph.logger_ = logging.getLogger("LCPL")
     digraph.root_ = "a"
     digraph.sample_weight_ = None
-    digraph.separator_ = "::HiClass::Separator::"
     digraph.masks_ = [
         [True, True],
         [True, True],
@@ -98,7 +97,6 @@ def fitted_logistic_regression():
     digraph.max_levels_ = 2
     digraph.dtype_ = "<U3"
     digraph.root_ = "r"
-    digraph.separator_ = "::HiClass::Separator::"
     digraph.masks_ = [
         [True, True, True, True],
         [True, True, True, True],
@@ -132,7 +130,7 @@ def test_fit_predict():
     x = np.array([[1, 2], [3, 4]])
     y = np.array([["a", "b"], ["b", "c"]])
     ground_truth = np.array(
-        [["a", "b"], ["a::HiClass::Separator::b", "b::HiClass::Separator::c"]]
+        [["a", "b"], ["b", "c"]]
     )
     lcpl.fit(x, y)
     for level, classifier in enumerate(lcpl.local_classifiers_):
@@ -173,10 +171,10 @@ def test_empty_levels(empty_levels):
     assert list(lcppn.hierarchy_.nodes) == [
         "1",
         "2",
-        "2" + lcppn.separator_ + "2.1",
+        "2.1",
         "3",
-        "3" + lcppn.separator_ + "3.1",
-        "3" + lcppn.separator_ + "3.1" + lcppn.separator_ + "3.1.2",
+        "3.1",
+        "3.1.2",
         lcppn.root_,
     ]
     assert_array_equal(ground_truth, predictions)

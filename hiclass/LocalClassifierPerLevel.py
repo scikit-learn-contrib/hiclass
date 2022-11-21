@@ -212,29 +212,29 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                 lcpl = ray.put(self)
                 _parallel_fit = ray.remote(self._fit_classifier)
                 results = [
-                    _parallel_fit.remote(lcpl, level, self.separator_)
+                    _parallel_fit.remote(lcpl, level)
                     for level in range(len(self.local_classifiers_))
                 ]
                 classifiers = ray.get(results)
             else:
                 classifiers = Parallel(n_jobs=self.n_jobs)(
-                    delayed(self._fit_classifier)(self, level, self.separator_)
+                    delayed(self._fit_classifier)(self, level)
                     for level in range(len(self.local_classifiers_))
                 )
         else:
             classifiers = [
-                self._fit_classifier(self, level, self.separator_)
+                self._fit_classifier(self, level)
                 for level in range(len(self.local_classifiers_))
             ]
         for level, classifier in enumerate(classifiers):
             self.local_classifiers_[level] = classifier
 
     @staticmethod
-    def _fit_classifier(self, level, separator):
+    def _fit_classifier(self, level):
         classifier = self.local_classifiers_[level]
 
         X, y, sample_weight = self._remove_empty_leaves(
-            separator, self.X_, self.y_[:, level], self.sample_weight_
+            self.X_, self.y_[:, level], self.sample_weight_
         )
 
         unique_y = np.unique(y)
@@ -244,9 +244,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         return classifier
 
     @staticmethod
-    def _remove_empty_leaves(separator, X, y, sample_weight):
+    def _remove_empty_leaves(X, y, sample_weight):
         # Detect rows where leaves are not empty
-        leaves = np.array([str(i).split(separator)[-1] for i in y])
+        leaves = np.array([str(i) for i in y])
         mask = leaves != ""
         X = X[mask]
         y = y[mask]
