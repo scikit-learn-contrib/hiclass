@@ -27,7 +27,7 @@ def md5(file_path: str) -> str:
 
 def download(dataset: dict, fuzzy: bool) -> None:
     """
-    Download a dataset.
+    Download a dataset if the file does not exist yet.
 
     Parameters
     ----------
@@ -75,7 +75,7 @@ def get_dataset(prefix: str) -> Union[dict, None]:
 
 
 def download_fungi_dataset() -> None:
-    """Download the fungi dataset if not already present only if the environment variables are set."""
+    """Download the fungi dataset only if the environment variables are set."""
     train = get_dataset("FUNGI_TRAIN")
     download(train, fuzzy=False)
     test = get_dataset("FUNGI_TEST")
@@ -83,7 +83,7 @@ def download_fungi_dataset() -> None:
 
 
 def download_complaints_dataset() -> None:
-    """Download the complaints dataset if not already present only if the environment variables are set."""
+    """Download the complaints dataset only if the environment variables are set."""
     x_train = get_dataset("COMPLAINTS_X_TRAIN")
     download(x_train, fuzzy=True)
     y_train = get_dataset("COMPLAINTS_Y_TRAIN")
