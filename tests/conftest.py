@@ -1,7 +1,9 @@
 """Shared code for all tests."""
 import hashlib
 import os
-from typing import Union
+from typing import Union, List
+
+import numpy as np
 
 try:
     import gdown
@@ -51,7 +53,7 @@ def download(dataset: dict, fuzzy: bool) -> None:
         )
 
 
-def get_dataset(prefix: str) -> Union[dict, None]:
+def get_dataset(prefix: str, suffix: str) -> Union[dict, None]:
     """
     Get the dataset information.
 
@@ -59,6 +61,8 @@ def get_dataset(prefix: str) -> Union[dict, None]:
     ----------
     prefix : str
         Prefix of the environment variables.
+    suffix : str
+        Suffix of the output file.
 
     Returns
     -------
@@ -71,7 +75,9 @@ def get_dataset(prefix: str) -> Union[dict, None]:
         lowercase = prefix.lower()
         dataset = {
             "url": os.environ["{}_URL".format(uppercase)],
-            "path": "tests/fixtures/{}.csv".format(lowercase),
+            "path": "tests/fixtures/{prefix}.{suffix}".format(
+                prefix=lowercase, suffix=suffix
+            ),
             "md5": os.environ["{}_MD5".format(uppercase)],
         }
     except KeyError:
@@ -82,22 +88,69 @@ def get_dataset(prefix: str) -> Union[dict, None]:
 
 def download_fungi_dataset() -> None:
     """Download the fungi dataset only if the environment variables are set."""
-    train = get_dataset("FUNGI_TRAIN")
+    train = get_dataset("FUNGI_TRAIN", "fasta")
     download(train, fuzzy=False)
-    test = get_dataset("FUNGI_TEST")
+    test = get_dataset("FUNGI_TEST", "fasta")
     download(test, fuzzy=False)
 
 
 def download_complaints_dataset() -> None:
     """Download the complaints dataset only if the environment variables are set."""
-    x_train = get_dataset("COMPLAINTS_X_TRAIN")
+    x_train = get_dataset("COMPLAINTS_X_TRAIN", "csv")
     download(x_train, fuzzy=True)
-    y_train = get_dataset("COMPLAINTS_Y_TRAIN")
+    y_train = get_dataset("COMPLAINTS_Y_TRAIN", "csv")
     download(y_train, fuzzy=True)
-    x_test = get_dataset("COMPLAINTS_X_TEST")
+    x_test = get_dataset("COMPLAINTS_X_TEST", "csv")
     download(x_test, fuzzy=True)
-    y_test = get_dataset("COMPLAINTS_Y_TEST")
+    y_test = get_dataset("COMPLAINTS_Y_TEST", "csv")
     download(y_test, fuzzy=True)
+
+
+def get_ranks(taxxi: str) -> List[str]:
+    """
+    Get the taxonomy ranks from a taxxi record.
+
+    Parameters
+    ----------
+    taxxi : str
+
+    Returns
+    -------
+    ranks : List[str]
+        List of taxonomic ranks.
+    """
+    split = taxxi.split(",")
+    kingdom = split[0]
+    kingdom = kingdom[kingdom.find("tax=") + 4 :]
+    phylum = split[1]
+    classs = split[2]
+    order = split[3]
+    family = split[4]
+    genus = split[5]
+    if len(split) == 6:
+        return [kingdom, phylum, classs, order, family, genus]
+    elif len(split) == 7:
+        species = split[6][:-1]
+        return [kingdom, phylum, classs, order, family, genus, species]
+
+
+# Returns taxonomy ranks from training dataset
+def get_taxonomy(taxxi: List[str]) -> np.ndarray:
+    """
+    Get the taxonomy ranks from a FASTA IDs.
+
+    Parameters
+    ----------
+    taxxi : List[str]
+        List of FASTA IDs in TAXXI format.
+
+    Returns
+    -------
+    taxonomy : np.ndarray
+        Array of taxonomic ranks.
+    """
+    taxonomy = np.array([get_ranks(record) for record in taxxi])
+    return taxonomy
 
 
 def pytest_sessionstart(session):
