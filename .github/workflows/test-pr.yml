@@ -30,6 +30,7 @@ jobs:
         python -m pip install pytest-pydocstyle==2.3.0
         python -m pip install pytest-cov==3.0.0
         python -m pip install ray==1.13.0
+        python -m pip install gdown==4.5.3
         python -m pip install .
     - name: Test with pytest
       run: |
