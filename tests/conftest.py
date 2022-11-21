@@ -57,8 +57,9 @@ def get_dataset(prefix: str) -> Union[dict, None]:
 
     Returns
     -------
-    dataset : dict
-        Dictionary containing the URL, path and MD5 hash of the dataset.
+    dataset : Union[dict, None]
+        Dictionary containing the URL, path and MD5 hash of the dataset
+        or None if environment variables are not set.
     """
     try:
         uppercase = prefix.upper()
