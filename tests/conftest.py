@@ -1,38 +1,107 @@
+"""Shared code for all tests."""
 import hashlib
 import os
-import urllib.request
+from typing import Union
+
+import gdown
 
 
-def md5(file_path):
+def md5(file_path: str) -> str:
+    """
+    Compute the MD5 hash of a file.
+
+    Parameters
+    ----------
+    file_path : str
+        Path to the file.
+
+    Returns
+    -------
+    md5sum : str
+        MD5 hash of the file.
+    """
     with open(file_path, "r") as file:
-        return hashlib.md5(file.read().encode("utf-8")).hexdigest()
+        md5sum = hashlib.md5(file.read().encode("utf-8")).hexdigest()
+        return md5sum
 
 
-def download(dataset):
-    if not os.path.exists(dataset["path"]) or md5(dataset["path"]) != dataset["md5"]:
-        print(f"Downloading file {dataset['path']}")
-        urllib.request.urlretrieve(dataset["url"], dataset["path"])
-        assert md5(dataset["path"]) == dataset["md5"]
+def download(dataset: dict, fuzzy: bool) -> None:
+    """
+    Download a dataset.
+
+    Parameters
+    ----------
+    dataset : dict
+        Dictionary containing the URL, path and MD5 hash of the dataset.
+    fuzzy : bool
+        Whether to use fuzzy matching to find the file name.
+    """
+    if dataset:
+        gdown.cached_download(
+            dataset["url"],
+            dataset["path"],
+            quiet=False,
+            fuzzy=fuzzy,
+            md5=dataset["md5"],
+        )
 
 
-def download_fungi_dataset():
-    # Download the fungi dataset if not already present
-    # only if the environment variables are set
-    if "FUNGI_TRAIN_URL" in os.environ and "FUNGI_TRAIN_MD5" in os.environ:
-        train = {
-            "url": os.environ["FUNGI_TRAIN_URL"],
-            "path": "tests/fixtures/fungi_train.fasta",
-            "md5": os.environ["FUNGI_TRAIN_MD5"],
+def get_dataset(prefix: str) -> Union[dict, None]:
+    """
+    Get the dataset information.
+
+    Parameters
+    ----------
+    prefix : str
+        Prefix of the environment variables.
+
+    Returns
+    -------
+    dataset : dict
+        Dictionary containing the URL, path and MD5 hash of the dataset.
+    """
+    try:
+        uppercase = prefix.upper()
+        lowercase = prefix.lower()
+        dataset = {
+            "url": os.environ["{}_URL".format(uppercase)],
+            "path": "tests/fixtures/{}.csv".format(lowercase),
+            "md5": os.environ["{}_MD5".format(uppercase)],
         }
-        download(train)
-    if "FUNGI_TEST_URL" in os.environ and "FUNGI_TEST_MD5" in os.environ:
-        test = {
-            "url": os.environ["FUNGI_TEST_URL"],
-            "path": "tests/fixtures/fungi_test.fasta",
-            "md5": os.environ["FUNGI_TEST_MD5"],
-        }
-        download(test)
+    except KeyError:
+        return None
+    else:
+        return dataset
+
+
+def download_fungi_dataset() -> None:
+    """Download the fungi dataset if not already present only if the environment variables are set."""
+    train = get_dataset("FUNGI_TRAIN")
+    download(train, fuzzy=False)
+    test = get_dataset("FUNGI_TEST")
+    download(test, fuzzy=False)
+
+
+def download_complaints_dataset() -> None:
+    """Download the complaints dataset if not already present only if the environment variables are set."""
+    x_train = get_dataset("COMPLAINTS_X_TRAIN")
+    download(x_train, fuzzy=True)
+    y_train = get_dataset("COMPLAINTS_Y_TRAIN")
+    download(y_train, fuzzy=True)
+    x_test = get_dataset("COMPLAINTS_X_TEST")
+    download(x_test, fuzzy=True)
+    y_test = get_dataset("COMPLAINTS_Y_TEST")
+    download(y_test, fuzzy=True)
 
 
 def pytest_sessionstart(session):
+    """
+    Download the datasets before the tests start.
+
+    Parameters
+    ----------
+    session : pytest.Session
+        The pytest session object.
+    """
     download_fungi_dataset()
+    download_complaints_dataset()
