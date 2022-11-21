@@ -1,7 +1,7 @@
 """Shared code for all tests."""
 import hashlib
 import os
-from typing import Union
+from typing import Union, List
 
 import numpy as np
 
@@ -106,8 +106,19 @@ def download_complaints_dataset() -> None:
     download(y_test, fuzzy=True)
 
 
-# Returns a list with ranks extracted from TAXXI format
-def get_ranks(taxxi):
+def get_ranks(taxxi: str) -> List[str]:
+    """
+    Get the taxonomy ranks from a taxxi record.
+
+    Parameters
+    ----------
+    taxxi : str
+
+    Returns
+    -------
+    ranks : List[str]
+        List of taxonomic ranks.
+    """
     split = taxxi.split(",")
     kingdom = split[0]
     kingdom = kingdom[kingdom.find("tax=") + 4 :]
@@ -124,7 +135,20 @@ def get_ranks(taxxi):
 
 
 # Returns taxonomy ranks from training dataset
-def get_taxonomy(taxxi):
+def get_taxonomy(taxxi: List[str]) -> np.ndarray:
+    """
+    Get the taxonomy ranks from a FASTA IDs.
+
+    Parameters
+    ----------
+    taxxi : List[str]
+        List of FASTA IDs in TAXXI format.
+
+    Returns
+    -------
+    taxonomy : np.ndarray
+        Array of taxonomic ranks.
+    """
     taxonomy = np.array([get_ranks(record) for record in taxxi])
     return taxonomy
 
