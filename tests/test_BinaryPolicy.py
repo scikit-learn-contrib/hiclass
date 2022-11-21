@@ -405,7 +405,9 @@ def test_siblings_get_binary_examples_sparse_3(digraph, features_sparse, labels)
     assert_array_equal(ground_truth_y, y)
     assert weights is None
 
+
 ###########################################################
+
 
 @pytest.fixture
 def digraph_dag():
@@ -416,29 +418,19 @@ def digraph_dag():
             ("a", "b"),
             ("b", "c"),
             ("d", "e"),
-        ])
+        ]
+    )
 
 
 @pytest.fixture
 def features_dag_1d():
-    return np.array(
-        [
-            1,
-            2,
-            3
-        ]
-    )
+    return np.array([1, 2, 3])
 
 
 @pytest.fixture
 def features_dag_2d():
-    return np.array(
-        [
-            [1, 2],
-            [3, 4],
-            [5, 6]
-        ]
-    )
+    return np.array([[1, 2], [3, 4], [5, 6]])
+
 
 @pytest.fixture
 def labels_dag():
@@ -450,18 +442,34 @@ def labels_dag():
         ]
     )
 
+
 @pytest.mark.parametrize(
-    ["node", "expected"], [["a", [True, False, False]], ["b", [True, True, False]], ["c", [False, True, False]]]
+    ["node", "expected"],
+    [
+        ["a", [True, False, False]],
+        ["b", [True, True, False]],
+        ["c", [False, True, False]],
+    ],
 )
-def test_exclusive_policy_positive_examples_1_dag(digraph_dag, features_dag_1d, labels_dag, node, expected):
+def test_exclusive_policy_positive_examples_1_dag(
+    digraph_dag, features_dag_1d, labels_dag, node, expected
+):
     policy = ExclusivePolicy(digraph_dag, features_dag_1d, labels_dag)
     result = policy.positive_examples(node)
     assert_array_equal(expected, result)
 
+
 @pytest.mark.parametrize(
-    ["node", "expected"], [["a", [False, True, True]], ["b", [False, False, True]], ["c", [True, False, True]]]
+    ["node", "expected"],
+    [
+        ["a", [False, True, True]],
+        ["b", [False, False, True]],
+        ["c", [True, False, True]],
+    ],
 )
-def test_exclusive_policy_negative_examples_1_dag(digraph_dag, features_dag_1d, labels_dag, node, expected):
+def test_exclusive_policy_negative_examples_1_dag(
+    digraph_dag, features_dag_1d, labels_dag, node, expected
+):
     policy = ExclusivePolicy(digraph_dag, features_dag_1d, labels_dag)
     result = policy.negative_examples(node)
     assert_array_equal(expected, result)

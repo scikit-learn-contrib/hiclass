@@ -7,9 +7,11 @@ import pytest
 from numpy.testing import assert_array_equal
 from sklearn.linear_model import LogisticRegression
 
-from hiclass.HierarchicalClassifier import HierarchicalClassifier, make_leveled, ARTIFICIAL_ROOT
-
-
+from hiclass.HierarchicalClassifier import (
+    HierarchicalClassifier,
+    make_leveled,
+    ARTIFICIAL_ROOT,
+)
 
 
 @pytest.fixture
@@ -108,7 +110,7 @@ def digraph_one_root():
     classifier = HierarchicalClassifier()
     classifier.logger_ = logging.getLogger("HC")
     classifier.hierarchy_ = nx.DiGraph([("a", "b")])
-    classifier.y_ = np.array([["a", "b"]] )
+    classifier.y_ = np.array([["a", "b"]])
     return classifier
 
 
@@ -149,6 +151,7 @@ def test_clean_up(digraph_multiple_roots):
         assert digraph_multiple_roots.X_ is None
     with pytest.raises(AttributeError):
         assert digraph_multiple_roots.y_ is None
+
 
 @pytest.fixture
 def digraph_multiple_roots_dag():

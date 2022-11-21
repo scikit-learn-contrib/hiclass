@@ -15,7 +15,7 @@ except ImportError:
     _has_ray = False
 else:
     _has_ray = True
-    
+
 
 ARTIFICIAL_ROOT = "hiclass::root"
 
@@ -231,15 +231,13 @@ class HierarchicalClassifier(abc.ABC):
 
             for row in range(rows):
                 for column in range(0, columns - 1):
-                    
-                    parent = self.y_[row, column] 
-                    child = self.y_[row, column + 1 ]
+
+                    parent = self.y_[row, column]
+                    child = self.y_[row, column + 1]
 
                     if parent != "" and child != "":
                         # Only add edge if both parent and child are not empty
-                        self.hierarchy_.add_edge(
-                            parent, child
-                        )
+                        self.hierarchy_.add_edge(parent, child)
                     if parent != "" and column == 0:
                         # Add parent node e
                         self.hierarchy_.add_node(parent)
@@ -274,10 +272,12 @@ class HierarchicalClassifier(abc.ABC):
 
         if columns > 1:
             # roots are the first column of y
-            roots = set(self.y_[:,0])
+            roots = set(self.y_[:, 0])
         else:
             roots = [
-                node for node, in_degree in self.hierarchy_.in_degree() if in_degree == 0
+                node
+                for node, in_degree in self.hierarchy_.in_degree()
+                if in_degree == 0
             ]
 
         self.logger_.info(f"Detected {len(roots)} roots")

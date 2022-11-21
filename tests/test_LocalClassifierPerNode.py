@@ -201,13 +201,27 @@ def test_fit_predict(binary_policy):
     lcpn = LocalClassifierPerNode(
         local_classifier=LogisticRegression(), binary_policy=binary_policy
     )
-    
+
     x = np.array([[-10], [0], [10], [100]])
-    y = np.array([["a", ""], ["a", "b"], ["b", ""],  ["b", "c"], ]) 
+    y = np.array(
+        [
+            ["a", ""],
+            ["a", "b"],
+            ["b", ""],
+            ["b", "c"],
+        ]
+    )
     lcpn.fit(x, y)
 
-    expected = np.array([["a", "b"], ["a", "b"], ["b", "c"],  ["b", "c"], ]) # TODO: is this the correct result?
-    predictions = lcpn.predict(x) 
+    expected = np.array(
+        [
+            ["a", "b"],
+            ["a", "b"],
+            ["b", "c"],
+            ["b", "c"],
+        ]
+    )  # TODO: is this the correct result?
+    predictions = lcpn.predict(x)
     assert_array_equal(expected, predictions)
 
 

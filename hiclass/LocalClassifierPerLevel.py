@@ -152,7 +152,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         y = self._convert_to_1d(y)
 
-
         return y
 
     def _predict_remaining_levels(self, X, y):

@@ -158,31 +158,43 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         self.logger_.info("Predicting")
 
         for level in range(y.shape[1]):
-            
-            predecessors = set(y[:, level - 1]) if level >= 1 else set([self.root_]) # in case of level 0 the predecessor is the root node
+
+            predecessors = (
+                set(y[:, level - 1]) if level >= 1 else set([self.root_])
+            )  # in case of level 0 the predecessor is the root node
             predecessors.discard("")
 
             for predecessor in predecessors:
-                
-                mask = np.isin(y[:, level - 1], predecessor) if level >= 1 else np.ones(y.shape[0], dtype=bool)
+
+                mask = (
+                    np.isin(y[:, level - 1], predecessor)
+                    if level >= 1
+                    else np.ones(y.shape[0], dtype=bool)
+                )
                 predecessor_x = X[mask]
-                
+
                 if predecessor_x.shape[0] > 0:
                     successors = list(self.hierarchy_.successors(predecessor))
                     if len(successors) > 0:
 
                         # we built an array of probabilities for all successor nodes/classifiers
-                        probabilities = np.zeros((predecessor_x.shape[0], len(successors)))
-                        for i,successor in enumerate(successors):
+                        probabilities = np.zeros(
+                            (predecessor_x.shape[0], len(successors))
+                        )
+                        for i, successor in enumerate(successors):
                             classifier = self.hierarchy_.nodes[successor]["classifier"]
                             positive_index = np.where(classifier.classes_ == 1)[0]
-                            probabilities[:,i] = classifier.predict_proba(predecessor_x)[:, positive_index][:,0]
+                            probabilities[:, i] = classifier.predict_proba(
+                                predecessor_x
+                            )[:, positive_index][:, 0]
 
-                        # prediction is the classifier that outputs the highest probability 
+                        # prediction is the classifier that outputs the highest probability
                         highest_probability_index = np.argmax(probabilities, axis=1)
-                        predictions = np.array([successors[i] for i in highest_probability_index])
+                        predictions = np.array(
+                            [successors[i] for i in highest_probability_index]
+                        )
                         y[mask, level] = predictions
-                        
+
         y = self._convert_to_1d(y)
 
         return y

@@ -3,7 +3,12 @@ import hashlib
 import os
 from typing import Union
 
-import gdown
+try:
+    import gdown
+except ImportError:
+    gdown_installed = False
+else:
+    gdown_installed = True
 
 
 def md5(file_path: str) -> str:
@@ -36,7 +41,7 @@ def download(dataset: dict, fuzzy: bool) -> None:
     fuzzy : bool
         Whether to use fuzzy matching to find the file name.
     """
-    if dataset:
+    if gdown_installed and dataset:
         gdown.cached_download(
             dataset["url"],
             dataset["path"],
