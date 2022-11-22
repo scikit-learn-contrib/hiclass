@@ -8,6 +8,8 @@ from sklearn.linear_model import LogisticRegression
 
 from hiclass import (
     LocalClassifierPerNode,
+    LocalClassifierPerParentNode,
+    LocalClassifierPerLevel,
 )
 from hiclass.metrics import f1
 from tests.conftest import get_taxonomy
@@ -56,14 +58,14 @@ else:
 @pytest.mark.skipif(not hitac_installed, reason="hitac not installed")
 @pytest.mark.skipif(not qiime2_installed, reason="qiime2 not installed")
 @pytest.mark.parametrize(
-    "model",
+    "model, expected",
     [
-        LocalClassifierPerNode(),
-        # LocalClassifierPerParentNode(),
-        # LocalClassifierPerLevel(),
+        (LocalClassifierPerNode(), 0.8038390550018457),
+        (LocalClassifierPerParentNode(), 0.8038390550018457),
+        (LocalClassifierPerLevel(), 0.8041343669250646),
     ],
 )
-def test_fungi(model):
+def test_fungi(model, expected):
     # Variables
     train = "tests/fixtures/fungi_train.fasta"
     test = "tests/fixtures/fungi_test.fasta"
@@ -97,4 +99,4 @@ def test_fungi(model):
     x_test = compute_frequencies(test_sequences, kmers, threads)
     y_test = get_taxonomy(test_ids)
     predictions = model.predict(x_test)
-    assert f1(y_true=y_test, y_pred=predictions) == 1.0
+    assert f1(y_true=y_test, y_pred=predictions) >= expected
