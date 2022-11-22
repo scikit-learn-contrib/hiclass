@@ -49,33 +49,33 @@ This first benchmark was executed on Google Colab with only 1 core, using Logist
 |[Local Classifier per Level](https://colab.research.google.com/drive/1b_Qb2d6RhSO7ICYTIsxH6ZqCVgeKWmll?usp=sharing)|04:14:45|10.71|123|0.7684|
 |[Flat Classifier](https://colab.research.google.com/drive/10jgzA65WaoTc7tFfrlKlhlwPBs3PFy9m?usp=sharing)|03:20:26|9.57|**107**|0.7636|
 
-This second benchmark is similar to the last one, except that it was executed on a cluster node running GNU/Linux with 512 GB physical memory and 128
+This second benchmark is similar to the last one, except that it was executed on multiple cluster nodes running GNU/Linux with 512 GB physical memory and 128
 cores provided by two AMD EPYC™ 7742 processors, and each model had 12 cores available for training.
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|00:19:26|4.08|118|**0.7688**|
-|Local Classifier per Node|**00:06:21**|**3.97**|120|0.7648|
-|Local Classifier per Level|01:22:51|4.08|120|0.7684|
-|Flat Classifier|01:38:19|6.63|**104**|0.7634|
+|Local Classifier per Parent Node|00:32:05|9.30|122|**0.7798**|
+|Local Classifier per Node|**00:04:05**|21.01|123|0.7763|
+|Local Classifier per Level|02:24:44|11.45|124|0.7795|
+|Flat Classifier|00:57:16|**3.15**|**108**|0.7748|
 
 This third benchmark was also executed on the same cluster node as the previous benchmark and 12 cores were provided for each model, however, the base classifier was LightGBM instead.
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (MB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|00:31:16|4.06|80|0.7062|
-|Local Classifier per Node|**00:24:21**|5.58|318|**0.7603**|
-|Local Classifier per Level|01:55:27|**4.02**|40|0.6382|
-|Flat Classifier|00:26:16|4.44|**32**|0.4788|
+|Local Classifier per Parent Node|||||
+|Local Classifier per Node|||||
+|Local Classifier per Level|||||
+|Flat Classifier|||||
 
 Lastly, this fourth benchmark was also executed on the same cluster node as the previous benchmarks and 12 cores were provided for each model, however, the base classifier was random forest instead.
 
 |Classifier|Training Time (hh:mm:ss)|Memory Usage (GB)|Disk Usage (GB)|F-score|
 |----------|:-----------------------:|:---------------:|:-------------:|:-----:|
-|Local Classifier per Parent Node|03:23:02|**36.43**|**11**|0.7245|
-|Local Classifier per Node|02:19:45|40.98|13|**0.7519**|
-|Local Classifier per Level|04:25:45|142.28|45|0.7208|
-|Flat Classifier|**00:29:26**|80.47|38|0.6515|
+|Local Classifier per Parent Node|||||
+|Local Classifier per Node|||||
+|Local Classifier per Level|||||
+|Flat Classifier|||||
 
 For reproducibility, a Snakemake pipeline was created. Instructions on how to run it and source code are available at [https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints](https://github.com/mirand863/hiclass/tree/main/benchmarks/consumer_complaints).
 
