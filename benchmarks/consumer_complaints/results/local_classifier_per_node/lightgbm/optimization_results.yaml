@@ -1,0 +1,6 @@
+name: optuna
+best_params:
+  num_leaves: 62
+  n_estimators: 200
+  min_child_samples: 20
+best_value: 0.7876225953442979

@@ -1,0 +1,5 @@
+name: optuna
+best_params:
+  solver: lbfgs
+  max_iter: 10000
+best_value: 0.7778761366057501

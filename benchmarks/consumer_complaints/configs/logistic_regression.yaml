@@ -1,0 +1,12 @@
+defaults:
+  - _self_
+  - optuna
+
+hydra:
+  sweeper:
+    params:
+      solver: choice("newton-cg", "lbfgs", "liblinear", "sag", "saga")
+      max_iter: choice(10000)
+
+solver: 1
+max_iter: 1

@@ -1,18 +1,20 @@
 rule train:
     input:
         x_train = "results/split_data/x_train.csv.zip",
-        y_train = "results/split_data/y_train.csv.zip"
+        y_train = "results/split_data/y_train.csv.zip",
+        best_parameters = "results/{model}/{classifier}/optimization_results.yaml",
     output:
         trained_model = "results/{model}/{classifier}/trained_model.sav",
         benchmark = "results/{model}/{classifier}/training_benchmark.txt"
     params:
         classifier = "{classifier}",
         model = "{model}",
-        random_state = config["random_state"]
     conda:
         "../envs/hiclass.yml"
     threads:
         config["threads"]
+    resources:
+        mem_gb = config["mem_gb"]
     shell:
         """
         /usr/bin/time -v \
@@ -24,5 +26,5 @@ rule train:
         --trained-model {output.trained_model} \
         --classifier {params.classifier} \
         --model {params.model} \
-        --random-state {params.random_state}
+        --best-parameters {input.best_parameters}
         """
