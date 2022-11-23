@@ -1,9 +1,10 @@
 """Shared code for all tests."""
 import hashlib
 import os
-from typing import Union, List
+from typing import Union, List, TextIO
 
 import numpy as np
+import pandas as pd
 
 try:
     import gdown
@@ -164,3 +165,20 @@ def pytest_sessionstart(session):
     """
     download_fungi_dataset()
     download_complaints_dataset()
+
+
+def load_dataframe(path: TextIO) -> pd.DataFrame:
+    """
+    Load a dataframe from a CSV file.
+
+    Parameters
+    ----------
+    path : TextIO
+        Path to CSV file.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Loaded dataframe.
+    """
+    return pd.read_csv(path, compression="infer", header=0, sep=",", low_memory=False)

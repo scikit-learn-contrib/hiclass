@@ -4,7 +4,9 @@ from os.path import exists
 
 import pytest
 from joblib import parallel_backend
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
 
 from hiclass import (
     LocalClassifierPerNode,
@@ -12,7 +14,7 @@ from hiclass import (
     LocalClassifierPerLevel,
 )
 from hiclass.metrics import f1
-from tests.conftest import get_taxonomy
+from tests.conftest import get_taxonomy, load_dataframe
 
 try:
     import skbio
@@ -99,4 +101,65 @@ def test_fungi(model, expected):
     x_test = compute_frequencies(test_sequences, kmers, threads)
     y_test = get_taxonomy(test_ids)
     predictions = model.predict(x_test)
+    assert f1(y_true=y_test, y_pred=predictions) >= expected
+
+
+@pytest.mark.skipif(
+    not exists("tests/fixtures/complaints_x_train.csv")
+    or not exists("tests/fixtures/complaints_y_train.csv")
+    or not exists("tests/fixtures/complaints_x_test.csv")
+    or not exists("tests/fixtures/complaints_y_test.csv"),
+    reason="dataset not available",
+)
+@pytest.mark.skipif(
+    "COMPLAINTS_X_TRAIN_URL" not in os.environ
+    or "COMPLAINTS_X_TRAIN_MD5" not in os.environ
+    or "COMPLAINTS_Y_TRAIN_URL" not in os.environ
+    or "COMPLAINTS_Y_TRAIN_MD5" not in os.environ
+    or "COMPLAINTS_X_TEST_URL" not in os.environ
+    or "COMPLAINTS_X_TEST_MD5" not in os.environ
+    or "COMPLAINTS_Y_TEST_URL" not in os.environ
+    or "COMPLAINTS_Y_TEST_MD5" not in os.environ,
+    reason="environment variables not set",
+)
+@pytest.mark.skipif(not skbio_installed, reason="scikit-bio not installed")
+@pytest.mark.skipif(not hitac_installed, reason="hitac not installed")
+@pytest.mark.skipif(not qiime2_installed, reason="qiime2 not installed")
+@pytest.mark.parametrize(
+    "model, expected",
+    [
+        (LocalClassifierPerNode(), 1),
+        (LocalClassifierPerParentNode(), 1),
+        (LocalClassifierPerLevel(), 1),
+    ],
+)
+def test_complaints(model, expected):
+    # Variables
+    x_train = load_dataframe("tests/fixtures/complaints_x_train.fasta").squeeze()
+    y_train = load_dataframe("tests/fixtures/complaints_y_train.fasta")
+    x_test = load_dataframe("tests/fixtures/complaints_x_test.fasta").squeeze()
+    y_test = load_dataframe("tests/fixtures/complaints_y_test.fasta")
+    threads = min(cpu_count(), 12)
+    logistic_regression_parameters = {
+        "random_state": 42,
+        "max_iter": 10000,
+        "verbose": 0,
+        "n_jobs": 1,
+    }
+
+    # Training
+    model.set_params(
+        local_classifier=LogisticRegression(**logistic_regression_parameters),
+        verbose=30,
+    )
+    pipeline = Pipeline(
+        ("count", CountVectorizer()),
+        ("tfidf", TfidfTransformer()),
+        ("classifier", model),
+    )
+    with parallel_backend("threading", n_jobs=threads):
+        pipeline.fit(x_train, y_train)
+
+    # Testing
+    predictions = pipeline.predict(x_test)
     assert f1(y_true=y_test, y_pred=predictions) >= expected
