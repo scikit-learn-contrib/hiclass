@@ -9,8 +9,10 @@ include: "rules/train.smk"
 include: "rules/predict.smk"
 include: "rules/metrics.smk"
 include: "rules/statistics.smk"
+include: "rules/tune_table.smk"
 
 rule all:
     input:
         metrics = [f"results/{model}/{classifier}/metrics.csv" for classifier in config["classifiers"] for model in config["models"]],
+        tables = [f"results/{model}/{classifier}/optimization_results.md" for classifier in config["classifiers"] for model in config["models"]],
         statistics = "results/statistics/statistics.csv"

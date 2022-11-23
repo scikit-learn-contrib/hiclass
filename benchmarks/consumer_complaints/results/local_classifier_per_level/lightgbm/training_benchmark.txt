@@ -1,0 +1,23 @@
+	Command being timed: "python scripts/train.py --n-jobs 12 --x-train results/split_data/x_train.csv.zip --y-train results/split_data/y_train.csv.zip --trained-model results/local_classifier_per_level/lightgbm/trained_model.sav --classifier lightgbm --model local_classifier_per_level --best-parameters results/local_classifier_per_level/lightgbm/optimization_results.yaml"
+	User time (seconds): 7024.20
+	System time (seconds): 53.93
+	Percent of CPU this job got: 123%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:35:26
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 9481704
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 100554869
+	Voluntary context switches: 5535
+	Involuntary context switches: 977451
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
