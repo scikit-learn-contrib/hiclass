@@ -119,9 +119,8 @@ def compute(
     return hyperparameters, scores, avg, std
 
 
-def create_table():  # pragma: no cover
+def create_table(args):
     """Create table with tuning results for flat and hierarchical approaches."""
-    args = parse_args(sys.argv[1:])
     with open(args.output, "w") as fout:
         fout.write(f"# Model: {args.model}\n")
         fout.write(f"## Base classifier: {args.classifier}\n")
@@ -133,4 +132,5 @@ def create_table():  # pragma: no cover
 
 
 if __name__ == "__main__":  # pragma: no cover
-    create_table()
+    args = parse_args(sys.argv[1:])
+    create_table(args)

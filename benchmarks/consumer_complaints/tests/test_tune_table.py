@@ -1,7 +1,15 @@
+from argparse import Namespace
+from io import StringIO
+
 import pytest
 from omegaconf import OmegaConf
 from pyfakefs.fake_filesystem_unittest import Patcher
-from scripts.tune_table import parse_args, delete_non_hyperparameters, compute
+from scripts.tune_table import (
+    parse_args,
+    delete_non_hyperparameters,
+    compute,
+    create_table,
+)
 
 from scripts.tune import save_trial
 
@@ -96,3 +104,38 @@ def test_compute(lightgbm_config):
         assert [[1, 2, 3]] == scores
         assert [2] == avg
         assert [0.816496580927726] == std
+
+
+@pytest.fixture
+def args():
+    return Namespace(
+        output="output.md",
+        model="flat",
+        classifier="lightgbm",
+        folder=".",
+    )
+
+
+@pytest.fixture
+def expected_content():
+    content = StringIO()
+    content.write("# Model: flat\n")
+    content.write("## Base classifier: lightgbm\n")
+    content.write("|Parameters|Scores|Average|Standard deviation|\n")
+    content.write("|----------|------|-------|------------------|\n")
+    content.write(
+        "|{'num_leaves': 100, 'n_estimators': 200, 'min_child_samples': 6}|[1, 2, 3]|2.000|0.816|\n"
+    )
+    return content.getvalue()
+
+
+def test_create_table(lightgbm_config, args, expected_content):
+    with Patcher() as patcher:
+        save_trial(lightgbm_config, [1, 2, 3])
+        create_table(args)
+        assert patcher.fs.exists("output.md")
+        with open("output.md", "r") as f:
+            content = f.read()
+            print(expected_content)
+            print(content)
+            assert expected_content == content

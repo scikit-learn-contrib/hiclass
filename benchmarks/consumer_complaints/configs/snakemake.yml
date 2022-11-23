@@ -14,7 +14,7 @@ n_splits: 5
 mem_gb: 450
 
 # Uncomment the next line to use a subset of the data
-##########nrows: 2000
+###########nrows: 2000
 
 classifiers:
   - logistic_regression
