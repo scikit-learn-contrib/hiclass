@@ -24,7 +24,7 @@ delab:  ## Run pipeline on delab with slurm
 	-sed -i "s?workdir.*?workdir: `pwd`?" configs/snakemake.yml
 	-sed -i "s?threads.*?threads: 12?" configs/snakemake.yml
 	-sed -i "s?nrows.*?#nrows: 2000?" configs/snakemake.yml
-	-srun -A renard --mem=30G --cpus-per-task=12 --time=30-00:00:00 -p cauldron snakemake --keep-going --printshellcmds --reason --use-conda --cores 1 --resources mem_gb=2700 --jobs 6 --cluster "sbatch -A renard -p magic --mem=450G --cpus-per-task=12 --time=5-00:00:00 -C 'ARCH:X86'"
+	-srun -A renard --mem=30G --cpus-per-task=12 --time=30-00:00:00 -p cauldron snakemake --restart-times 5 --keep-going --printshellcmds --reason --use-conda --cores 1 --resources mem_gb=2700 --jobs 6 --cluster "sbatch -A renard -p magic --mem=450G --cpus-per-task=12 --time=5-00:00:00 -C 'ARCH:X86'"
 	-rm -f slurm-*
 
 .PHONY: clean
