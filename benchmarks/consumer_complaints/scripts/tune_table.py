@@ -82,7 +82,9 @@ def delete_non_hyperparameters(hyperparameters: OmegaConf) -> dict:
     return hyperparameters
 
 
-def compute(folder: str) -> Tuple[List[dict], List[float], List[float]]:
+def compute(
+    folder: str,
+) -> Tuple[List[dict], List[list], List[np.ndarray], List[np.ndarray]]:
     """
     Compute average and standard deviation of the tuning results.
 
@@ -95,9 +97,11 @@ def compute(folder: str) -> Tuple[List[dict], List[float], List[float]]:
     -------
     hyperparameters : List[dict]
         Hyperparameters tested for tuning.
-    avg : List[float]
+    scores : List[list]
+        Scores for each hyperparameter combination tested.
+    avg : List[np.ndarray]
         Averages of k-fold cross-validation.
-    std : List[float]
+    std : List[np.ndarray]
         Standard deviations of k-fold cross-validation.
     """
     results = glob.glob(f"{folder}/[!trained_model]*.sav")
