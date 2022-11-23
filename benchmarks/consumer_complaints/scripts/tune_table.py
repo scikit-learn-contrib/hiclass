@@ -25,7 +25,9 @@ def parse_args(args: list) -> Namespace:
     _ : Namespace
         Parsed arguments.
     """
-    parser = argparse.ArgumentParser(description="Create table with hyper-parameter tuning results")
+    parser = argparse.ArgumentParser(
+        description="Create table with hyper-parameter tuning results"
+    )
     parser.add_argument(
         "--folder",
         type=str,
