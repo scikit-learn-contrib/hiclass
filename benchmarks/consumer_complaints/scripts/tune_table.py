@@ -119,7 +119,7 @@ def compute(
     return hyperparameters, scores, avg, std
 
 
-def create_table():
+def create_table():  # pragma: no cover
     """Create table with tuning results for flat and hierarchical approaches."""
     args = parse_args(sys.argv[1:])
     with open(args.output, "w") as fout:
