@@ -97,13 +97,13 @@ def download_fungi_dataset() -> None:
 
 def download_complaints_dataset() -> None:
     """Download the complaints dataset only if the environment variables are set."""
-    x_train = get_dataset("COMPLAINTS_X_TRAIN", "csv")
+    x_train = get_dataset("COMPLAINTS_X_TRAIN", "csv.zip")
     download(x_train, fuzzy=True)
-    y_train = get_dataset("COMPLAINTS_Y_TRAIN", "csv")
+    y_train = get_dataset("COMPLAINTS_Y_TRAIN", "csv.zip")
     download(y_train, fuzzy=True)
-    x_test = get_dataset("COMPLAINTS_X_TEST", "csv")
+    x_test = get_dataset("COMPLAINTS_X_TEST", "csv.zip")
     download(x_test, fuzzy=True)
-    y_test = get_dataset("COMPLAINTS_Y_TEST", "csv")
+    y_test = get_dataset("COMPLAINTS_Y_TEST", "csv.zip")
     download(y_test, fuzzy=True)
 
 
