@@ -135,10 +135,10 @@ def test_fungi(model, expected):
 )
 def test_complaints(model, expected):
     # Variables
-    x_train = load_dataframe("tests/fixtures/complaints_x_train.fasta").squeeze()
-    y_train = load_dataframe("tests/fixtures/complaints_y_train.fasta")
-    x_test = load_dataframe("tests/fixtures/complaints_x_test.fasta").squeeze()
-    y_test = load_dataframe("tests/fixtures/complaints_y_test.fasta")
+    x_train = load_dataframe("tests/fixtures/complaints_x_train.csv.zip").squeeze()
+    y_train = load_dataframe("tests/fixtures/complaints_y_train.csv.zip")
+    x_test = load_dataframe("tests/fixtures/complaints_x_test.csv.zip").squeeze()
+    y_test = load_dataframe("tests/fixtures/complaints_y_test.csv.zip")
     threads = min(cpu_count(), 12)
     logistic_regression_parameters = {
         "random_state": 42,
@@ -153,9 +153,11 @@ def test_complaints(model, expected):
         verbose=30,
     )
     pipeline = Pipeline(
-        ("count", CountVectorizer()),
-        ("tfidf", TfidfTransformer()),
-        ("classifier", model),
+        [
+            ("count", CountVectorizer()),
+            ("tfidf", TfidfTransformer()),
+            ("classifier", model),
+        ]
     )
     with parallel_backend("threading", n_jobs=threads):
         pipeline.fit(x_train, y_train)
