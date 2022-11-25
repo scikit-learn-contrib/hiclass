@@ -130,9 +130,7 @@ def compute_md5(cfg: dict) -> str:
         MD5 hash of configuration.
 
     """
-    md5 = hashlib.md5(
-        json.dumps(cfg, sort_keys=True).encode("utf-8")
-    ).hexdigest()
+    md5 = hashlib.md5(json.dumps(cfg, sort_keys=True).encode("utf-8")).hexdigest()
     return md5
 
 
