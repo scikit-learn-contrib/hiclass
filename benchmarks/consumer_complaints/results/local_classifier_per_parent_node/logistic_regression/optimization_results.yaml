@@ -1,5 +1,5 @@
 name: optuna
 best_params:
-  solver: saga
+  solver: lbfgs
   max_iter: 10000
-best_value: 0.7142857142857143
+best_value: 0.7782135959697317

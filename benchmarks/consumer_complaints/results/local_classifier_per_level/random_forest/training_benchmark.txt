@@ -1,21 +1,21 @@
 	Command being timed: "python scripts/train.py --n-jobs 12 --x-train results/split_data/x_train.csv.zip --y-train results/split_data/y_train.csv.zip --trained-model results/local_classifier_per_level/random_forest/trained_model.sav --classifier random_forest --model local_classifier_per_level --best-parameters results/local_classifier_per_level/random_forest/optimization_results.yaml"
-	User time (seconds): 1.17
-	System time (seconds): 1.84
-	Percent of CPU this job got: 292%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.03
+	User time (seconds): 60475.69
+	System time (seconds): 829.12
+	Percent of CPU this job got: 174%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 9:45:18
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 154068
+	Maximum resident set size (kbytes): 200689644
 	Average resident set size (kbytes): 0
 	Major (requiring I/O) page faults: 0
-	Minor (reclaiming a frame) page faults: 32044
-	Voluntary context switches: 4028
-	Involuntary context switches: 33
+	Minor (reclaiming a frame) page faults: 147569336
+	Voluntary context switches: 22850
+	Involuntary context switches: 6300609
 	Swaps: 0
 	File system inputs: 0
-	File system outputs: 840
+	File system outputs: 0
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0

@@ -1,5 +1,5 @@
 name: optuna
 best_params:
-  solver: liblinear
+  solver: saga
   max_iter: 10000
-best_value: 0.7142857142857143
+best_value: 0.7727118399439171

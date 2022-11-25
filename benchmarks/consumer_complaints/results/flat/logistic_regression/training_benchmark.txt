@@ -1,21 +1,21 @@
 	Command being timed: "python scripts/train.py --n-jobs 12 --x-train results/split_data/x_train.csv.zip --y-train results/split_data/y_train.csv.zip --trained-model results/flat/logistic_regression/trained_model.sav --classifier logistic_regression --model flat --best-parameters results/flat/logistic_regression/optimization_results.yaml"
-	User time (seconds): 1.09
-	System time (seconds): 1.74
-	Percent of CPU this job got: 328%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.86
+	User time (seconds): 3407.11
+	System time (seconds): 27.12
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 57:16.20
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 152064
+	Maximum resident set size (kbytes): 3303628
 	Average resident set size (kbytes): 0
 	Major (requiring I/O) page faults: 0
-	Minor (reclaiming a frame) page faults: 31403
-	Voluntary context switches: 60
-	Involuntary context switches: 32
+	Minor (reclaiming a frame) page faults: 20909985
+	Voluntary context switches: 4108
+	Involuntary context switches: 432244
 	Swaps: 0
 	File system inputs: 0
-	File system outputs: 184
+	File system outputs: 8
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0
