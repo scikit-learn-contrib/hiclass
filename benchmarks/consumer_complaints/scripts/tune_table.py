@@ -76,7 +76,8 @@ def compute(
     std : List[np.ndarray]
         Standard deviations of k-fold cross-validation.
     """
-    results = glob.glob(f"{folder}/[!trained_model]*.sav")
+    results = glob.glob(f"{folder}/*.sav")
+    results.remove(f"{folder}/trained_model.sav")
     hyperparameters = []
     scores = []
     avg = []
