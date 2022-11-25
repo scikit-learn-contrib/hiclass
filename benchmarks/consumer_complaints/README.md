@@ -49,7 +49,7 @@ n_estimators: 1
 criterion: 1
 ```
 
-The intervals for testing can be defined with the functions `range` or `choice`, as described on [Hydra's documentation](https://hydra.cc/docs/plugins/optuna_sweeper/). If you wish to add more parameters for testing, you can simply add the parameter name inside the `params` field and at the end of the file set it to 1 in order to enable its usage in Hydra. Additionally, you would need to modify one of the functions `configure_lightgbm`, `configure_logistic_regression` or `configure_random_forest` (whichever is appropriate) inside the script [tune.py](scripts/tune.py) to enable the new hyperparameter.
+The intervals for testing can be defined with the functions `range` or `choice`, as described on [Hydra's documentation](https://hydra.cc/docs/plugins/optuna_sweeper/). If you wish to add more parameters for testing, you can simply add the parameter name inside the `params` field and at the end of the file set it to 1 in order to enable its usage in Hydra.
 
 ## Running locally
 
