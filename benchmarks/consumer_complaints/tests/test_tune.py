@@ -56,8 +56,6 @@ def test_compute_md5_1(random_forest_config):
 
 def test_save_and_load_trial_1(random_forest_config):
     with Patcher():
-        print(random_forest_config)
-        print(type(random_forest_config))
         save_trial(random_forest_config, [1, 2, 3])
         scores = load_trial(random_forest_config)
         assert [1, 2, 3] == scores
