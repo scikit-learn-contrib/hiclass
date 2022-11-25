@@ -77,7 +77,8 @@ def compute(
         Standard deviations of k-fold cross-validation.
     """
     results = glob.glob(f"{folder}/*.sav")
-    results.remove(f"{folder}/trained_model.sav")
+    if "{}/trained_model.sav".format(folder) in results:
+        results.remove(f"{folder}/trained_model.sav")
     hyperparameters = []
     scores = []
     avg = []
