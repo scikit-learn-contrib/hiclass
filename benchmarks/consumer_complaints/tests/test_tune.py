@@ -2,49 +2,19 @@ import resource
 
 import pandas as pd
 import pytest
-from lightgbm import LGBMClassifier
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from pyfakefs.fake_filesystem_unittest import Patcher
 from scripts.data import flatten_labels
 from scripts.tune import (
-    configure_lightgbm,
-    configure_logistic_regression,
-    configure_random_forest,
     configure_pipeline,
     compute_md5,
     save_trial,
     load_trial,
     limit_memory,
     cross_validate,
+    delete_non_hyperparameters,
 )
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-
-
-def test_configure_lightgbm():
-    cfg = DictConfig(
-        {
-            "n_jobs": 1,
-            "boosting_type": "gbdt",
-            "num_leaves": 31,
-            "learning_rate": 0.1,
-            "n_estimators": 100,
-            "subsample_for_bin": 200000,
-            "class_weight": None,
-            "min_split_gain": 0.0,
-            "min_child_weight": 0.001,
-            "min_child_samples": 20,
-            "subsample": 1.0,
-            "subsample_freq": 0,
-            "colsample_bytree": 1.0,
-            "reg_alpha": 0.0,
-            "reg_lambda": 0.0,
-        }
-    )
-    classifier = configure_lightgbm(cfg)
-    assert classifier is not None
-    assert isinstance(classifier, LGBMClassifier)
 
 
 @pytest.fixture
@@ -71,12 +41,6 @@ def random_forest_config():
     return cfg
 
 
-def test_configure_random_forest(random_forest_config):
-    classifier = configure_random_forest(random_forest_config)
-    assert classifier is not None
-    assert isinstance(classifier, RandomForestClassifier)
-
-
 def test_configure_pipeline_1(random_forest_config):
     classifier = configure_pipeline(random_forest_config)
     assert classifier is not None
@@ -84,14 +48,16 @@ def test_configure_pipeline_1(random_forest_config):
 
 
 def test_compute_md5_1(random_forest_config):
-    md5 = compute_md5(random_forest_config)
-    expected = "407b164147fd7e78c41acc215d9c28fe"
+    hyperparameters = delete_non_hyperparameters(random_forest_config)
+    md5 = compute_md5(hyperparameters)
+    expected = "14a11881777bc9589583efba8af9b752"
     assert expected == md5
 
 
 def test_save_and_load_trial_1(random_forest_config):
-    random_forest_config.output_dir = "."
     with Patcher():
+        print(random_forest_config)
+        print(type(random_forest_config))
         save_trial(random_forest_config, [1, 2, 3])
         scores = load_trial(random_forest_config)
         assert [1, 2, 3] == scores
@@ -121,12 +87,6 @@ def logistic_regression_config():
     return cfg
 
 
-def test_configure_logistic_regression(logistic_regression_config):
-    classifier = configure_logistic_regression(logistic_regression_config)
-    assert classifier is not None
-    assert isinstance(classifier, LogisticRegression)
-
-
 def test_configure_pipeline_2(logistic_regression_config):
     classifier = configure_pipeline(logistic_regression_config)
     assert classifier is not None
@@ -134,8 +94,9 @@ def test_configure_pipeline_2(logistic_regression_config):
 
 
 def test_compute_md5_2(logistic_regression_config):
-    md5 = compute_md5(logistic_regression_config)
-    expected = "739b6346f16b738eb36967e6d82ade41"
+    hyperparameters = delete_non_hyperparameters(logistic_regression_config)
+    md5 = compute_md5(hyperparameters)
+    expected = "f393e84d6faa5dc4c62aacbf70ef5865"
     assert expected == md5
 
 
@@ -213,3 +174,37 @@ def test_cross_validate_4(logistic_regression_config, X, y):
         assert [0.5, 1.0] == scores
         scores = load_trial(logistic_regression_config)
         assert [0.5, 1.0] == scores
+
+
+@pytest.fixture
+def hyperparameters():
+    hp = OmegaConf.create(
+        {
+            "model": "flat",
+            "classifier": "lightgbm",
+            "n_jobs": 1,
+            "x_train": "x_train.csv",
+            "y_train": "y_train.csv",
+            "output_dir": ".",
+            "mem_gb": 1,
+            "n_splits": 2,
+            "reg_alpha": 0.0,
+            "reg_lambda": 0.0,
+            "num_leaves": 31,
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+        }
+    )
+    return hp
+
+
+def test_delete_non_hyperparameters(hyperparameters):
+    hyperparameters = delete_non_hyperparameters(hyperparameters)
+    expected = {
+        "reg_alpha": 0.0,
+        "reg_lambda": 0.0,
+        "num_leaves": 31,
+        "learning_rate": 0.1,
+        "n_estimators": 100,
+    }
+    assert expected == hyperparameters

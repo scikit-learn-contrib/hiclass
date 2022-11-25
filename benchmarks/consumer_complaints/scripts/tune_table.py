@@ -8,7 +8,6 @@ from argparse import Namespace
 from typing import Tuple, List
 
 import numpy as np
-from omegaconf import OmegaConf
 
 
 def parse_args(args: list) -> Namespace:
@@ -55,33 +54,6 @@ def parse_args(args: list) -> Namespace:
     return parser.parse_args(args)
 
 
-def delete_non_hyperparameters(hyperparameters: OmegaConf) -> dict:
-    """
-    Delete non-hyperparameters from the dictionary.
-
-    Parameters
-    ----------
-    hyperparameters : OmegaConf
-        Hyperparameters to delete non-hyperparameters from.
-
-    Returns
-    -------
-    hyperparameters : dict
-        Hyperparameters without non-hyperparameters.
-
-    """
-    hyperparameters = OmegaConf.to_container(hyperparameters)
-    del hyperparameters["model"]
-    del hyperparameters["classifier"]
-    del hyperparameters["n_jobs"]
-    del hyperparameters["x_train"]
-    del hyperparameters["y_train"]
-    del hyperparameters["output_dir"]
-    del hyperparameters["mem_gb"]
-    del hyperparameters["n_splits"]
-    return hyperparameters
-
-
 def compute(
     folder: str,
 ) -> Tuple[List[dict], List[list], List[np.ndarray], List[np.ndarray]]:
@@ -111,7 +83,6 @@ def compute(
     std = []
     for result in results:
         parameters, s = pickle.load(open(result, "rb"))
-        parameters = delete_non_hyperparameters(parameters)
         hyperparameters.append(parameters)
         scores.append([round(i, 3) for i in s])
         avg.append(np.mean(s))

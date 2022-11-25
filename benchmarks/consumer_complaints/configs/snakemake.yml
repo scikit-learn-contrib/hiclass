@@ -1,4 +1,4 @@
-workdir: /hpi/fs00/home/fabio.malchermiranda/scratch/hiclass/benchmarks/consumer_complaints
+workdir: /home/fabio/Desktop/hiclass/benchmarks/consumer_complaints
 
 threads: 12
 
