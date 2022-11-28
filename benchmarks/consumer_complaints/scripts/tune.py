@@ -15,7 +15,6 @@ from joblib import parallel_backend
 from lightgbm import LGBMClassifier
 from numpy.core._exceptions import _ArrayMemoryError
 from omegaconf import DictConfig, OmegaConf
-from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
@@ -30,81 +29,13 @@ from hiclass import (
 )
 from hiclass.metrics import f1
 
-
 log = logging.getLogger("TUNE")
 
 
-def configure_lightgbm(cfg: DictConfig) -> BaseEstimator:
-    """
-    Configure LightGBM with parameters passed as argument.
-
-    Parameters
-    ----------
-    cfg : DictConfig
-        Dictionary containing all configuration information.
-
-    Returns
-    -------
-    classifier : BaseEstimator
-        Estimator with hyper-parameters configured.
-    """
-    classifier = LGBMClassifier(
-        n_jobs=cfg.n_jobs,
-        num_leaves=cfg.num_leaves,
-        n_estimators=cfg.n_estimators,
-        min_child_samples=cfg.min_child_samples,
-    )
-    return classifier
-
-
-def configure_logistic_regression(cfg: DictConfig) -> BaseEstimator:
-    """
-    Configure LogisticRegression with parameters passed as argument.
-
-    Parameters
-    ----------
-    cfg : DictConfig
-        Dictionary containing all configuration information.
-
-    Returns
-    -------
-    classifier : BaseEstimator
-        Estimator with hyper-parameters configured.
-    """
-    classifier = LogisticRegression(
-        n_jobs=cfg.n_jobs,
-        solver=cfg.solver,
-        max_iter=cfg.max_iter,
-    )
-    return classifier
-
-
-def configure_random_forest(cfg: DictConfig) -> BaseEstimator:
-    """
-    Configure RandomForest with parameters passed as argument.
-
-    Parameters
-    ----------
-    cfg : DictConfig
-        Dictionary containing all configuration information.
-
-    Returns
-    -------
-    classifier : BaseEstimator
-        Estimator with hyper-parameters configured.
-    """
-    classifier = RandomForestClassifier(
-        n_jobs=cfg.n_jobs,
-        n_estimators=cfg.n_estimators,
-        criterion=cfg.criterion,
-    )
-    return classifier
-
-
 configure_flat = {
-    "lightgbm": configure_lightgbm,
-    "logistic_regression": configure_logistic_regression,
-    "random_forest": configure_random_forest,
+    "lightgbm": LGBMClassifier(),
+    "logistic_regression": LogisticRegression(),
+    "random_forest": RandomForestClassifier(),
 }
 
 
@@ -113,6 +44,40 @@ configure_hierarchical = {
     "local_classifier_per_parent_node": LocalClassifierPerParentNode(),
     "local_classifier_per_level": LocalClassifierPerLevel(),
 }
+
+
+non_hyperparameters = [
+    "model",
+    "classifier",
+    "n_jobs",
+    "x_train",
+    "y_train",
+    "output_dir",
+    "mem_gb",
+    "n_splits",
+]
+
+
+def delete_non_hyperparameters(cfg: OmegaConf) -> dict:
+    """
+    Delete non-hyperparameters from the dictionary.
+
+    Parameters
+    ----------
+    cfg : OmegaConf
+        Dictionary to delete non-hyperparameters from.
+
+    Returns
+    -------
+    hyperparameters : dict
+        Dictionary containing only hyperparameters.
+
+    """
+    hyperparameters = OmegaConf.to_container(cfg)
+    for key in non_hyperparameters:
+        if key in hyperparameters:
+            del hyperparameters[key]
+    return hyperparameters
 
 
 def configure_pipeline(cfg: DictConfig) -> Pipeline:
@@ -130,9 +95,11 @@ def configure_pipeline(cfg: DictConfig) -> Pipeline:
         Pipeline with hyper-parameters configured.
     """
     if cfg.model == "flat":
-        classifier = configure_flat[cfg.classifier](cfg)
+        classifier = configure_flat[cfg.classifier]
+        classifier.set_params(**delete_non_hyperparameters(cfg))
     else:
-        local_classifier = configure_flat[cfg.classifier](cfg)
+        local_classifier = configure_flat[cfg.classifier]
+        local_classifier.set_params(**delete_non_hyperparameters(cfg))
         local_classifier.set_params(n_jobs=1)
         classifier = configure_hierarchical[cfg.model]
         classifier.set_params(
@@ -148,14 +115,14 @@ def configure_pipeline(cfg: DictConfig) -> Pipeline:
     return pipeline
 
 
-def compute_md5(cfg: DictConfig) -> str:
+def compute_md5(cfg: dict) -> str:
     """
     Compute MD5 hash of configuration.
 
     Parameters
     ----------
-    cfg : DictConfig
-        Dictionary containing all configuration information.
+    cfg : dict
+        Dictionary containing hyperparameters.
 
     Returns
     -------
@@ -163,10 +130,7 @@ def compute_md5(cfg: DictConfig) -> str:
         MD5 hash of configuration.
 
     """
-    dictionary = OmegaConf.to_object(cfg)
-    md5 = hashlib.md5(
-        json.dumps(dictionary, sort_keys=True).encode("utf-8")
-    ).hexdigest()
+    md5 = hashlib.md5(json.dumps(cfg, sort_keys=True).encode("utf-8")).hexdigest()
     return md5
 
 
@@ -181,10 +145,11 @@ def save_trial(cfg: DictConfig, scores: List[float]) -> None:
     scores : List[float]
         List of scores for each fold.
     """
-    md5 = compute_md5(cfg)
+    hyperparameters = delete_non_hyperparameters(cfg)
+    md5 = compute_md5(hyperparameters)
     filename = f"{cfg.output_dir}/{md5}.sav"
     with open(filename, "wb") as file:
-        pickle.dump((cfg, scores), file)
+        pickle.dump((hyperparameters, scores), file)
 
 
 def load_trial(cfg: DictConfig) -> List[float]:
@@ -201,7 +166,8 @@ def load_trial(cfg: DictConfig) -> List[float]:
     scores : List[float]
         The cross-validation scores or empty list if file does not exist.
     """
-    md5 = compute_md5(cfg)
+    hyperparameters = delete_non_hyperparameters(cfg)
+    md5 = compute_md5(hyperparameters)
     filename = f"{cfg.output_dir}/{md5}.sav"
     if os.path.exists(filename):
         (_, scores) = pickle.load(open(filename, "rb"))
