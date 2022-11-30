@@ -2,8 +2,9 @@
 ## Base classifier: random_forest
 |Parameters|Scores|Average|Standard deviation|
 |----------|------|-------|------------------|
-|{'n_estimators': 200, 'criterion': 'entropy'}|[0.617, 0.616, 0.618, 0.618, 0.614]|0.617|0.001|
-|{'n_estimators': 100, 'criterion': 'gini'}|[0.656, 0.655, 0.656, 0.656, 0.658]|0.656|0.001|
-|{'n_estimators': 100, 'criterion': 'log_loss'}|[0.615, 0.617, 0.619, 0.618, 0.617]|0.617|0.001|
-|{'n_estimators': 200, 'criterion': 'gini'}|[0.659, 0.658, 0.66, 0.66, 0.657]|0.659|0.001|
-|{'n_estimators': 200, 'criterion': 'log_loss'}|[0.618, 0.616, 0.619, 0.618, 0.616]|0.617|0.001|
+|{'n_estimators': 200, 'criterion': 'entropy', 'classifier': 'random_forest', 'model': 'flat', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/flat/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.617, 0.616, 0.618, 0.618, 0.614]|0.617|0.001|
+|{'n_estimators': 100, 'criterion': 'gini', 'classifier': 'random_forest', 'model': 'flat', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/flat/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.656, 0.655, 0.656, 0.656, 0.658]|0.656|0.001|
+|{'n_estimators': 100, 'criterion': 'entropy', 'classifier': 'random_forest', 'model': 'flat', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/flat/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.613, 0.613, 0.615, 0.616, 0.615]|0.614|0.001|
+|{'n_estimators': 100, 'criterion': 'log_loss', 'classifier': 'random_forest', 'model': 'flat', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/flat/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.615, 0.617, 0.619, 0.618, 0.617]|0.617|0.001|
+|{'n_estimators': 200, 'criterion': 'gini', 'classifier': 'random_forest', 'model': 'flat', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/flat/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.659, 0.658, 0.66, 0.66, 0.657]|0.659|0.001|
+|{'n_estimators': 200, 'criterion': 'log_loss', 'classifier': 'random_forest', 'model': 'flat', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/flat/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.618, 0.616, 0.619, 0.618, 0.616]|0.617|0.001|

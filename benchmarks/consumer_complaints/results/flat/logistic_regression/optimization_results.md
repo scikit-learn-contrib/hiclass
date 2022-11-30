@@ -2,8 +2,8 @@
 ## Base classifier: logistic_regression
 |Parameters|Scores|Average|Standard deviation|
 |----------|------|-------|------------------|
-|{'solver': 'lbfgs', 'max_iter': 10000}|[0.772, 0.773, 0.772, 0.774, 0.772]|0.773|0.001|
-|{'solver': 'liblinear', 'max_iter': 10000}|[0.763, 0.764, 0.763, 0.764, 0.763]|0.763|0.001|
-|{'solver': 'sag', 'max_iter': 10000}|[0.772, 0.773, 0.772, 0.774, 0.772]|0.773|0.001|
-|{'solver': 'newton-cg', 'max_iter': 10000}|[0.772, 0.773, 0.772, 0.774, 0.772]|0.773|0.001|
-|{'solver': 'saga', 'max_iter': 10000}|[0.772, 0.773, 0.772, 0.774, 0.772]|0.773|0.001|
+|{'solver': 'lbfgs', 'max_iter': 10000, 'classifier': 'logistic_regression', 'model': 'flat', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/flat/logistic_regression', 'mem_gb': 450, 'n_splits': 5}|[0.772, 0.773, 0.772, 0.774, 0.772]|0.773|0.001|
+|{'solver': 'liblinear', 'max_iter': 10000, 'classifier': 'logistic_regression', 'model': 'flat', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/flat/logistic_regression', 'mem_gb': 450, 'n_splits': 5}|[0.763, 0.764, 0.763, 0.764, 0.763]|0.763|0.001|
+|{'solver': 'sag', 'max_iter': 10000, 'classifier': 'logistic_regression', 'model': 'flat', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/flat/logistic_regression', 'mem_gb': 450, 'n_splits': 5}|[0.772, 0.773, 0.772, 0.774, 0.772]|0.773|0.001|
+|{'solver': 'newton-cg', 'max_iter': 10000, 'classifier': 'logistic_regression', 'model': 'flat', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/flat/logistic_regression', 'mem_gb': 450, 'n_splits': 5}|[0.772, 0.773, 0.772, 0.774, 0.772]|0.773|0.001|
+|{'solver': 'saga', 'max_iter': 10000, 'classifier': 'logistic_regression', 'model': 'flat', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/flat/logistic_regression', 'mem_gb': 450, 'n_splits': 5}|[0.772, 0.773, 0.772, 0.774, 0.772]|0.773|0.001|
