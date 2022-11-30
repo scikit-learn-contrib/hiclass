@@ -1,0 +1,12 @@
+defaults:
+  - _self_
+  - optuna
+
+hydra:
+  sweeper:
+    params:
+      n_estimators: choice(100, 200)
+      criterion: choice("gini", "entropy", "log_loss")
+
+n_estimators: 1
+criterion: 1

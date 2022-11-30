@@ -1,0 +1,5 @@
+name: optuna
+best_params:
+  n_estimators: 200
+  criterion: gini
+best_value: 0.6589227417370566

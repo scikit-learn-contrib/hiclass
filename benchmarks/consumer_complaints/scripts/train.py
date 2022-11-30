@@ -5,42 +5,11 @@ import pickle
 import sys
 from argparse import Namespace
 
-import pandas as pd
-from lightgbm import LGBMClassifier
-from sklearn.base import BaseEstimator
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
+from joblib import parallel_backend
+from omegaconf import DictConfig, OmegaConf
 
-from data import load_dataframe
-from hiclass import (
-    LocalClassifierPerNode,
-    LocalClassifierPerParentNode,
-    LocalClassifierPerLevel,
-)
-
-# Base classifiers used for building models
-classifiers = {
-    "logistic_regression": LogisticRegression(
-        max_iter=10000,
-        n_jobs=1,
-    ),
-    "random_forest": RandomForestClassifier(
-        n_jobs=1,
-    ),
-    "lightgbm": LGBMClassifier(
-        n_jobs=1,
-    ),
-}
-
-
-# Hierarchical classifiers used for training
-hierarchical_classifiers = {
-    "local_classifier_per_node": LocalClassifierPerNode(),
-    "local_classifier_per_parent_node": LocalClassifierPerParentNode(),
-    "local_classifier_per_level": LocalClassifierPerLevel(),
-}
+from data import load_dataframe, flatten_labels
+from tune import configure_pipeline
 
 
 def parse_args(args: list) -> Namespace:
@@ -89,126 +58,54 @@ def parse_args(args: list) -> Namespace:
         help="Algorithm used for fitting, e.g., logistic_regression or random_forest",
     )
     parser.add_argument(
-        "--random-state",
-        type=int,
-        required=True,
-        help="Random state to enable reproducibility",
-    )
-    parser.add_argument(
         "--model",
         type=str,
         required=True,
         help="Model used for training, e.g., flat, lcpl, lcpn or lcppn",
     )
+    parser.add_argument(
+        "--best-parameters",
+        type=str,
+        required=True,
+        help="Path to optuna's tuned parameters",
+    )
     return parser.parse_args(args)
 
 
-def join(y: pd.DataFrame, separator: str = ":sep:") -> pd.Series:
+def load_parameters(yml: str) -> DictConfig:
     """
-    Join hierarchical labels into a single column.
+    Load parameters from a YAML file.
 
     Parameters
     ----------
-    y : pd.DataFrame
-        hierarchical labels.
-    separator : str, default=":sep:"
-        Separator used to differentiate between columns.
+    yml : str
+        Path to YAML file containing tuned parameters.
 
     Returns
     -------
-    y : pd.Series
-        Joined labels.
+    cfg : DictConfig
+        Dictionary containing all configuration information.
     """
-    y = y[y.columns].apply(lambda x: separator.join(x.dropna().astype(str)), axis=1)
-    return y
+    cfg = OmegaConf.load(yml)
+    return cfg["best_params"]
 
 
-def get_flat_classifier(
-    n_jobs: int,
-    base_classifier: str,
-    random_state: int,
-) -> BaseEstimator:
-    """
-    Build flat classifier for pipeline.
-
-    Parameters
-    ----------
-    n_jobs : int
-        Number of threads to fit in parallel.
-    base_classifier : str
-        Classifier used for fitting.
-    random_state : int
-        Random state to enable reproducibility.
-
-    Returns
-    -------
-    classifier : BaseEstimator
-        Flat classifier.
-    """
-    model = classifiers[base_classifier]
-    model.set_params(n_jobs=n_jobs, random_state=random_state)
-    return model
-
-
-def get_hierarchical_classifier(
-    n_jobs: int,
-    local_classifier: str,
-    hierarchical_classifier: str,
-    random_state: int,
-) -> BaseEstimator:
-    """
-    Build hierarchical classifier for pipeline.
-
-    Parameters
-    ----------
-    n_jobs : int
-        Number of threads to fit in parallel.
-    local_classifier : str
-        Classifier used for fitting.
-    hierarchical_classifier : str
-        Classifier used for hierarchical classification.
-    random_state : int
-        Random state to enable reproducibility.
-
-    Returns
-    -------
-    classifier: BaseEstimator
-        Hierarchical classifier.
-    """
-    local_classifier = classifiers[local_classifier]
-    local_classifier.set_params(random_state=random_state)
-    model = hierarchical_classifiers[hierarchical_classifier]
-    model.set_params(local_classifier=local_classifier, n_jobs=n_jobs)
-    return model
-
-
-def main():  # pragma: no cover
+def train() -> None:  # pragma: no cover
     """Train with flat or hierarchical approaches."""
     args = parse_args(sys.argv[1:])
     x_train = load_dataframe(args.x_train).squeeze()
     y_train = load_dataframe(args.y_train)
     if args.model == "flat":
-        y_train = join(y_train)
-        classifier = get_flat_classifier(
-            args.n_jobs, args.classifier, args.random_state
-        )
-    else:
-        classifier = get_hierarchical_classifier(
-            args.n_jobs,
-            args.classifier,
-            args.model,
-            args.random_state,
-        )
-    pipeline = Pipeline(
-        [
-            ("count", CountVectorizer()),
-            ("tfidf", TfidfTransformer()),
-            ("classifier", classifier),
-        ]
-    )
-    pipeline.fit(x_train, y_train)
+        y_train = flatten_labels(y_train)
+    best_params = load_parameters(args.best_parameters)
+    best_params.model = args.model
+    best_params.classifier = args.classifier
+    best_params.n_jobs = args.n_jobs
+    pipeline = configure_pipeline(best_params)
+    with parallel_backend("threading", n_jobs=args.n_jobs):
+        pipeline.fit(x_train, y_train)
     pickle.dump(pipeline, open(args.trained_model, "wb"))
 
 
 if __name__ == "__main__":
-    main()  # pragma: no cover
+    train()  # pragma: no cover

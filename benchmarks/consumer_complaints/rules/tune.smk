@@ -1,0 +1,34 @@
+rule tune:
+    input:
+        x_train = "results/split_data/x_train.csv.zip",
+        y_train = "results/split_data/y_train.csv.zip"
+    output:
+        best_parameters = "results/{model}/{classifier}/optimization_results.yaml",
+    params:
+        classifier = "{classifier}",
+        model = "{model}",
+        output_dir = "results/{model}/{classifier}",
+        study_name = "{model}_{classifier}",
+        n_splits = config["n_splits"],
+    conda:
+        "../envs/hiclass.yml"
+    threads:
+        config["threads"]
+    resources:
+        mem_gb = config["mem_gb"]
+    shell:
+        """
+        python scripts/tune.py \
+        --config-name {params.classifier} \
+        --multirun \
+        'classifier={params.classifier}' \
+        'model={params.model}' \
+        'n_jobs={threads}' \
+        'x_train={input.x_train}' \
+        'y_train={input.y_train}' \
+        'output_dir={params.output_dir}' \
+        'mem_gb={resources.mem_gb}' \
+        'n_splits={params.n_splits}' \
+        hydra.sweep.dir={params.output_dir} \
+        hydra.sweeper.study_name={params.study_name} \
+        """
