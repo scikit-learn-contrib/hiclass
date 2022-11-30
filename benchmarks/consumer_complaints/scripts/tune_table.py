@@ -9,6 +9,8 @@ from typing import Tuple, List
 
 import numpy as np
 
+from tune import delete_non_hyperparameters
+
 
 def parse_args(args: list) -> Namespace:
     """
@@ -85,7 +87,7 @@ def compute(
     std = []
     for result in results:
         parameters, s = pickle.load(open(result, "rb"))
-        hyperparameters.append(parameters)
+        hyperparameters.append(delete_non_hyperparameters(parameters))
         scores.append([round(i, 3) for i in s])
         avg.append(np.mean(s))
         std.append(np.std(s))

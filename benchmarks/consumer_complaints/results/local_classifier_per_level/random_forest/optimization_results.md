@@ -2,9 +2,9 @@
 ## Base classifier: random_forest
 |Parameters|Scores|Average|Standard deviation|
 |----------|------|-------|------------------|
-|{'n_estimators': 100, 'criterion': 'log_loss', 'classifier': 'random_forest', 'model': 'local_classifier_per_level', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/local_classifier_per_level/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.713, 0.713, 0.715, 0.712, 0.715]|0.714|0.001|
-|{'n_estimators': 100, 'criterion': 'entropy', 'classifier': 'random_forest', 'model': 'local_classifier_per_level', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/local_classifier_per_level/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.714, 0.712, 0.716, 0.715, 0.714]|0.714|0.001|
-|{'n_estimators': 200, 'criterion': 'log_loss', 'classifier': 'random_forest', 'model': 'local_classifier_per_level', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/local_classifier_per_level/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.718, 0.718, 0.72, 0.72, 0.718]|0.719|0.001|
-|{'n_estimators': 100, 'criterion': 'gini', 'classifier': 'random_forest', 'model': 'local_classifier_per_level', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/local_classifier_per_level/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.724, 0.726, 0.726, 0.725, 0.724]|0.725|0.001|
-|{'n_estimators': 200, 'criterion': 'gini', 'classifier': 'random_forest', 'model': 'local_classifier_per_level', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/local_classifier_per_level/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.729, 0.73, 0.732, 0.73, 0.73]|0.730|0.001|
-|{'n_estimators': 200, 'criterion': 'entropy', 'classifier': 'random_forest', 'model': 'local_classifier_per_level', 'n_jobs': 12, 'x_train': 'results/split_data/x_train.csv.zip', 'y_train': 'results/split_data/y_train.csv.zip', 'output_dir': 'results/local_classifier_per_level/random_forest', 'mem_gb': 450, 'n_splits': 5}|[0.719, 0.72, 0.719, 0.72, 0.719]|0.720|0.001|
+|{'n_estimators': 100, 'criterion': 'log_loss'}|[0.713, 0.713, 0.715, 0.712, 0.715]|0.714|0.001|
+|{'n_estimators': 100, 'criterion': 'entropy'}|[0.714, 0.712, 0.716, 0.715, 0.714]|0.714|0.001|
+|{'n_estimators': 200, 'criterion': 'log_loss'}|[0.718, 0.718, 0.72, 0.72, 0.718]|0.719|0.001|
+|{'n_estimators': 100, 'criterion': 'gini'}|[0.724, 0.726, 0.726, 0.725, 0.724]|0.725|0.001|
+|{'n_estimators': 200, 'criterion': 'gini'}|[0.729, 0.73, 0.732, 0.73, 0.73]|0.730|0.001|
+|{'n_estimators': 200, 'criterion': 'entropy'}|[0.719, 0.72, 0.719, 0.72, 0.719]|0.720|0.001|
