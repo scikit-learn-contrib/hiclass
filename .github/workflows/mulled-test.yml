@@ -51,6 +51,7 @@ jobs:
     container:
       image: mirand863/hiclass:mulled
     strategy:
+      fail-fast: false
       matrix:
         test: ["test_complaints[model0", "test_complaints[model1", "test_complaints[model2"]
     steps:
