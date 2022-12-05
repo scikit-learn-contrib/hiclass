@@ -55,22 +55,22 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        conda install --name base --channel conda-forge mamba
+        conda install --name base --channel conda-forge mamba --yes
         wget https://data.qiime2.org/distro/core/qiime2-2022.8-py38-linux-conda.yml
         mamba env update --name base --file qiime2-2022.8-py38-linux-conda.yml --prune
-        python -m pip install --upgrade pip
-        python -m pip install flake8==4.0.1
-        python -m pip install pytest==7.1.2
-        python -m pip install pytest-flake8==1.1.1
-        python -m pip install pytest-pydocstyle==2.3.0
-        python -m pip install pytest-cov==3.0.0
-        python -m pip install ray==1.13.0
-        python -m pip install pandas==1.4
-        python -m pip install gdown==4.5
-        python -m pip install .
-        python -m pip install hitac==2.0.21
-        python -m pip install scikit-bio==0.5
-        python -m pip install scipy==1.8
+#        python -m pip install --upgrade pip
+#        python -m pip install flake8==4.0.1
+#        python -m pip install pytest==7.1.2
+#        python -m pip install pytest-flake8==1.1.1
+#        python -m pip install pytest-pydocstyle==2.3.0
+#        python -m pip install pytest-cov==3.0.0
+#        python -m pip install ray==1.13.0
+#        python -m pip install pandas==1.4
+#        python -m pip install gdown==4.5
+#        python -m pip install .
+#        python -m pip install hitac==2.0.21
+#        python -m pip install scikit-bio==0.5
+#        python -m pip install scipy==1.8
     - name: Test with pytest
       run: |
         pytest -v --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html
