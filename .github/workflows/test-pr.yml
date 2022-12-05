@@ -61,6 +61,9 @@ jobs:
         python -m pip install gdown==4.5
         python -m pip install .
         python -m pip install hitac==2.0.21
+        apt-get update
+        apt-get -y install gcc mono-mcs
+        rm -rf /var/lib/apt/lists/*
         python -m pip install scikit-bio==0.5
         python -m pip install scipy==1.8
     - name: Test with pytest
