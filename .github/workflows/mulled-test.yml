@@ -3,12 +3,42 @@ name: Mulled Test
 on: [pull_request]
 
 jobs:
-  mulled_test:
+  fungi:
     env:
       FUNGI_TRAIN_URL: ${{ secrets.FUNGI_TRAIN_URL }}
       FUNGI_TRAIN_MD5: ${{ secrets.FUNGI_TRAIN_MD5 }}
       FUNGI_TEST_URL: ${{ secrets.FUNGI_TEST_URL }}
       FUNGI_TEST_MD5: ${{ secrets.FUNGI_TEST_MD5 }}
+    runs-on: ubuntu-latest
+    container:
+      image: mirand863/hiclass:mulled
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ["test_fungi[model0", "test_fungi[model1", "test_fungi[model2"]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip && \
+          python -m pip install flake8==4.0.1 && \
+          python -m pip install pytest==7.1.2 && \
+          python -m pip install pytest-flake8==1.1.1 && \
+          python -m pip install pytest-pydocstyle==2.3.0 && \
+          python -m pip install pytest-cov==3.0.0 && \
+          python -m pip install ray==1.13.0 && \
+          python -m pip install pandas==1.4 && \
+          python -m pip install gdown==4.5 && \
+          python -m pip install .
+          python -m pip install hitac==2.0.21 && \
+          python -m pip install scikit-bio==0.5 && \
+          python -m pip install scipy==1.8
+      - name: Test with pytest
+        run: |
+          pytest -v --durations=0 --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html tests/test_RealData.py -k ${{ matrix.test }}
+  complaints:
+    env:
       COMPLAINTS_X_TRAIN_URL: ${{ secrets.COMPLAINTS_X_TRAIN_URL }}
       COMPLAINTS_X_TRAIN_MD5: ${{ secrets.COMPLAINTS_X_TRAIN_MD5 }}
       COMPLAINTS_Y_TRAIN_URL: ${{ secrets.COMPLAINTS_Y_TRAIN_URL }}
@@ -19,33 +49,27 @@ jobs:
       COMPLAINTS_Y_TEST_MD5: ${{ secrets.COMPLAINTS_Y_TEST_MD5 }}
     runs-on: ubuntu-latest
     container:
-      image: continuumio/miniconda3:latest
+      image: mirand863/hiclass:mulled
     strategy:
       matrix:
-        test: ["test_fungi[model0", "test_fungi[model1", "test_fungi[model2", "test_complaints[model0", "test_complaints[model1", "test_complaints[model2"]
+        test: ["test_complaints[model0", "test_complaints[model1", "test_complaints[model2"]
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
     - name: Install dependencies
       run: |
-        conda install --name base --channel conda-forge mamba --yes
-        wget https://data.qiime2.org/distro/core/qiime2-2022.8-py38-linux-conda.yml
-        mamba env update --name base --file qiime2-2022.8-py38-linux-conda.yml --prune
-        python -m pip install --upgrade pip
-        python -m pip install flake8==4.0.1
-        python -m pip install pytest==7.1.2
-        python -m pip install pytest-flake8==1.1.1
-        python -m pip install pytest-pydocstyle==2.3.0
-        python -m pip install pytest-cov==3.0.0
-        python -m pip install ray==1.13.0
-        python -m pip install pandas==1.4
-        python -m pip install gdown==4.5
+        python -m pip install --upgrade pip && \
+        python -m pip install flake8==4.0.1 && \
+        python -m pip install pytest==7.1.2 && \
+        python -m pip install pytest-flake8==1.1.1 && \
+        python -m pip install pytest-pydocstyle==2.3.0 && \
+        python -m pip install pytest-cov==3.0.0 && \
+        python -m pip install ray==1.13.0 && \
+        python -m pip install pandas==1.4 && \
+        python -m pip install gdown==4.5 && \
         python -m pip install .
-        python -m pip install hitac==2.0.21
-        apt-get update
-        apt-get -y install gcc mono-mcs
-        rm -rf /var/lib/apt/lists/*
-        python -m pip install scikit-bio==0.5
+        python -m pip install hitac==2.0.21 && \
+        python -m pip install scikit-bio==0.5 && \
         python -m pip install scipy==1.8
     - name: Test with pytest
       run: |
