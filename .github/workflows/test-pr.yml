@@ -39,8 +39,8 @@ jobs:
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v2
   mulled_test:
-    runs:
-      using: "docker"
+    runs-on: ubuntu-latest
+    container:
       image: continuumio/miniconda3:latest
     steps:
     - name: Install dependencies
