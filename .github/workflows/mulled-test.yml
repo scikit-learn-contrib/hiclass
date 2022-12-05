@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: continuumio/miniconda3:latest
+    strategy:
+      matrix:
+        test: ["test_fungi[model0-0.8038390550018457]", "test_fungi[model1-0.8038390550018457]", "test_fungi[model2-0.8041343669250646]"]
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
@@ -38,4 +41,4 @@ jobs:
         python -m pip install scipy==1.8
     - name: Test with pytest
       run: |
-        pytest -v --durations=0 --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html tests/test_RealData.py
+        pytest -v --durations=0 --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html tests/test_RealData.py -k ${{ matrix.test }}
