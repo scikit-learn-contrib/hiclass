@@ -1,4 +1,4 @@
-name: Mulled Tests
+name: Test PR
 
 on: [pull_request]
 

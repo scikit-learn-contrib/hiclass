@@ -1,4 +1,4 @@
-name: Test PR
+name: Mulled Test
 
 on: [pull_request]
 
