@@ -4,6 +4,11 @@ on: [pull_request]
 
 jobs:
   mulled_test:
+    env:
+      FUNGI_TRAIN_URL: ${{ secrets.FUNGI_TRAIN_URL }}
+      FUNGI_TRAIN_MD5: ${{ secrets.FUNGI_TRAIN_MD5 }}
+      FUNGI_TEST_URL: ${{ secrets.FUNGI_TEST_URL }}
+      FUNGI_TEST_MD5: ${{ secrets.FUNGI_TEST_MD5 }}
     runs-on: ubuntu-latest
     container:
       image: continuumio/miniconda3:latest
@@ -33,4 +38,4 @@ jobs:
         python -m pip install scipy==1.8
     - name: Test with pytest
       run: |
-        pytest -v --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html
+        pytest -v --durations=0 --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html tests/test_RealData.py
