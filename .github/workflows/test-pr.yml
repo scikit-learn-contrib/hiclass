@@ -39,20 +39,10 @@ jobs:
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v2
   mulled_test:
-    runs-on: ${{ matrix.os }}
-    container:
+    runs:
+      using: "docker"
       image: continuumio/miniconda3:latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.9"]
-        os: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         conda install --name base --channel conda-forge mamba --yes
@@ -74,6 +64,3 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -v --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html
-        coverage xml
-    - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v2
