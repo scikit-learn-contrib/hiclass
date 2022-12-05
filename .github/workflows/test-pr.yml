@@ -57,8 +57,7 @@ jobs:
       run: |
         conda install -n base -c conda-forge mamba
         wget https://data.qiime2.org/distro/core/qiime2-2022.8-py38-linux-conda.yml
-        mamba env create -n mulled_test --file qiime2-2022.8-py38-linux-conda.yml
-        conda activate mulled_test
+        mamba env update --file qiime2-2022.8-py38-linux-conda.yml --prune
         python -m pip install --upgrade pip
         python -m pip install flake8==4.0.1
         python -m pip install pytest==7.1.2
