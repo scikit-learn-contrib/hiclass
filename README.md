@@ -239,7 +239,7 @@ If you use HiClass in your research, please cite our [preprint on arXiv](https:/
   title={HiClass: a Python library for local hierarchical classification compatible with scikit-learn},
   author={Miranda, F{\'a}bio M and K{\"o}ehnecke, Niklas and Renard, Bernhard Y},
   journal={arXiv preprint arXiv:2112.06560},
-  year={2021}
+  year={2021},
   doi = {arXiv:2112.06560},
   url = {https://arxiv.org/abs/2112.06560}
 }
