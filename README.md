@@ -230,7 +230,7 @@ If you'd like to get updates when we release new versions, please click on the "
 
 ## Citation
 
-If you use HiClass, please cite:
+If you use HiClass in your research, please cite our [preprint on arXiv](https://arxiv.org/abs/2112.06560):
 
 > Miranda, Fábio M., Niklas Köehnecke, and Bernhard Y. Renard. "HiClass: a Python library for local hierarchical classification compatible with scikit-learn." arXiv preprint arXiv:2112.06560 (2021).
 
@@ -239,7 +239,9 @@ If you use HiClass, please cite:
   title={HiClass: a Python library for local hierarchical classification compatible with scikit-learn},
   author={Miranda, F{\'a}bio M and K{\"o}ehnecke, Niklas and Renard, Bernhard Y},
   journal={arXiv preprint arXiv:2112.06560},
-  year={2021}
+  year={2021},
+  doi={arXiv:2112.06560},
+  url={https://arxiv.org/abs/2112.06560}
 }
 ```
 
