@@ -32,7 +32,7 @@ jobs:
           python -m pip install hitac==2.0.21
       - name: Test with pytest
         run: |
-          pytest -v --durations=0 --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html tests/test_RealData.py -k ${{ matrix.test }}
+          pytest -v --durations=0 --flake8 --pydocstyle --cov=hiclass --cov-report html tests/test_RealData.py -k ${{ matrix.test }}
   complaints:
     env:
       COMPLAINTS_X_TRAIN_URL: ${{ secrets.COMPLAINTS_X_TRAIN_URL }}
@@ -66,4 +66,4 @@ jobs:
         python -m pip install hitac==2.0.21
     - name: Test with pytest
       run: |
-        pytest -v --durations=0 --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html tests/test_RealData.py -k ${{ matrix.test }}
+        pytest -v --durations=0 --flake8 --pydocstyle --cov=hiclass --cov-report html tests/test_RealData.py -k ${{ matrix.test }}
