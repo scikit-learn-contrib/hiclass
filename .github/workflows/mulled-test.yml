@@ -27,7 +27,7 @@ jobs:
           python -m pip install pytest-pydocstyle==2.3.0
           python -m pip install pytest-cov==3.0.0
           python -m pip install ray==1.13.0
-          python -m pip install gdown==4.5
+          python -m pip install gdown
           python -m pip install .
           python -m pip install hitac==2.0.21
       - name: Test with pytest
@@ -61,7 +61,7 @@ jobs:
         python -m pip install pytest-pydocstyle==2.3.0
         python -m pip install pytest-cov==3.0.0
         python -m pip install ray==1.13.0
-        python -m pip install gdown==4.5
+        python -m pip install gdown
         python -m pip install .
         python -m pip install hitac==2.0.21
     - name: Test with pytest
