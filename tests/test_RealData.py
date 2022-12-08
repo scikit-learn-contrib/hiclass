@@ -105,10 +105,10 @@ def test_fungi(model, expected):
 
 
 @pytest.mark.skipif(
-    not exists("tests/fixtures/complaints_x_train.csv")
-    or not exists("tests/fixtures/complaints_y_train.csv")
-    or not exists("tests/fixtures/complaints_x_test.csv")
-    or not exists("tests/fixtures/complaints_y_test.csv"),
+    not exists("tests/fixtures/complaints_x_train.csv.zip")
+    or not exists("tests/fixtures/complaints_y_train.csv.zip")
+    or not exists("tests/fixtures/complaints_x_test.csv.zip")
+    or not exists("tests/fixtures/complaints_y_test.csv.zip"),
     reason="dataset not available",
 )
 @pytest.mark.skipif(
