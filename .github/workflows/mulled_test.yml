@@ -1,6 +1,8 @@
 name: Mulled Test
 
-on: [pull_request]
+on:
+  pull_request:
+    labels: mulled_test
 
 jobs:
   mulled_test:

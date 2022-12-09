@@ -51,9 +51,13 @@ else:
 )
 @pytest.mark.skipif(
     "FUNGI_TRAIN_URL" not in os.environ
+    or "FUNGI_TEST_URL" == ""
     or "FUNGI_TRAIN_MD5" not in os.environ
+    or "FUNGI_TEST_MD5" == ""
     or "FUNGI_TEST_URL" not in os.environ
-    or "FUNGI_TEST_MD5" not in os.environ,
+    or "FUNGI_TEST_URL" == ""
+    or "FUNGI_TEST_MD5" not in os.environ
+    or "FUNGI_TEST_MD5" == "",
     reason="environment variables not set",
 )
 @pytest.mark.skipif(not skbio_installed, reason="scikit-bio not installed")
@@ -113,13 +117,21 @@ def test_fungi(model, expected):
 )
 @pytest.mark.skipif(
     "COMPLAINTS_X_TRAIN_URL" not in os.environ
+    or "COMPLAINTS_X_TRAIN_URL" == ""
     or "COMPLAINTS_X_TRAIN_MD5" not in os.environ
+    or "COMPLAINTS_X_TRAIN_MD5" == ""
     or "COMPLAINTS_Y_TRAIN_URL" not in os.environ
+    or "COMPLAINTS_Y_TRAIN_URL" == ""
     or "COMPLAINTS_Y_TRAIN_MD5" not in os.environ
+    or "COMPLAINTS_Y_TRAIN_MD5" == ""
     or "COMPLAINTS_X_TEST_URL" not in os.environ
+    or "COMPLAINTS_X_TEST_URL" == ""
     or "COMPLAINTS_X_TEST_MD5" not in os.environ
+    or "COMPLAINTS_X_TEST_MD5" == ""
     or "COMPLAINTS_Y_TEST_URL" not in os.environ
-    or "COMPLAINTS_Y_TEST_MD5" not in os.environ,
+    or "COMPLAINTS_Y_TEST_URL" == ""
+    or "COMPLAINTS_Y_TEST_MD5" not in os.environ
+    or "COMPLAINTS_Y_TEST_MD5" == "",
     reason="environment variables not set",
 )
 @pytest.mark.skipif(not skbio_installed, reason="scikit-bio not installed")
