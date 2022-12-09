@@ -128,7 +128,7 @@ def test_fungi(model, expected):
 @pytest.mark.parametrize(
     "model, expected",
     [
-        (LocalClassifierPerNode(), 0.7762697893413388),
+        (LocalClassifierPerNode(), 0.7762665819926616),
         (LocalClassifierPerParentNode(), 0.7798363610704848),
         (LocalClassifierPerLevel(), 0.7794434608575166),
     ],
