@@ -6,7 +6,7 @@ on:
 
 jobs:
   mulled_test:
-    if: github.event.label.name == 'mulled-test'
+    if: github.event.label.name == 'mulled_test'
     env:
       FUNGI_TRAIN_URL: ${{ secrets.FUNGI_TRAIN_URL }}
       FUNGI_TRAIN_MD5: ${{ secrets.FUNGI_TRAIN_MD5 }}
