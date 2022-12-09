@@ -1,10 +1,10 @@
-name: Mulled Tests
+name: Mulled Test
 
 on: [pull_request]
 
 jobs:
   mulled_test:
-    if: github.event.label.name == 'mulled_test'
+    if: contains(github.event.pull_request.labels.*.name, 'mulled_test')
     env:
       FUNGI_TRAIN_URL: ${{ secrets.FUNGI_TRAIN_URL }}
       FUNGI_TRAIN_MD5: ${{ secrets.FUNGI_TRAIN_MD5 }}
