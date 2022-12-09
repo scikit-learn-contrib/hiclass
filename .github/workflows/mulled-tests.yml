@@ -1,5 +1,8 @@
 name: Mulled Tests
 
+# This workflow is triggered on pushes to pull requests, when labelled with mulled_tests
+# Mulled tests cannot run on forks, because they require access to GitHub secrets
+
 on: [pull_request]
 
 jobs:
