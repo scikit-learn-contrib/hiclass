@@ -1,9 +1,6 @@
 name: Mulled Test
 
-on:
-  pull_request:
-    branches:
-      - mulled_tests
+on: [pull_request]
 
 jobs:
   mulled_test:
