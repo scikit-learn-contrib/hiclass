@@ -44,7 +44,7 @@ def download(dataset: dict, fuzzy: bool) -> None:
     fuzzy : bool
         Whether to use fuzzy matching to find the file name.
     """
-    if gdown_installed and dataset and dataset["url"] != "":
+    if gdown_installed and dataset:
         gdown.cached_download(
             dataset["url"],
             dataset["path"],
