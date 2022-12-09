@@ -2,7 +2,8 @@ name: Mulled Test
 
 on:
   pull_request:
-    labels: mulled_test
+    branches:
+      - mulled_tests
 
 jobs:
   mulled_test:
