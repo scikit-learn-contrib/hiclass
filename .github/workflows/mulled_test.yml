@@ -1,9 +1,12 @@
 name: Mulled Test
 
-on: [pull_request]
+on:
+  pull_request:
+    types: [labeled]
 
 jobs:
   mulled_test:
+    if: github.event.label.name == 'mulled-test'
     env:
       FUNGI_TRAIN_URL: ${{ secrets.FUNGI_TRAIN_URL }}
       FUNGI_TRAIN_MD5: ${{ secrets.FUNGI_TRAIN_MD5 }}
@@ -18,7 +21,6 @@ jobs:
       COMPLAINTS_Y_TEST_URL: ${{ secrets.COMPLAINTS_Y_TEST_URL }}
       COMPLAINTS_Y_TEST_MD5: ${{ secrets.COMPLAINTS_Y_TEST_MD5 }}
     runs-on: ubuntu-latest
-    if: ${{ env.FUNGI_TRAIN_URL != '' && env.FUNGI_TRAIN_MD5 != '' && env.FUNGI_TEST_URL != '' && env.FUNGI_TEST_MD5 != '' && env.COMPLAINTS_X_TRAIN_URL != '' && env.COMPLAINTS_X_TRAIN_MD5 != '' && env.COMPLAINTS_Y_TRAIN_URL != '' && env.COMPLAINTS_Y_TRAIN_MD5 != '' && env.COMPLAINTS_X_TEST_URL != '' && env.COMPLAINTS_X_TEST_MD5 != '' && env.COMPLAINTS_Y_TEST_URL != '' && env.COMPLAINTS_Y_TEST_MD5 != '' }}
     container:
       image: mirand863/hiclass:mulled
     strategy:
