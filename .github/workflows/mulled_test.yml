@@ -18,6 +18,7 @@ jobs:
       COMPLAINTS_Y_TEST_URL: ${{ secrets.COMPLAINTS_Y_TEST_URL }}
       COMPLAINTS_Y_TEST_MD5: ${{ secrets.COMPLAINTS_Y_TEST_MD5 }}
     runs-on: ubuntu-latest
+    if: ${{ env.FUNGI_TRAIN_URL != '' && env.FUNGI_TRAIN_MD5 != '' && env.FUNGI_TEST_URL != '' && env.FUNGI_TEST_MD5 != '' && env.COMPLAINTS_X_TRAIN_URL != '' && env.COMPLAINTS_X_TRAIN_MD5 != '' && env.COMPLAINTS_Y_TRAIN_URL != '' && env.COMPLAINTS_Y_TRAIN_MD5 != '' && env.COMPLAINTS_X_TEST_URL != '' && env.COMPLAINTS_X_TEST_MD5 != '' && env.COMPLAINTS_Y_TEST_URL != '' && env.COMPLAINTS_Y_TEST_MD5 != '' }}
     container:
       image: mirand863/hiclass:mulled
     strategy:
