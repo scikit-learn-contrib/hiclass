@@ -129,9 +129,7 @@ def test_fit_predict():
     lcpl = LocalClassifierPerLevel(local_classifier=LogisticRegression())
     x = np.array([[1, 2], [3, 4]])
     y = np.array([["a", "b"], ["b", "c"]])
-    ground_truth = np.array(
-        [["a", "b"], ["b", "c"]]
-    )
+    ground_truth = np.array([["a", "b"], ["b", "c"]])
     lcpl.fit(x, y)
     for level, classifier in enumerate(lcpl.local_classifiers_):
         try:
