@@ -84,6 +84,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             edge_list=edge_list,
             replace_classifiers=replace_classifiers,
             n_jobs=n_jobs,
+            warm_start=warm_start,
             classifier_abbreviation="LCPN",
         )
         self.binary_policy = binary_policy
