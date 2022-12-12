@@ -65,6 +65,7 @@ class HierarchicalClassifier(abc.ABC):
         edge_list: str = None,
         replace_classifiers: bool = True,
         n_jobs: int = 1,
+        warm_start: bool = False,
         classifier_abbreviation: str = "",
     ):
         """
@@ -87,6 +88,8 @@ class HierarchicalClassifier(abc.ABC):
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
             If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
+        warm_start : bool, default=False
+            When set to `True`, reuse the solution of the previous call to fit and add more estimators for new nodes, otherwise, just fit a whole new DAG. See :ref:`Fitting additional nodes` for more information.
         classifier_abbreviation : str, default=""
             The abbreviation of the local hierarchical classifier to be displayed during logging.
         """
