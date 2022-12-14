@@ -207,7 +207,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
-        classifier.fit(X, y, sample_weight)
+        classifier.fit(X, y)
         return classifier
 
     def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):

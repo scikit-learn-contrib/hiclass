@@ -134,9 +134,12 @@ class HierarchicalClassifier(abc.ABC):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 
-        self.X_, self.y_ = self._validate_data(
-            X, y, multi_output=True, accept_sparse="csr"
-        )
+        # self.X_, self.y_ = self._validate_data(
+        #     X, y, multi_output=True, accept_sparse="csr"
+        # )
+
+        self.X_ = X
+        self.y_ = y
 
         if sample_weight is not None:
             self.sample_weight_ = _check_sample_weight(sample_weight, X)
