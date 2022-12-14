@@ -95,7 +95,6 @@ class HierarchicalClassifier(abc.ABC):
         self.edge_list = edge_list
         self.replace_classifiers = replace_classifiers
         self.n_jobs = n_jobs
-        self.warm_start = warm_start
         self.classifier_abbreviation = classifier_abbreviation
 
     def fit(self, X, y, sample_weight=None):
