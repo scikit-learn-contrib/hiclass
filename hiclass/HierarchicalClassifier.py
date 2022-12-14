@@ -65,7 +65,6 @@ class HierarchicalClassifier(abc.ABC):
         edge_list: str = None,
         replace_classifiers: bool = True,
         n_jobs: int = 1,
-        warm_start: bool = False,
         classifier_abbreviation: str = "",
     ):
         """
