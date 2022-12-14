@@ -40,7 +40,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         edge_list: str = None,
         replace_classifiers: bool = True,
         n_jobs: int = 1,
-        warm_start: bool = False,
     ):
         """
         Initialize a local classifier per parent node.
