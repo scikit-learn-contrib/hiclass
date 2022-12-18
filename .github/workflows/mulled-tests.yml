@@ -23,7 +23,7 @@ jobs:
       COMPLAINTS_Y_TEST_MD5: ${{ secrets.COMPLAINTS_Y_TEST_MD5 }}
     runs-on: ubuntu-latest
     container:
-      image: mirand863/hiclass:mulled
+      image: quay.io/qiime2/core:2022.2
     strategy:
       fail-fast: false
       matrix:
