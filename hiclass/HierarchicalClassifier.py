@@ -139,8 +139,8 @@ class HierarchicalClassifier(abc.ABC):
                 X, y, multi_output=True, accept_sparse="csr"
             )
         else:
-            self.X_ = X
-            self.y_ = y
+            self.X_ = np.array(X)
+            self.y_ = np.array(y)
 
         if sample_weight is not None:
             self.sample_weight_ = _check_sample_weight(sample_weight, X)
