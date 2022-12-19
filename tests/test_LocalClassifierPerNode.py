@@ -12,6 +12,7 @@ from sklearn.utils.validation import check_is_fitted
 
 from hiclass import LocalClassifierPerNode
 from hiclass.BinaryPolicy import ExclusivePolicy
+from hiclass.ConstantClassifier import ConstantClassifier
 
 
 @parametrize_with_checks([LocalClassifierPerNode()])
@@ -245,8 +246,12 @@ def test_empty_levels(empty_levels):
 
 
 def test_fit_bert():
-    lcpn = LocalClassifierPerNode(bert=True)
-    X = [[0, 1], [2, 3]]  # Bert actually has text as input
-    y = [["a", "b"], ["c", "d"]]
+    bert = ConstantClassifier()
+    lcpn = LocalClassifierPerNode(
+        local_classifier=bert,
+        bert=True,
+    )
+    X = ["Text 1", "Text 2"]
+    y = ["a", "a"]
     lcpn.fit(X, y)
     check_is_fitted(lcpn)

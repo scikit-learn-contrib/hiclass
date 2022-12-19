@@ -12,6 +12,7 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 
 from hiclass import LocalClassifierPerParentNode
+from hiclass.ConstantClassifier import ConstantClassifier
 
 
 @parametrize_with_checks([LocalClassifierPerParentNode()])
@@ -229,8 +230,12 @@ def test_empty_levels(empty_levels):
 
 
 def test_fit_bert():
-    lcppn = LocalClassifierPerParentNode(bert=True)
-    X = [[0, 1], [2, 3]]  # Bert actually has text as input
-    y = [["a", "b"], ["c", "d"]]
-    lcppn.fit(X, y)
-    check_is_fitted(lcppn)
+    bert = ConstantClassifier()
+    lcpn = LocalClassifierPerParentNode(
+        local_classifier=bert,
+        bert=True,
+    )
+    X = ["Text 1", "Text 2"]
+    y = ["a", "a"]
+    lcpn.fit(X, y)
+    check_is_fitted(lcpn)
