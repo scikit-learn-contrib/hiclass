@@ -226,3 +226,13 @@ def test_empty_levels(empty_levels):
         lcppn.root_,
     ]
     assert_array_equal(ground_truth, predictions)
+
+
+def test_fit_bert():
+    lcppn = LocalClassifierPerParentNode(
+        bert=True
+    )
+    X = [[0, 1], [2, 3]]  # Bert actually has text as input
+    y = [["a", "b"], ["c", "d"]]
+    lcppn.fit(X, y)
+    check_is_fitted(lcppn)
