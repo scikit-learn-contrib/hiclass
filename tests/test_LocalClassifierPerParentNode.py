@@ -229,9 +229,7 @@ def test_empty_levels(empty_levels):
 
 
 def test_fit_bert():
-    lcppn = LocalClassifierPerParentNode(
-        bert=True
-    )
+    lcppn = LocalClassifierPerParentNode(bert=True)
     X = [[0, 1], [2, 3]]  # Bert actually has text as input
     y = [["a", "b"], ["c", "d"]]
     lcppn.fit(X, y)

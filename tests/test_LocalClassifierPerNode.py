@@ -245,9 +245,7 @@ def test_empty_levels(empty_levels):
 
 
 def test_fit_bert():
-    lcpn = LocalClassifierPerNode(
-        bert=True
-    )
+    lcpn = LocalClassifierPerNode(bert=True)
     X = [[0, 1], [2, 3]]  # Bert actually has text as input
     y = [["a", "b"], ["c", "d"]]
     lcpn.fit(X, y)
