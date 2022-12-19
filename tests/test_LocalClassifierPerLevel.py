@@ -10,6 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 from hiclass import LocalClassifierPerLevel
+from hiclass.ConstantClassifier import ConstantClassifier
 
 
 @parametrize_with_checks([LocalClassifierPerLevel()])
@@ -180,3 +181,15 @@ def test_empty_levels(empty_levels):
         lcppn.root_,
     ]
     assert_array_equal(ground_truth, predictions)
+
+
+def test_fit_bert():
+    bert = ConstantClassifier()
+    lcpn = LocalClassifierPerLevel(
+        local_classifier=bert,
+        bert=True,
+    )
+    X = ["Text 1", "Text 2"]
+    y = ["a", "a"]
+    lcpn.fit(X, y)
+    check_is_fitted(lcpn)
