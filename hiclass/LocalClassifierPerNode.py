@@ -149,7 +149,10 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         check_is_fitted(self)
 
         # Input validation
-        X = check_array(X, accept_sparse="csr")
+        if not self.bert:
+            X = check_array(X, accept_sparse="csr")
+        else:
+            X = np.array(X)
 
         # Initialize array that holds predictions
         y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)

@@ -193,3 +193,5 @@ def test_fit_bert():
     y = ["a", "a"]
     lcpn.fit(X, y)
     check_is_fitted(lcpn)
+    predictions = lcpn.predict(X)
+    assert_array_equal(y, predictions)

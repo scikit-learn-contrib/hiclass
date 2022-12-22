@@ -229,7 +229,7 @@ def test_empty_levels(empty_levels):
     assert_array_equal(ground_truth, predictions)
 
 
-def test_fit_bert():
+def test_bert():
     bert = ConstantClassifier()
     lcpn = LocalClassifierPerParentNode(
         local_classifier=bert,
@@ -239,3 +239,5 @@ def test_fit_bert():
     y = ["a", "a"]
     lcpn.fit(X, y)
     check_is_fitted(lcpn)
+    predictions = lcpn.predict(X)
+    assert_array_equal(y, predictions)
