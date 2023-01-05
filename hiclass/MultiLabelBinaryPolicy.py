@@ -258,7 +258,7 @@ class ExclusiveSiblingsPolicy(ExclusivePolicy):
             A mask for which examples are included (True) and which are not.
         """
         siblings = self._get_siblings(node)
-        negative_examples = np.isin(self.y[:,:,-1], list(siblings)).any(axis=1)
+        negative_examples = np.isin(self.y[:, :, -1], list(siblings)).any(axis=1)
         return negative_examples
 
 
@@ -282,7 +282,7 @@ class InclusivePolicy(BinaryPolicy):
             A mask for which examples are included (True) and which are not.
         """
         descendants = self._get_descendants(node, inclusive=True)
-        positive_examples = np.isin(self.y[:,:,-1], list(descendants)).any(axis=1)
+        positive_examples = np.isin(self.y[:, :, -1], list(descendants)).any(axis=1)
         return positive_examples
 
     def negative_examples(self, node) -> np.ndarray:
@@ -305,7 +305,9 @@ class InclusivePolicy(BinaryPolicy):
         ancestors = nx.ancestors(self.digraph, node)
         descendants_and_ancestors = set.union(descendants, ancestors)
         negative_examples = np.logical_not(
-            np.isin(self.y.reshape(self.y.shape[0], -1), list(descendants_and_ancestors)).any(axis=1)
+            np.isin(
+                self.y.reshape(self.y.shape[0], -1), list(descendants_and_ancestors)
+            ).any(axis=1)
         )
         return negative_examples
 
@@ -331,7 +333,9 @@ class LessInclusivePolicy(InclusivePolicy):
         """
         descendants = self._get_descendants(node, inclusive=True)
         negative_examples = np.logical_not(
-            self.positive_examples(node) # see paper: Tr+(c_j) =∗(c_j)∪⇓(c_j) and Tr−(c_j) = Tr \∗(c_j)∪⇓(c_j), e.g. Tr- = Tr \ Tr+
+            self.positive_examples(
+                node
+            )  # see paper: Tr+(c_j) =∗(c_j)∪⇓(c_j) and Tr−(c_j) = Tr \∗(c_j)∪⇓(c_j), e.g. Tr- = Tr \ Tr+
         )
         return negative_examples
 
@@ -360,7 +364,9 @@ class SiblingsPolicy(InclusivePolicy):
         negative_classes = set()
         for sibling in siblings:
             negative_classes.update(self._get_descendants(sibling, inclusive=True))
-        negative_examples = np.isin(self.y[:,:,-1], list(negative_classes)).any(axis=1)
+        negative_examples = np.isin(self.y[:, :, -1], list(negative_classes)).any(
+            axis=1
+        )
         return negative_examples
 
 

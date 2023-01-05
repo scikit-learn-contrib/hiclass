@@ -319,7 +319,7 @@ def test_exclusive_siblings_policy_negative_examples_1(digraph, features_1d, lab
         False,
         # Mutli-label Test cases
         True,
-        False, 
+        False,
         False,
     ]
     result = policy.negative_examples("1.1")
