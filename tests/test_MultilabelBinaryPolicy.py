@@ -129,8 +129,8 @@ def test_binary_policy_negative_examples(digraph, features_1d, labels):
 def test_exclusive_policy_positive_examples_1(digraph, features_1d, labels):
     policy = ExclusivePolicy(digraph, features_1d, labels)
     ground_truth = [
-        True,
-        True,
+        False,
+        False,
         False,
         False,
         False,
@@ -138,8 +138,8 @@ def test_exclusive_policy_positive_examples_1(digraph, features_1d, labels):
         False,
         False,
         # Mutli-label Test cases
-        True,
-        True,
+        False,
+        False,
         False,
     ]
     result = policy.positive_examples("1")
@@ -149,20 +149,20 @@ def test_exclusive_policy_positive_examples_1(digraph, features_1d, labels):
 def test_exclusive_policy_positive_examples_2(digraph, features_1d, labels):
     policy = ExclusivePolicy(digraph, features_1d, labels)
     ground_truth = [
+        True,
         False,
         False,
-        True,
-        True,
+        False,
         False,
         False,
         False,
         False,
         # Mutli-label Test cases
-        False,
+        True,
         True,
         False,
     ]
-    result = policy.positive_examples("2")
+    result = policy.positive_examples("1.1")
     assert_array_equal(ground_truth, result)
 
 
@@ -173,14 +173,14 @@ def test_exclusive_policy_positive_examples_3(digraph, features_1d, labels):
         False,
         True,
         False,
-        True,
-        True,
+        False,
+        False,
         False,
         False,
         # Mutli-label Test cases
         False,
         True,
-        True,
+        False,
     ]
     result = policy.positive_examples("2.1")
     assert_array_equal(ground_truth, result)
@@ -189,8 +189,8 @@ def test_exclusive_policy_positive_examples_3(digraph, features_1d, labels):
 def test_exclusive_policy_negative_examples_1(digraph, features_1d, labels):
     policy = ExclusivePolicy(digraph, features_1d, labels)
     ground_truth = [
-        False,
-        False,
+        True,
+        True,
         True,
         True,
         True,
@@ -198,8 +198,8 @@ def test_exclusive_policy_negative_examples_1(digraph, features_1d, labels):
         True,
         True,
         # Mutli-label Test cases
-        False,
-        False,
+        True,
+        True,
         True,
     ]
     result = policy.negative_examples("1")
@@ -209,20 +209,20 @@ def test_exclusive_policy_negative_examples_1(digraph, features_1d, labels):
 def test_exclusive_policy_negative_examples_2(digraph, features_1d, labels):
     policy = ExclusivePolicy(digraph, features_1d, labels)
     ground_truth = [
+        False,
         True,
         True,
-        False,
-        False,
+        True,
         True,
         True,
         True,
         True,
         # Mutli-label Test cases
-        True,
+        False,
         False,
         True,
     ]
-    result = policy.negative_examples("2")
+    result = policy.negative_examples("1.1")
     assert_array_equal(ground_truth, result)
 
 
@@ -233,14 +233,14 @@ def test_exclusive_policy_negative_examples_3(digraph, features_1d, labels):
         True,
         False,
         True,
-        False,
-        False,
+        True,
+        True,
         True,
         True,
         # Mutli-label Test cases
         True,
         False,
-        False,
+        True,
     ]
     result = policy.negative_examples("2.1")
     assert_array_equal(ground_truth, result)
@@ -310,39 +310,39 @@ def test_exclusive_siblings_policy_negative_examples_1(digraph, features_1d, lab
     policy = ExclusiveSiblingsPolicy(digraph, features_1d, labels)
     ground_truth = [
         False,
+        True,
         False,
-        True,
-        True,
+        False,
         False,
         False,
         False,
         False,
         # Mutli-label Test cases
-        False,
-        True,  # TODO: This case is a positive AND negative training example
+        True,
+        False, 
         False,
     ]
-    result = policy.negative_examples("1")
+    result = policy.negative_examples("1.1")
     assert_array_equal(ground_truth, result)
 
 
 def test_exclusive_siblings_policy_negative_examples_2(digraph, features_1d, labels):
     policy = ExclusiveSiblingsPolicy(digraph, features_1d, labels)
     ground_truth = [
-        True,
-        True,
         False,
         False,
+        False,
+        True,
         False,
         False,
         False,
         False,
         # Mutli-label Test cases
-        True,
-        True,
+        False,
+        False,
         False,
     ]
-    result = policy.negative_examples("2")
+    result = policy.negative_examples("2.1")
     assert_array_equal(ground_truth, result)
 
 
@@ -352,17 +352,17 @@ def test_exclusive_siblings_policy_negative_examples_3(digraph, features_1d, lab
         False,
         False,
         False,
+        False,
         True,
         False,
         False,
-        True,
-        True,
+        False,
         # Mutli-label Test cases
         False,
         False,
         True,
     ]
-    result = policy.negative_examples("2.1")
+    result = policy.negative_examples("2.1.2")
     assert_array_equal(ground_truth, result)
 
 
