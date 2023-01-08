@@ -43,6 +43,8 @@ def make_leveled(y):
     array([['a', ''],
        ['b', 'c']])
     """
+    
+    # TODO: allow for 3 dimension for MultiLabelClassification
     try:
         depth = max([len(row) for row in y])
     except TypeError:
