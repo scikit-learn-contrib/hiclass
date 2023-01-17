@@ -6,16 +6,16 @@
 Welcome to hiclass' documentation!
 ===================================
 
-.. image:: https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push
-    :target: https://github.com/mirand863/hiclass/actions/workflows/deploy-pypi.yml
+.. image:: https://github.com/scikit-learn-contrib/hiclass/actions/workflows/deploy-pypi.yml/badge.svg?event=push
+    :target: https://github.com/scikit-learn-contrib/hiclass/actions/workflows/deploy-pypi.yml
     :alt: Deploy PyPI
 
 .. image:: https://readthedocs.org/projects/hiclass/badge/?version=latest
     :target: https://hiclass.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://codecov.io/gh/mirand863/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR
-    :target: https://codecov.io/gh/mirand863/hiclass
+.. image:: https://codecov.io/gh/scikit-learn-contrib/hiclass/branch/main/graph/badge.svg?token=PR8VLBMMNR
+    :target: https://codecov.io/gh/scikit-learn-contrib/hiclass
     :alt: codecov
 
 .. image:: https://static.pepy.tech/personalized-badge/hiclass?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=pypi

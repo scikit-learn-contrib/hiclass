@@ -9,7 +9,7 @@ The main requirement to run this pipeline is Anaconda 3. Please, install the lat
 With Anaconda installed, you can create a new environment with snakemake by running the following commands:
 
 ```shell
-git clone https://github.com/mirand863/hiclass.git
+git clone https://github.com/scikit-learn-contrib/hiclass.git
 cd hiclass/benchmarks/consumer_complaints
 conda env create --name snakemake --file envs/snakemake.yml
 ```
