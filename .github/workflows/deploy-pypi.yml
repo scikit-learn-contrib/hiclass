@@ -1,9 +1,11 @@
 name: pipeline
 
-on:
-  push:
-    branches:
-      - main
+on: [pull_request]
+
+#on:
+#  push:
+#    branches:
+#      - main
 
 jobs:
 
@@ -26,6 +28,7 @@ jobs:
         python -m pip install flake8==4.0.1
         python -m pip install pytest==7.1.2
         python -m pip install pytest-flake8==1.1.1
+        python -m pip install pydocstyle==6.1.1
         python -m pip install pytest-pydocstyle==2.3.0
         python -m pip install pytest-cov==3.0.0
         python -m pip install ray==1.13.0
