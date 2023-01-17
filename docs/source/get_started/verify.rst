@@ -23,4 +23,4 @@ If everything goes smoothly, it means your installation works. However, you shou
       File "<stdin>", line 1, in <module>
     ModuleNotFoundError: No module named 'hiclass'
 
-If you have any problems with your installation, please open an issue describing it at `https://github.com/mirand863/hiclass/issues <https://github.com/mirand863/hiclass/issues>`_.
+If you have any problems with your installation, please open an issue describing it at `https://github.com/scikit-learn-contrib/hiclass/issues <https://github.com/scikit-learn-contrib/hiclass/issues>`_.
