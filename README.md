@@ -230,18 +230,20 @@ If you'd like to get updates when we release new versions, please click on the "
 
 ## Citation
 
-If you use HiClass in your research, please cite our [preprint on arXiv](https://arxiv.org/abs/2112.06560):
+If you use HiClass in your research, please cite our [paper](https://jmlr.org/papers/v24/21-1518.html):
 
-> Miranda, Fábio M., Niklas Köehnecke, and Bernhard Y. Renard. "HiClass: a Python library for local hierarchical classification compatible with scikit-learn." arXiv preprint arXiv:2112.06560 (2021).
+> Miranda, F.M., Köehnecke, N. and Renard, B.Y. (2023) 'HiClass: a Python Library for Local Hierarchical Classification Compatible with Scikit-learn', Journal of Machine Learning Research, 24(29), pp. 1–17. Available at: https://jmlr.org/papers/v24/21-1518.html.
 
 ```latex
-@article{miranda2021hiclass,
-  title={HiClass: a Python library for local hierarchical classification compatible with scikit-learn},
-  author={Miranda, F{\'a}bio M and K{\"o}ehnecke, Niklas and Renard, Bernhard Y},
-  journal={arXiv preprint arXiv:2112.06560},
-  year={2021},
-  doi={arXiv:2112.06560},
-  url={https://arxiv.org/abs/2112.06560}
+@article{JMLR:v24:21-1518,
+  author  = {F{\'a}bio M. Miranda and Niklas K{\"o}hnecke and Bernhard Y. Renard},
+  title   = {HiClass: a Python Library for Local Hierarchical Classification Compatible with Scikit-learn},
+  journal = {Journal of Machine Learning Research},
+  year    = {2023},
+  volume  = {24},
+  number  = {29},
+  pages   = {1--17},
+  url     = {http://jmlr.org/papers/v24/21-1518.html}
 }
 ```
 
