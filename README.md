@@ -29,10 +29,11 @@ HiClass is an open-source Python library for hierarchical classification compati
 - **Python lists and NumPy arrays:** Handles Python lists and NumPy arrays elegantly, out-of-the-box.
 - **Pandas Series and DataFrames:** If you prefer to use pandas, that is not an issue as HiClass also works with Pandas.
 - **Sparse matrices:** HiClass also supports features (X_train and X_test) built with sparse matrices, both for training and predicting, which can save you heaps of memory.
-- **Parallel training:** Training can be performed in parallel on the hierarchical classifiers, which allows parallelization regardless of the implementations available on scikit-learn.
-- **Build pipelines:** Since the hierarchical classifiers inherit from the BaseEstimator of scikit-learn, pipelines can be built to automate machine learning workflows.
-- **Hierarchical metrics:** HiClass supports the computation of hierarchical precision, recall and f-score, which are more appropriate for hierarchical data than traditional metrics.
-- **Compatible with pickle:** Easily store trained models on disk for future use.
+- **[Parallel training](https://hiclass.readthedocs.io/en/latest/auto_examples/plot_parallel_training.html):** Training can be performed in parallel on the hierarchical classifiers, which allows parallelization regardless of the implementations available on scikit-learn.
+- **[Build pipelines](https://hiclass.readthedocs.io/en/latest/auto_examples/plot_pipeline.html):** Since the hierarchical classifiers inherit from the BaseEstimator of scikit-learn, pipelines can be built to automate machine learning workflows.
+- **[Hierarchical metrics](https://hiclass.readthedocs.io/en/latest/api/utilities.html#hierarchical-metrics):** HiClass supports the computation of hierarchical precision, recall and f-score, which are more appropriate for hierarchical data than traditional metrics.
+- **[Compatible with pickle](https://hiclass.readthedocs.io/en/latest/auto_examples/plot_model_persistence.html):** Easily store trained models on disk for future use.
+- **[BERT sklearn](https://hiclass.readthedocs.io/en/latest/auto_examples/plot_bert.html):** Compatible with the library [BERT sklearn](https://github.com/charles9n/bert-sklearn).
 
 **Any feature missing on this list?** Search our [issue tracker](https://github.com/scikit-learn-contrib/hiclass/issues) to see if someone has already requested it and add a comment to it explaining your use-case. Otherwise, please open a new issue describing the requested feature and possible use-case scenario. We prioritize our roadmap based on user feedback, so we would love to hear from you.
 
