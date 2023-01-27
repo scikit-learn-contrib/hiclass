@@ -331,7 +331,7 @@ class LessInclusivePolicy(InclusivePolicy):
         negative_examples : np.ndarray
             A mask for which examples are included (True) and which are not.
         """
-        descendants = self._get_descendants(node, inclusive=True)
+        # descendants = self._get_descendants(node, inclusive=True)
         negative_examples = np.logical_not(
             self.positive_examples(
                 node

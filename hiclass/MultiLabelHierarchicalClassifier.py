@@ -23,37 +23,41 @@ def make_leveled(y):
 
     Parameters
     ----------
-    y : array-like of shape (n_samples, n_levels)
-        The target values, i.e., hierarchical class labels for classification.
+    y : array-like of shape (n_samples, n_labels, n_levels)
+        The target values, i.e., multi-label hierarchical class labels for classification.
 
     Returns
     -------
-    leveled_y : array-like of shape (n_samples, n_levels)
-        The leveled target values, i.e., hierarchical class labels for classification.
+    leveled_y : array-like of shape (n_samples, n_labels, n_levels)
+        The leveled target values, i.e., multi-label hierarchical class labels for classification.
 
     Notes
     -----
     If rows are not iterable, returns the current y without modifications.
-    Y is returned only to pass sklearn's checks.
 
     Examples
     --------
     >>> from hiclass.HierarchicalClassifier import make_leveled
-    >>> y = [['a'], ['b', 'c']]
+    >>> y = [[['a']], [['b', 'c']]]
     >>> make_leveled(y)
-    array([['a', ''],
-       ['b', 'c']])
+    array([[['a', '']],
+       [['b', 'c']]])
     """
+    rows = len(y)
     try:
-        depth = max([len(row) for row in y])
+        multi_labels = max([len(row) for row in y])
+        levels = max([len(label) for row in y for label in row])
     except TypeError:
-        return y
-    y = np.array(y)
-    leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
+        raise TypeError("Y is not iterable")
+    leveled_y = np.full((rows, multi_labels, levels), "")
+    for i, row in enumerate(y):
+        for j, multi_label in enumerate(row):
+            for k, label in enumerate(multi_label):
+                leveled_y[i, j, k] = y[i][j][k]
     return np.array(leveled_y)
 
 
-class HierarchicalClassifier(abc.ABC):
+class MultiLabelHierarchicalClassifier(abc.ABC):
     """Abstract class for the local hierarchical classifiers.
 
     Offers mostly utility methods and common data initialization.
