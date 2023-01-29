@@ -42,6 +42,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         edge_list: str = None,
         replace_classifiers: bool = True,
         n_jobs: int = 1,
+        bert: bool = False,
     ):
         """
         Initialize a local classifier per node.
@@ -74,6 +75,8 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
             If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
+        bert : bool, default=False
+            If True, skip scikit-learn's checks and sample_weight passing for BERT.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -82,6 +85,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             replace_classifiers=replace_classifiers,
             n_jobs=n_jobs,
             classifier_abbreviation="LCPN",
+            bert=bert,
         )
         self.binary_policy = binary_policy
 
@@ -145,7 +149,10 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         check_is_fitted(self)
 
         # Input validation
-        X = check_array(X, accept_sparse="csr")
+        if not self.bert:
+            X = check_array(X, accept_sparse="csr")
+        else:
+            X = np.array(X)
 
         # Initialize array that holds predictions
         y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
@@ -233,7 +240,10 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
-        classifier.fit(X, y, sample_weight)
+        if not self.bert:
+            classifier.fit(X, y, sample_weight)
+        else:
+            classifier.fit(X, y)
         return classifier
 
     def _clean_up(self):
