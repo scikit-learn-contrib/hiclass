@@ -149,10 +149,28 @@ def test_assert_digraph_is_dag(cyclic_graph):
         cyclic_graph._assert_digraph_is_dag()
 
 
-def test_convert_1d_y_to_2d(graph_1d):
-    ground_truth = np.array([["a"], ["b"], ["c"], ["d"]])
-    graph_1d._convert_1d_y_to_2d()
+def test_convert_1d_y_to_3d(graph_1d):
+    ground_truth = np.array(
+        [
+            [["a"]],
+            [["b"]],
+            [["c"]],
+            [["d"]],
+        ]
+    )
+    graph_1d._convert_1d_or_2d_y_to_3d()
     assert_array_equal(ground_truth, graph_1d.y_)
+
+
+def test_convert_2d_y_to_3d(digraph_2d):
+    ground_truth = np.array(
+        [
+            [["a", "b", "c"]],
+            [["d", "e", "f"]],
+        ]
+    )
+    digraph_2d._convert_1d_or_2d_y_to_3d()
+    assert_array_equal(ground_truth, digraph_2d.y_)
 
 
 @pytest.fixture

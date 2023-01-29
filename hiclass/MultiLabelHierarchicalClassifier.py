@@ -163,8 +163,8 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         # Assert that graph is directed acyclic
         self._assert_digraph_is_dag()
 
-        # If y is 1D, convert to 2D for binary policies
-        self._convert_1d_y_to_2d()
+        # If y is 1D or 2D, convert to 3D for binary policies
+        self._convert_1d_or_2d_y_to_3d()
 
         # Detect root(s) and add artificial root to DAG
         self._add_artificial_root()
@@ -275,10 +275,12 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
             self.logger_.error("Cycle detected in graph")
             raise ValueError("Graph is not directed acyclic")
 
-    def _convert_1d_y_to_2d(self):
+    def _convert_1d_or_2d_y_to_3d(self):
         # This conversion is necessary for the binary policies
         if self.y_.ndim == 1:
-            self.y_ = np.reshape(self.y_, (-1, 1))
+            self.y_ = np.reshape(self.y_, (-1, 1, 1))
+        if self.y_.ndim == 2:
+            self.y_ = np.reshape(self.y_, (self.y_.shape[0], -1, self.y_.shape[1]))
 
     def _add_artificial_root(self):
         # Detect root(s)
