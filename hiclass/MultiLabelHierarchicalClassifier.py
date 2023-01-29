@@ -195,16 +195,17 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
 
     def _disambiguate(self):
         self.separator_ = "::HiClass::Separator::"
-        if self.y_.ndim == 2:
-            new_y = []
-            for i in range(self.y_.shape[0]):
-                row = [str(self.y_[i, 0])]
-                for j in range(1, self.y_.shape[1]):
-                    parent = str(row[-1])
-                    child = str(self.y_[i, j])
-                    row.append(parent + self.separator_ + child)
-                new_y.append(np.asarray(row, dtype=np.str_))
-            self.y_ = np.array(new_y)
+        new_y = []
+        for i in range(self.y_.shape[0]):
+            new_y.append([])
+            for j in range(self.y_.shape[1]):
+                new_y[i].append([str(self.y_[i, j, 0])])
+                for k in range(1, self.y_.shape[2]):
+                    new_cell = ""
+                    if new_y[i][j][k - 1] != "":
+                        new_cell = new_y[i][j][k - 1] + self.separator_ + str(self.y_[i, j, k])
+                    new_y[i][j].append(new_cell)
+        self.y_ = np.array(new_y)
 
     def _create_digraph(self):
         # Create DiGraph

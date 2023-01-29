@@ -13,14 +13,20 @@ from hiclass.MultiLabelHierarchicalClassifier import MultiLabelHierarchicalClass
 @pytest.fixture
 def ambiguous_node_str():
     classifier = MultiLabelHierarchicalClassifier()
-    classifier.y_ = np.array([["a", "b"], ["b", "c"]])
+    classifier.y_ = np.array([
+        [["a", "b"], ["", ""]],
+        [["b", "c"], ["", ""]],
+        [["d", "e"], ["f", "g"]],
+    ])
     return classifier
 
 
 def test_disambiguate_str(ambiguous_node_str):
-    ground_truth = np.array(
-        [["a", "a::HiClass::Separator::b"], ["b", "b::HiClass::Separator::c"]]
-    )
+    ground_truth = np.array([
+        [["a", "a::HiClass::Separator::b"], ["", ""]],
+        [["b", "b::HiClass::Separator::c"], ["", ""]],
+        [["d", "d::HiClass::Separator::e"], ["f", "f::HiClass::Separator::g"]],
+    ])
     ambiguous_node_str._disambiguate()
     assert_array_equal(ground_truth, ambiguous_node_str.y_)
 
@@ -28,14 +34,20 @@ def test_disambiguate_str(ambiguous_node_str):
 @pytest.fixture
 def ambiguous_node_int():
     classifier = MultiLabelHierarchicalClassifier()
-    classifier.y_ = np.array([[1, 2], [2, 3]])
+    classifier.y_ = np.array([
+        [[1, 2], ["", ""]],
+        [[2, 3], ["", ""]],
+        [[4, 5], [6, 7]],
+    ])
     return classifier
 
 
 def test_disambiguate_int(ambiguous_node_int):
-    ground_truth = np.array(
-        [["1", "1::HiClass::Separator::2"], ["2", "2::HiClass::Separator::3"]]
-    )
+    ground_truth = np.array([
+        [["1", "1::HiClass::Separator::2"], ["", ""]],
+        [["2", "2::HiClass::Separator::3"], ["", ""]],
+        [["4", "4::HiClass::Separator::5"], ["6", "6::HiClass::Separator::7"]],
+    ])
     ambiguous_node_int._disambiguate()
     assert_array_equal(ground_truth, ambiguous_node_int.y_)
 
