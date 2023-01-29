@@ -203,7 +203,9 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
                 for k in range(1, self.y_.shape[2]):
                     new_cell = ""
                     if new_y[i][j][k - 1] != "":
-                        new_cell = new_y[i][j][k - 1] + self.separator_ + str(self.y_[i, j, k])
+                        new_cell = (
+                            new_y[i][j][k - 1] + self.separator_ + str(self.y_[i, j, k])
+                        )
                     new_y[i][j].append(new_cell)
         self.y_ = np.array(new_y)
 
