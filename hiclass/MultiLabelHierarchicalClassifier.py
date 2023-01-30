@@ -70,6 +70,7 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         edge_list: str = None,
         replace_classifiers: bool = True,
         n_jobs: int = 1,
+        bert: bool = False,
         classifier_abbreviation: str = "",
     ):
         """
@@ -92,6 +93,8 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
             If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
+        bert : bool, default=False
+            If True, skip scikit-learn's checks and sample_weight passing for BERT.
         classifier_abbreviation : str, default=""
             The abbreviation of the local hierarchical classifier to be displayed during logging.
         """
@@ -100,7 +103,9 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         self.edge_list = edge_list
         self.replace_classifiers = replace_classifiers
         self.n_jobs = n_jobs
+        self.bert = bert
         self.classifier_abbreviation = classifier_abbreviation
+        # TODO: add bert parameter to all multi-label classifiers
 
     def fit(self, X, y, sample_weight=None):
         """
