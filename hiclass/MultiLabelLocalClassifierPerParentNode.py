@@ -190,12 +190,10 @@ class MultiLabelLocalClassifierPerParentNode(
 
     def _get_successors(self, node):
         successors = list(self.hierarchy_.successors(node))
-        mask = np.full(self.y_.shape[0], False)
-        print(successors)
-        # mask = np.isin(self.y_, successors).any(axis=1)
-        # TODO: Fix this search for 3D array
+        mask = np.isin(self.y_, successors).any(axis=(2, 1))
         X = self.X_[mask]
         y = []
+        # TODO: Fix this search for 3D array
         # for row in self.y_[mask]:
         #     if node == self.root_:
         #         y.append(row[0])
