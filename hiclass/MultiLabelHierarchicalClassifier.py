@@ -301,7 +301,7 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
             raise ValueError("Graph is not directed acyclic")
 
     def _convert_1d_or_2d_y_to_3d(self):
-        # This conversion is necessary for the binary policies
+        # This conversion is necessary for the multi-label binary policies
         if self.y_.ndim == 1:
             self.y_ = np.reshape(self.y_, (-1, 1, 1))
         if self.y_.ndim == 2:
@@ -340,6 +340,11 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
             for i in range(y.shape[0]):
                 for j in range(1, y.shape[1]):
                     y[i, j] = y[i, j].split(self.separator_)[-1]
+        elif y.ndim == 3:
+            for i in range(y.shape[0]):
+                for j in range(y.shape[1]):
+                    for k in range(1, y.shape[2]):
+                        y[i, j, k] = y[i, j, k].split(self.separator_)[-1]
 
     def _fit_node_classifier(
         self, nodes, local_mode: bool = False, use_joblib: bool = False
