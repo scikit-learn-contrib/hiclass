@@ -200,11 +200,10 @@ class MultiLabelLocalClassifierPerParentNode(
         #     else:
         #         y.append(row[np.where(row == node)[0][0] + 1])
         # y = np.array(y)
-        # sample_weight = (
-        #     self.sample_weight_[mask] if self.sample_weight_ is not None else None
-        # )
-        # return X, y, sample_weight
-        return X, y, None
+        sample_weight = (
+            self.sample_weight_[mask] if self.sample_weight_ is not None else None
+        )
+        return X, y, sample_weight
 
     @staticmethod
     def _fit_classifier(self, node):
