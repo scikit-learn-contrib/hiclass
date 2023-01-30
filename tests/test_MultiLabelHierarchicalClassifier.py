@@ -101,9 +101,7 @@ def test_create_digraph_1d_disguised_as_2d(graph_1d_disguised_as_2d):
 def digraph_2d():
     classifier = MultiLabelHierarchicalClassifier()
     classifier.y_ = np.array([["a", "b", "c"], ["d", "e", "f"]])
-    classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
     classifier.logger_ = logging.getLogger("HC")
-    classifier.edge_list = tempfile.TemporaryFile()
     classifier.separator_ = "::HiClass::Separator::"
     return classifier
 
@@ -119,17 +117,39 @@ def test_create_digraph_2d(digraph_2d):
 @pytest.fixture
 def digraph_3d():
     classifier = MultiLabelHierarchicalClassifier()
-    classifier.y_ = np.arange(27).reshape((3, 3, 3))
+    classifier.y_ = np.array(
+        [
+            [["a", "b", "c"], ["d", "e", "f"]],
+            [["g", "h", "i"], ["j", "k", "l"]],
+        ]
+    )
     classifier.logger_ = logging.getLogger("HC")
+    classifier.separator_ = "::HiClass::Separator::"
     return classifier
 
 
 def test_create_digraph_3d(digraph_3d):
-    with pytest.raises(ValueError):
-        digraph_3d._create_digraph()
+    ground_truth = nx.DiGraph(
+        [
+            ("a", "b"),
+            ("b", "c"),
+            ("d", "e"),
+            ("e", "f"),
+            ("g", "h"),
+            ("h", "i"),
+            ("j", "k"),
+            ("k", "l"),
+        ]
+    )
+    digraph_3d._create_digraph()
+    assert nx.is_isomorphic(ground_truth, digraph_3d.hierarchy_)
+    assert list(ground_truth.nodes) == list(digraph_3d.hierarchy_.nodes)
+    assert list(ground_truth.edges) == list(digraph_3d.hierarchy_.edges)
 
 
 def test_export_digraph(digraph_2d):
+    digraph_2d.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
+    digraph_2d.edge_list = tempfile.TemporaryFile()
     ground_truth = b'"a","b",{}\n"b","c",{}\n"d","e",{}\n"e","f",{}\n'
     digraph_2d._export_digraph()
     digraph_2d.edge_list.seek(0)

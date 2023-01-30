@@ -220,7 +220,9 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
 
         self._create_digraph_2d()
 
-        if self.y_.ndim > 2:
+        self._create_digraph_3d()
+
+        if self.y_.ndim > 3:
             # Unsuported dimension
             self.logger_.error(f"y with {self.y_.ndim} dimensions detected")
             raise ValueError(
@@ -256,6 +258,29 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
                         )
                     elif parent != "" and column == 0:
                         self.hierarchy_.add_node(parent)
+
+    def _create_digraph_3d(self):
+        if self.y_.ndim == 3:
+            self.max_levels_ = self.y_.shape[2]
+            rows, multi_labels, columns = self.y_.shape
+            self.logger_.info(f"Creating digraph from {rows} 3D labels")
+            for row in range(rows):
+                for multi_label in range(multi_labels):
+                    for column in range(columns - 1):
+                        parent = self.y_[row, multi_label, column].split(
+                            self.separator_
+                        )[-1]
+                        child = self.y_[row, multi_label, column + 1].split(
+                            self.separator_
+                        )[-1]
+                        if parent != "" and child != "":
+                            # Only add edge if both parent and child are not empty
+                            self.hierarchy_.add_edge(
+                                self.y_[row, multi_label, column],
+                                self.y_[row, multi_label, column + 1],
+                            )
+                        elif parent != "" and column == 0:
+                            self.hierarchy_.add_node(parent)
 
     def _export_digraph(self):
         # Check if edge_list is set
