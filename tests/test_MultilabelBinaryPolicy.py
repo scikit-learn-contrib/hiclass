@@ -619,10 +619,9 @@ def test_siblings_get_binary_examples_1d_1(digraph, features_1d, labels):
         6,
         7,
         8,
-        10,
         11,
     ]  # TODO: 10 is both positive and negative example
-    ground_truth_y = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+    ground_truth_y = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
     x, y, weights = policy.get_binary_examples("1")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
@@ -643,9 +642,8 @@ def test_siblings_get_binary_examples_1d_2(digraph, features_1d, labels):
         1,
         2,
         9,
-        10,
     ]
-    ground_truth_y = [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+    ground_truth_y = [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]
     x, y, weights = policy.get_binary_examples("2")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
@@ -654,8 +652,8 @@ def test_siblings_get_binary_examples_1d_2(digraph, features_1d, labels):
 
 def test_siblings_get_binary_examples_1d_3(digraph, features_1d, labels):
     policy = SiblingsPolicy(digraph, features_1d, labels)
-    ground_truth_x = [3, 5, 6, 10, 11, 4, 7, 8, 11]
-    ground_truth_y = [1, 1, 1, 1, 1, 0, 0, 0, 0]
+    ground_truth_x = [3, 5, 6, 10, 11, 4, 7, 8]
+    ground_truth_y = [1, 1, 1, 1, 1, 0, 0, 0]
     x, y, weights = policy.get_binary_examples("2.1")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
@@ -675,10 +673,9 @@ def test_siblings_get_binary_examples_2d_1(digraph, features_2d, labels):
         [11, 12],
         [13, 14],
         [15, 16],
-        [19, 20],
         [21, 22],
     ]
-    ground_truth_y = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+    ground_truth_y = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
     x, y, weights = policy.get_binary_examples("1")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
@@ -699,9 +696,8 @@ def test_siblings_get_binary_examples_2d_2(digraph, features_2d, labels):
         [1, 2],
         [3, 4],
         [17, 18],
-        [19, 20],
     ]
-    ground_truth_y = [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+    ground_truth_y = [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]
     x, y, weights = policy.get_binary_examples("2")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
@@ -719,9 +715,8 @@ def test_siblings_get_binary_examples_2d_3(digraph, features_2d, labels):
         [7, 8],
         [13, 14],
         [15, 16],
-        [21, 22],
     ]
-    ground_truth_y = [1, 1, 1, 1, 1, 0, 0, 0, 0]
+    ground_truth_y = [1, 1, 1, 1, 1, 0, 0, 0]
     x, y, weights = policy.get_binary_examples("2.1")
     assert_array_equal(ground_truth_x, x)
     assert_array_equal(ground_truth_y, y)
@@ -741,10 +736,9 @@ def test_siblings_get_binary_examples_sparse_1(digraph, features_sparse, labels)
         [11, 12],
         [13, 14],
         [15, 16],
-        [19, 20],
         [21, 22],
     ]
-    ground_truth_y = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+    ground_truth_y = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
     x, y, weights = policy.get_binary_examples("1")
     assert_array_equal(ground_truth_x, x.todense())
     assert_array_equal(ground_truth_y, y)
@@ -765,9 +759,8 @@ def test_siblings_get_binary_examples_sparse_2(digraph, features_sparse, labels)
         [1, 2],
         [3, 4],
         [17, 18],
-        [19, 20],
     ]
-    ground_truth_y = [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+    ground_truth_y = [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]
     x, y, weights = policy.get_binary_examples("2")
     assert_array_equal(ground_truth_x, x.todense())
     assert_array_equal(ground_truth_y, y)
@@ -785,9 +778,8 @@ def test_siblings_get_binary_examples_sparse_3(digraph, features_sparse, labels)
         [7, 8],
         [13, 14],
         [15, 16],
-        [21, 22],
     ]
-    ground_truth_y = [1, 1, 1, 1, 1, 0, 0, 0, 0]
+    ground_truth_y = [1, 1, 1, 1, 1, 0, 0, 0]
     x, y, weights = policy.get_binary_examples("2.1")
     assert_array_equal(ground_truth_x, x.todense())
     assert_array_equal(ground_truth_y, y)

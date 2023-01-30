@@ -133,7 +133,9 @@ class BinaryPolicy(ABC):
             The subset with positive and negative labels.
         """
         positive_examples = self.positive_examples(node)
-        negative_examples = self.negative_examples(node)
+        negative_examples = np.logical_and(
+            np.logical_not(positive_examples), self.negative_examples(node)
+        )
         positive_x = self.X[positive_examples]
         negative_x = self.X[negative_examples]
         positive_weights = (

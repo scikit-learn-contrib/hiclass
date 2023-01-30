@@ -356,9 +356,9 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
                     local_mode=local_mode,
                     ignore_reinit_error=True,
                 )
-                lcppn = ray.put(self)
+                classifier = ray.put(self)
                 _parallel_fit = ray.remote(self._fit_classifier)
-                results = [_parallel_fit.remote(lcppn, node) for node in nodes]
+                results = [_parallel_fit.remote(classifier, node) for node in nodes]
                 classifiers = ray.get(results)
             else:
                 classifiers = Parallel(n_jobs=self.n_jobs)(
