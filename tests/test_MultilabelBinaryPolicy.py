@@ -620,7 +620,7 @@ def test_siblings_get_binary_examples_1d_1(digraph, features_1d, labels):
         7,
         8,
         11,
-    ]  # TODO: 10 is both positive and negative example
+    ]
     ground_truth_y = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
     x, y, weights = policy.get_binary_examples("1")
     assert_array_equal(ground_truth_x, x)

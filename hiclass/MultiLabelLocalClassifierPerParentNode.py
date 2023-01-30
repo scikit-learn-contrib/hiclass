@@ -194,12 +194,9 @@ class MultiLabelLocalClassifierPerParentNode(
         X = self.X_[mask]
         y = []
         # TODO: Fix this search for 3D array
-        # for row in self.y_[mask]:
-        #     if node == self.root_:
-        #         y.append(row[0])
-        #     else:
-        #         y.append(row[np.where(row == node)[0][0] + 1])
-        # y = np.array(y)
+        for row in self.y_[mask]:
+            y.append(np.array(row[np.isin(row, successors)]))
+        y = np.array(y)
         sample_weight = (
             self.sample_weight_[mask] if self.sample_weight_ is not None else None
         )
