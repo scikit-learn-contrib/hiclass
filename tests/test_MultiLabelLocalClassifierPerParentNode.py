@@ -151,32 +151,28 @@ def x_and_y_arrays():
 
 def test_get_successors_1(x_and_y_arrays):
     x, y, weights = x_and_y_arrays._get_successors("a")
-    ground_truth_x = x_and_y_arrays.X_[[True, True, False, True, True]]
-    ground_truth_y = np.array(
-        [np.array(["b"]), np.array(["e"]), np.array(["b", "e"]), np.array(["b"])]
+    ground_truth_x = np.array(
+        [[1, 2, 3], [4, 5, 6], [10, 11, 12], [10, 11, 12], [13, 14, 15]]
     )
+    ground_truth_y = np.array(["b", "e", "b", "e", "b"])
     assert_array_equal(ground_truth_x, x)
-    assert ground_truth_y.shape == y.shape
-    for gt_y, y in zip(ground_truth_y, y):
-        assert_array_equal(gt_y, y)
+    assert_array_equal(ground_truth_y, y)
     assert weights is None
 
 
 def test_get_successors_2(x_and_y_arrays):
     x, y, weights = x_and_y_arrays._get_successors("d")
     ground_truth_x = x_and_y_arrays.X_[[False, False, True, False, True]]
-    ground_truth_y = np.array([["g"], ["g"]])
+    ground_truth_y = np.array(["g", "g"])
     assert_array_equal(ground_truth_x, x)
-    assert ground_truth_y.shape == y.shape
-    for gt_y, y in zip(ground_truth_y, y):
-        assert_array_equal(gt_y, y)
+    assert_array_equal(ground_truth_y, y)
     assert weights is None
 
 
 def test_get_successors_3(x_and_y_arrays):
     x, y, weights = x_and_y_arrays._get_successors("b")
     ground_truth_x = x_and_y_arrays.X_[[True, False, False, True, True]]
-    ground_truth_y = np.array([["c"], ["c"], ["c"]])
+    ground_truth_y = np.array(["c", "c", "c"])
     assert_array_equal(ground_truth_x, x)
     assert ground_truth_y.shape == y.shape
     assert_array_equal(ground_truth_y, y)

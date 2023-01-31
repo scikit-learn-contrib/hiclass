@@ -7,6 +7,7 @@ from copy import deepcopy
 
 import networkx as nx
 import numpy as np
+from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
@@ -191,15 +192,22 @@ class MultiLabelLocalClassifierPerParentNode(
     def _get_successors(self, node):
         successors = list(self.hierarchy_.successors(node))
         mask = np.isin(self.y_, successors).any(axis=(2, 1))
-        X = self.X_[mask]
-        y = []
-        # TODO: Fix this search for 3D array
-        for row in self.y_[mask]:
-            y.append(np.array(row[np.isin(row, successors)]))
+        X, y = [], []
+        sample_weight = [] if self.sample_weight_ is not None else None
+        for i in range(self.y_.shape[0]):
+            if mask[i]:
+                row = self.y_[i]
+                labels = row[np.isin(row, successors)]
+                y.extend(labels)
+                for _ in range(labels.shape[0]):
+                    X.append(self.X_[i])
+                    if self.sample_weight_ is not None:
+                        sample_weight.append(self.sample_weight_[i])
         y = np.array(y)
-        sample_weight = (
-            self.sample_weight_[mask] if self.sample_weight_ is not None else None
-        )
+        if isinstance(self.X_, np.ndarray):
+            X = np.array(X)
+        elif isinstance(self.X_, csr_matrix):
+            X = csr_matrix(X)
         return X, y, sample_weight
 
     @staticmethod
