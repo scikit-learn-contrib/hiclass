@@ -5,6 +5,7 @@ import logging
 import networkx as nx
 import numpy as np
 from joblib import Parallel, delayed
+from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import _check_sample_weight
@@ -140,9 +141,16 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 
-        self.X_, self.y_ = self._validate_data(
-            X, y, multi_output=True, accept_sparse="csr"
-        )
+        if isinstance(X, csr_matrix):
+            self.X_ = X
+        else:
+            self.X_ = np.array(X)
+        self.y_ = np.array(y)
+        # TODO: add own check or update sklearn's check for 3D y
+        # if not self.bert:
+        #     self.X_, self.y_ = self._validate_data(
+        #         X, y, multi_output=True, accept_sparse="csr"
+        #     )
 
         if sample_weight is not None:
             self.sample_weight_ = _check_sample_weight(sample_weight, X)
