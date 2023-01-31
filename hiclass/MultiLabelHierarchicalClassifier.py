@@ -106,7 +106,6 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         self.n_jobs = n_jobs
         self.bert = bert
         self.classifier_abbreviation = classifier_abbreviation
-        # TODO: add bert parameter to all multi-label classifiers
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -141,13 +140,6 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 
-        # if isinstance(X, csr_matrix):
-        #     self.X_ = X
-        # else:
-        #     self.X_ = np.array(X)
-        # self.y_ = np.array(y)
-        # assert self.X_.shape[0] == self.y_.shape[0]
-        # TODO: add own check or update sklearn's check for 3D y
         if not self.bert:
             self.X_, self.y_ = self._validate_data(
                 X, y, multi_output=True, accept_sparse="csr", allow_nd=True
