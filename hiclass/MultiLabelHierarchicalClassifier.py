@@ -49,7 +49,7 @@ def make_leveled(y):
         multi_labels = max([len(row) for row in y])
         levels = max([len(label) for row in y for label in row])
     except TypeError:
-        raise TypeError("Y is not iterable")
+        return y
     leveled_y = np.full((rows, multi_labels, levels), "")
     for i, row in enumerate(y):
         for j, multi_label in enumerate(row):
@@ -141,16 +141,23 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 
-        if isinstance(X, csr_matrix):
-            self.X_ = X
-        else:
-            self.X_ = np.array(X)
-        self.y_ = np.array(y)
+        # if isinstance(X, csr_matrix):
+        #     self.X_ = X
+        # else:
+        #     self.X_ = np.array(X)
+        # self.y_ = np.array(y)
+        # assert self.X_.shape[0] == self.y_.shape[0]
         # TODO: add own check or update sklearn's check for 3D y
-        # if not self.bert:
-        #     self.X_, self.y_ = self._validate_data(
-        #         X, y, multi_output=True, accept_sparse="csr"
-        #     )
+        if not self.bert:
+            self.X_, self.y_ = self._validate_data(
+                X, y, multi_output=True, accept_sparse="csr", allow_nd=True
+            )
+        else:
+            if isinstance(X, csr_matrix):
+                self.X_ = X
+            else:
+                self.X_ = np.array(X)
+            self.y_ = np.array(y)
 
         if sample_weight is not None:
             self.sample_weight_ = _check_sample_weight(sample_weight, X)
@@ -208,19 +215,22 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
 
     def _disambiguate(self):
         self.separator_ = "::HiClass::Separator::"
-        new_y = []
-        for i in range(self.y_.shape[0]):
-            new_y.append([])
-            for j in range(self.y_.shape[1]):
-                new_y[i].append([str(self.y_[i, j, 0])])
-                for k in range(1, self.y_.shape[2]):
-                    new_cell = ""
-                    if new_y[i][j][k - 1] != "":
-                        new_cell = (
-                            new_y[i][j][k - 1] + self.separator_ + str(self.y_[i, j, k])
-                        )
-                    new_y[i][j].append(new_cell)
-        self.y_ = np.array(new_y)
+        if self.y_.ndim == 3:
+            new_y = []
+            for i in range(self.y_.shape[0]):
+                new_y.append([])
+                for j in range(self.y_.shape[1]):
+                    new_y[i].append([str(self.y_[i, j, 0])])
+                    for k in range(1, self.y_.shape[2]):
+                        new_cell = ""
+                        if new_y[i][j][k - 1] != "":
+                            new_cell = (
+                                new_y[i][j][k - 1]
+                                + self.separator_
+                                + str(self.y_[i, j, k])
+                            )
+                        new_y[i][j].append(new_cell)
+            self.y_ = np.array(new_y)
 
     def _create_digraph(self):
         # Create DiGraph

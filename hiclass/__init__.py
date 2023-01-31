@@ -2,6 +2,7 @@
 from .LocalClassifierPerLevel import LocalClassifierPerLevel
 from .LocalClassifierPerNode import LocalClassifierPerNode
 from .LocalClassifierPerParentNode import LocalClassifierPerParentNode
+from .MultiLabelLocalClassifierPerNode import MultiLabelLocalClassifierPerNode
 from .MultiLabelLocalClassifierPerParentNode import (
     MultiLabelLocalClassifierPerParentNode,
 )
@@ -13,5 +14,7 @@ del get_versions
 __all__ = [
     "LocalClassifierPerNode",
     "LocalClassifierPerParentNode",
-    "MultiLabelLocalClassifierPerParentNode" "LocalClassifierPerLevel",
+    "LocalClassifierPerLevel",
+    "MultiLabelLocalClassifierPerParentNode",
+    "MultiLabelLocalClassifierPerNode",
 ]

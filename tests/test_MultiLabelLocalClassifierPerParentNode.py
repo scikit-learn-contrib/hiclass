@@ -16,9 +16,9 @@ from hiclass.ConstantClassifier import ConstantClassifier
 
 
 # TODO: Make it compatible with sklearn's tests
-# @parametrize_with_checks([MultiLabelLocalClassifierPerParentNode()])
-# def test_sklearn_compatible_estimator(estimator, check):
-#     check(estimator)
+@parametrize_with_checks([MultiLabelLocalClassifierPerParentNode()])
+def test_sklearn_compatible_estimator(estimator, check):
+    check(estimator)
 
 
 @pytest.fixture
