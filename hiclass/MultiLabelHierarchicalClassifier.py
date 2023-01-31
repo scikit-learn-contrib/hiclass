@@ -145,10 +145,7 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
                 X, y, multi_output=True, accept_sparse="csr", allow_nd=True
             )
         else:
-            if isinstance(X, csr_matrix):
-                self.X_ = X
-            else:
-                self.X_ = np.array(X)
+            self.X_ = np.array(X)
             self.y_ = np.array(y)
 
         if sample_weight is not None:

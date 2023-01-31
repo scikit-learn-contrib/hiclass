@@ -114,6 +114,7 @@ class MultiLabelLocalClassifierPerParentNode(
         # Return the classifier
         return self
 
+    # TODO: Fix predict for multi-label classification
     def predict(self, X):
         """
         Predict classes for the given data.

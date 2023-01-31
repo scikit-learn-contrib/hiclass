@@ -104,7 +104,7 @@ def test_fit_1_class():
 @pytest.fixture
 def digraph_2d():
     classifier = MultiLabelLocalClassifierPerParentNode()
-    classifier.y_ = np.array([["a", "b", "c"], ["d", "e", "f"]])
+    classifier.y_ = np.array([[["a", "b", "c"]], [["d", "e", "f"]]])
     classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
     classifier.logger_ = logging.getLogger("HC")
     classifier.edge_list = tempfile.TemporaryFile()
@@ -187,7 +187,7 @@ def fitted_logistic_regression():
     digraph.hierarchy_ = nx.DiGraph(
         [("r", "1"), ("r", "2"), ("1", "1.1"), ("1", "1.2"), ("2", "2.1"), ("2", "2.2")]
     )
-    digraph.y_ = np.array([["1", "1.1"], ["1", "1.2"], ["2", "2.1"], ["2", "2.2"]])
+    digraph.y_ = np.array([[["1", "1.1"], ["1", "1.2"], ["2", "2.1"], ["2", "2.2"]]])
     digraph.X_ = np.array([[1, 2], [3, 4], [5, 6], [7, 8]])
     digraph.logger_ = logging.getLogger("LCPPN")
     digraph.max_levels_ = 2
@@ -277,7 +277,10 @@ def test_bert():
         bert=True,
     )
     X = ["Text 1", "Text 2"]
-    y = ["a", "a"]
+    y = [
+        [["a", "b"], ["a", "c"]],
+        [["d", "e"], ["d", "f"]],
+    ]
     lcpn.fit(X, y)
     check_is_fitted(lcpn)
     # TODO: Fix this test after predict is implemented

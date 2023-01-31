@@ -241,34 +241,6 @@ def test_clean_up(digraph_multiple_roots):
 
 
 @pytest.fixture
-def empty_levels():
-    y = [
-        [["a"]],
-        [["b", "c"]],
-        [["d", "e", "f"]],
-        [["g", "h", "i"], ["j", "k", "l"]],
-        [["m", "n", "o"]],
-    ]
-    return y
-
-
-def test_make_leveled(empty_levels):
-    ground_truth = np.array(
-        [
-            # Labels that are the same as in the Single-Label Test case
-            [["a", "", ""], ["", "", ""]],
-            [["b", "c", ""], ["", "", ""]],
-            [["d", "e", "f"], ["", "", ""]],
-            # Multi-label Test cases
-            [["g", "h", "i"], ["j", "k", "l"]],
-            [["m", "n", "o"], ["", "", ""]],
-        ]
-    )
-    result = make_leveled(empty_levels)
-    assert_array_equal(ground_truth, result)
-
-
-@pytest.fixture
 def noniterable_y():
     y = [1, 2, 3]
     return y

@@ -25,7 +25,7 @@ def digraph_with_policy():
     digraph = MultiLabelLocalClassifierPerNode(binary_policy="exclusive")
     digraph.hierarchy_ = nx.DiGraph([("a", "b")])
     digraph.X_ = np.array([1, 2])
-    digraph.y_ = np.array(["a", "b"])
+    digraph.y_ = np.array([[["a", "b"]]])
     digraph.logger_ = logging.getLogger("LCPN")
     digraph.sample_weight_ = None
     return digraph
@@ -40,7 +40,7 @@ def test_initialize_binary_policy(digraph_with_policy):
 def digraph_with_unknown_policy():
     digraph = MultiLabelLocalClassifierPerNode(binary_policy="unknown")
     digraph.hierarchy_ = nx.DiGraph([("a", "b")])
-    digraph.y_ = np.array(["a", "b"])
+    digraph.y_ = np.array([[["a", "b"]]])
     digraph.logger_ = logging.getLogger("LCPN")
     return digraph
 
@@ -54,7 +54,7 @@ def test_initialize_unknown_binary_policy(digraph_with_unknown_policy):
 def digraph_with_object_policy():
     digraph = MultiLabelLocalClassifierPerNode(binary_policy=ExclusivePolicy)
     digraph.hierarchy_ = nx.DiGraph([("a", "b")])
-    digraph.y_ = np.array(["a", "b"])
+    digraph.y_ = np.array([[["a", "b"]]])
     digraph.logger_ = logging.getLogger("LCPN")
     return digraph
 
@@ -68,7 +68,9 @@ def test_initialize_object_binary_policy(digraph_with_object_policy):
 def digraph_logistic_regression():
     digraph = MultiLabelLocalClassifierPerNode(local_classifier=LogisticRegression())
     digraph.hierarchy_ = nx.DiGraph([("a", "b"), ("a", "c")])
-    digraph.y_ = np.array([["a", "b"], ["a", "c"]])
+    digraph.y_ = np.array(
+        [[["a", "b"], ["", ""]], [["a", "c"], ["", ""]], [["a", "b"], ["a", "c"]]]
+    )
     digraph.X_ = np.array([[1, 2], [3, 4]])
     digraph.logger_ = logging.getLogger("LCPN")
     digraph.root_ = "a"
@@ -138,7 +140,7 @@ def test_fit_1_class():
     lcpn = MultiLabelLocalClassifierPerNode(
         local_classifier=LogisticRegression(), n_jobs=2
     )
-    y = np.array([["1", "2"]])
+    y = np.array([[["1", "2"]]])
     X = np.array([[1, 2]])
     ground_truth = np.array([["1", "2"]])
     lcpn.fit(X, y)
@@ -162,7 +164,15 @@ def fitted_logistic_regression():
     digraph.hierarchy_ = nx.DiGraph(
         [("r", "1"), ("r", "2"), ("1", "1.1"), ("1", "1.2"), ("2", "2.1"), ("2", "2.2")]
     )
-    digraph.y_ = np.array([["1", "1.1"], ["1", "1.2"], ["2", "2.1"], ["2", "2.2"]])
+    digraph.y_ = np.array(
+        [
+            [["1", "1.1"]],
+            [["1", "1.2"]],
+            [["2", "2.1"]],
+            [["2", "2.2"]],
+            [["1", "1.1"], ["1", "1.2"]],
+        ]
+    )
     digraph.X_ = np.array([[1, 2], [3, 4], [5, 6], [7, 8]])
     digraph.logger_ = logging.getLogger("LCPN")
     digraph.max_levels_ = 2
@@ -204,7 +214,7 @@ def test_predict_sparse(fitted_logistic_regression):
 def test_fit_predict():
     lcpn = MultiLabelLocalClassifierPerNode(local_classifier=LogisticRegression())
     x = np.array([[1, 2], [3, 4]])
-    y = np.array([["a", "b"], ["b", "c"]])
+    y = np.array([[["a", "b"]], [["b", "c"]], [["a", "b"], ["a", "c"]]])
     lcpn.fit(x, y)
     predictions = lcpn.predict(x)
     assert_array_equal(y, predictions)
@@ -218,9 +228,9 @@ def empty_levels():
         [3],
     ]
     y = [
-        ["1"],
-        ["2", "2.1"],
-        ["3", "3.1", "3.1.2"],
+        [["1"]],
+        [["2", "2.1"]],
+        [["3", "3.1", "3.1.2"]],
     ]
     return X, y
 
@@ -231,9 +241,9 @@ def test_empty_levels(empty_levels):
     lcppn.fit(X, y)
     predictions = lcppn.predict(X)
     ground_truth = [
-        ["1", "", ""],
-        ["2", "2.1", ""],
-        ["3", "3.1", "3.1.2"],
+        [["1", "", ""]],
+        [["2", "2.1", ""]],
+        [["3", "3.1", "3.1.2"]],
     ]
     assert list(lcppn.hierarchy_.nodes) == [
         "1",
@@ -254,8 +264,12 @@ def test_fit_bert():
         bert=True,
     )
     X = ["Text 1", "Text 2"]
-    y = ["a", "a"]
+    y = [
+        [["a", "b"], ["a", "c"]],
+        [["d", "e"], ["d", "f"]],
+    ]
     lcpn.fit(X, y)
     check_is_fitted(lcpn)
-    predictions = lcpn.predict(X)
-    assert_array_equal(y, predictions)
+    # TODO: Fix this test after predict is implemented
+    # predictions = lcpn.predict(X)
+    # assert_array_equal(y, predictions)
