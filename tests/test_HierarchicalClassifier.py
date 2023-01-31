@@ -432,12 +432,11 @@ def test_remove_separator_3d(separator_3d):
 def separator_3d_multi_label():
     hc = HierarchicalClassifier()
     hc.separator_ = "::HiClass::Separator::"
-    # TODO: Fix this test case, which is being recognized as a 2D array instead of a 3D array
     y = np.array(
         [
-            [["a", "a::HiClass::Separator::b"], ["a::HiClass::Separator::c"]],
-            [["d", "d::HiClass::Separator::e"], ["d::HiClass::Separator::f"]],
-            [["g", "g::HiClass::Separator::h"], ["g::HiClass::Separator::i"]],
+            [["a", "a::HiClass::Separator::b"], ["a", "a::HiClass::Separator::c"]],
+            [["d", "d::HiClass::Separator::e"], ["d", "d::HiClass::Separator::f"]],
+            [["g", "g::HiClass::Separator::h"], ["g", "g::HiClass::Separator::i"]],
         ]
     )
     return hc, y
