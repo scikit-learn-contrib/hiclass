@@ -142,22 +142,37 @@ def test_binary_policy_negative_examples(digraph, features_1d, labels_2d):
         policy.negative_examples("1")
 
 
-def test_exclusive_policy_positive_examples_2d_1(digraph, features_1d, labels_2d):
-    policy = ExclusivePolicy(digraph, features_1d[:8], labels_2d)
+@pytest.mark.parametrize(
+    "policy", [ExclusivePolicy, LessExclusivePolicy, ExclusiveSiblingsPolicy]
+)
+def test_exclusive_policy_positive_examples_2d_1(
+    policy, digraph, features_1d, labels_2d
+):
+    policy = policy(digraph, features_1d[:8], labels_2d)
     ground_truth = [True, True, False, False, False, False, False, False]
     result = policy.positive_examples("1")
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_policy_positive_examples_2d_2(digraph, features_1d, labels_2d):
-    policy = ExclusivePolicy(digraph, features_1d[:8], labels_2d)
+@pytest.mark.parametrize(
+    "policy", [ExclusivePolicy, LessExclusivePolicy, ExclusiveSiblingsPolicy]
+)
+def test_exclusive_policy_positive_examples_2d_2(
+    policy, digraph, features_1d, labels_2d
+):
+    policy = policy(digraph, features_1d[:8], labels_2d)
     ground_truth = [False, False, True, True, False, False, False, False]
     result = policy.positive_examples("2")
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_policy_positive_examples_2d_3(digraph, features_1d, labels_2d):
-    policy = ExclusivePolicy(digraph, features_1d[:8], labels_2d)
+@pytest.mark.parametrize(
+    "policy", [ExclusivePolicy, LessExclusivePolicy, ExclusiveSiblingsPolicy]
+)
+def test_exclusive_policy_positive_examples_2d_3(
+    policy, digraph, features_1d, labels_2d
+):
+    policy = policy(digraph, features_1d[:8], labels_2d)
     ground_truth = [False, False, True, False, True, True, False, False]
     result = policy.positive_examples("2.1")
     assert_array_equal(ground_truth, result)
@@ -184,8 +199,13 @@ def test_exclusive_policy_negative_examples_2d_3(digraph, features_1d, labels_2d
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_policy_positive_examples_3d_1(digraph, features_1d, labels_3d):
-    policy = ExclusivePolicy(digraph, features_1d, labels_3d)
+@pytest.mark.parametrize(
+    "policy", [ExclusivePolicy, LessExclusivePolicy, ExclusiveSiblingsPolicy]
+)
+def test_exclusive_policy_positive_examples_3d_1(
+    policy, digraph, features_1d, labels_3d
+):
+    policy = policy(digraph, features_1d, labels_3d)
     ground_truth = [
         True,
         True,
@@ -203,8 +223,13 @@ def test_exclusive_policy_positive_examples_3d_1(digraph, features_1d, labels_3d
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_policy_positive_examples_3d_2(digraph, features_1d, labels_3d):
-    policy = ExclusivePolicy(digraph, features_1d, labels_3d)
+@pytest.mark.parametrize(
+    "policy", [ExclusivePolicy, LessExclusivePolicy, ExclusiveSiblingsPolicy]
+)
+def test_exclusive_policy_positive_examples_3d_2(
+    policy, digraph, features_1d, labels_3d
+):
+    policy = policy(digraph, features_1d, labels_3d)
     ground_truth = [
         True,
         False,
@@ -222,8 +247,13 @@ def test_exclusive_policy_positive_examples_3d_2(digraph, features_1d, labels_3d
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_policy_positive_examples_3d_3(digraph, features_1d, labels_3d):
-    policy = ExclusivePolicy(digraph, features_1d, labels_3d)
+@pytest.mark.parametrize(
+    "policy", [ExclusivePolicy, LessExclusivePolicy, ExclusiveSiblingsPolicy]
+)
+def test_exclusive_policy_positive_examples_3d_3(
+    policy, digraph, features_1d, labels_3d
+):
+    policy = policy(digraph, features_1d, labels_3d)
     ground_truth = [
         False,
         False,
@@ -298,29 +328,41 @@ def test_exclusive_policy_negative_examples_3d_3(digraph, features_1d, labels_3d
     assert_array_equal(ground_truth, result)
 
 
-def test_less_exclusive_policy_negative_examples_2d_1(digraph, features_1d, labels_2d):
-    policy = LessExclusivePolicy(digraph, features_1d[:8], labels_2d)
+@pytest.mark.parametrize("policy", [LessExclusivePolicy, LessInclusivePolicy])
+def test_less_exclusive_policy_negative_examples_2d_1(
+    policy, digraph, features_1d, labels_2d
+):
+    policy = policy(digraph, features_1d[:8], labels_2d)
     ground_truth = [False, False, True, True, True, True, True, True]
     result = policy.negative_examples("1")
     assert_array_equal(ground_truth, result)
 
 
-def test_less_exclusive_policy_negative_examples_2d_2(digraph, features_1d, labels_2d):
-    policy = LessExclusivePolicy(digraph, features_1d[:8], labels_2d)
+@pytest.mark.parametrize("policy", [LessExclusivePolicy, LessInclusivePolicy])
+def test_less_exclusive_policy_negative_examples_2d_2(
+    policy, digraph, features_1d, labels_2d
+):
+    policy = policy(digraph, features_1d[:8], labels_2d)
     ground_truth = [True, True, False, False, False, False, False, False]
     result = policy.negative_examples("2")
     assert_array_equal(ground_truth, result)
 
 
-def test_less_exclusive_policy_negative_examples_2d_3(digraph, features_1d, labels_2d):
-    policy = LessExclusivePolicy(digraph, features_1d[:8], labels_2d)
+@pytest.mark.parametrize("policy", [LessExclusivePolicy, LessInclusivePolicy])
+def test_less_exclusive_policy_negative_examples_2d_3(
+    policy, digraph, features_1d, labels_2d
+):
+    policy = policy(digraph, features_1d[:8], labels_2d)
     ground_truth = [True, True, False, True, False, False, True, True]
     result = policy.negative_examples("2.1")
     assert_array_equal(ground_truth, result)
 
 
-def test_less_exclusive_policy_negative_examples_3d_1(digraph, features_1d, labels_3d):
-    policy = LessExclusivePolicy(digraph, features_1d, labels_3d)
+@pytest.mark.parametrize("policy", [LessExclusivePolicy, LessInclusivePolicy])
+def test_less_exclusive_policy_negative_examples_3d_1(
+    policy, digraph, features_1d, labels_3d
+):
+    policy = policy(digraph, features_1d, labels_3d)
     ground_truth = [
         False,
         False,
@@ -338,8 +380,11 @@ def test_less_exclusive_policy_negative_examples_3d_1(digraph, features_1d, labe
     assert_array_equal(ground_truth, result)
 
 
-def test_less_exclusive_policy_negative_examples_3d_2(digraph, features_1d, labels_3d):
-    policy = LessExclusivePolicy(digraph, features_1d, labels_3d)
+@pytest.mark.parametrize("policy", [LessExclusivePolicy, LessInclusivePolicy])
+def test_less_exclusive_policy_negative_examples_3d_2(
+    policy, digraph, features_1d, labels_3d
+):
+    policy = policy(digraph, features_1d, labels_3d)
     ground_truth = [
         True,
         True,
@@ -357,8 +402,11 @@ def test_less_exclusive_policy_negative_examples_3d_2(digraph, features_1d, labe
     assert_array_equal(ground_truth, result)
 
 
-def test_less_exclusive_policy_negative_examples_3d_3(digraph, features_1d, labels_3d):
-    policy = LessExclusivePolicy(digraph, features_1d, labels_3d)
+@pytest.mark.parametrize("policy", [LessExclusivePolicy, LessInclusivePolicy])
+def test_less_exclusive_policy_negative_examples_3d_3(
+    policy, digraph, features_1d, labels_3d
+):
+    policy = policy(digraph, features_1d, labels_3d)
     ground_truth = [
         True,
         True,
@@ -466,22 +514,37 @@ def test_exclusive_siblings_policy_negative_examples_3d_3(
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_positive_examples_2d_1(digraph, features_1d, labels_2d):
-    policy = InclusivePolicy(digraph, features_1d[:8], labels_2d)
+@pytest.mark.parametrize(
+    "policy", [InclusivePolicy, LessInclusivePolicy, SiblingsPolicy]
+)
+def test_inclusive_policy_positive_examples_2d_1(
+    policy, digraph, features_1d, labels_2d
+):
+    policy = policy(digraph, features_1d[:8], labels_2d)
     ground_truth = [True, True, False, False, False, False, False, False]
     result = policy.positive_examples("1")
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_positive_examples_2d_2(digraph, features_1d, labels_2d):
-    policy = InclusivePolicy(digraph, features_1d[:8], labels_2d)
+@pytest.mark.parametrize(
+    "policy", [InclusivePolicy, LessInclusivePolicy, SiblingsPolicy]
+)
+def test_inclusive_policy_positive_examples_2d_2(
+    policy, digraph, features_1d, labels_2d
+):
+    policy = policy(digraph, features_1d[:8], labels_2d)
     ground_truth = [False, False, True, True, True, True, True, True]
     result = policy.positive_examples("2")
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_positive_examples_2d_3(digraph, features_1d, labels_2d):
-    policy = InclusivePolicy(digraph, features_1d[:8], labels_2d)
+@pytest.mark.parametrize(
+    "policy", [InclusivePolicy, LessInclusivePolicy, SiblingsPolicy]
+)
+def test_inclusive_policy_positive_examples_2d_3(
+    policy, digraph, features_1d, labels_2d
+):
+    policy = policy(digraph, features_1d[:8], labels_2d)
     ground_truth = [False, False, True, False, True, True, False, False]
     result = policy.positive_examples("2.1")
     assert_array_equal(ground_truth, result)
@@ -508,8 +571,13 @@ def test_inclusive_policy_negative_examples_2d_3(digraph, features_1d, labels_2d
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_positive_examples_3d_1(digraph, features_1d, labels_3d):
-    policy = InclusivePolicy(digraph, features_1d, labels_3d)
+@pytest.mark.parametrize(
+    "policy", [InclusivePolicy, LessInclusivePolicy, SiblingsPolicy]
+)
+def test_inclusive_policy_positive_examples_3d_1(
+    policy, digraph, features_1d, labels_3d
+):
+    policy = policy(digraph, features_1d, labels_3d)
     ground_truth = [
         True,
         True,
@@ -527,8 +595,13 @@ def test_inclusive_policy_positive_examples_3d_1(digraph, features_1d, labels_3d
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_positive_examples_3d_2(digraph, features_1d, labels_3d):
-    policy = InclusivePolicy(digraph, features_1d, labels_3d)
+@pytest.mark.parametrize(
+    "policy", [InclusivePolicy, LessInclusivePolicy, SiblingsPolicy]
+)
+def test_inclusive_policy_positive_examples_3d_2(
+    policy, digraph, features_1d, labels_3d
+):
+    policy = policy(digraph, features_1d, labels_3d)
     ground_truth = [
         False,
         False,
@@ -546,8 +619,13 @@ def test_inclusive_policy_positive_examples_3d_2(digraph, features_1d, labels_3d
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_positive_examples_3d_3(digraph, features_1d, labels_3d):
-    policy = InclusivePolicy(digraph, features_1d, labels_3d)
+@pytest.mark.parametrize(
+    "policy", [InclusivePolicy, LessInclusivePolicy, SiblingsPolicy]
+)
+def test_inclusive_policy_positive_examples_3d_3(
+    policy, digraph, features_1d, labels_3d
+):
+    policy = policy(digraph, features_1d, labels_3d)
     ground_truth = [
         False,
         False,
@@ -622,48 +700,6 @@ def test_inclusive_policy_negative_examples_3d_3(digraph, features_1d, labels_3d
     assert_array_equal(ground_truth, result)
 
 
-def test_less_inclusive_policy_positive_examples_2d_1(digraph, features_1d, labels_2d):
-    policy = LessInclusivePolicy(digraph, features_1d[:8], labels_2d)
-    ground_truth = [True, True, False, False, False, False, False, False]
-    result = policy.positive_examples("1")
-    assert_array_equal(ground_truth, result)
-
-
-def test_less_inclusive_policy_positive_examples_2d_2(digraph, features_1d, labels_2d):
-    policy = LessInclusivePolicy(digraph, features_1d[:8], labels_2d)
-    ground_truth = [False, False, True, True, True, True, True, True]
-    result = policy.positive_examples("2")
-    assert_array_equal(ground_truth, result)
-
-
-def test_less_inclusive_policy_positive_examples_2d_3(digraph, features_1d, labels_2d):
-    policy = LessInclusivePolicy(digraph, features_1d[:8], labels_2d)
-    ground_truth = [False, False, True, False, True, True, False, False]
-    result = policy.positive_examples("2.1")
-    assert_array_equal(ground_truth, result)
-
-
-def test_less_inclusive_policy_negative_examples_2d_1(digraph, features_1d, labels_2d):
-    policy = LessInclusivePolicy(digraph, features_1d[:8], labels_2d)
-    ground_truth = [False, False, True, True, True, True, True, True]
-    result = policy.negative_examples("1")
-    assert_array_equal(ground_truth, result)
-
-
-def test_less_inclusive_policy_negative_examples_2d_2(digraph, features_1d, labels_2d):
-    policy = LessInclusivePolicy(digraph, features_1d[:8], labels_2d)
-    ground_truth = [True, True, False, False, False, False, False, False]
-    result = policy.negative_examples("2")
-    assert_array_equal(ground_truth, result)
-
-
-def test_less_inclusive_policy_negative_examples_2d_3(digraph, features_1d, labels_2d):
-    policy = LessInclusivePolicy(digraph, features_1d[:8], labels_2d)
-    ground_truth = [True, True, False, True, False, False, True, True]
-    result = policy.negative_examples("2.1")
-    assert_array_equal(ground_truth, result)
-
-
 def test_siblings_policy_negative_examples_2d_1(digraph, features_1d, labels_2d):
     policy = SiblingsPolicy(digraph, features_1d[:8], labels_2d)
     ground_truth = [False, False, True, True, True, True, True, True]
@@ -681,6 +717,63 @@ def test_siblings_policy_negative_examples_2d_2(digraph, features_1d, labels_2d)
 def test_siblings_policy_negative_examples_2d_3(digraph, features_1d, labels_2d):
     policy = SiblingsPolicy(digraph, features_1d[:8], labels_2d)
     ground_truth = [False, False, False, True, False, False, True, True]
+    result = policy.negative_examples("2.1")
+    assert_array_equal(ground_truth, result)
+
+
+def test_siblings_policy_negative_examples_3d_1(digraph, features_1d, labels_3d):
+    policy = SiblingsPolicy(digraph, features_1d, labels_3d)
+    ground_truth = [
+        False,
+        False,
+        True,
+        True,
+        True,
+        True,
+        True,
+        True,
+        False,
+        True,
+        True,
+    ]
+    result = policy.negative_examples("1")
+    assert_array_equal(ground_truth, result)
+
+
+def test_siblings_policy_negative_examples_3d_2(digraph, features_1d, labels_3d):
+    policy = SiblingsPolicy(digraph, features_1d, labels_3d)
+    ground_truth = [
+        True,
+        True,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        True,
+        True,
+        False,
+    ]
+    result = policy.negative_examples("2")
+    assert_array_equal(ground_truth, result)
+
+
+def test_siblings_policy_negative_examples_3d_3(digraph, features_1d, labels_3d):
+    policy = SiblingsPolicy(digraph, features_1d, labels_3d)
+    ground_truth = [
+        False,
+        False,
+        False,
+        True,
+        False,
+        False,
+        True,
+        True,
+        False,
+        False,
+        True,
+    ]
     result = policy.negative_examples("2.1")
     assert_array_equal(ground_truth, result)
 
