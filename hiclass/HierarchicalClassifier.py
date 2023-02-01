@@ -150,6 +150,12 @@ class HierarchicalClassifier(abc.ABC):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 
+        try:
+            if len(y) > 0:
+                y = make_leveled(y)
+        except TypeError:
+            pass
+
         if not self.bert:
             self.X_, self.y_ = self._validate_data(
                 X, y, multi_output=True, accept_sparse="csr", allow_nd=True
@@ -162,8 +168,6 @@ class HierarchicalClassifier(abc.ABC):
             self.sample_weight_ = _check_sample_weight(sample_weight, X)
         else:
             self.sample_weight_ = None
-
-        self.y_ = make_leveled(self.y_)
 
         # Create and configure logger
         self._create_logger()
