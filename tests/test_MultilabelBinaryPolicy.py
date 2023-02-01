@@ -114,20 +114,20 @@ def labels():
     )
 
 
-def test_binary_policy_positive_examples(digraph, features_1d, labels):
-    policy = BinaryPolicy(digraph, features_1d, labels)
+def test_binary_policy_positive_examples(digraph, features_1d, labels_2d):
+    policy = BinaryPolicy(digraph, features_1d, labels_2d)
     with pytest.raises(NotImplementedError):
         policy.positive_examples("1")
 
 
-def test_binary_policy_negative_examples(digraph, features_1d, labels):
-    policy = BinaryPolicy(digraph, features_1d, labels)
+def test_binary_policy_negative_examples(digraph, features_1d, labels_2d):
+    policy = BinaryPolicy(digraph, features_1d, labels_2d)
     with pytest.raises(NotImplementedError):
         policy.negative_examples("1")
 
 
-def test_exclusive_policy_positive_examples_1(digraph, features_1d, labels):
-    policy = ExclusivePolicy(digraph, features_1d, labels)
+def test_exclusive_policy_positive_examples_1(digraph, features_1d, labels_2d):
+    policy = ExclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         False,
@@ -146,8 +146,8 @@ def test_exclusive_policy_positive_examples_1(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_policy_positive_examples_2(digraph, features_1d, labels):
-    policy = ExclusivePolicy(digraph, features_1d, labels)
+def test_exclusive_policy_positive_examples_2(digraph, features_1d, labels_2d):
+    policy = ExclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         True,
         False,
@@ -166,8 +166,8 @@ def test_exclusive_policy_positive_examples_2(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_policy_positive_examples_3(digraph, features_1d, labels):
-    policy = ExclusivePolicy(digraph, features_1d, labels)
+def test_exclusive_policy_positive_examples_3(digraph, features_1d, labels_2d):
+    policy = ExclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         False,
@@ -186,8 +186,8 @@ def test_exclusive_policy_positive_examples_3(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_policy_negative_examples_1(digraph, features_1d, labels):
-    policy = ExclusivePolicy(digraph, features_1d, labels)
+def test_exclusive_policy_negative_examples_1(digraph, features_1d, labels_2d):
+    policy = ExclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         True,
         True,
@@ -206,8 +206,8 @@ def test_exclusive_policy_negative_examples_1(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_policy_negative_examples_2(digraph, features_1d, labels):
-    policy = ExclusivePolicy(digraph, features_1d, labels)
+def test_exclusive_policy_negative_examples_2(digraph, features_1d, labels_2d):
+    policy = ExclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         True,
@@ -226,8 +226,8 @@ def test_exclusive_policy_negative_examples_2(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_policy_negative_examples_3(digraph, features_1d, labels):
-    policy = ExclusivePolicy(digraph, features_1d, labels)
+def test_exclusive_policy_negative_examples_3(digraph, features_1d, labels_2d):
+    policy = ExclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         True,
         True,
@@ -246,8 +246,8 @@ def test_exclusive_policy_negative_examples_3(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_less_exclusive_policy_negative_examples_1(digraph, features_1d, labels):
-    policy = LessExclusivePolicy(digraph, features_1d, labels)
+def test_less_exclusive_policy_negative_examples_1(digraph, features_1d, labels_2d):
+    policy = LessExclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         False,
@@ -266,8 +266,8 @@ def test_less_exclusive_policy_negative_examples_1(digraph, features_1d, labels)
     assert_array_equal(ground_truth, result)
 
 
-def test_less_exclusive_policy_negative_examples_2(digraph, features_1d, labels):
-    policy = LessExclusivePolicy(digraph, features_1d, labels)
+def test_less_exclusive_policy_negative_examples_2(digraph, features_1d, labels_2d):
+    policy = LessExclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         True,
         True,
@@ -286,8 +286,8 @@ def test_less_exclusive_policy_negative_examples_2(digraph, features_1d, labels)
     assert_array_equal(ground_truth, result)
 
 
-def test_less_exclusive_policy_negative_examples_3(digraph, features_1d, labels):
-    policy = LessExclusivePolicy(digraph, features_1d, labels)
+def test_less_exclusive_policy_negative_examples_3(digraph, features_1d, labels_2d):
+    policy = LessExclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         True,
         True,
@@ -306,8 +306,8 @@ def test_less_exclusive_policy_negative_examples_3(digraph, features_1d, labels)
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_siblings_policy_negative_examples_1(digraph, features_1d, labels):
-    policy = ExclusiveSiblingsPolicy(digraph, features_1d, labels)
+def test_exclusive_siblings_policy_negative_examples_1(digraph, features_1d, labels_2d):
+    policy = ExclusiveSiblingsPolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         True,
@@ -326,8 +326,8 @@ def test_exclusive_siblings_policy_negative_examples_1(digraph, features_1d, lab
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_siblings_policy_negative_examples_2(digraph, features_1d, labels):
-    policy = ExclusiveSiblingsPolicy(digraph, features_1d, labels)
+def test_exclusive_siblings_policy_negative_examples_2(digraph, features_1d, labels_2d):
+    policy = ExclusiveSiblingsPolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         False,
@@ -346,8 +346,8 @@ def test_exclusive_siblings_policy_negative_examples_2(digraph, features_1d, lab
     assert_array_equal(ground_truth, result)
 
 
-def test_exclusive_siblings_policy_negative_examples_3(digraph, features_1d, labels):
-    policy = ExclusiveSiblingsPolicy(digraph, features_1d, labels)
+def test_exclusive_siblings_policy_negative_examples_3(digraph, features_1d, labels_2d):
+    policy = ExclusiveSiblingsPolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         False,
@@ -366,8 +366,8 @@ def test_exclusive_siblings_policy_negative_examples_3(digraph, features_1d, lab
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_positive_examples_1(digraph, features_1d, labels):
-    policy = InclusivePolicy(digraph, features_1d, labels)
+def test_inclusive_policy_positive_examples_1(digraph, features_1d, labels_2d):
+    policy = InclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         True,
         True,
@@ -386,8 +386,8 @@ def test_inclusive_policy_positive_examples_1(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_positive_examples_2(digraph, features_1d, labels):
-    policy = InclusivePolicy(digraph, features_1d, labels)
+def test_inclusive_policy_positive_examples_2(digraph, features_1d, labels_2d):
+    policy = InclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         False,
@@ -406,8 +406,8 @@ def test_inclusive_policy_positive_examples_2(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_positive_examples_3(digraph, features_1d, labels):
-    policy = InclusivePolicy(digraph, features_1d, labels)
+def test_inclusive_policy_positive_examples_3(digraph, features_1d, labels_2d):
+    policy = InclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         False,
@@ -426,8 +426,8 @@ def test_inclusive_policy_positive_examples_3(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_negative_examples_1(digraph, features_1d, labels):
-    policy = InclusivePolicy(digraph, features_1d, labels)
+def test_inclusive_policy_negative_examples_1(digraph, features_1d, labels_2d):
+    policy = InclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         False,
@@ -446,8 +446,8 @@ def test_inclusive_policy_negative_examples_1(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_negative_examples_2(digraph, features_1d, labels):
-    policy = InclusivePolicy(digraph, features_1d, labels)
+def test_inclusive_policy_negative_examples_2(digraph, features_1d, labels_2d):
+    policy = InclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         True,
         True,
@@ -466,8 +466,8 @@ def test_inclusive_policy_negative_examples_2(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_inclusive_policy_negative_examples_3(digraph, features_1d, labels):
-    policy = InclusivePolicy(digraph, features_1d, labels)
+def test_inclusive_policy_negative_examples_3(digraph, features_1d, labels_2d):
+    policy = InclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         True,
         True,
@@ -486,8 +486,8 @@ def test_inclusive_policy_negative_examples_3(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_less_inclusive_policy_negative_examples_1(digraph, features_1d, labels):
-    policy = LessInclusivePolicy(digraph, features_1d, labels)
+def test_less_inclusive_policy_negative_examples_1(digraph, features_1d, labels_2d):
+    policy = LessInclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         False,
@@ -506,8 +506,8 @@ def test_less_inclusive_policy_negative_examples_1(digraph, features_1d, labels)
     assert_array_equal(ground_truth, result)
 
 
-def test_less_inclusive_policy_negative_examples_2(digraph, features_1d, labels):
-    policy = LessInclusivePolicy(digraph, features_1d, labels)
+def test_less_inclusive_policy_negative_examples_2(digraph, features_1d, labels_2d):
+    policy = LessInclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         True,
         True,
@@ -526,8 +526,8 @@ def test_less_inclusive_policy_negative_examples_2(digraph, features_1d, labels)
     assert_array_equal(ground_truth, result)
 
 
-def test_less_inclusive_policy_negative_examples_3(digraph, features_1d, labels):
-    policy = LessInclusivePolicy(digraph, features_1d, labels)
+def test_less_inclusive_policy_negative_examples_3(digraph, features_1d, labels_2d):
+    policy = LessInclusivePolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         True,
         True,
@@ -546,8 +546,8 @@ def test_less_inclusive_policy_negative_examples_3(digraph, features_1d, labels)
     assert_array_equal(ground_truth, result)
 
 
-def test_siblings_policy_negative_examples_1(digraph, features_1d, labels):
-    policy = SiblingsPolicy(digraph, features_1d, labels)
+def test_siblings_policy_negative_examples_1(digraph, features_1d, labels_2d):
+    policy = SiblingsPolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         False,
@@ -566,8 +566,8 @@ def test_siblings_policy_negative_examples_1(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_siblings_policy_negative_examples_2(digraph, features_1d, labels):
-    policy = SiblingsPolicy(digraph, features_1d, labels)
+def test_siblings_policy_negative_examples_2(digraph, features_1d, labels_2d):
+    policy = SiblingsPolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         True,
         True,
@@ -586,8 +586,8 @@ def test_siblings_policy_negative_examples_2(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_siblings_policy_negative_examples_3(digraph, features_1d, labels):
-    policy = SiblingsPolicy(digraph, features_1d, labels)
+def test_siblings_policy_negative_examples_3(digraph, features_1d, labels_2d):
+    policy = SiblingsPolicy(digraph, features_1d, labels_2d)
     ground_truth = [
         False,
         False,
@@ -606,8 +606,8 @@ def test_siblings_policy_negative_examples_3(digraph, features_1d, labels):
     assert_array_equal(ground_truth, result)
 
 
-def test_siblings_get_binary_examples_1d_1(digraph, features_1d, labels):
-    policy = SiblingsPolicy(digraph, features_1d, labels)
+def test_siblings_get_binary_examples_1d_1(digraph, features_1d, labels_2d):
+    policy = SiblingsPolicy(digraph, features_1d, labels_2d)
     ground_truth_x = [
         1,
         2,
@@ -628,8 +628,8 @@ def test_siblings_get_binary_examples_1d_1(digraph, features_1d, labels):
     assert weights is None
 
 
-def test_siblings_get_binary_examples_1d_2(digraph, features_1d, labels):
-    policy = SiblingsPolicy(digraph, features_1d, labels)
+def test_siblings_get_binary_examples_1d_2(digraph, features_1d, labels_2d):
+    policy = SiblingsPolicy(digraph, features_1d, labels_2d)
     ground_truth_x = [
         3,
         4,
@@ -650,8 +650,8 @@ def test_siblings_get_binary_examples_1d_2(digraph, features_1d, labels):
     assert weights is None
 
 
-def test_siblings_get_binary_examples_1d_3(digraph, features_1d, labels):
-    policy = SiblingsPolicy(digraph, features_1d, labels)
+def test_siblings_get_binary_examples_1d_3(digraph, features_1d, labels_2d):
+    policy = SiblingsPolicy(digraph, features_1d, labels_2d)
     ground_truth_x = [3, 5, 6, 10, 11, 4, 7, 8]
     ground_truth_y = [1, 1, 1, 1, 1, 0, 0, 0]
     x, y, weights = policy.get_binary_examples("2.1")
@@ -660,8 +660,8 @@ def test_siblings_get_binary_examples_1d_3(digraph, features_1d, labels):
     assert weights is None
 
 
-def test_siblings_get_binary_examples_2d_1(digraph, features_2d, labels):
-    policy = SiblingsPolicy(digraph, features_2d, labels)
+def test_siblings_get_binary_examples_2d_1(digraph, features_2d, labels_2d):
+    policy = SiblingsPolicy(digraph, features_2d, labels_2d)
     ground_truth_x = [
         [1, 2],
         [3, 4],
@@ -682,8 +682,8 @@ def test_siblings_get_binary_examples_2d_1(digraph, features_2d, labels):
     assert weights is None
 
 
-def test_siblings_get_binary_examples_2d_2(digraph, features_2d, labels):
-    policy = SiblingsPolicy(digraph, features_2d, labels)
+def test_siblings_get_binary_examples_2d_2(digraph, features_2d, labels_2d):
+    policy = SiblingsPolicy(digraph, features_2d, labels_2d)
     ground_truth_x = [
         [5, 6],
         [7, 8],
@@ -704,8 +704,8 @@ def test_siblings_get_binary_examples_2d_2(digraph, features_2d, labels):
     assert weights is None
 
 
-def test_siblings_get_binary_examples_2d_3(digraph, features_2d, labels):
-    policy = SiblingsPolicy(digraph, features_2d, labels)
+def test_siblings_get_binary_examples_2d_3(digraph, features_2d, labels_2d):
+    policy = SiblingsPolicy(digraph, features_2d, labels_2d)
     ground_truth_x = [
         [5, 6],
         [9, 10],
@@ -723,8 +723,8 @@ def test_siblings_get_binary_examples_2d_3(digraph, features_2d, labels):
     assert weights is None
 
 
-def test_siblings_get_binary_examples_sparse_1(digraph, features_sparse, labels):
-    policy = SiblingsPolicy(digraph, features_sparse, labels)
+def test_siblings_get_binary_examples_sparse_1(digraph, features_sparse, labels_2d):
+    policy = SiblingsPolicy(digraph, features_sparse, labels_2d)
     ground_truth_x = [
         [1, 2],
         [3, 4],
@@ -745,8 +745,8 @@ def test_siblings_get_binary_examples_sparse_1(digraph, features_sparse, labels)
     assert weights is None
 
 
-def test_siblings_get_binary_examples_sparse_2(digraph, features_sparse, labels):
-    policy = SiblingsPolicy(digraph, features_sparse, labels)
+def test_siblings_get_binary_examples_sparse_2(digraph, features_sparse, labels_2d):
+    policy = SiblingsPolicy(digraph, features_sparse, labels_2d)
     ground_truth_x = [
         [5, 6],
         [7, 8],
@@ -767,8 +767,8 @@ def test_siblings_get_binary_examples_sparse_2(digraph, features_sparse, labels)
     assert weights is None
 
 
-def test_siblings_get_binary_examples_sparse_3(digraph, features_sparse, labels):
-    policy = SiblingsPolicy(digraph, features_sparse, labels)
+def test_siblings_get_binary_examples_sparse_3(digraph, features_sparse, labels_2d):
+    policy = SiblingsPolicy(digraph, features_sparse, labels_2d)
     ground_truth_x = [
         [5, 6],
         [9, 10],
