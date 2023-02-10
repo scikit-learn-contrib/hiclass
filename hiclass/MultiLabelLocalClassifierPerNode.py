@@ -5,14 +5,22 @@ Numeric and string output labels are both handled.
 """
 from copy import deepcopy
 
+import functools
 import networkx as nx
 import numpy as np
-from sklearn.base import BaseEstimator
-from sklearn.utils.validation import check_array, check_is_fitted
 
-from hiclass import MultiLabelBinaryPolicy
+from hiclass import BinaryPolicy
 from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.MultiLabelHierarchicalClassifier import MultiLabelHierarchicalClassifier
+
+from sklearn.base import BaseEstimator
+from sklearn.utils.validation import check_is_fitted
+
+# monkeypatching check_array to accept 3 dimensional arrays
+import sklearn.utils.validation
+sklearn.utils.validation.check_array = functools.partial(
+    sklearn.utils.validation.check_array, allow_nd=True
+    )
 
 
 class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClassifier):
@@ -25,7 +33,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
     Examples
     --------
     >>> from hiclass import MultiLabelLocalClassifierPerNode.py
-    >>> y = [['1', '1.1'], ['2', '2.1']]
+    >>> y = [[['1', '1.1'], ['', '']], [['1', '1.1'], ['2', '2.1']]]
     >>> X = [[1, 2], [3, 4]]
     >>> lcpn = MultiLabelLocalClassifierPerNode.py()
     >>> lcpn.fit(X, y)
@@ -151,7 +159,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
 
         # Input validation
         if not self.bert:
-            X = check_array(X, accept_sparse="csr")
+            X = sklearn.utils.validation.check_array(X, accept_sparse="csr") # TODO: Decide allow_nd True or False 
         else:
             X = np.array(X)
 
@@ -201,13 +209,13 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         if isinstance(self.binary_policy, str):
             self.logger_.info(f"Initializing {self.binary_policy} binary policy")
             try:
-                self.binary_policy_ = MultiLabelBinaryPolicy.IMPLEMENTED_POLICIES[
+                self.binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
                     self.binary_policy.lower()
                 ](self.hierarchy_, self.X_, self.y_, self.sample_weight_)
             except KeyError:
                 self.logger_.error(
                     f"Policy {self.binary_policy} not implemented. Available policies are:\n"
-                    + f"{list(MultiLabelBinaryPolicy.IMPLEMENTED_POLICIES.keys())}"
+                    + f"{list(BinaryPolicy.IMPLEMENTED_POLICIES.keys())}"
                 )
                 raise KeyError(f"Policy {self.binary_policy} not implemented.")
         else:

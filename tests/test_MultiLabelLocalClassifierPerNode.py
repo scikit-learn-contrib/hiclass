@@ -10,7 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 
-from hiclass import MultiLabelLocalClassifierPerNode
+from hiclass.MultiLabelLocalClassifierPerNode import MultiLabelLocalClassifierPerNode
 from hiclass.BinaryPolicy import ExclusivePolicy
 from hiclass.ConstantClassifier import ConstantClassifier
 
@@ -214,7 +214,7 @@ def test_predict_sparse(fitted_logistic_regression):
 def test_fit_predict():
     lcpn = MultiLabelLocalClassifierPerNode(local_classifier=LogisticRegression())
     x = np.array([[1, 2], [3, 4]])
-    y = np.array([[["a", "b"]], [["b", "c"]], [["a", "b"], ["a", "c"]]])
+    y = np.array([[["a", "b"], ["b", "c"]], [["a", "b"], ["a", "c"]]])
     lcpn.fit(x, y)
     predictions = lcpn.predict(x)
     assert_array_equal(y, predictions)
