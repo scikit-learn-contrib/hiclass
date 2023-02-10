@@ -1,6 +1,7 @@
 """Shared code for all classifiers."""
 import abc
 import logging
+from typing import List
 
 import networkx as nx
 import numpy as np
@@ -23,17 +24,19 @@ def make_leveled(y):
 
     Parameters
     ----------
-    y : array-like of shape (n_samples, n_levels)
+    y : array-like of shape (n_samples, n_levels) or (n_samples, n_labels, n_levels) for multi-label classification
         The target values, i.e., hierarchical class labels for classification.
 
     Returns
     -------
-    leveled_y : array-like of shape (n_samples, n_levels)
+    leveled_y : array-like of shape (n_samples, n_levels) or (n_samples, n_labels, n_levels) for multi-label classification
         The leveled target values, i.e., hierarchical class labels for classification.
+        Y is returned only to pass sklearn's checks.
 
     Notes
     -----
     If rows are not iterable, returns the current y without modifications.
+    Y is returned only to pass sklearn's checks.
 
     Examples
     --------
@@ -43,15 +46,26 @@ def make_leveled(y):
     array([['a', ''],
        ['b', 'c']])
     """
-    
-    # TODO: allow for 3 dimension for MultiLabelClassification
-    try:
-        depth = max([len(row) for row in y])
-    except TypeError:
+    # TODO: refactor this function to make it more readable
+    # TODO: add more tests, e.g., mixing different types and lists or np.ndarrays
+    if not isinstance(y[0], List):
         return y
-    y = np.array(y)
-    leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
-    return np.array(leveled_y)
+    elif not isinstance(y[0][0], List):
+        depth = max([len(row) for row in y])
+        leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
+        return np.array(leveled_y)
+    elif not isinstance(y[0][0][0], List):
+        rows = len(y)
+        multi_labels = max([len(row) for row in y])
+        levels = max([len(label) for row in y for label in row])
+        leveled_y = np.full((rows, multi_labels, levels), "")
+        for i, row in enumerate(y):
+            for j, multi_label in enumerate(row):
+                for k, label in enumerate(multi_label):
+                    leveled_y[i, j, k] = y[i][j][k]
+        return np.array(leveled_y)
+    else:
+        raise ValueError("y.ndim must be <= 3")
 
 
 class HierarchicalClassifier(abc.ABC):
@@ -67,6 +81,7 @@ class HierarchicalClassifier(abc.ABC):
         edge_list: str = None,
         replace_classifiers: bool = True,
         n_jobs: int = 1,
+        bert: bool = False,
         classifier_abbreviation: str = "",
     ):
         """
@@ -89,6 +104,8 @@ class HierarchicalClassifier(abc.ABC):
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
             If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
+        bert : bool, default=False
+            If True, skip scikit-learn's checks and sample_weight passing for BERT.
         classifier_abbreviation : str, default=""
             The abbreviation of the local hierarchical classifier to be displayed during logging.
         """
@@ -97,6 +114,7 @@ class HierarchicalClassifier(abc.ABC):
         self.edge_list = edge_list
         self.replace_classifiers = replace_classifiers
         self.n_jobs = n_jobs
+        self.bert = bert
         self.classifier_abbreviation = classifier_abbreviation
 
     def fit(self, X, y, sample_weight=None):
@@ -132,16 +150,24 @@ class HierarchicalClassifier(abc.ABC):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 
-        self.X_, self.y_ = self._validate_data(
-            X, y, multi_output=True, accept_sparse="csr"
-        )
+        try:
+            if len(y) > 0:
+                y = make_leveled(y)
+        except TypeError:
+            pass
+
+        if not self.bert:
+            self.X_, self.y_ = self._validate_data(
+                X, y, multi_output=True, accept_sparse="csr", allow_nd=True
+            )
+        else:
+            self.X_ = np.array(X)
+            self.y_ = np.array(y)
 
         if sample_weight is not None:
             self.sample_weight_ = _check_sample_weight(sample_weight, X)
         else:
             self.sample_weight_ = None
-
-        self.y_ = make_leveled(self.y_)
 
         # Create and configure logger
         self._create_logger()
@@ -191,6 +217,7 @@ class HierarchicalClassifier(abc.ABC):
             self.logger_.addHandler(ch)
 
     def _disambiguate(self):
+        # TODO: refactor this function to make it more readable
         self.separator_ = "::HiClass::Separator::"
         if self.y_.ndim == 2:
             new_y = []
@@ -201,6 +228,22 @@ class HierarchicalClassifier(abc.ABC):
                     child = str(self.y_[i, j])
                     row.append(parent + self.separator_ + child)
                 new_y.append(np.asarray(row, dtype=np.str_))
+            self.y_ = np.array(new_y)
+        if self.y_.ndim == 3:
+            new_y = []
+            for i in range(self.y_.shape[0]):
+                new_y.append([])
+                for j in range(self.y_.shape[1]):
+                    new_y[i].append([str(self.y_[i, j, 0])])
+                    for k in range(1, self.y_.shape[2]):
+                        new_cell = ""
+                        if new_y[i][j][k - 1] != "":
+                            new_cell = (
+                                new_y[i][j][k - 1]
+                                + self.separator_
+                                + str(self.y_[i, j, k])
+                            )
+                        new_y[i][j].append(new_cell)
             self.y_ = np.array(new_y)
 
     def _create_digraph(self):
@@ -214,7 +257,9 @@ class HierarchicalClassifier(abc.ABC):
 
         self._create_digraph_2d()
 
-        if self.y_.ndim > 2:
+        self._create_digraph_3d()
+
+        if self.y_.ndim > 3:
             # Unsuported dimension
             self.logger_.error(f"y with {self.y_.ndim} dimensions detected")
             raise ValueError(
@@ -250,6 +295,29 @@ class HierarchicalClassifier(abc.ABC):
                         )
                     elif parent != "" and column == 0:
                         self.hierarchy_.add_node(parent)
+
+    def _create_digraph_3d(self):
+        if self.y_.ndim == 3:
+            self.max_levels_ = self.y_.shape[2]
+            rows, multi_labels, columns = self.y_.shape
+            self.logger_.info(f"Creating digraph from {rows} 3D labels")
+            for row in range(rows):
+                for multi_label in range(multi_labels):
+                    for column in range(columns - 1):
+                        parent = self.y_[row, multi_label, column].split(
+                            self.separator_
+                        )[-1]
+                        child = self.y_[row, multi_label, column + 1].split(
+                            self.separator_
+                        )[-1]
+                        if parent != "" and child != "":
+                            # Only add edge if both parent and child are not empty
+                            self.hierarchy_.add_edge(
+                                self.y_[row, multi_label, column],
+                                self.y_[row, multi_label, column + 1],
+                            )
+                        elif parent != "" and column == 0:
+                            self.hierarchy_.add_node(parent)
 
     def _export_digraph(self):
         # Check if edge_list is set
@@ -304,9 +372,18 @@ class HierarchicalClassifier(abc.ABC):
     def _remove_separator(self, y):
         # Remove separator from predictions
         if y.ndim == 2:
-            for i in range(y.shape[0]):
-                for j in range(1, y.shape[1]):
-                    y[i, j] = y[i, j].split(self.separator_)[-1]
+            rows, columns = y.shape
+            for row in range(rows):
+                for column in range(1, columns):
+                    y[row, column] = y[row, column].split(self.separator_)[-1]
+        elif y.ndim == 3:
+            rows, multi_labels, columns = y.shape
+            for row in range(rows):
+                for multi_label in range(multi_labels):
+                    for column in range(1, columns):
+                        y[row, multi_label, column] = y[row, multi_label, column].split(
+                            self.separator_
+                        )[-1]
 
     def _fit_node_classifier(
         self, nodes, local_mode: bool = False, use_joblib: bool = False
@@ -318,9 +395,9 @@ class HierarchicalClassifier(abc.ABC):
                     local_mode=local_mode,
                     ignore_reinit_error=True,
                 )
-                lcppn = ray.put(self)
+                classifier = ray.put(self)
                 _parallel_fit = ray.remote(self._fit_classifier)
-                results = [_parallel_fit.remote(lcppn, node) for node in nodes]
+                results = [_parallel_fit.remote(classifier, node) for node in nodes]
                 classifiers = ray.get(results)
             else:
                 classifiers = Parallel(n_jobs=self.n_jobs)(

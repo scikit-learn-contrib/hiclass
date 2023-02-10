@@ -10,12 +10,12 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
-from hiclass import BinaryPolicy
+from hiclass import MultiLabelBinaryPolicy
 from hiclass.ConstantClassifier import ConstantClassifier
-from hiclass.HierarchicalClassifier import HierarchicalClassifier
+from hiclass.MultiLabelHierarchicalClassifier import MultiLabelHierarchicalClassifier
 
 
-class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
+class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClassifier):
     """
     Assign local classifiers to each node of the graph, except the root node.
 
@@ -24,14 +24,14 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
     Examples
     --------
-    >>> from hiclass import LocalClassifierPerNode
+    >>> from hiclass import MultiLabelLocalClassifierPerNode.py
     >>> y = [['1', '1.1'], ['2', '2.1']]
     >>> X = [[1, 2], [3, 4]]
-    >>> lcpn = LocalClassifierPerNode()
+    >>> lcpn = MultiLabelLocalClassifierPerNode.py()
     >>> lcpn.fit(X, y)
     >>> lcpn.predict(X)
-    array([['1', '1.1'],
-       ['2', '2.1']])
+    array([[['1', '1.1']],
+       [['2', '2.1']]])
     """
 
     def __init__(
@@ -128,6 +128,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         # Return the classifier
         return self
 
+    # TODO: Fix predict for multi-label classification
     def predict(self, X):
         """
         Predict classes for the given data.
@@ -200,13 +201,13 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         if isinstance(self.binary_policy, str):
             self.logger_.info(f"Initializing {self.binary_policy} binary policy")
             try:
-                self.binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
+                self.binary_policy_ = MultiLabelBinaryPolicy.IMPLEMENTED_POLICIES[
                     self.binary_policy.lower()
                 ](self.hierarchy_, self.X_, self.y_, self.sample_weight_)
             except KeyError:
                 self.logger_.error(
                     f"Policy {self.binary_policy} not implemented. Available policies are:\n"
-                    + f"{list(BinaryPolicy.IMPLEMENTED_POLICIES.keys())}"
+                    + f"{list(MultiLabelBinaryPolicy.IMPLEMENTED_POLICIES.keys())}"
                 )
                 raise KeyError(f"Policy {self.binary_policy} not implemented.")
         else:

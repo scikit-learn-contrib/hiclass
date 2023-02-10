@@ -7,14 +7,17 @@ from copy import deepcopy
 
 import networkx as nx
 import numpy as np
+from scipy.sparse import csr_matrix, vstack
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
-from hiclass.HierarchicalClassifier import HierarchicalClassifier
+from hiclass.MultiLabelHierarchicalClassifier import MultiLabelHierarchicalClassifier
 
 
-class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
+class MultiLabelLocalClassifierPerParentNode(
+    BaseEstimator, MultiLabelHierarchicalClassifier
+):
     """
     Assign local classifiers to each parent node of the graph.
 
@@ -23,14 +26,14 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
     Examples
     --------
-    >>> from hiclass import LocalClassifierPerParentNode
-    >>> y = [['1', '1.1'], ['2', '2.1']]
-    >>> X = [[1, 2], [3, 4]]
-    >>> lcppn = LocalClassifierPerParentNode()
-    >>> lcppn.fit(X, y)
-    >>> lcppn.predict(X)
-    array([['1', '1.1'],
-       ['2', '2.1']])
+    >>> from hiclass import MultiLabelLocalClassifierPerParentNode
+    >>> y = [[['1', '1.1'], ['2', '2.1']]]
+    >>> X = [[1, 2]]
+    >>> mllcppn = MultiLabelLocalClassifierPerParentNode()
+    >>> mllcppn.fit(X, y)
+    >>> mllcppn.predict(X)
+    array([[['1', '1.1'],
+       ['2', '2.1']]])
     """
 
     def __init__(
@@ -43,7 +46,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         bert: bool = False,
     ):
         """
-        Initialize a local classifier per parent node.
+        Initialize a multi-label local classifier per parent node.
 
         Parameters
         ----------
@@ -111,6 +114,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # Return the classifier
         return self
 
+    # TODO: Fix predict for multi-label classification
     def predict(self, X):
         """
         Predict classes for the given data.
@@ -188,18 +192,28 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
     def _get_successors(self, node):
         successors = list(self.hierarchy_.successors(node))
-        mask = np.isin(self.y_, successors).any(axis=1)
-        X = self.X_[mask]
+        mask = np.isin(self.y_, successors).any(axis=(2, 1))
         y = []
-        for row in self.y_[mask]:
-            if node == self.root_:
-                y.append(row[0])
-            else:
-                y.append(row[np.where(row == node)[0][0] + 1])
+        if isinstance(self.X_, csr_matrix):
+            X = csr_matrix((0, self.X_.shape[1]), dtype=self.X_.dtype)
+        else:
+            X = []
+        sample_weight = [] if self.sample_weight_ is not None else None
+        for i in range(self.y_.shape[0]):
+            if mask[i]:
+                row = self.y_[i]
+                labels = row[np.isin(row, successors)]
+                y.extend(labels)
+                for _ in range(labels.shape[0]):
+                    if isinstance(self.X_, csr_matrix):
+                        X = vstack([X, self.X_[i]])
+                    else:
+                        X.append(self.X_[i])
+                    if self.sample_weight_ is not None:
+                        sample_weight.append(self.sample_weight_[i])
         y = np.array(y)
-        sample_weight = (
-            self.sample_weight_[mask] if self.sample_weight_ is not None else None
-        )
+        if isinstance(self.X_, np.ndarray):
+            X = np.array(X)
         return X, y, sample_weight
 
     @staticmethod

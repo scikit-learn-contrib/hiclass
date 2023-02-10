@@ -16,17 +16,17 @@ from setuptools import find_packages, setup, Command
 NAME = "hiclass"
 DESCRIPTION = "Hierarchical Classification Library."
 
-# URL = 'https://github.com/mirand863/hiclass'
-# URL_DOKU = "https://github.com/mirand863/hiclass
-URL_GITHUB = "https://github.com/mirand863/hiclass"
-URL_ISSUES = "https://github.com/mirand863/hiclass/issues"
+# URL = 'https://github.com/scikit-learn-contrib/hiclass'
+# URL_DOKU = "https://github.com/scikit-learn-contrib/hiclass
+URL_GITHUB = "https://github.com/scikit-learn-contrib/hiclass"
+URL_ISSUES = "https://github.com/scikit-learn-contrib/hiclass/issues"
 EMAIL = "fabio.malchermiranda@hpi.de, Niklas.Koehnecke@student.hpi.uni-potsdam.de"
 AUTHOR = "Fabio Malcher Miranda, Niklas Koehnecke"
 REQUIRES_PYTHON = ">=3.7,<3.10"
 KEYWORDS = ["hierarchical classification"]
 DACS_SOFTWARE = "https://gitlab.com/dacs-hpi"
 # What packages are required for this module to be executed?
-REQUIRED = ["networkx", "numpy", "scikit-learn"]
+REQUIRED = ["networkx", "scikit-learn"]
 
 # What packages are optional?
 # 'fancy feature': ['django'],}
