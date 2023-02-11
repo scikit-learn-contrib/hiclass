@@ -137,7 +137,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         return self
 
     # TODO: Fix predict for multi-label classification
-    def predict(self, X):
+    def predict(self, X, threshold: float = 0.7):
         """
         Predict classes for the given data.
 
@@ -163,9 +163,10 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         else:
             X = np.array(X)
 
+        # TODO
         # Initialize array that holds predictions
         y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
-
+        y = [[[]] for _ in range(X.shape[0])] 
         # TODO: Add threshold to stop prediction halfway if need be
 
         bfs = nx.bfs_successors(self.hierarchy_, source=self.root_)
@@ -176,30 +177,63 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
             if predecessor == self.root_:
                 mask = [True] * X.shape[0]
                 subset_x = X[mask]
+                y_row_indices = [[i, [0]] for i in range(X.shape[0])]
             else:
-                mask = np.isin(y, predecessor).any(axis=1)
+                # TODO: Check if this is the best way to do this
+                y_row_indices = []
+                for row in range(X.shape[0]):
+                    # TODO: Dealing with HiClass Seperator
+                    _t = [z for z,l in enumerate(y[row]) if l[-1].split(self.separator_)[-1] == predecessor] # TODO: Deal with HiClass Seperator
+                    y_row_indices.append([row, _t])
+                # Filter 
+                mask = [True if l[1] else False for l in y_row_indices]
+                y_row_indices = [l for l in y_row_indices if l[1]]
+                
                 subset_x = X[mask]
             if subset_x.shape[0] > 0:
                 probabilities = np.zeros((subset_x.shape[0], len(successors)))
-                for i, successor in enumerate(successors):
+                for row, successor in enumerate(successors):
                     successor_name = str(successor).split(self.separator_)[-1]
                     self.logger_.info(f"Predicting for node '{successor_name}'")
                     classifier = self.hierarchy_.nodes[successor]["classifier"]
                     positive_index = np.where(classifier.classes_ == 1)[0]
-                    probabilities[:, i] = classifier.predict_proba(subset_x)[
+                    probabilities[:, row] = classifier.predict_proba(subset_x)[
                         :, positive_index
                     ][:, 0]
-                highest_probability = np.argmax(probabilities, axis=1)
+                
+                # TODO: update here?
+                # get indices of probabilities that are higher than 0.7
+                indices_probabilities_above_threshold = np.argwhere(
+                    probabilities >= threshold
+                    ) 
+                # TODO: strategies for multiple predictions
+                # TODO: what to do in case of no probabilites above threshold?
+                # TODO: is dictionary a better way to to store predictions?
                 prediction = []
-                for i in highest_probability:
-                    prediction.append(successors[i])
-                level = nx.shortest_path_length(
-                    self.hierarchy_, self.root_, predecessor
-                )
-                prediction = np.array(prediction)
-                y[mask, level] = prediction
 
+                for row, column in indices_probabilities_above_threshold:
+                    _successor = successors[column]
+                    if row >= len(prediction):
+                        prediction.append([_successor])
+                    else:
+                        prediction[row].append(_successor)
+                
+                k = 0
+                assert len(y_row_indices) == len(prediction)
+                for row,col_list in y_row_indices:
+                    # extend b to hold also additional axis
+                    for j in col_list:
+                        _old_y = y[row][j].copy()
+                        for pi, _suc in enumerate(prediction[k]):
+                            if pi == 0:
+                                y[row][j].append(_suc)
+                            else:
+                                y[row].insert(j+1, _old_y + [_suc])
+                            # y[i][j].append(prediction[k])
+                    k += 1
+            
         y = self._convert_to_1d(y)
+        # TODO: make leveled, but first fix make_leveled
 
         self._remove_separator(y)
 
