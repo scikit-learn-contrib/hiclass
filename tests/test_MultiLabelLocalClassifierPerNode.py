@@ -71,7 +71,7 @@ def digraph_logistic_regression():
     digraph.y_ = np.array(
         [[["a", "b"], ["", ""]], [["a", "c"], ["", ""]], [["a", "b"], ["a", "c"]]]
     )
-    digraph.X_ = np.array([[1, 2], [3, 4]])
+    digraph.X_ = np.array([[1, 2], [3, 4], [5, 6]])
     digraph.logger_ = logging.getLogger("LCPN")
     digraph.root_ = "a"
     digraph.separator_ = "::HiClass::Separator::"
@@ -95,13 +95,13 @@ def test_initialize_local_classifiers(digraph_logistic_regression):
                     LogisticRegression,
                 )
 
-
-def test_fit_digraph(digraph_logistic_regression):
+@pytest.mark.parametrize("n_jobs", [1, 2])
+def test_fit_digraph(digraph_logistic_regression, n_jobs):
     classifiers = {
         "b": {"classifier": LogisticRegression()},
         "c": {"classifier": LogisticRegression()},
     }
-    digraph_logistic_regression.n_jobs = 2
+    digraph_logistic_regression.n_jobs = n_jobs
     nx.set_node_attributes(digraph_logistic_regression.hierarchy_, classifiers)
     digraph_logistic_regression._fit_digraph(local_mode=True)
     with pytest.raises(KeyError):
@@ -135,8 +135,8 @@ def test_fit_digraph_joblib_multiprocessing(digraph_logistic_regression):
             pytest.fail(repr(e))
     assert 1
 
-
-def test_fit_1_class():
+def test_fit_1_label():
+    # test that predict removes multilabel dimension in case of 1 label
     lcpn = MultiLabelLocalClassifierPerNode(
         local_classifier=LogisticRegression(), n_jobs=2
     )
@@ -179,6 +179,7 @@ def fitted_logistic_regression():
     digraph.dtype_ = "<U3"
     digraph.root_ = "r"
     digraph.separator_ = "::HiClass::Separator::"
+    digraph.max_multi_labels_ = 2 
     classifiers = {
         "1": {"classifier": LogisticRegression()},
         "1.1": {"classifier": LogisticRegression()},
@@ -213,12 +214,20 @@ def test_predict_sparse(fitted_logistic_regression):
 
 def test_fit_predict():
     lcpn = MultiLabelLocalClassifierPerNode(local_classifier=LogisticRegression())
+    # TODO: what is correct outcomes for this est?
     x = np.array([[1, 2], [3, 4]])
     y = np.array([[["a", "b"], ["b", "c"]], [["a", "b"], ["a", "c"]]])
     lcpn.fit(x, y)
     predictions = lcpn.predict(x)
     assert_array_equal(y, predictions)
 
+def test_fit_predict_full_path():
+    lcpn = MultiLabelLocalClassifierPerNode(local_classifier=LogisticRegression())
+    x = np.array([[1, 2], [3, 4]])
+    y = np.array([[["a", "b", "c"], ["b", "c", ""]], [["a", "b", "c"], ["a", "c", ""]]])
+    lcpn.fit(x, y)
+    predictions = lcpn.predict(x)
+    assert_array_equal(y, predictions)
 
 @pytest.fixture
 def empty_levels():

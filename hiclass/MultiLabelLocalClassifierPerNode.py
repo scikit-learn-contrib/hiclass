@@ -11,16 +11,17 @@ import numpy as np
 
 from hiclass import BinaryPolicy
 from hiclass.ConstantClassifier import ConstantClassifier
-from hiclass.MultiLabelHierarchicalClassifier import MultiLabelHierarchicalClassifier
+from hiclass.MultiLabelHierarchicalClassifier import MultiLabelHierarchicalClassifier, make_leveled
 
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_is_fitted
 
 # monkeypatching check_array to accept 3 dimensional arrays
 import sklearn.utils.validation
+
 sklearn.utils.validation.check_array = functools.partial(
     sklearn.utils.validation.check_array, allow_nd=True
-    )
+)
 
 
 class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClassifier):
@@ -137,7 +138,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         return self
 
     # TODO: Fix predict for multi-label classification
-    def predict(self, X, threshold: float = 0.7):
+    def predict(self, X, threshold: float = 0.7) -> np.ndarray:
         """
         Predict classes for the given data.
 
@@ -159,14 +160,19 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
 
         # Input validation
         if not self.bert:
-            X = sklearn.utils.validation.check_array(X, accept_sparse="csr") # TODO: Decide allow_nd True or False 
+            X = sklearn.utils.validation.check_array(
+                X, accept_sparse="csr"
+            )  # TODO: Decide allow_nd True or False
         else:
             X = np.array(X)
 
-        # TODO
+        # what to do in case of not correctly specified y?
+        # TODO: max depths?
+        # TODO: max multi labels?
+        # y = np.empty((X.shape[0],  self.max_multi_labels_, self.max_levels_), dtype=self.dtype_)
         # Initialize array that holds predictions
-        y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
-        y = [[[]] for _ in range(X.shape[0])] 
+        y = [[[]] for _ in range(X.shape[0])]
+
         # TODO: Add threshold to stop prediction halfway if need be
 
         bfs = nx.bfs_successors(self.hierarchy_, source=self.root_)
@@ -179,17 +185,24 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
                 subset_x = X[mask]
                 y_row_indices = [[i, [0]] for i in range(X.shape[0])]
             else:
-                # TODO: Check if this is the best way to do this
+                # get indices of rows that have the predecessor
                 y_row_indices = []
                 for row in range(X.shape[0]):
-                    # TODO: Dealing with HiClass Seperator
-                    _t = [z for z,l in enumerate(y[row]) if l[-1].split(self.separator_)[-1] == predecessor] # TODO: Deal with HiClass Seperator
+                    # create list of indices
+                    _t = [
+                        z
+                        for z, l in enumerate(y[row])
+                        if l[-1].split(self.separator_)[-1] == predecessor
+                    ]  # TODO: Deal with HiClass Seperator
+
+                    # y_row_indices is a list of lists, each list contains the index of the row and a list of column indices
                     y_row_indices.append([row, _t])
-                # Filter 
+
+                # Filter
                 mask = [True if l[1] else False for l in y_row_indices]
                 y_row_indices = [l for l in y_row_indices if l[1]]
-                
                 subset_x = X[mask]
+
             if subset_x.shape[0] > 0:
                 probabilities = np.zeros((subset_x.shape[0], len(successors)))
                 for row, successor in enumerate(successors):
@@ -200,41 +213,39 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
                     probabilities[:, row] = classifier.predict_proba(subset_x)[
                         :, positive_index
                     ][:, 0]
-                
+
                 # TODO: update here?
-                # get indices of probabilities that are higher than 0.7
+                # get indices of probabilities that are higher than threshold or max
                 indices_probabilities_above_threshold = np.argwhere(
                     probabilities >= threshold
-                    ) 
+                )
                 # TODO: strategies for multiple predictions
                 # TODO: what to do in case of no probabilites above threshold?
-                # TODO: is dictionary a better way to to store predictions?
-                prediction = []
-
-                for row, column in indices_probabilities_above_threshold:
-                    _successor = successors[column]
-                    if row >= len(prediction):
-                        prediction.append([_successor])
-                    else:
-                        prediction[row].append(_successor)
                 
-                k = 0
-                assert len(y_row_indices) == len(prediction)
-                for row,col_list in y_row_indices:
-                    # extend b to hold also additional axis
-                    for j in col_list:
-                        _old_y = y[row][j].copy()
-                        for pi, _suc in enumerate(prediction[k]):
-                            if pi == 0:
-                                y[row][j].append(_suc)
-                            else:
-                                y[row].insert(j+1, _old_y + [_suc])
-                            # y[i][j].append(prediction[k])
-                    k += 1
-            
-        y = self._convert_to_1d(y)
-        # TODO: make leveled, but first fix make_leveled
+                prediction = [[] for _ in range(len(subset_x))]
+                for row, column in indices_probabilities_above_threshold:
+                    prediction[row].append(successors[column])
 
+
+                assert len(prediction) == len(y_row_indices)
+
+                k = 0 # index of prediction
+                for row, col_list in y_row_indices:
+                    for j in col_list:
+                        if not prediction[k]:
+                            y[row][j].append("")
+                        else:
+                            for pi, _suc in enumerate(prediction[k]):
+                                if pi == 0:
+                                    y[row][j].append(_suc)
+                                else:
+                                    # in case of mulitple predictions, copy the previous prediction and add the new one
+                                    _old_y = y[row][j].copy()
+                                    y[row].insert(j + 1, _old_y + [_suc])
+                    k += 1
+
+        y = make_leveled(y)
+        y = self._convert_to_2d(y)
         self._remove_separator(y)
 
         return y
