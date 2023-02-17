@@ -10,6 +10,7 @@ from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import _check_sample_weight
 
+
 try:
     import ray
 except ImportError:
@@ -50,11 +51,11 @@ def make_leveled(y):
         levels = max([len(label) for row in y for label in row])
     except TypeError:
         return y
-    leveled_y = np.full((rows, multi_labels, levels), "")
+    leveled_y = np.full((rows, multi_labels, levels), "", dtype=object) # dtype object relevant to allow for string labels
     for i, row in enumerate(y):
         for j, multi_label in enumerate(row):
             for k, label in enumerate(multi_label):
-                leveled_y[i, j, k] = y[i][j][k]
+                leveled_y[i, j, k] = label
     return np.array(leveled_y)
 
 
@@ -274,6 +275,7 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
     def _create_digraph_3d(self):
         if self.y_.ndim == 3:
             self.max_levels_ = self.y_.shape[2]
+            self.max_multi_labels_ = self.y_.shape[1]
             rows, multi_labels, columns = self.y_.shape
             self.logger_.info(f"Creating digraph from {rows} 3D labels")
             for row in range(rows):

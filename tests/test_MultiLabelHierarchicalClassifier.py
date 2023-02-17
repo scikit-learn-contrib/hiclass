@@ -250,6 +250,18 @@ def test_make_leveled_non_iterable_y(noniterable_y):
     assert noniterable_y == make_leveled(noniterable_y)
 
 
+def test_make_leveled_example_y():
+    y = np.array([[["a"]], [["b", "c"]]])
+    ground_truth = np.array([[["a", ""]], [["b", "c"]]])
+    assert_array_equal(ground_truth, make_leveled(y))
+    
+
+def test_make_leveled_multicharacter_nodes_y():
+    y = np.array([[["node1"]], [["node2", "node3"]]])
+    ground_truth = np.array([[["node1", ""]], [["node2", "node3"]]])
+    assert_array_equal(ground_truth, make_leveled(y))
+
+
 def test_fit_classifier():
     with pytest.raises(NotImplementedError):
         MultiLabelHierarchicalClassifier._fit_classifier(None, None)
