@@ -19,6 +19,7 @@ from sklearn.utils.validation import check_is_fitted
 # monkeypatching check_array to accept 3 dimensional arrays
 import sklearn.utils.validation
 
+# TODO: Move to MultiLabelHierarchicalClassifier (Parent Class)
 sklearn.utils.validation.check_array = functools.partial(
     sklearn.utils.validation.check_array, allow_nd=True
 )
@@ -216,6 +217,10 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
 
                 # TODO: update here?
                 # get indices of probabilities that are higher than threshold or max
+                # alternatives: 
+                    # - threshold for each successor
+                    # - split only when two highest probabilities are close 
+                    # - just use predict method directly without probabilities
                 indices_probabilities_above_threshold = np.argwhere(
                     probabilities >= threshold
                 )
@@ -229,6 +234,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
 
                 assert len(prediction) == len(y_row_indices)
 
+                # TODO: Bug when splitting, check test_fit_preduct for more info
                 k = 0 # index of prediction
                 for row, col_list in y_row_indices:
                     for j in col_list:
@@ -239,13 +245,12 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
                                 if pi == 0:
                                     y[row][j].append(_suc)
                                 else:
-                                    # in case of mulitple predictions, copy the previous prediction and add the new one
-                                    _old_y = y[row][j].copy()
+                                    # in case of mulitple predictions, copy the previous prediction up to (but not including) the last prediction and add the new one
+                                    _old_y = y[row][j][:-1].copy()
                                     y[row].insert(j + 1, _old_y + [_suc])
                     k += 1
 
         y = make_leveled(y)
-        y = self._convert_to_2d(y)
         self._remove_separator(y)
 
         return y
