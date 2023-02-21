@@ -182,6 +182,7 @@ def fitted_logistic_regression():
     classifiers["2.1"]["classifier"].fit(digraph.X_, [0, 0, 1, 0])
     classifiers["2.2"]["classifier"].fit(digraph.X_, [0, 0, 0, 1])
     nx.set_node_attributes(digraph.hierarchy_, classifiers)
+    digraph.classes_ = np.array(["1", "1.1", "1.2", "2", "2.1", "2.2"])
     return digraph
 
 
@@ -263,5 +264,12 @@ def test_classes(empty_levels):
     lcpn = LocalClassifierPerNode()
     X, y = empty_levels
     lcpn.fit(X, y)
-    ground_truth = ["1", "2", "2.1", "3", "3.1", "3.1.2"]
+    ground_truth = [
+        "1",
+        "2",
+        "2" + lcpn.separator_ + "2.1",
+        "3",
+        "3" + lcpn.separator_ + "3.1",
+        "3" + lcpn.separator_ + "3.1" + lcpn.separator_ + "3.1.2",
+    ]
     assert_array_equal(ground_truth, lcpn.classes_)

@@ -161,13 +161,15 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         self.logger_.info("Predicting")
 
+        probabilities = self.predict_proba(X)
+
         for row in range(X.shape[0]):
-            mask = [False] * X.shape[0]
-            mask[row] = True
-            y[row, 0] = self._predict_successor(self.root_, X[mask])
+            y[row, 0] = self._predict_successor(self.root_, probabilities[row, :])
             for level in range(1, self.max_levels_):
                 if y[row, level - 1] != "":
-                    y[row, level] = self._predict_successor(y[row, level - 1], X[mask])
+                    y[row, level] = self._predict_successor(
+                        y[row, level - 1], probabilities[row, :]
+                    )
 
         y = self._convert_to_1d(y)
 
@@ -206,20 +208,24 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         T = np.zeros((X.shape[0], len(self.classes_)))
 
+        for i, node in enumerate(self.classes_):
+            classifier = self.hierarchy_.nodes[node]["classifier"]
+            positive_index = np.where(classifier.classes_ == 1)[0]
+            T[:, i] = classifier.predict_proba(X)[:, positive_index][:, 0]
+
         return T
 
-    def _predict_successor(self, node, X):
-        successors = list(self.hierarchy_.successors(node))
+    def _predict_successor(self, node, probabilities):
+        successors = set(self.hierarchy_.successors(node))
+        highest_probability = 0
+        node_with_highest_probability = ""
         if len(successors) > 0:
-            probabilities = np.zeros(len(successors))
-            for i, successor in enumerate(successors):
-                classifier = self.hierarchy_.nodes[successor]["classifier"]
-                positive_index = np.where(classifier.classes_ == 1)[0][0]
-                probabilities[i] = classifier.predict_proba(X)[0, positive_index]
-            highest_probability = np.argmax(probabilities)
-            return successors[highest_probability]
-        else:
-            return ""
+            for i, node in enumerate(self.classes_):
+                if node in successors:
+                    if probabilities[i] > highest_probability:
+                        highest_probability = probabilities[i]
+                        node_with_highest_probability = node
+        return node_with_highest_probability
 
     def _initialize_binary_policy(self):
         if isinstance(self.binary_policy, str):
