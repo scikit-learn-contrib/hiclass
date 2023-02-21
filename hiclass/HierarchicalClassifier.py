@@ -266,6 +266,8 @@ class HierarchicalClassifier(abc.ABC):
                 f"Creating graph from y with {self.y_.ndim} dimensions is not supported"
             )
 
+        self._save_classes()
+
     def _create_digraph_1d(self):
         # Flatten 1D disguised as 2D
         if self.y_.ndim == 2 and self.y_.shape[1] == 1:
@@ -318,6 +320,9 @@ class HierarchicalClassifier(abc.ABC):
                             )
                         elif parent != "" and column == 0:
                             self.hierarchy_.add_node(parent)
+
+    def _save_classes(self):
+        self.classes_ = np.array(self.hierarchy_.nodes)
 
     def _export_digraph(self):
         # Check if edge_list is set

@@ -159,42 +159,67 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         # TODO: Add threshold to stop prediction halfway if need be
 
-        bfs = nx.bfs_successors(self.hierarchy_, source=self.root_)
-
         self.logger_.info("Predicting")
 
-        for predecessor, successors in bfs:
-            if predecessor == self.root_:
-                mask = [True] * X.shape[0]
-                subset_x = X[mask]
-            else:
-                mask = np.isin(y, predecessor).any(axis=1)
-                subset_x = X[mask]
-            if subset_x.shape[0] > 0:
-                probabilities = np.zeros((subset_x.shape[0], len(successors)))
-                for i, successor in enumerate(successors):
-                    successor_name = str(successor).split(self.separator_)[-1]
-                    self.logger_.info(f"Predicting for node '{successor_name}'")
-                    classifier = self.hierarchy_.nodes[successor]["classifier"]
-                    positive_index = np.where(classifier.classes_ == 1)[0]
-                    probabilities[:, i] = classifier.predict_proba(subset_x)[
-                        :, positive_index
-                    ][:, 0]
-                highest_probability = np.argmax(probabilities, axis=1)
-                prediction = []
-                for i in highest_probability:
-                    prediction.append(successors[i])
-                level = nx.shortest_path_length(
-                    self.hierarchy_, self.root_, predecessor
-                )
-                prediction = np.array(prediction)
-                y[mask, level] = prediction
+        for row in range(X.shape[0]):
+            mask = [False] * X.shape[0]
+            mask[row] = True
+            y[row, 0] = self._predict_successor(self.root_, X[mask])
+            for level in range(1, self.max_levels_):
+                if y[row, level - 1] != "":
+                    y[row, level] = self._predict_successor(y[row, level - 1], X[mask])
 
         y = self._convert_to_1d(y)
 
         self._remove_separator(y)
 
         return y
+
+    def predict_proba(self, X):
+        """
+        Probability estimates.
+
+        The returned estimates for all classes are ordered by the label of classes.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            Vector to be scored, where ``n_samples`` is the number of samples and
+            ``n_features`` is the number of features.
+            Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csr_matrix``.
+        Returns
+        -------
+        T : ndarray of shape (n_samples, n_classes)
+            Returns the probability of the sample for each class in the model,
+            where classes are ordered as they are in :code:`self.classes_`.
+        """
+        # Check if fit has been called
+        check_is_fitted(self)
+
+        # Input validation
+        if not self.bert:
+            X = check_array(X, accept_sparse="csr")
+        else:
+            X = np.array(X)
+
+        T = np.zeros((X.shape[0], len(self.classes_)))
+
+        return T
+
+    def _predict_successor(self, node, X):
+        successors = list(self.hierarchy_.successors(node))
+        if len(successors) > 0:
+            probabilities = np.zeros(len(successors))
+            for i, successor in enumerate(successors):
+                classifier = self.hierarchy_.nodes[successor]["classifier"]
+                positive_index = np.where(classifier.classes_ == 1)[0][0]
+                probabilities[i] = classifier.predict_proba(X)[0, positive_index]
+            highest_probability = np.argmax(probabilities)
+            return successors[highest_probability]
+        else:
+            return ""
 
     def _initialize_binary_policy(self):
         if isinstance(self.binary_policy, str):
