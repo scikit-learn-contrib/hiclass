@@ -48,6 +48,8 @@ def make_leveled(y):
     """
     # TODO: refactor this function to make it more readable
     # TODO: add more tests, e.g., mixing different types and lists or np.ndarrays
+    if not isinstance(y, List):
+        return y
     if not isinstance(y[0], List):
         return y
     elif not isinstance(y[0][0], List):
@@ -281,6 +283,7 @@ class HierarchicalClassifier(abc.ABC):
         if self.y_.ndim == 1:
             # Create max_levels_ variable
             self.max_levels_ = 1
+            self.ndim_ = 1
             self.logger_.info(f"Creating digraph from {self.y_.size} 1D labels")
             for label in self.y_:
                 self.hierarchy_.add_node(label)
@@ -289,6 +292,7 @@ class HierarchicalClassifier(abc.ABC):
         if self.y_.ndim == 2:
             # Create max_levels variable
             self.max_levels_ = self.y_.shape[1]
+            self.ndim_ = 2
             rows, columns = self.y_.shape
             self.logger_.info(f"Creating digraph from {rows} 2D labels")
             for row in range(rows):
@@ -305,7 +309,9 @@ class HierarchicalClassifier(abc.ABC):
 
     def _create_digraph_3d(self):
         if self.y_.ndim == 3:
+            self.max_multi_labels = self.y_.shape[1]
             self.max_levels_ = self.y_.shape[2]
+            self.ndim_ = 3
             rows, multi_labels, columns = self.y_.shape
             self.logger_.info(f"Creating digraph from {rows} 3D labels")
             for row in range(rows):

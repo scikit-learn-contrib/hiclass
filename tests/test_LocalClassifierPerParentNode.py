@@ -266,6 +266,7 @@ def fitted_logistic_regression():
     digraph.dtype_ = "<U3"
     digraph.root_ = "r"
     digraph.separator_ = "::HiClass::Separator::"
+    digraph.ndim_ = 2
     classifiers = {
         "r": {"classifier": LogisticRegression()},
         "1": {"classifier": LogisticRegression()},

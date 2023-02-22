@@ -146,7 +146,12 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # y = np.empty(
         #     (X.shape[0], self.multi_labels_, self.max_levels_), dtype=self.dtype_
         # )
-        y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
+        if self.ndim_ <= 2:
+            y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
+        elif self.ndim_ == 3:
+            y = np.empty(
+                (X.shape[0], self.multi_labels_, self.max_levels_), dtype=self.dtype_
+            )
 
         # TODO: Add threshold to stop prediction halfway if need be
 
@@ -163,6 +168,44 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         self._remove_separator(y)
 
         return y
+
+    def predict_proba(self, X):
+        """
+        Probability estimates.
+
+        The returned estimates for all classes are ordered by the label of classes.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            Vector to be scored, where ``n_samples`` is the number of samples and
+            ``n_features`` is the number of features.
+            Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csr_matrix``.
+        Returns
+        -------
+        T : ndarray of shape (n_samples, n_classes)
+            Returns the probability of the sample for each class in the model,
+            where classes are ordered as they are in :code:`self.classes_`.
+        """
+        # Check if fit has been called
+        check_is_fitted(self)
+
+        # Input validation
+        if not self.bert:
+            X = check_array(X, accept_sparse="csr")
+        else:
+            X = np.array(X)
+
+        T = np.zeros((X.shape[0], len(self.classes_)))
+
+        # for i, node in enumerate(self.classes_):
+        #     classifier = self.hierarchy_.nodes[node]["classifier"]
+        #     positive_index = np.where(classifier.classes_ == 1)[0]
+        #     T[:, i] = classifier.predict_proba(X)[:, positive_index][:, 0]
+
+        return T
 
     def _predict_remaining_levels(self, X, y):
         for level in range(1, y.shape[1]):
