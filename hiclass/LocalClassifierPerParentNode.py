@@ -38,6 +38,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
     def __init__(
         self,
         local_classifier: BaseEstimator = None,
+        tolerance: float = None,
         verbose: int = 0,
         edge_list: str = None,
         replace_classifiers: bool = True,
@@ -52,6 +53,9 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         local_classifier : BaseEstimator, default=LogisticRegression
             The local_classifier used to create the collection of local classifiers. Needs to have fit, predict and
             clone methods.
+        tolerance : float, default=None
+            The tolerance used to determine multi-labels. If set to None, only the child class with highest probability is predicted.
+            Otherwise, all child classes with :math:`probability >= max\_prob - tolerance` are predicted.
         verbose : int, default=0
             Controls the verbosity when fitting and predicting.
             See https://verboselogs.readthedocs.io/en/latest/readme.html#overview-of-logging-levels
@@ -69,6 +73,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         """
         super().__init__(
             local_classifier=local_classifier,
+            tolerance=tolerance,
             verbose=verbose,
             edge_list=edge_list,
             replace_classifiers=replace_classifiers,
@@ -104,8 +109,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # Fit local classifiers in DAG
         super().fit(X, y)
 
-        # TODO: Store the classes seen during fit
-
         # TODO: Add function to allow user to change local classifier
 
         # TODO: Add parameter to receive hierarchy as parameter in constructor
@@ -140,7 +143,9 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             X = np.array(X)
 
         # Initialize array that holds predictions
-        y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
+        y = np.empty(
+            (X.shape[0], self.multi_labels_, self.max_levels_), dtype=self.dtype_
+        )
 
         # TODO: Add threshold to stop prediction halfway if need be
 

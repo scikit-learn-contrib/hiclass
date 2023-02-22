@@ -77,6 +77,7 @@ class HierarchicalClassifier(abc.ABC):
     def __init__(
         self,
         local_classifier: BaseEstimator = None,
+        tolerance: float = None,
         verbose: int = 0,
         edge_list: str = None,
         replace_classifiers: bool = True,
@@ -92,6 +93,9 @@ class HierarchicalClassifier(abc.ABC):
         local_classifier : BaseEstimator, default=LogisticRegression
             The local_classifier used to create the collection of local classifiers. Needs to have fit, predict and
             clone methods.
+        tolerance : float, default=None
+            The tolerance used to determine multi-labels. If set to None, only the child class with highest probability is predicted.
+            Otherwise, all child classes with :math:`probability >= max\_prob - tolerance` are predicted.
         verbose : int, default=0
             Controls the verbosity when fitting and predicting.
             See https://verboselogs.readthedocs.io/en/latest/readme.html#overview-of-logging-levels
@@ -110,6 +114,7 @@ class HierarchicalClassifier(abc.ABC):
             The abbreviation of the local hierarchical classifier to be displayed during logging.
         """
         self.local_classifier = local_classifier
+        self.tolerance = tolerance
         self.verbose = verbose
         self.edge_list = edge_list
         self.replace_classifiers = replace_classifiers
