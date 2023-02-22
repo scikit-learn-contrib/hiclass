@@ -7,6 +7,8 @@ from copy import deepcopy
 
 import networkx as nx
 import numpy as np
+from numpy import vstack
+from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
@@ -187,6 +189,12 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         return nodes
 
     def _get_successors(self, node):
+        if self.y_.ndim == 2:
+            return self._get_successors_2d(node)
+        elif self.y_.ndim == 3:
+            return self._get_successors_3d(node)
+
+    def _get_successors_2d(self, node):
         successors = list(self.hierarchy_.successors(node))
         mask = np.isin(self.y_, successors).any(axis=1)
         X = self.X_[mask]
@@ -200,6 +208,32 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         sample_weight = (
             self.sample_weight_[mask] if self.sample_weight_ is not None else None
         )
+        return X, y, sample_weight
+
+    def _get_successors_3d(self, node):
+        successors = list(self.hierarchy_.successors(node))
+        mask = np.isin(self.y_, successors).any(axis=(2, 1))
+        y = []
+        if isinstance(self.X_, csr_matrix):
+            X = csr_matrix((0, self.X_.shape[1]), dtype=self.X_.dtype)
+        else:
+            X = []
+        sample_weight = [] if self.sample_weight_ is not None else None
+        for i in range(self.y_.shape[0]):
+            if mask[i]:
+                row = self.y_[i]
+                labels = row[np.isin(row, successors)]
+                y.extend(labels)
+                for _ in range(labels.shape[0]):
+                    if isinstance(self.X_, csr_matrix):
+                        X = vstack([X, self.X_[i]])
+                    else:
+                        X.append(self.X_[i])
+                    if self.sample_weight_ is not None:
+                        sample_weight.append(self.sample_weight_[i])
+        y = np.array(y)
+        if isinstance(self.X_, np.ndarray):
+            X = np.array(X)
         return X, y, sample_weight
 
     @staticmethod

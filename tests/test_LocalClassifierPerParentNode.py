@@ -21,7 +21,7 @@ def test_sklearn_compatible_estimator(estimator, check):
 
 
 @pytest.fixture
-def digraph_logistic_regression():
+def digraph_logistic_regression_2d():
     digraph = LocalClassifierPerParentNode(local_classifier=LogisticRegression())
     digraph.hierarchy_ = nx.DiGraph([("a", "b"), ("a", "c")])
     digraph.y_ = np.array([["a", "b"], ["a", "c"]])
@@ -33,56 +33,98 @@ def digraph_logistic_regression():
     return digraph
 
 
-def test_initialize_local_classifiers(digraph_logistic_regression):
-    digraph_logistic_regression._initialize_local_classifiers()
-    for node in digraph_logistic_regression.hierarchy_.nodes:
-        if node == digraph_logistic_regression.root_:
+def test_initialize_local_classifiers(digraph_logistic_regression_2d):
+    digraph_logistic_regression_2d._initialize_local_classifiers()
+    for node in digraph_logistic_regression_2d.hierarchy_.nodes:
+        if node == digraph_logistic_regression_2d.root_:
             assert isinstance(
-                digraph_logistic_regression.hierarchy_.nodes[node]["classifier"],
+                digraph_logistic_regression_2d.hierarchy_.nodes[node]["classifier"],
                 LogisticRegression,
             )
         else:
             with pytest.raises(KeyError):
                 isinstance(
-                    digraph_logistic_regression.hierarchy_.nodes[node]["classifier"],
+                    digraph_logistic_regression_2d.hierarchy_.nodes[node]["classifier"],
                     LogisticRegression,
                 )
 
 
-def test_fit_digraph(digraph_logistic_regression):
+@pytest.mark.parametrize("use_joblib", [True, False])
+def test_fit_digraph_2d(digraph_logistic_regression_2d, use_joblib):
     classifiers = {
         "a": {"classifier": LogisticRegression()},
     }
-    digraph_logistic_regression.n_jobs = 2
-    nx.set_node_attributes(digraph_logistic_regression.hierarchy_, classifiers)
-    digraph_logistic_regression._fit_digraph(local_mode=True)
+    digraph_logistic_regression_2d.n_jobs = 2
+    nx.set_node_attributes(digraph_logistic_regression_2d.hierarchy_, classifiers)
+    digraph_logistic_regression_2d._fit_digraph(local_mode=True, use_joblib=use_joblib)
     try:
-        check_is_fitted(digraph_logistic_regression.hierarchy_.nodes["a"]["classifier"])
+        check_is_fitted(
+            digraph_logistic_regression_2d.hierarchy_.nodes["a"]["classifier"]
+        )
     except NotFittedError as e:
         pytest.fail(repr(e))
     for node in ["b", "c"]:
         with pytest.raises(KeyError):
             check_is_fitted(
-                digraph_logistic_regression.hierarchy_.nodes[node]["classifier"]
+                digraph_logistic_regression_2d.hierarchy_.nodes[node]["classifier"]
             )
     assert 1
 
 
-def test_fit_digraph_joblib_multiprocessing(digraph_logistic_regression):
+@pytest.fixture
+def digraph_logistic_regression_3d():
+    digraph = LocalClassifierPerParentNode(local_classifier=LogisticRegression())
+    digraph.hierarchy_ = nx.DiGraph(
+        [
+            ("a", "b"),
+            ("a", "c"),
+            ("d", "e"),
+            ("d", "f"),
+        ]
+    )
+    digraph.y_ = np.array(
+        [
+            [["a", "b"], ["", ""]],
+            [["a", "c"], ["", ""]],
+            [["a", "b"], ["a", "c"]],
+            [["d", "e"], ["d", "f"]],
+        ]
+    )
+    digraph.X_ = np.array(
+        [
+            [1, 2],
+            [3, 4],
+            [5, 6],
+            [7, 8],
+        ]
+    )
+    digraph.logger_ = logging.getLogger("LCPPN")
+    digraph.root_ = "a"
+    digraph.separator_ = "::HiClass::Separator::"
+    digraph.sample_weight_ = None
     classifiers = {
         "a": {"classifier": LogisticRegression()},
+        "d": {"classifier": LogisticRegression()},
     }
-    digraph_logistic_regression.n_jobs = 2
-    nx.set_node_attributes(digraph_logistic_regression.hierarchy_, classifiers)
-    digraph_logistic_regression._fit_digraph(local_mode=True, use_joblib=True)
+    digraph.n_jobs = 2
+    nx.set_node_attributes(digraph.hierarchy_, classifiers)
+    return digraph
+
+
+@pytest.mark.parametrize("use_joblib", [True, False])
+def test_fit_digraph_3d(digraph_logistic_regression_3d, use_joblib):
+    digraph_logistic_regression_3d._fit_digraph(local_mode=True, use_joblib=use_joblib)
     try:
-        check_is_fitted(digraph_logistic_regression.hierarchy_.nodes["a"]["classifier"])
+        for node in ["a", "d"]:
+            check_is_fitted(
+                digraph_logistic_regression_3d.hierarchy_.nodes[node]["classifier"]
+            )
     except NotFittedError as e:
         pytest.fail(repr(e))
-    for node in ["b", "c"]:
+    for node in ["b", "c", "e", "f"]:
         with pytest.raises(KeyError):
             check_is_fitted(
-                digraph_logistic_regression.hierarchy_.nodes[node]["classifier"]
+                digraph_logistic_regression_3d.hierarchy_.nodes[node]["classifier"]
             )
     assert 1
 
@@ -117,7 +159,7 @@ def test_get_parents(digraph_2d):
 
 
 @pytest.fixture
-def x_and_y_arrays():
+def x_and_y_arrays_2d():
     graph = LocalClassifierPerParentNode()
     graph.X_ = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     graph.y_ = np.array([["a", "b", "c"], ["a", "e", "f"], ["d", "g", "h"]])
@@ -129,18 +171,85 @@ def x_and_y_arrays():
     return graph
 
 
-def test_get_successors(x_and_y_arrays):
-    x, y, weights = x_and_y_arrays._get_successors("a")
-    assert_array_equal(x_and_y_arrays.X_[0:2], x)
+def test_get_successors_2d_1(x_and_y_arrays_2d):
+    x, y, weights = x_and_y_arrays_2d._get_successors("a")
+    assert_array_equal(x_and_y_arrays_2d.X_[0:2], x)
     assert_array_equal(["b", "e"], y)
     assert weights is None
-    x, y, weights = x_and_y_arrays._get_successors("d")
-    assert_array_equal([x_and_y_arrays.X_[-1]], x)
+
+
+def test_get_successors_2d_2(x_and_y_arrays_2d):
+    x, y, weights = x_and_y_arrays_2d._get_successors("d")
+    assert_array_equal([x_and_y_arrays_2d.X_[-1]], x)
     assert_array_equal(["g"], y)
     assert weights is None
-    x, y, weights = x_and_y_arrays._get_successors("b")
-    assert_array_equal([x_and_y_arrays.X_[0]], x)
+
+
+def test_get_successors_2d_3(x_and_y_arrays_2d):
+    x, y, weights = x_and_y_arrays_2d._get_successors("b")
+    assert_array_equal([x_and_y_arrays_2d.X_[0]], x)
     assert_array_equal(["c"], y)
+    assert weights is None
+
+
+@pytest.fixture
+def x_and_y_arrays_3d():
+    graph = LocalClassifierPerParentNode()
+    graph.X_ = np.array(
+        [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+            # Multi-label
+            [10, 11, 12],
+            [13, 14, 15],
+        ]
+    )
+    graph.y_ = np.array(
+        [
+            [["a", "b", "c"], ["", "", ""]],
+            [["a", "e", "f"], ["", "", ""]],
+            [["d", "g", "h"], ["", "", ""]],
+            # Multi-label
+            [["a", "b", "c"], ["a", "e", "f"]],
+            [["a", "b", "c"], ["d", "g", "h"]],
+        ]
+    )
+    graph.hierarchy_ = nx.DiGraph(
+        [("a", "b"), ("b", "c"), ("a", "e"), ("e", "f"), ("d", "g"), ("g", "h")]
+    )
+    graph.root_ = "r"
+    graph.sample_weight_ = None
+    return graph
+
+
+def test_get_successors_3d_1(x_and_y_arrays_3d):
+    x, y, weights = x_and_y_arrays_3d._get_successors("a")
+    ground_truth_x = np.array(
+        [[1, 2, 3], [4, 5, 6], [10, 11, 12], [10, 11, 12], [13, 14, 15]]
+    )
+    ground_truth_y = np.array(["b", "e", "b", "e", "b"])
+    assert_array_equal(ground_truth_x, x)
+    assert_array_equal(ground_truth_y, y)
+    assert weights is None
+
+
+def test_get_successors_3d_2(x_and_y_arrays_3d):
+    x, y, weights = x_and_y_arrays_3d._get_successors("d")
+    ground_truth_x = x_and_y_arrays_3d.X_[[False, False, True, False, True]]
+    ground_truth_y = np.array(["g", "g"])
+    assert_array_equal(ground_truth_x, x)
+    assert_array_equal(ground_truth_y, y)
+    assert weights is None
+
+
+def test_get_successors_3d_3(x_and_y_arrays_3d):
+    x, y, weights = x_and_y_arrays_3d._get_successors("b")
+    ground_truth_x = x_and_y_arrays_3d.X_[[True, False, False, True, True]]
+    ground_truth_y = np.array(["c", "c", "c"])
+    assert_array_equal(ground_truth_x, x)
+    assert ground_truth_y.shape == y.shape
+    assert_array_equal(ground_truth_y, y)
     assert weights is None
 
 
