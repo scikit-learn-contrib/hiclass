@@ -143,9 +143,10 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             X = np.array(X)
 
         # Initialize array that holds predictions
-        y = np.empty(
-            (X.shape[0], self.multi_labels_, self.max_levels_), dtype=self.dtype_
-        )
+        # y = np.empty(
+        #     (X.shape[0], self.multi_labels_, self.max_levels_), dtype=self.dtype_
+        # )
+        y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
 
         # TODO: Add threshold to stop prediction halfway if need be
 
