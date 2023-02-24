@@ -11,7 +11,10 @@ import numpy as np
 
 from hiclass import BinaryPolicy
 from hiclass.ConstantClassifier import ConstantClassifier
-from hiclass.MultiLabelHierarchicalClassifier import MultiLabelHierarchicalClassifier, make_leveled
+from hiclass.MultiLabelHierarchicalClassifier import (
+    MultiLabelHierarchicalClassifier,
+    make_leveled,
+)
 
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_is_fitted
@@ -48,6 +51,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         self,
         local_classifier: BaseEstimator = None,
         binary_policy: str = "siblings",
+        tolerance: float = None,
         verbose: int = 0,
         edge_list: str = None,
         replace_classifiers: bool = True,
@@ -73,6 +77,9 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
             - `siblings`: Positive examples belong only to the class being considered and its descendants. All siblings and their descendant classes are negative examples.
 
             See :ref:`Training Policies` for more information about the different policies.
+        tolerance : float, default=None
+            The tolerance used to determine multi-labels. If set to None, only the child class with highest probability is predicted.
+            Otherwise, all child classes with :math:`probability >= max\_prob - tolerance` are predicted.
         verbose : int, default=0
             Controls the verbosity when fitting and predicting.
             See https://verboselogs.readthedocs.io/en/latest/readme.html#overview-of-logging-levels
@@ -98,6 +105,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
             bert=bert,
         )
         self.binary_policy = binary_policy
+        self.tolerance = tolerance
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -139,7 +147,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         return self
 
     # TODO: Fix predict for multi-label classification
-    def predict(self, X, threshold: float = 0.7) -> np.ndarray:
+    def predict(self, X) -> np.ndarray:
         """
         Predict classes for the given data.
 
@@ -174,8 +182,6 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         # Initialize array that holds predictions
         y = [[[]] for _ in range(X.shape[0])]
 
-        # TODO: Add threshold to stop prediction halfway if need be
-
         bfs = nx.bfs_successors(self.hierarchy_, source=self.root_)
 
         self.logger_.info("Predicting")
@@ -190,11 +196,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
                 y_row_indices = []
                 for row in range(X.shape[0]):
                     # create list of indices
-                    _t = [
-                        z
-                        for z, l in enumerate(y[row])
-                        if l[-1].split(self.separator_)[-1] == predecessor
-                    ]  # TODO: Deal with HiClass Seperator
+                    _t = [z for z, l in enumerate(y[row]) if l[-1] == predecessor]
 
                     # y_row_indices is a list of lists, each list contains the index of the row and a list of column indices
                     y_row_indices.append([row, _t])
@@ -215,27 +217,21 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
                         :, positive_index
                     ][:, 0]
 
-                # TODO: update here?
-                # get indices of probabilities that are higher than threshold or max
-                # alternatives: 
-                    # - threshold for each successor
-                    # - split only when two highest probabilities are close 
-                    # - just use predict method directly without probabilities
-                indices_probabilities_above_threshold = np.argwhere(
-                    probabilities >= threshold
+                # get indices of probabilities that are within tolerance of max
+                _tolerance = self.tolerance if self.tolerance else 1e-08
+
+                highest_probabilities = np.max(probabilities, axis=1).reshape(-1, 1)
+                indices_probabilities_within_tolerance = np.argwhere(
+                    np.greater_equal(probabilities, highest_probabilities - _tolerance)
                 )
                 # TODO: strategies for multiple predictions
                 # TODO: what to do in case of no probabilites above threshold?
-                
-                prediction = [[] for _ in range(len(subset_x))]
-                for row, column in indices_probabilities_above_threshold:
+
+                prediction = [[] for _ in range(subset_x.shape[0])]
+                for row, column in indices_probabilities_within_tolerance:
                     prediction[row].append(successors[column])
 
-
-                assert len(prediction) == len(y_row_indices)
-
-                # TODO: Bug when splitting, check test_fit_preduct for more info
-                k = 0 # index of prediction
+                k = 0  # index of prediction
                 for row, col_list in y_row_indices:
                     for j in col_list:
                         if not prediction[k]:
@@ -252,7 +248,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
 
         y = make_leveled(y)
         self._remove_separator(y)
-
+        y = np.array(y, dtype=self.dtype_)
         return y
 
     def _initialize_binary_policy(self):
