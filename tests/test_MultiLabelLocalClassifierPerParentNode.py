@@ -11,7 +11,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 
-from hiclass import MultiLabelLocalClassifierPerParentNode
+from hiclass.MultiLabelLocalClassifierPerParentNode import (
+    MultiLabelLocalClassifierPerParentNode,
+)
 from hiclass.ConstantClassifier import ConstantClassifier
 
 
@@ -95,7 +97,7 @@ def test_fit_1_class():
     )
     y = np.array([[["1", "2"]]])
     X = np.array([[1, 2]])
-    ground_truth = np.array([["1", "2"]])
+    ground_truth = np.array([[["1", "2"]]])
     lcppn.fit(X, y)
     prediction = lcppn.predict(X)
     assert_array_equal(ground_truth, prediction)
@@ -224,12 +226,12 @@ def test_fit_predict():
     lcppn = MultiLabelLocalClassifierPerParentNode(
         local_classifier=LogisticRegression()
     )
-    x = np.array([[1, 2], [3, 4]])
-    y = np.array([[["a", "b"]], [["b", "c"]]])
+    x = np.array([[0, -1], [1, 1]])
+    y = np.array([[["a", "b", "c"]], [["b", "c", ""]]])
     lcppn.fit(x, y)
     # TODO: fix this test after predict is implemented
-    # predictions = lcppn.predict(x)
-    # assert_array_equal(y, predictions)
+    predictions = lcppn.predict(x)
+    assert_array_equal(y, predictions)
 
 
 @pytest.fixture

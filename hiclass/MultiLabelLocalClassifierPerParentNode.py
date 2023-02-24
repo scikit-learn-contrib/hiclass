@@ -4,6 +4,7 @@ Local classifier per parent node approach.
 Numeric and string output labels are both handled.
 """
 from copy import deepcopy
+from collections import defaultdict
 
 import networkx as nx
 import numpy as np
@@ -12,7 +13,10 @@ from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
-from hiclass.MultiLabelHierarchicalClassifier import MultiLabelHierarchicalClassifier
+from hiclass.MultiLabelHierarchicalClassifier import (
+    MultiLabelHierarchicalClassifier,
+    make_leveled,
+)
 
 
 class MultiLabelLocalClassifierPerParentNode(
@@ -39,6 +43,7 @@ class MultiLabelLocalClassifierPerParentNode(
     def __init__(
         self,
         local_classifier: BaseEstimator = None,
+        tolerance: float = None,
         verbose: int = 0,
         edge_list: str = None,
         replace_classifiers: bool = True,
@@ -53,6 +58,9 @@ class MultiLabelLocalClassifierPerParentNode(
         local_classifier : BaseEstimator, default=LogisticRegression
             The local_classifier used to create the collection of local classifiers. Needs to have fit, predict and
             clone methods.
+        tolerance : float, default=None
+            The tolerance used to determine multi-labels. If set to None, only the child class with highest probability is predicted.
+            Otherwise, all child classes with :math:`probability >= max\_prob - tolerance` are predicted.
         verbose : int, default=0
             Controls the verbosity when fitting and predicting.
             See https://verboselogs.readthedocs.io/en/latest/readme.html#overview-of-logging-levels
@@ -70,6 +78,7 @@ class MultiLabelLocalClassifierPerParentNode(
         """
         super().__init__(
             local_classifier=local_classifier,
+            tolerance=tolerance,
             verbose=verbose,
             edge_list=edge_list,
             replace_classifiers=replace_classifiers,
@@ -77,6 +86,8 @@ class MultiLabelLocalClassifierPerParentNode(
             classifier_abbreviation="LCPPN",
             bert=bert,
         )
+
+        self.tolerance = self.tolerance if self.tolerance is not None else 0.0
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -142,36 +153,75 @@ class MultiLabelLocalClassifierPerParentNode(
             X = np.array(X)
 
         # Initialize array that holds predictions
-        y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
+        # y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
 
         # TODO: Add threshold to stop prediction halfway if need be
 
         self.logger_.info("Predicting")
 
+        y = [[] for _ in range(X.shape[0])]
         # Predict first level
         classifier = self.hierarchy_.nodes[self.root_]["classifier"]
-        y[:, 0] = classifier.predict(X).flatten()
 
-        self._predict_remaining_levels(X, y)
+        probabilities = classifier.predict_proba(X)
+        for probs, ls in zip(probabilities, y):
+            prediction = classifier.classes_[
+                np.greater_equal(probs, np.max(probs) - self.tolerance)
+            ]
+            for pred in prediction:
+                ls.append([pred])
 
-        y = self._convert_to_1d(y)
-
+        y = self._predict_remaining_(X, y)
+        y = make_leveled(y)
+        y = np.array(y, dtype=self.dtype_)
         self._remove_separator(y)
 
         return y
 
-    def _predict_remaining_levels(self, X, y):
-        for level in range(1, y.shape[1]):
-            predecessors = set(y[:, level - 1])
-            predecessors.discard("")
-            for predecessor in predecessors:
-                mask = np.isin(y[:, level - 1], predecessor)
-                predecessor_x = X[mask]
-                if predecessor_x.shape[0] > 0:
-                    successors = list(self.hierarchy_.successors(predecessor))
-                    if len(successors) > 0:
-                        classifier = self.hierarchy_.nodes[predecessor]["classifier"]
-                        y[mask, level] = classifier.predict(predecessor_x).flatten()
+    def _get_mask_and_indices(self, y, node):
+        mask = np.zeros(len(y), dtype=bool)
+        indicies = defaultdict(lambda: [])
+        for i, multi_label in enumerate(y):
+            for j, label in enumerate(multi_label):
+                if label[-1].split(self.separator_)[-1] == node:
+                    mask[i] = True
+                    indicies[i].append(j)
+        return mask, indicies
+
+    def _get_nodes_to_predict(self, y):
+        last_predictions = set()
+        for multi_label in y:
+            for label in multi_label:
+                last_predictions.add(label[-1].split(self.separator_)[-1])
+
+        nodes_to_predict = []
+        for node in last_predictions:
+            if node in self.hierarchy_.nodes and self.hierarchy_.nodes[node].get(
+                "classifier"
+            ):
+                nodes_to_predict.append(node)
+
+        return nodes_to_predict
+
+    def _predict_remaining_(self, X, y):
+        nodes_to_predict = self._get_nodes_to_predict(y)
+        while nodes_to_predict:
+            for node in nodes_to_predict:
+                classifier = self.hierarchy_.nodes[node]["classifier"]
+                mask, indices = self._get_mask_and_indices(y, node)
+                subset_x = X[mask]
+                probabilities = classifier.predict_proba(subset_x)
+                for probs, (i, ls) in zip(probabilities, indices.items()):
+                    prediction = classifier.classes_[
+                        np.greater_equal(probs, np.max(probs) - self.tolerance)
+                    ]
+                    for j in ls:
+                        y[i][j].append(prediction[0])
+                        for pred in prediction[1:]:
+                            _old_y = y[i][j][:-1].copy()
+                            y[i].insert(j + 1, _old_y + [pred])
+            nodes_to_predict = self._get_nodes_to_predict(y)
+        return y
 
     def _initialize_local_classifiers(self):
         super()._initialize_local_classifiers()

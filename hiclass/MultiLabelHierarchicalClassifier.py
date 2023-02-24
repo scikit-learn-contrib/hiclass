@@ -10,6 +10,13 @@ from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import _check_sample_weight
 
+import functools
+import sklearn.utils.validation
+
+# TODO: Move to MultiLabelHierarchicalClassifier (Parent Class)
+sklearn.utils.validation.check_array = functools.partial(
+    sklearn.utils.validation.check_array, allow_nd=True
+)
 
 try:
     import ray
@@ -51,7 +58,9 @@ def make_leveled(y):
         levels = max([len(label) for row in y for label in row])
     except TypeError:
         return y
-    leveled_y = np.full((rows, multi_labels, levels), "", dtype=object) # dtype object relevant to allow for string labels
+    leveled_y = np.full(
+        (rows, multi_labels, levels), "", dtype=object
+    )  # dtype object relevant to allow for string labels
     for i, row in enumerate(y):
         for j, multi_label in enumerate(row):
             for k, label in enumerate(multi_label):
@@ -68,6 +77,7 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
     def __init__(
         self,
         local_classifier: BaseEstimator = None,
+        tolerance: float = None,
         verbose: int = 0,
         edge_list: str = None,
         replace_classifiers: bool = True,
@@ -83,6 +93,9 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         local_classifier : BaseEstimator, default=LogisticRegression
             The local_classifier used to create the collection of local classifiers. Needs to have fit, predict and
             clone methods.
+        tolerance : float, default=None
+            The tolerance used to determine multi-labels. If set to None, only the child class with highest probability is predicted.
+            Otherwise, all child classes with :math:`probability >= max\_prob - tolerance` are predicted.
         verbose : int, default=0
             Controls the verbosity when fitting and predicting.
             See https://verboselogs.readthedocs.io/en/latest/readme.html#overview-of-logging-levels
@@ -101,6 +114,7 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
             The abbreviation of the local hierarchical classifier to be displayed during logging.
         """
         self.local_classifier = local_classifier
+        self.tolerance = tolerance
         self.verbose = verbose
         self.edge_list = edge_list
         self.replace_classifiers = replace_classifiers
@@ -250,6 +264,7 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         if self.y_.ndim == 1:
             # Create max_levels_ variable
             self.max_levels_ = 1
+            self.max_multi_labels_ = 1
             self.logger_.info(f"Creating digraph from {self.y_.size} 1D labels")
             for label in self.y_:
                 self.hierarchy_.add_node(label)
@@ -258,6 +273,7 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         if self.y_.ndim == 2:
             # Create max_levels variable
             self.max_levels_ = self.y_.shape[1]
+            self.max_multi_labels_ = 1
             rows, columns = self.y_.shape
             self.logger_.info(f"Creating digraph from {rows} 2D labels")
             for row in range(rows):
@@ -314,7 +330,9 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
             self.logger_.error("Cycle detected in graph")
             raise ValueError("Graph is not directed acyclic")
 
-    def _convert_1d_or_2d_y_to_3d(self):
+    def _convert_1d_or_2d_y_to_3d(
+        self,
+    ):
         # This conversion is necessary for the multi-label binary policies
         if self.y_.ndim == 1:
             self.y_ = np.reshape(self.y_, (-1, 1, 1))
@@ -342,10 +360,18 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
         else:
             self.local_classifier_ = self.local_classifier
 
+    def _convert_to_2d(self, y):
+        # Convert predictions to 2D if there is only 1 label (should probably be deleted since this MultiLabel class should only be called when multipe y labels exist)
+        if self.max_multi_labels_ == 1:
+            y = y[:, 0, :]  # Remove multi-label dimension
+        return y
+
     def _convert_to_1d(self, y):
         # Convert predictions to 1D if there is only 1 column
+        # TODO: Decide if to keep in case of multi-label
         if self.max_levels_ == 1:
             y = y.flatten()
+
         return y
 
     def _remove_separator(self, y):
