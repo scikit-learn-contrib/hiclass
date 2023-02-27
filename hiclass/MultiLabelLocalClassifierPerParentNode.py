@@ -183,7 +183,8 @@ class MultiLabelLocalClassifierPerParentNode(
         indicies = defaultdict(lambda: [])
         for i, multi_label in enumerate(y):
             for j, label in enumerate(multi_label):
-                if label[-1].split(self.separator_)[-1] == node:
+                if label[-1] == node:
+                    # if label[-1].split(self.separator_)[-1] == node:
                     mask[i] = True
                     indicies[i].append(j)
         return mask, indicies
@@ -192,7 +193,7 @@ class MultiLabelLocalClassifierPerParentNode(
         last_predictions = set()
         for multi_label in y:
             for label in multi_label:
-                last_predictions.add(label[-1].split(self.separator_)[-1])
+                last_predictions.add(label[-1])
 
         nodes_to_predict = []
         for node in last_predictions:
@@ -252,7 +253,9 @@ class MultiLabelLocalClassifierPerParentNode(
         for i in range(self.y_.shape[0]):
             if mask[i]:
                 row = self.y_[i]
-                labels = row[np.isin(row, successors)]
+                labels = np.unique(
+                    row[np.isin(row, successors)]
+                )  # We do not want to double count the same row, e.g [["a", "b"], ["a", "c"]] should only count once for the root classifier with y label "a"
                 y.extend(labels)
                 for _ in range(labels.shape[0]):
                     if isinstance(self.X_, csr_matrix):

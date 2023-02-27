@@ -8,6 +8,7 @@ from numpy.testing import assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 
@@ -189,48 +190,155 @@ def fitted_logistic_regression():
     digraph.hierarchy_ = nx.DiGraph(
         [("r", "1"), ("r", "2"), ("1", "1.1"), ("1", "1.2"), ("2", "2.1"), ("2", "2.2")]
     )
-    digraph.y_ = np.array([[["1", "1.1"], ["1", "1.2"], ["2", "2.1"], ["2", "2.2"]]])
-    digraph.X_ = np.array([[1, 2], [3, 4], [5, 6], [7, 8]])
-    digraph.logger_ = logging.getLogger("LCPPN")
+    digraph.X_ = np.array(
+        [
+            [1, -1],
+            [1, 1],
+            [1, 0],
+            [2, -1],
+            [2, 1],
+        ]
+    )
+    digraph.y_ = np.array(
+        [
+            [["1", "1.1"]],
+            [["1", "1.2"]],
+            [["1", "1.1"], ["1", "1.2"]],
+            [["2", "2.1"]],
+            [["2", "2.2"]],
+        ]
+    )
+    digraph.logger_ = logging.getLogger("LCPN")
     digraph.max_levels_ = 2
     digraph.dtype_ = "<U3"
     digraph.root_ = "r"
     digraph.separator_ = "::HiClass::Separator::"
+    digraph.tolerance = 0.0
     classifiers = {
         "r": {"classifier": LogisticRegression()},
         "1": {"classifier": LogisticRegression()},
         "2": {"classifier": LogisticRegression()},
     }
-    classifiers["r"]["classifier"].fit(digraph.X_, ["1", "1", "2", "2"])
-    classifiers["1"]["classifier"].fit(digraph.X_[:2], ["1.1", "1.2"])
-    classifiers["2"]["classifier"].fit(digraph.X_[2:], ["2.1", "2.2"])
+    classifiers["r"]["classifier"].fit(digraph.X_, ["1", "1", "1", "2", "2"])
+    classifiers["1"]["classifier"].fit(
+        digraph.X_[[0, 1, 2, 2]], ["1.1", "1.2", "1.1", "1.2"]
+    )
+    classifiers["2"]["classifier"].fit(digraph.X_[[3, 4]], ["2.1", "2.2"])
     nx.set_node_attributes(digraph.hierarchy_, classifiers)
     return digraph
 
 
-def test_predict(fitted_logistic_regression):
-    ground_truth = np.array([["2", "2.2"], ["2", "2.1"], ["1", "1.2"], ["1", "1.1"]])
-    prediction = fitted_logistic_regression.predict([[7, 8], [5, 6], [3, 4], [1, 2]])
+def test_predict_no_tolerance(fitted_logistic_regression):
+    ground_truth = np.array(
+        [
+            [["1", "1.1"], ["", ""]],
+            [["1", "1.2"], ["", ""]],
+            [["1", "1.1"], ["1", "1.2"]],
+            [["2", "2.1"], ["", ""]],
+            [["2", "2.2"], ["", ""]],
+        ]
+    )
+    X = np.array(
+        [
+            [1, -1],
+            [1, 1],
+            [1, 0],
+            [2, -1],
+            [2, 1],
+        ]
+    )
+    prediction = fitted_logistic_regression.predict(X)
+    assert_array_equal(ground_truth, prediction)
+
+
+@pytest.mark.parametrize(
+    "tolerance,expected", [(0.0, [["1", "1.2"]]), (0.1, [["1", "1.1"], ["1", "1.2"]])]
+)
+def test_predict_tolerance(fitted_logistic_regression, tolerance, expected):
+    # test that depending on tolerance set predicts multilabels or not
+    fitted_logistic_regression.tolerance = tolerance
+    ground_truth = np.array([expected])
+    X = np.array([[1, 0.01]])
+    prediction = fitted_logistic_regression.predict(X)
     assert_array_equal(ground_truth, prediction)
 
 
 def test_predict_sparse(fitted_logistic_regression):
-    ground_truth = np.array([["2", "2.2"], ["2", "2.1"], ["1", "1.2"], ["1", "1.1"]])
+    ground_truth = np.array(
+        [
+            [["1", "1.1"], ["", ""]],
+            [["1", "1.2"], ["", ""]],
+            [["1", "1.1"], ["1", "1.2"]],
+            [["2", "2.1"], ["", ""]],
+            [["2", "2.2"], ["", ""]],
+        ]
+    )
     prediction = fitted_logistic_regression.predict(
-        csr_matrix([[7, 8], [5, 6], [3, 4], [1, 2]])
+        csr_matrix([[1, -1], [1, 1], [1, 0], [2, -1], [2, 1]])
     )
     assert_array_equal(ground_truth, prediction)
+
+
+def test_fit_predict_dag():
+    lcppn = MultiLabelLocalClassifierPerParentNode(
+        local_classifier=LogisticRegression()
+    )
+    x = np.array([[0, -1], [1, 1]])
+    y = np.array(
+        [[["a", "b", "c"]], [["b", "c", ""]]]
+    )  # TODO: How to deal with seperator nodes?, in this case we have two classifiers for b: "b" and "a::sep::b"
+    lcppn.fit(x, y)
+    predictions = lcppn.predict(x)
+    assert_array_equal(y, predictions)
 
 
 def test_fit_predict():
     lcppn = MultiLabelLocalClassifierPerParentNode(
         local_classifier=LogisticRegression()
     )
-    x = np.array([[0, -1], [1, 1]])
-    y = np.array([[["a", "b", "c"]], [["b", "c", ""]]])
+    y = np.array(
+        [
+            [["1", "1.1"], ["", ""]],
+            [["1", "1.2"], ["", ""]],
+            [["1", "1.1"], ["1", "1.2"]],
+            [["2", "2.1"], ["", ""]],
+            [["2", "2.2"], ["", ""]],
+        ]
+    )
+    x = np.array([[1, -1], [1, 1], [1, 0], [2, -1], [2, 1]])
     lcppn.fit(x, y)
-    # TODO: fix this test after predict is implemented
     predictions = lcppn.predict(x)
+    assert_array_equal(y, predictions)
+
+
+def test_fit_predict_deep():
+    lcpn = MultiLabelLocalClassifierPerParentNode(
+        local_classifier=LogisticRegression(), tolerance=0.1
+    )
+    x = np.array(
+        [
+            [1, 1, -1],
+            [1, 1, 1],
+        ]
+    )
+    y = np.array(
+        [
+            [
+                ["1", "1.1", "1.1.1"],
+                ["1", "1.1", "1.1.2"],
+                ["1", "1.2", "1.2.1"],
+                ["1", "1.2", "1.2.2"],
+            ],
+            [
+                ["1", "1.1", "1.1.1"],
+                ["1", "1.1", "1.1.2"],
+                ["1", "1.2", "1.2.1"],
+                ["1", "1.2", "1.2.2"],
+            ],
+        ]
+    )
+    lcpn.fit(x, y)
+    predictions = lcpn.predict(x)
     assert_array_equal(y, predictions)
 
 
@@ -242,9 +350,9 @@ def empty_levels():
         [3],
     ]
     y = [
-        ["1"],
-        ["2", "2.1"],
-        ["3", "3.1", "3.1.2"],
+        [["1"]],
+        [["2", "2.1"]],
+        [["3", "3.1", "3.1.2"]],
     ]
     return X, y
 
@@ -253,23 +361,22 @@ def test_empty_levels(empty_levels):
     lcppn = MultiLabelLocalClassifierPerParentNode()
     X, y = empty_levels
     lcppn.fit(X, y)
-    # TODO: Fix this test after predict is implemented
-    # predictions = lcppn.predict(X)
-    # ground_truth = [
-    #     ["1", "", ""],
-    #     ["2", "2.1", ""],
-    #     ["3", "3.1", "3.1.2"],
-    # ]
-    # assert list(lcppn.hierarchy_.nodes) == [
-    #     "1",
-    #     "2",
-    #     "2" + lcppn.separator_ + "2.1",
-    #     "3",
-    #     "3" + lcppn.separator_ + "3.1",
-    #     "3" + lcppn.separator_ + "3.1" + lcppn.separator_ + "3.1.2",
-    #     lcppn.root_,
-    # ]
-    # assert_array_equal(ground_truth, predictions)
+    predictions = lcppn.predict(X)
+    ground_truth = [
+        [["1", "", ""]],
+        [["2", "2.1", ""]],
+        [["3", "3.1", "3.1.2"]],
+    ]
+    assert list(lcppn.hierarchy_.nodes) == [
+        "1",
+        "2",
+        "2" + lcppn.separator_ + "2.1",
+        "3",
+        "3" + lcppn.separator_ + "3.1",
+        "3" + lcppn.separator_ + "3.1" + lcppn.separator_ + "3.1.2",
+        lcppn.root_,
+    ]
+    assert_array_equal(ground_truth, predictions)
 
 
 def test_bert():
