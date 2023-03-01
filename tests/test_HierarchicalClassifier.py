@@ -11,36 +11,6 @@ from hiclass.HierarchicalClassifier import HierarchicalClassifier, make_leveled
 
 
 @pytest.fixture
-def ambiguous_node_str():
-    classifier = HierarchicalClassifier()
-    classifier.y_ = np.array([["a", "b"], ["b", "c"]])
-    return classifier
-
-
-def test_disambiguate_str(ambiguous_node_str):
-    ground_truth = np.array(
-        [["a", "a::HiClass::Separator::b"], ["b", "b::HiClass::Separator::c"]]
-    )
-    ambiguous_node_str._disambiguate()
-    assert_array_equal(ground_truth, ambiguous_node_str.y_)
-
-
-@pytest.fixture
-def ambiguous_node_int():
-    classifier = HierarchicalClassifier()
-    classifier.y_ = np.array([[1, 2], [2, 3]])
-    return classifier
-
-
-def test_disambiguate_int(ambiguous_node_int):
-    ground_truth = np.array(
-        [["1", "1::HiClass::Separator::2"], ["2", "2::HiClass::Separator::3"]]
-    )
-    ambiguous_node_int._disambiguate()
-    assert_array_equal(ground_truth, ambiguous_node_int.y_)
-
-
-@pytest.fixture
 def graph_1d():
     classifier = HierarchicalClassifier()
     classifier.y_ = np.array(["a", "b", "c", "d"])
@@ -81,7 +51,6 @@ def digraph_2d():
     classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
     classifier.logger_ = logging.getLogger("HC")
     classifier.edge_list = tempfile.TemporaryFile()
-    classifier.separator_ = "::HiClass::Separator::"
     return classifier
 
 

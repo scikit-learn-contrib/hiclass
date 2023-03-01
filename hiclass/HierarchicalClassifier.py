@@ -47,8 +47,8 @@ def make_leveled(y):
         depth = max([len(row) for row in y])
     except TypeError:
         return y
-    y = np.array(y)
     leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
+    print(leveled_y)
     return np.array(leveled_y)
 
 
@@ -154,7 +154,6 @@ class HierarchicalClassifier(abc.ABC):
 
         # Avoids creating more columns in prediction if edges are a->b and b->c,
         # which would generate the prediction a->b->c
-        self._disambiguate()
 
         # Create DAG from self.y_ and store to self.hierarchy_
         self._create_digraph()
@@ -196,19 +195,6 @@ class HierarchicalClassifier(abc.ABC):
             # Add ch to logger
             self.logger_.addHandler(ch)
 
-    def _disambiguate(self):
-        self.separator_ = "::HiClass::Separator::"
-        if self.y_.ndim == 2:
-            new_y = []
-            for i in range(self.y_.shape[0]):
-                row = [str(self.y_[i, 0])]
-                for j in range(1, self.y_.shape[1]):
-                    parent = str(row[-1])
-                    child = str(self.y_[i, j])
-                    row.append(parent + self.separator_ + child)
-                new_y.append(np.asarray(row, dtype=np.str_))
-            self.y_ = np.array(new_y)
-
     def _create_digraph(self):
         # Create DiGraph
         self.hierarchy_ = nx.DiGraph()
@@ -247,8 +233,8 @@ class HierarchicalClassifier(abc.ABC):
             self.logger_.info(f"Creating digraph from {rows} 2D labels")
             for row in range(rows):
                 for column in range(columns - 1):
-                    parent = self.y_[row, column].split(self.separator_)[-1]
-                    child = self.y_[row, column + 1].split(self.separator_)[-1]
+                    parent = self.y_[row, column]
+                    child = self.y_[row, column + 1]
                     if parent != "" and child != "":
                         # Only add edge if both parent and child are not empty
                         self.hierarchy_.add_edge(
@@ -263,7 +249,7 @@ class HierarchicalClassifier(abc.ABC):
             # Add quotes to all nodes in case the text has commas
             mapping = {}
             for node in self.hierarchy_:
-                mapping[node] = '"{}"'.format(node.split(self.separator_)[-1])
+                mapping[node] = '"{}"'.format(node)
             hierarchy = nx.relabel_nodes(self.hierarchy_, mapping, copy=True)
             # Export DAG to CSV file
             self.logger_.info(f"Writing edge list to file {self.edge_list}")
@@ -306,13 +292,6 @@ class HierarchicalClassifier(abc.ABC):
         if self.max_levels_ == 1:
             y = y.flatten()
         return y
-
-    def _remove_separator(self, y):
-        # Remove separator from predictions
-        if y.ndim == 2:
-            for i in range(y.shape[0]):
-                for j in range(1, y.shape[1]):
-                    y[i, j] = y[i, j].split(self.separator_)[-1]
 
     def _fit_node_classifier(
         self, nodes, local_mode: bool = False, use_joblib: bool = False

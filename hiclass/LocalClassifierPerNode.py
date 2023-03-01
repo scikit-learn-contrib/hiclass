@@ -173,8 +173,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             if subset_x.shape[0] > 0:
                 probabilities = np.zeros((subset_x.shape[0], len(successors)))
                 for i, successor in enumerate(successors):
-                    successor_name = str(successor).split(self.separator_)[-1]
-                    self.logger_.info(f"Predicting for node '{successor_name}'")
                     classifier = self.hierarchy_.nodes[successor]["classifier"]
                     positive_index = np.where(classifier.classes_ == 1)[0]
                     probabilities[:, i] = classifier.predict_proba(subset_x)[
@@ -191,8 +189,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 y[mask, level] = prediction
 
         y = self._convert_to_1d(y)
-
-        self._remove_separator(y)
 
         return y
 
