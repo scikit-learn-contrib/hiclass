@@ -47,8 +47,8 @@ def make_leveled(y):
         depth = max([len(row) for row in y])
     except TypeError:
         return y
+    y = np.array(y)
     leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
-    print(leveled_y)
     return np.array(leveled_y)
 
 
@@ -327,3 +327,6 @@ class HierarchicalClassifier(abc.ABC):
         del self.y_
         if self.sample_weight_ is not None:
             del self.sample_weight_
+
+    def _fit_digraph(self):
+        raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")

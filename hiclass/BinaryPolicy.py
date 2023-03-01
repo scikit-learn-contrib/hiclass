@@ -36,6 +36,9 @@ class BinaryPolicy(ABC):
         self.X = X
         self.y = y
         self.sample_weight = sample_weight
+        self.axis = {
+            2: 1,
+        }
 
     def positive_examples(self, node) -> np.ndarray:
         """
@@ -164,6 +167,15 @@ class BinaryPolicy(ABC):
             y[: positive_x.shape[0]] = 1
         return X, y, sample_weights
 
+    def _get_axis(self):
+        return self.axis[self.y.ndim]
+
+    def _get_any(self, mask):
+        if self.y.ndim > 1:
+            return np.any(mask, axis=self._get_axis())
+        else:
+            return mask
+
 
 class ExclusivePolicy(BinaryPolicy):
     """Implement the exclusive policy of the referenced paper."""
@@ -184,7 +196,7 @@ class ExclusivePolicy(BinaryPolicy):
         positive_examples : np.ndarray
             A mask for which examples are included (True) and which are not.
         """
-        positive_examples = np.isin(self.y, node).any(axis=1)
+        positive_examples = self._get_any(np.isin(self.y, node))
         return positive_examples
 
     def negative_examples(self, node) -> np.ndarray:
@@ -229,7 +241,7 @@ class LessExclusivePolicy(ExclusivePolicy):
         """
         descendants = self._get_descendants(node, inclusive=True)
         negative_examples = np.logical_not(
-            np.isin(self.y, list(descendants)).any(axis=1)
+            np.isin(self.y, list(descendants)).any(axis=self._get_axis())
         )
         return negative_examples
 
@@ -254,7 +266,7 @@ class ExclusiveSiblingsPolicy(ExclusivePolicy):
             A mask for which examples are included (True) and which are not.
         """
         siblings = self._get_siblings(node)
-        negative_examples = np.isin(self.y, list(siblings)).any(axis=1)
+        negative_examples = np.isin(self.y, list(siblings)).any(axis=self._get_axis())
         return negative_examples
 
 
@@ -278,7 +290,9 @@ class InclusivePolicy(BinaryPolicy):
             A mask for which examples are included (True) and which are not.
         """
         descendants = self._get_descendants(node, inclusive=True)
-        positive_examples = np.isin(self.y, list(descendants)).any(axis=1)
+        positive_examples = np.isin(self.y, list(descendants)).any(
+            axis=self._get_axis()
+        )
         return positive_examples
 
     def negative_examples(self, node) -> np.ndarray:
@@ -301,7 +315,7 @@ class InclusivePolicy(BinaryPolicy):
         ancestors = nx.ancestors(self.digraph, node)
         descendants_and_ancestors = set.union(descendants, ancestors)
         negative_examples = np.logical_not(
-            np.isin(self.y, list(descendants_and_ancestors)).any(axis=1)
+            np.isin(self.y, list(descendants_and_ancestors)).any(axis=self._get_axis())
         )
         return negative_examples
 
@@ -327,7 +341,7 @@ class LessInclusivePolicy(InclusivePolicy):
         """
         descendants = self._get_descendants(node, inclusive=True)
         negative_examples = np.logical_not(
-            np.isin(self.y, list(descendants)).any(axis=1)
+            np.isin(self.y, list(descendants)).any(axis=self._get_axis())
         )
         return negative_examples
 
@@ -356,7 +370,9 @@ class SiblingsPolicy(InclusivePolicy):
         negative_classes = set()
         for sibling in siblings:
             negative_classes.update(self._get_descendants(sibling, inclusive=True))
-        negative_examples = np.isin(self.y, list(negative_classes)).any(axis=1)
+        negative_examples = np.isin(self.y, list(negative_classes)).any(
+            axis=self._get_axis()
+        )
         return negative_examples
 
 

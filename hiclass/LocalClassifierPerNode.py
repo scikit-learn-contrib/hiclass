@@ -186,7 +186,8 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                     self.hierarchy_, self.root_, predecessor
                 )
                 prediction = np.array(prediction)
-                y[mask, level] = prediction
+                if level < self.max_levels_:
+                    y[mask, level] = prediction
 
         y = self._convert_to_1d(y)
 
