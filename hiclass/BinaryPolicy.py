@@ -241,7 +241,7 @@ class LessExclusivePolicy(ExclusivePolicy):
         """
         descendants = self._get_descendants(node, inclusive=True)
         negative_examples = np.logical_not(
-            np.isin(self.y, list(descendants)).any(axis=self._get_axis())
+            self._get_any(np.isin(self.y, list(descendants)))
         )
         return negative_examples
 
