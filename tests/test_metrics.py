@@ -13,22 +13,29 @@ def test_unmatched_lengths():
 def test_precision_micro():
     y_true = np.array([[1, 2, 3, 4], [1, 2, 5, 6]])
     y_pred = np.array([[1, 2, 5, 6], [1, 2, 3, 4]])
-    assert metrics.precision(y_true, y_pred) == 0.5
-    assert metrics.precision(y_true, y_true) == 1
+    assert metrics.precision(y_true, y_pred, "micro") == 0.5
+    assert metrics.precision(y_true, y_true, "micro") == 1
 
 
 def test_precision_macro():
     y_true = np.array([[1, 2, 3, 4], [1, 2, 5, 6]])
     y_pred = np.array([[1, 5, 6, 7], [1, 2, 3, 4]])
-    assert metrics.precision(y_true, y_pred) == 0.375
-    assert metrics.precision(y_true, y_true) == 1
+    assert metrics.precision(y_true, y_pred, "macro") == 0.375
+    assert metrics.precision(y_true, y_true, "macro") == 1
 
 
-def test_recall():
+def test_recall_micro():
     y_true = np.array([[1, 2], [1, 2]])
     y_pred = np.array([[1, 2, 5, 6], [1, 2, 3, 4]])
-    assert metrics.recall(y_true, y_pred) == 1
-    assert metrics.recall(y_pred, y_true) == 0.5
+    assert metrics.recall(y_true, y_pred, "micro") == 1
+    assert metrics.recall(y_pred, y_true, "micro") == 0.5
+
+
+def test_recall_macro():
+    y_true = np.array([[1, 2], [1, 2]])
+    y_pred = np.array([[1, 5, 6, 7], [1, 2, 3, 4]])
+    assert metrics.recall(y_true, y_pred, "macro") == 0.75
+    assert metrics.recall(y_pred, y_true, "macro") == 0.375
 
 
 def test_f1():

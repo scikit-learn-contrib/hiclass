@@ -37,7 +37,7 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     """
     average_functions = {
         "micro": _precision_micro,
-        # "macro": _precision_macro,
+        "macro": _precision_macro,
     }
     return average_functions[average](y_true, y_pred)
 
@@ -70,21 +70,14 @@ def _precision_macro(y_true: np.ndarray, y_pred: np.ndarray):
         predicted_set = set(predicted)
         predicted_set.discard("")
         intersection = len(ground_truth_set.intersection(predicted_set))
-        precision = intersection / len(predicted_set)
-        sum_precisions = sum_precisions + precision
-    precision = sum_precisions / len(y_true)
-    return precision
+        sample_precision = intersection / len(predicted_set)
+        sum_precisions = sum_precisions + sample_precision
+    return sum_precisions / len(y_true)
 
 
-def recall(y_true: np.ndarray, y_pred: np.ndarray):
+def recall(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     r"""
-    Compute recall score for hierarchical classification.
-
-    :math:`\displaystyle{hR = \frac{\sum_i|\alpha_i \cap \beta_i|}{\sum_i|\beta_i|}}`,
-    where :math:`\alpha_i` is the set consisting of the most specific classes predicted
-    for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the
-    set containing the true most specific classes of test example :math:`i` and all
-    their ancestors, with summations computed over all test examples.
+    Compute hierarchical recall score.
 
     Parameters
     ----------
@@ -92,11 +85,25 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray):
         Ground truth (correct) labels.
     y_pred : np.array of shape (n_samples, n_levels)
         Predicted labels, as returned by a classifier.
+    average: {"micro", "macro"}, str, default="micro"
+        This parameter determines the type of averaging performed during the computation:
+
+        - `micro`: The recall is computed by summing over all individual instances, :math:`\displaystyle{hR = \frac{\sum_{i=1}^{n}|\alpha_i \cap \beta_i|}{\sum_{i=1}^{n}|\beta_i|}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors, with summations computed over all test examples.
+        - `macro`: The recall is computed for each instance and then averaged, :math:`hR = \displaystyle{\frac{\sum_{i=1}^{n}\frac{| \alpha_i \cap \beta_i |}{| \beta_i |}}{n}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors.
+
     Returns
     -------
     recall : float
         What proportion of actual positives was identified correctly?
     """
+    average_functions = {
+        "micro": _recall_micro,
+        "macro": _recall_macro,
+    }
+    return average_functions[average](y_true, y_pred)
+
+
+def _recall_micro(y_true: np.ndarray, y_pred: np.ndarray):
     y_true, y_pred = _validate_input(y_true, y_pred)
     sum_intersection = 0
     sum_prediction_and_ancestors = 0
@@ -113,6 +120,20 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray):
         )
     recall = sum_intersection / sum_prediction_and_ancestors
     return recall
+
+
+def _recall_macro(y_true: np.ndarray, y_pred: np.ndarray):
+    y_true, y_pred = _validate_input(y_true, y_pred)
+    sum_recalls = 0
+    for ground_truth, prediction in zip(y_true, y_pred):
+        ground_truth_set = set(ground_truth)
+        ground_truth_set.discard("")
+        predicted_set = set(prediction)
+        predicted_set.discard("")
+        intersection = len(ground_truth_set.intersection(predicted_set))
+        sample_recall = intersection / len(ground_truth_set)
+        sum_recalls = sum_recalls + sample_recall
+    return sum_recalls / len(y_true)
 
 
 def f1(y_true: np.ndarray, y_pred: np.ndarray):
