@@ -63,12 +63,7 @@ def _precision_macro(y_true: np.ndarray, y_pred: np.ndarray):
     y_true, y_pred = _validate_input(y_true, y_pred)
     sum_precisions = 0
     for ground_truth, predicted in zip(y_true, y_pred):
-        ground_truth_set = set(ground_truth)
-        ground_truth_set.discard("")
-        predicted_set = set(predicted)
-        predicted_set.discard("")
-        intersection = len(ground_truth_set.intersection(predicted_set))
-        sample_precision = intersection / len(predicted_set)
+        sample_precision = _precision_micro([ground_truth], [predicted])
         sum_precisions = sum_precisions + sample_precision
     return sum_precisions / len(y_true)
 
@@ -124,12 +119,7 @@ def _recall_macro(y_true: np.ndarray, y_pred: np.ndarray):
     y_true, y_pred = _validate_input(y_true, y_pred)
     sum_recalls = 0
     for ground_truth, prediction in zip(y_true, y_pred):
-        ground_truth_set = set(ground_truth)
-        ground_truth_set.discard("")
-        predicted_set = set(prediction)
-        predicted_set.discard("")
-        intersection = len(ground_truth_set.intersection(predicted_set))
-        sample_recall = intersection / len(ground_truth_set)
+        sample_recall = _recall_micro([ground_truth], [prediction])
         sum_recalls = sum_recalls + sample_recall
     return sum_recalls / len(y_true)
 
@@ -154,8 +144,25 @@ def f1(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     f1 : float
         Weighted average of the precision and recall
     """
+    average_functions = {
+        "micro": _f_score_micro,
+        "macro": _f_score_macro,
+    }
+    return average_functions[average](y_true, y_pred)
+
+
+def _f_score_micro(y_true: np.ndarray, y_pred: np.ndarray):
     y_true, y_pred = _validate_input(y_true, y_pred)
     prec = precision(y_true, y_pred)
     rec = recall(y_true, y_pred)
     f1 = 2 * prec * rec / (prec + rec)
     return f1
+
+
+def _f_score_macro(y_true: np.ndarray, y_pred: np.ndarray):
+    y_true, y_pred = _validate_input(y_true, y_pred)
+    sum_f_scores = 0
+    for ground_truth, prediction in zip(y_true, y_pred):
+        sample_f_score = _f_score_micro([ground_truth], [prediction])
+        sum_f_scores = sum_f_scores + sample_f_score
+    return sum_f_scores / len(y_true)

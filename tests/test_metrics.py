@@ -1,5 +1,7 @@
 import numpy as np
 import pytest
+from pytest import approx
+
 from hiclass import metrics
 
 
@@ -42,6 +44,12 @@ def test_f1_micro():
     y_true = np.array([[1, 2, 3, 4], [1, 2, 5, 6]])
     y_pred = np.array([[1, 2, 5, 6], [1, 2, 3, 4]])
     assert metrics.f1(y_true, y_pred, "micro") == 0.5
+
+
+def test_f1_macro():
+    y_true = np.array([[1, 2, 3, 4], [1, 2, 5, 6]])
+    y_pred = np.array([[1, 5, 6], [1, 2, 3]])
+    assert 0.4285714 == approx(metrics.f1(y_true, y_pred, "macro"))
 
 
 def test_empty_levels_1():
