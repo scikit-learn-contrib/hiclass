@@ -35,6 +35,14 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     precision : float
         What proportion of positive identifications was actually correct?
     """
+    average_functions = {
+        "micro": _precision_micro,
+        # "macro": _precision_macro,
+    }
+    return average_functions[average](y_true, y_pred)
+
+
+def _precision_micro(y_true: np.ndarray, y_pred: np.ndarray):
     y_true, y_pred = _validate_input(y_true, y_pred)
     sum_intersection = 0
     sum_prediction_and_ancestors = 0
@@ -50,6 +58,21 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
             prediction_set
         )
     precision = sum_intersection / sum_prediction_and_ancestors
+    return precision
+
+
+def _precision_macro(y_true: np.ndarray, y_pred: np.ndarray):
+    y_true, y_pred = _validate_input(y_true, y_pred)
+    sum_precisions = 0
+    for ground_truth, predicted in zip(y_true, y_pred):
+        ground_truth_set = set(ground_truth)
+        ground_truth_set.discard("")
+        predicted_set = set(predicted)
+        predicted_set.discard("")
+        intersection = len(ground_truth_set.intersection(predicted_set))
+        precision = intersection / len(predicted_set)
+        sum_precisions = sum_precisions + precision
+    precision = sum_precisions / len(y_true)
     return precision
 
 

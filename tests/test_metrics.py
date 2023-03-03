@@ -10,10 +10,17 @@ def test_unmatched_lengths():
         metrics.precision(y_true, y_pred)
 
 
-def test_precision():
+def test_precision_micro():
     y_true = np.array([[1, 2, 3, 4], [1, 2, 5, 6]])
     y_pred = np.array([[1, 2, 5, 6], [1, 2, 3, 4]])
     assert metrics.precision(y_true, y_pred) == 0.5
+    assert metrics.precision(y_true, y_true) == 1
+
+
+def test_precision_macro():
+    y_true = np.array([[1, 2, 3, 4], [1, 2, 5, 6]])
+    y_pred = np.array([[1, 5, 6, 7], [1, 2, 3, 4]])
+    assert metrics.precision(y_true, y_pred) == 0.375
     assert metrics.precision(y_true, y_true) == 1
 
 
