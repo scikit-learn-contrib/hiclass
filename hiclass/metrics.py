@@ -27,8 +27,8 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     average: {"micro", "macro"}, str, default="micro"
         This parameter determines the type of averaging performed during the computation:
 
-        - `micro`: The precision is computed by summing over all individual instances, :math:`hP = \displaystyle{\frac{\sum_{i=1}^{n}| \alpha_i \cap \beta_i |}{\sum_{i=1}^{n}| \alpha_i |}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors, with summations computed over all test examples.
-        - `macro`: The precision is computed for each instance and then averaged, :math:`hP = \displaystyle{\frac{\sum_{i=1}^{n}\frac{| \alpha_i \cap \beta_i |}{| \alpha_i |}}{n}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors.
+        - `micro`: The precision is computed by summing over all individual instances, :math:`\displaystyle{hP = \frac{\sum_{i=1}^{n}| \alpha_i \cap \beta_i |}{\sum_{i=1}^{n}| \alpha_i |}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors, with summations computed over all test examples.
+        - `macro`: The precision is computed for each instance and then averaged, :math:`\displaystyle{hP = \frac{\sum_{i=1}^{n}hP_{i}}{n}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors.
 
     Returns
     -------
@@ -49,14 +49,12 @@ def _precision_micro(y_true: np.ndarray, y_pred: np.ndarray):
     for ground_truth, prediction in zip(y_true, y_pred):
         ground_truth_set = set(ground_truth)
         ground_truth_set.discard("")
-        prediction_set = set(prediction)
-        prediction_set.discard("")
+        predicted_set = set(prediction)
+        predicted_set.discard("")
         sum_intersection = sum_intersection + len(
-            ground_truth_set.intersection(prediction_set)
+            ground_truth_set.intersection(predicted_set)
         )
-        sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(
-            prediction_set
-        )
+        sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(predicted_set)
     precision = sum_intersection / sum_prediction_and_ancestors
     return precision
 
@@ -89,7 +87,7 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
         This parameter determines the type of averaging performed during the computation:
 
         - `micro`: The recall is computed by summing over all individual instances, :math:`\displaystyle{hR = \frac{\sum_{i=1}^{n}|\alpha_i \cap \beta_i|}{\sum_{i=1}^{n}|\beta_i|}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors, with summations computed over all test examples.
-        - `macro`: The recall is computed for each instance and then averaged, :math:`hR = \displaystyle{\frac{\sum_{i=1}^{n}\frac{| \alpha_i \cap \beta_i |}{| \beta_i |}}{n}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors.
+        - `macro`: The recall is computed for each instance and then averaged, :math:`\displaystyle{hR = \frac{\sum_{i=1}^{n}hR_{i}}{n}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors.
 
     Returns
     -------
@@ -110,10 +108,10 @@ def _recall_micro(y_true: np.ndarray, y_pred: np.ndarray):
     for ground_truth, prediction in zip(y_true, y_pred):
         ground_truth_set = set(ground_truth)
         ground_truth_set.discard("")
-        prediction_set = set(prediction)
-        prediction_set.discard("")
+        predicted_set = set(prediction)
+        predicted_set.discard("")
         sum_intersection = sum_intersection + len(
-            ground_truth_set.intersection(prediction_set)
+            ground_truth_set.intersection(predicted_set)
         )
         sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(
             ground_truth_set
@@ -136,12 +134,9 @@ def _recall_macro(y_true: np.ndarray, y_pred: np.ndarray):
     return sum_recalls / len(y_true)
 
 
-def f1(y_true: np.ndarray, y_pred: np.ndarray):
+def f1(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     r"""
-    Compute f1 score for hierarchical classification.
-
-    :math:`\displaystyle{hF = \frac{2 \times hP \times hR}{hP + hR}}`,
-    where :math:`hP` is the hierarchical precision and :math:`hR` is the hierarchical recall.
+    Compute hierarchical f-score.
 
     Parameters
     ----------
@@ -149,6 +144,11 @@ def f1(y_true: np.ndarray, y_pred: np.ndarray):
         Ground truth (correct) labels.
     y_pred : np.array of shape (n_samples, n_levels)
         Predicted labels, as returned by a classifier.
+    average: {"micro", "macro"}, str, default="micro"
+        This parameter determines the type of averaging performed during the computation:
+
+        - `micro`: The f-score is computed by summing over all individual instances, :math:`\displaystyle{hF = \frac{2 \times hP \times hR}{hP + hR}}`, where :math:`hP` is the hierarchical precision and :math:`hR` is the hierarchical recall.
+        - `macro`: The f-score is computed for each instance and then averaged, :math:`\displaystyle{hF = \frac{\sum_{i=1}^{n}hF_{i}}{n}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors.
     Returns
     -------
     f1 : float

@@ -38,10 +38,10 @@ def test_recall_macro():
     assert metrics.recall(y_pred, y_true, "macro") == 0.375
 
 
-def test_f1():
+def test_f1_micro():
     y_true = np.array([[1, 2, 3, 4], [1, 2, 5, 6]])
     y_pred = np.array([[1, 2, 5, 6], [1, 2, 3, 4]])
-    assert metrics.f1(y_true, y_pred) == 0.5
+    assert metrics.f1(y_true, y_pred, "micro") == 0.5
 
 
 def test_empty_levels_1():
