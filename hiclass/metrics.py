@@ -14,15 +14,9 @@ def _validate_input(y_true, y_pred):
     return y_true, y_pred
 
 
-def precision(y_true: np.ndarray, y_pred: np.ndarray):
+def precision(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     r"""
-    Compute precision score for hierarchical classification.
-
-    :math:`hP = \displaystyle{\frac{\sum_{i}| \alpha_i \cap \beta_i |}{\sum_{i}| \alpha_i |}}`,
-    where :math:`\alpha_i` is the set consisting of the most specific classes predicted
-    for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the
-    set containing the true most specific classes of test example :math:`i` and all
-    their ancestors, with summations computed over all test examples.
+    Compute hierarchical precision score.
 
     Parameters
     ----------
@@ -30,6 +24,12 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray):
         Ground truth (correct) labels.
     y_pred : np.array of shape (n_samples, n_levels)
         Predicted labels, as returned by a classifier.
+    average: {"micro", "macro"}, str, default="micro"
+        This parameter determines the type of averaging performed during the computation:
+
+        - `micro`: The precision is computed by summing over all individual instances, :math:`hP = \displaystyle{\frac{\sum_{i=1}^{n}| \alpha_i \cap \beta_i |}{\sum_{i=1}^{n}| \alpha_i |}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors, with summations computed over all test examples.
+        - `macro`: The precision is computed for each instance and then averaged, :math:`hP = \displaystyle{\frac{\sum_{i=1}^{n}\frac{| \alpha_i \cap \beta_i |}{| \alpha_i |}}{n}}`, where :math:`\alpha_i` is the set consisting of the most specific classes predicted for test example :math:`i` and all their ancestor classes, while :math:`\beta_i` is the set containing the true most specific classes of test example :math:`i` and all their ancestors.
+
     Returns
     -------
     precision : float
