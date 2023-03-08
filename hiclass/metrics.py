@@ -9,8 +9,8 @@ def _validate_input(y_true, y_pred):
     assert len(y_true) == len(y_pred)
     y_pred = make_leveled(y_pred)
     y_true = make_leveled(y_true)
-    y_true = check_array(y_true, dtype=None)
-    y_pred = check_array(y_pred, dtype=None)
+    y_true = check_array(y_true, dtype=None, ensure_2d=False, allow_nd=True)
+    y_pred = check_array(y_pred, dtype=None, ensure_2d=False, allow_nd=True)
     return y_true, y_pred
 
 
@@ -35,15 +35,37 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     precision : float
         What proportion of positive identifications was actually correct?
     """
-    average_functions = {
-        "micro": _precision_micro,
-        "macro": _precision_macro,
-    }
-    return average_functions[average](y_true, y_pred)
-
-
-def _precision_micro(y_true: np.ndarray, y_pred: np.ndarray):
     y_true, y_pred = _validate_input(y_true, y_pred)
+    average_functions = {
+        1: {
+            "micro": _precision_micro_1d,
+            "macro": _precision_macro_1d,
+        },
+        2: {
+            "micro": _precision_micro_2d,
+            "macro": _precision_macro_2d,
+        },
+    }
+    return average_functions[y_true.ndim][average](y_true, y_pred)
+
+
+def _precision_micro_1d(y_true: np.ndarray, y_pred: np.ndarray):
+    sum_intersection = 0
+    sum_prediction_and_ancestors = 0
+    for ground_truth, prediction in zip(y_true, y_pred):
+        ground_truth_set = set([ground_truth])
+        ground_truth_set.discard("")
+        predicted_set = set([prediction])
+        predicted_set.discard("")
+        sum_intersection = sum_intersection + len(
+            ground_truth_set.intersection(predicted_set)
+        )
+        sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(predicted_set)
+    precision = sum_intersection / sum_prediction_and_ancestors
+    return precision
+
+
+def _precision_micro_2d(y_true: np.ndarray, y_pred: np.ndarray):
     sum_intersection = 0
     sum_prediction_and_ancestors = 0
     for ground_truth, prediction in zip(y_true, y_pred):
@@ -59,11 +81,18 @@ def _precision_micro(y_true: np.ndarray, y_pred: np.ndarray):
     return precision
 
 
-def _precision_macro(y_true: np.ndarray, y_pred: np.ndarray):
-    y_true, y_pred = _validate_input(y_true, y_pred)
+def _precision_macro_1d(y_true: np.ndarray, y_pred: np.ndarray):
     sum_precisions = 0
     for ground_truth, predicted in zip(y_true, y_pred):
-        sample_precision = _precision_micro([ground_truth], [predicted])
+        sample_precision = _precision_micro_1d([ground_truth], [predicted])
+        sum_precisions = sum_precisions + sample_precision
+    return sum_precisions / len(y_true)
+
+
+def _precision_macro_2d(y_true: np.ndarray, y_pred: np.ndarray):
+    sum_precisions = 0
+    for ground_truth, predicted in zip(y_true, y_pred):
+        sample_precision = _precision_micro_2d([ground_truth], [predicted])
         sum_precisions = sum_precisions + sample_precision
     return sum_precisions / len(y_true)
 
@@ -89,15 +118,39 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     recall : float
         What proportion of actual positives was identified correctly?
     """
-    average_functions = {
-        "micro": _recall_micro,
-        "macro": _recall_macro,
-    }
-    return average_functions[average](y_true, y_pred)
-
-
-def _recall_micro(y_true: np.ndarray, y_pred: np.ndarray):
     y_true, y_pred = _validate_input(y_true, y_pred)
+    average_functions = {
+        1: {
+            "micro": _recall_micro_1d,
+            "macro": _recall_macro_1d,
+        },
+        2: {
+            "micro": _recall_micro_2d,
+            "macro": _recall_macro_2d,
+        },
+    }
+    return average_functions[y_true.ndim][average](y_true, y_pred)
+
+
+def _recall_micro_1d(y_true: np.ndarray, y_pred: np.ndarray):
+    sum_intersection = 0
+    sum_prediction_and_ancestors = 0
+    for ground_truth, prediction in zip(y_true, y_pred):
+        ground_truth_set = set([ground_truth])
+        ground_truth_set.discard("")
+        predicted_set = set([prediction])
+        predicted_set.discard("")
+        sum_intersection = sum_intersection + len(
+            ground_truth_set.intersection(predicted_set)
+        )
+        sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(
+            ground_truth_set
+        )
+    recall = sum_intersection / sum_prediction_and_ancestors
+    return recall
+
+
+def _recall_micro_2d(y_true: np.ndarray, y_pred: np.ndarray):
     sum_intersection = 0
     sum_prediction_and_ancestors = 0
     for ground_truth, prediction in zip(y_true, y_pred):
@@ -115,11 +168,18 @@ def _recall_micro(y_true: np.ndarray, y_pred: np.ndarray):
     return recall
 
 
-def _recall_macro(y_true: np.ndarray, y_pred: np.ndarray):
-    y_true, y_pred = _validate_input(y_true, y_pred)
+def _recall_macro_1d(y_true: np.ndarray, y_pred: np.ndarray):
     sum_recalls = 0
     for ground_truth, prediction in zip(y_true, y_pred):
-        sample_recall = _recall_micro([ground_truth], [prediction])
+        sample_recall = _recall_micro_1d([ground_truth], [prediction])
+        sum_recalls = sum_recalls + sample_recall
+    return sum_recalls / len(y_true)
+
+
+def _recall_macro_2d(y_true: np.ndarray, y_pred: np.ndarray):
+    sum_recalls = 0
+    for ground_truth, prediction in zip(y_true, y_pred):
+        sample_recall = _recall_micro_2d([ground_truth], [prediction])
         sum_recalls = sum_recalls + sample_recall
     return sum_recalls / len(y_true)
 
