@@ -170,6 +170,7 @@ def fitted_logistic_regression():
     digraph.hierarchy_ = nx.DiGraph(
         [("r", "1"), ("r", "2"), ("1", "1.1"), ("1", "1.2"), ("2", "2.1"), ("2", "2.2")]
     )
+    digraph.X_ = np.array([[1, -1], [1, 1], [2, -1], [2, 1], [1, 0]])
     digraph.y_ = np.array(
         [
             [["1", "1.1"]],
@@ -179,7 +180,6 @@ def fitted_logistic_regression():
             [["1", "1.1"], ["1", "1.2"]],
         ]
     )
-    digraph.X_ = np.array([[1, -1], [1, 1], [2, -1], [2, 1], [1, 0]])
     digraph.logger_ = logging.getLogger("LCPN")
     digraph.max_levels_ = 2
     digraph.dtype_ = "<U3"
@@ -194,6 +194,7 @@ def fitted_logistic_regression():
         "2.1": {"classifier": LogisticRegression()},
         "2.2": {"classifier": LogisticRegression()},
     }
+    # TODO: is selection of labels for trainnig correct with respect to binary policy?
     classifiers["1"]["classifier"].fit(digraph.X_, [1, 1, 0, 0, 1])
     classifiers["1.1"]["classifier"].fit(digraph.X_, [1, 0, 0, 0, 1])
     classifiers["1.2"]["classifier"].fit(digraph.X_, [0, 1, 0, 0, 1])
@@ -326,6 +327,23 @@ def test_empty_levels(empty_levels):
     assert_array_equal(ground_truth, predictions)
 
 
+def test_fit_unique_class():
+    # TODO: this has to do with the _create_digraph_3d in the MulitiLavelHierarchicalClassifier
+    # especially in the line
+    #                     for column in range(columns - 1):
+    # because columns is 1 and range(0) is empty
+
+    lcpn = MultiLabelLocalClassifierPerNode(
+        local_classifier=LogisticRegression(), n_jobs=1
+    )
+    y = np.array([["1"], ["1"]])
+    X = np.array([[1], [2]])
+
+    lcpn.fit(X, y)
+    prediction = lcpn.predict(X)
+    assert_array_equal(y, prediction)
+
+
 def test_fit_bert():
     bert = ConstantClassifier()
     lcpn = MultiLabelLocalClassifierPerNode(
@@ -334,11 +352,17 @@ def test_fit_bert():
     )
     X = ["Text 1", "Text 2"]
     y = [
-        [["a", "b"], ["a", "c"]],
-        [["d", "e"], ["d", "f"]],
+        [["a", ""]],
+        [["a", ""]],
     ]
+    ground_truth = np.array(
+        [
+            [["a"]],
+            [["a"]],
+        ]
+    )
     lcpn.fit(X, y)
     check_is_fitted(lcpn)
 
     predictions = lcpn.predict(X)
-    assert_array_equal(y, predictions)
+    assert_array_equal(ground_truth, predictions)
