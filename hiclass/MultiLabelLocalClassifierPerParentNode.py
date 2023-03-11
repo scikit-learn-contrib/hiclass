@@ -87,8 +87,6 @@ class MultiLabelLocalClassifierPerParentNode(
             bert=bert,
         )
 
-        self.tolerance = self.tolerance if self.tolerance is not None else 0.0
-
     def fit(self, X, y, sample_weight=None):
         """
         Fit a local classifier per parent node.
@@ -125,8 +123,7 @@ class MultiLabelLocalClassifierPerParentNode(
         # Return the classifier
         return self
 
-    # TODO: Fix predict for multi-label classification
-    def predict(self, X):
+    def predict(self, X, tolerance: float = None):
         """
         Predict classes for the given data.
 
@@ -138,6 +135,11 @@ class MultiLabelLocalClassifierPerParentNode(
             The input samples. Internally, its dtype will be converted
             to ``dtype=np.float32``. If a sparse matrix is provided, it will be
             converted into a sparse ``csr_matrix``.
+        tolerance : float, default=None
+            The tolerance used to determine multi-labels.
+            If set to None, only the child class with highest probability is predicted.
+            Overrides the tolerance set in the constructor.
+            Otherwise, all child classes with :math:`probability >= max\_prob - tolerance` are predicted.
         Returns
         -------
         y : ndarray of shape (n_samples,) or (n_samples, n_outputs)
@@ -145,15 +147,13 @@ class MultiLabelLocalClassifierPerParentNode(
         """
         # Check if fit has been called
         check_is_fitted(self)
+        _tolerance = (tolerance if tolerance is not None else self.tolerance) or 0.0
 
         # Input validation
         if not self.bert:
             X = check_array(X, accept_sparse="csr")
         else:
             X = np.array(X)
-
-        # Initialize array that holds predictions
-        # y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
 
         # TODO: Add threshold to stop prediction halfway if need be
 
@@ -166,14 +166,20 @@ class MultiLabelLocalClassifierPerParentNode(
         probabilities = classifier.predict_proba(X)
         for probs, ls in zip(probabilities, y):
             prediction = classifier.classes_[
-                np.greater_equal(probs, np.max(probs) - self.tolerance)
+                np.greater_equal(probs, np.max(probs) - _tolerance)
             ]
             for pred in prediction:
                 ls.append([pred])
 
-        y = self._predict_remaining_(X, y)
+        y = self._predict_remaining_(X, y, _tolerance)
         y = make_leveled(y)
         y = np.array(y, dtype=self.dtype_)
+
+        # TODO: this only needed for the sklearn check_estimator_sparse_data test to pass :(
+        # However it also breaks a bunch of other tests
+        # y = self._convert_to_1d(
+        #   self._convert_to_2d(y)
+        # )
         self._remove_separator(y)
 
         return y
@@ -204,7 +210,7 @@ class MultiLabelLocalClassifierPerParentNode(
 
         return nodes_to_predict
 
-    def _predict_remaining_(self, X, y):
+    def _predict_remaining_(self, X, y, tolerance):
         nodes_to_predict = self._get_nodes_to_predict(y)
         while nodes_to_predict:
             for node in nodes_to_predict:
@@ -214,7 +220,7 @@ class MultiLabelLocalClassifierPerParentNode(
                 probabilities = classifier.predict_proba(subset_x)
                 for probs, (i, ls) in zip(probabilities, indices.items()):
                     prediction = classifier.classes_[
-                        np.greater_equal(probs, np.max(probs) - self.tolerance)
+                        np.greater_equal(probs, np.max(probs) - tolerance)
                     ]
                     for j in ls:
                         y[i][j].append(prediction[0])

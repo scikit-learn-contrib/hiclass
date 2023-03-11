@@ -146,8 +146,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         # Return the classifier
         return self
 
-    # TODO: Fix predict for multi-label classification
-    def predict(self, X) -> np.ndarray:
+    def predict(self, X, tolerance: float = None) -> np.ndarray:
         """
         Predict classes for the given data.
 
@@ -159,6 +158,11 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
             The input samples. Internally, its dtype will be converted
             to ``dtype=np.float32``. If a sparse matrix is provided, it will be
             converted into a sparse ``csr_matrix``.
+        tolerance : float, default=None
+            The tolerance used to determine multi-labels.
+            If set to None, only the child class with highest probability is predicted.
+            Overrides the tolerance set in the constructor.
+            Otherwise, all child classes with :math:`probability >= max\_prob - tolerance` are predicted.
         Returns
         -------
         y : ndarray of shape (n_samples,) or (n_samples, n_outputs)
@@ -166,6 +170,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         """
         # Check if fit has been called
         check_is_fitted(self)
+        _tolerance = (tolerance if tolerance is not None else self.tolerance) or 0.0
 
         # Input validation
         if not self.bert:
@@ -175,10 +180,6 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         else:
             X = np.array(X)
 
-        # what to do in case of not correctly specified y?
-        # TODO: max depths?
-        # TODO: max multi labels?
-        # y = np.empty((X.shape[0],  self.max_multi_labels_, self.max_levels_), dtype=self.dtype_)
         # Initialize array that holds predictions
         y = [[[]] for _ in range(X.shape[0])]
 
@@ -218,14 +219,11 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
                     ][:, 0]
 
                 # get indices of probabilities that are within tolerance of max
-                _tolerance = self.tolerance if self.tolerance else 1e-08
 
                 highest_probabilities = np.max(probabilities, axis=1).reshape(-1, 1)
                 indices_probabilities_within_tolerance = np.argwhere(
                     np.greater_equal(probabilities, highest_probabilities - _tolerance)
                 )
-                # TODO: strategies for multiple predictions
-                # TODO: what to do in case of no probabilites above threshold?
 
                 prediction = [[] for _ in range(subset_x.shape[0])]
                 for row, column in indices_probabilities_within_tolerance:
@@ -249,6 +247,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         y = make_leveled(y)
         self._remove_separator(y)
         y = np.array(y, dtype=self.dtype_)
+
         return y
 
     def _initialize_binary_policy(self):

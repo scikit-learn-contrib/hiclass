@@ -227,10 +227,9 @@ def test_predict_no_tolerance(fitted_logistic_regression):
 )
 def test_predict_tolerance(fitted_logistic_regression, tolerance, expected):
     # test that depending on tolerance set predicts multilabels or not
-    fitted_logistic_regression.tolerance = tolerance
     ground_truth = np.array([expected])
     X = np.array([[1, 0.01]])
-    prediction = fitted_logistic_regression.predict(X)
+    prediction = fitted_logistic_regression.predict(X, tolerance)
     assert_array_equal(ground_truth, prediction)
 
 
@@ -328,15 +327,11 @@ def test_empty_levels(empty_levels):
 
 
 def test_fit_unique_class():
-    # TODO: this has to do with the _create_digraph_3d in the MulitiLavelHierarchicalClassifier
-    # especially in the line
-    #                     for column in range(columns - 1):
-    # because columns is 1 and range(0) is empty
 
     lcpn = MultiLabelLocalClassifierPerNode(
         local_classifier=LogisticRegression(), n_jobs=1
     )
-    y = np.array([["1"], ["1"]])
+    y = np.array([[["1"]], [["1"]]])
     X = np.array([[1], [2]])
 
     lcpn.fit(X, y)
@@ -351,11 +346,7 @@ def test_fit_bert():
         bert=True,
     )
     X = ["Text 1", "Text 2"]
-    y = [
-        [["a", ""]],
-        [["a", ""]],
-    ]
-    ground_truth = np.array(
+    y = np.array(
         [
             [["a"]],
             [["a"]],
@@ -365,4 +356,4 @@ def test_fit_bert():
     check_is_fitted(lcpn)
 
     predictions = lcpn.predict(X)
-    assert_array_equal(ground_truth, predictions)
+    assert_array_equal(y, predictions)

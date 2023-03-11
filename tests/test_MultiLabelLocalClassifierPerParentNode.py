@@ -379,6 +379,18 @@ def test_empty_levels(empty_levels):
     assert_array_equal(ground_truth, predictions)
 
 
+def test_fit_unique_class():
+    lcppn = MultiLabelLocalClassifierPerParentNode(
+        local_classifier=LogisticRegression(), n_jobs=1
+    )
+    y = np.array([[["1"]], [["1"]]])
+    X = np.array([[1], [2]])
+
+    lcppn.fit(X, y)
+    prediction = lcppn.predict(X)
+    assert_array_equal(y, prediction)
+
+
 def test_bert():
     bert = ConstantClassifier()
     lcpn = MultiLabelLocalClassifierPerParentNode(
@@ -387,11 +399,10 @@ def test_bert():
     )
     X = ["Text 1", "Text 2"]
     y = [
-        [["a", "b"], ["a", "c"]],
-        [["d", "e"], ["d", "f"]],
+        [["a"]],
+        [["a"]],
     ]
     lcpn.fit(X, y)
     check_is_fitted(lcpn)
-    # TODO: Fix this test after predict is implemented
-    # predictions = lcpn.predict(X)
-    # assert_array_equal(y, predictions)
+    predictions = lcpn.predict(X)
+    assert_array_equal(y, predictions)
