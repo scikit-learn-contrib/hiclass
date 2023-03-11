@@ -147,6 +147,26 @@ def test_create_digraph_3d(digraph_3d):
     assert list(ground_truth.edges) == list(digraph_3d.hierarchy_.edges)
 
 
+@pytest.fixture
+def digraph_3d_no_children():
+    classifier = MultiLabelHierarchicalClassifier()
+    classifier.y_ = np.array([[["a"]], [["b"]]])
+    classifier.logger_ = logging.getLogger("HC")
+    classifier.separator_ = "::HiClass::Separator::"
+    return classifier
+
+
+def test_create_digraph_3d_single_column(digraph_3d_no_children):
+    ground_truth = nx.DiGraph()
+    ground_truth.add_node("a")
+    ground_truth.add_node("b")
+
+    digraph_3d_no_children._create_digraph()
+    assert nx.is_isomorphic(ground_truth, digraph_3d_no_children.hierarchy_)
+    assert list(ground_truth.nodes) == list(digraph_3d_no_children.hierarchy_.nodes)
+    assert list(ground_truth.edges) == list(digraph_3d_no_children.hierarchy_.edges)
+
+
 def test_export_digraph(digraph_2d):
     digraph_2d.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
     digraph_2d.edge_list = tempfile.TemporaryFile()
@@ -254,7 +274,7 @@ def test_make_leveled_example_y():
     y = np.array([[["a"]], [["b", "c"]]])
     ground_truth = np.array([[["a", ""]], [["b", "c"]]])
     assert_array_equal(ground_truth, make_leveled(y))
-    
+
 
 def test_make_leveled_multicharacter_nodes_y():
     y = np.array([[["node1"]], [["node2", "node3"]]])

@@ -296,21 +296,25 @@ class MultiLabelHierarchicalClassifier(abc.ABC):
             self.logger_.info(f"Creating digraph from {rows} 3D labels")
             for row in range(rows):
                 for multi_label in range(multi_labels):
-                    for column in range(columns - 1):
-                        parent = self.y_[row, multi_label, column].split(
-                            self.separator_
-                        )[-1]
-                        child = self.y_[row, multi_label, column + 1].split(
-                            self.separator_
-                        )[-1]
-                        if parent != "" and child != "":
-                            # Only add edge if both parent and child are not empty
-                            self.hierarchy_.add_edge(
-                                self.y_[row, multi_label, column],
-                                self.y_[row, multi_label, column + 1],
-                            )
-                        elif parent != "" and column == 0:
-                            self.hierarchy_.add_node(parent)
+                    if columns == 1:
+                        # If column is 1, then add node without children
+                        self.hierarchy_.add_node(self.y_[row, multi_label, 0])
+                    else:
+                        for column in range(columns - 1):
+                            parent = self.y_[row, multi_label, column].split(
+                                self.separator_
+                            )[-1]
+                            child = self.y_[row, multi_label, column + 1].split(
+                                self.separator_
+                            )[-1]
+                            if parent != "" and child != "":
+                                # Only add edge if both parent and child are not empty
+                                self.hierarchy_.add_edge(
+                                    self.y_[row, multi_label, column],
+                                    self.y_[row, multi_label, column + 1],
+                                )
+                            elif parent != "" and column == 0:
+                                self.hierarchy_.add_node(parent)
 
     def _export_digraph(self):
         # Check if edge_list is set
