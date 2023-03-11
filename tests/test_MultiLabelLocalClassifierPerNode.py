@@ -305,29 +305,28 @@ def empty_levels():
 
 
 def test_empty_levels(empty_levels):
-    lcppn = MultiLabelLocalClassifierPerNode()
+    lcpn = MultiLabelLocalClassifierPerNode()
     X, y = empty_levels
-    lcppn.fit(X, y)
-    predictions = lcppn.predict(X)
+    lcpn.fit(X, y)
+    predictions = lcpn.predict(X)
     ground_truth = [
         [["1", "", ""]],
         [["2", "2.1", ""]],
         [["3", "3.1", "3.1.2"]],
     ]
-    assert list(lcppn.hierarchy_.nodes) == [
+    assert list(lcpn.hierarchy_.nodes) == [
         "1",
         "2",
-        "2" + lcppn.separator_ + "2.1",
+        "2" + lcpn.separator_ + "2.1",
         "3",
-        "3" + lcppn.separator_ + "3.1",
-        "3" + lcppn.separator_ + "3.1" + lcppn.separator_ + "3.1.2",
-        lcppn.root_,
+        "3" + lcpn.separator_ + "3.1",
+        "3" + lcpn.separator_ + "3.1" + lcpn.separator_ + "3.1.2",
+        lcpn.root_,
     ]
     assert_array_equal(ground_truth, predictions)
 
 
 def test_fit_unique_class():
-
     lcpn = MultiLabelLocalClassifierPerNode(
         local_classifier=LogisticRegression(), n_jobs=1
     )
