@@ -45,6 +45,10 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
             "micro": _precision_micro_2d,
             "macro": _precision_macro_2d,
         },
+        3: {
+            "micro": _precision_micro_3d,
+            "macro": _precision_macro_3d,
+        },
     }
     return average_functions[y_true.ndim][average](y_true, y_pred)
 
@@ -81,6 +85,25 @@ def _precision_micro_2d(y_true: np.ndarray, y_pred: np.ndarray):
     return precision
 
 
+def _precision_micro_3d(y_true: np.ndarray, y_pred: np.ndarray):
+    sum_intersection = 0
+    sum_prediction_and_ancestors = 0
+    for row_ground_truth, row_prediction in zip(y_true, y_pred):
+        ground_truth_set = set()
+        predicted_set = set()
+        for ground_truth, prediction in zip(row_ground_truth, row_prediction):
+            ground_truth_set.update(ground_truth)
+            predicted_set.update(prediction)
+        ground_truth_set.discard("")
+        predicted_set.discard("")
+        sum_intersection = sum_intersection + len(
+            ground_truth_set.intersection(predicted_set)
+        )
+        sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(predicted_set)
+    precision = sum_intersection / sum_prediction_and_ancestors
+    return precision
+
+
 def _precision_macro_1d(y_true: np.ndarray, y_pred: np.ndarray):
     sum_precisions = 0
     for ground_truth, predicted in zip(y_true, y_pred):
@@ -93,6 +116,14 @@ def _precision_macro_2d(y_true: np.ndarray, y_pred: np.ndarray):
     sum_precisions = 0
     for ground_truth, predicted in zip(y_true, y_pred):
         sample_precision = _precision_micro_2d([ground_truth], [predicted])
+        sum_precisions = sum_precisions + sample_precision
+    return sum_precisions / len(y_true)
+
+
+def _precision_macro_3d(y_true: np.ndarray, y_pred: np.ndarray):
+    sum_precisions = 0
+    for ground_truth, predicted in zip(y_true, y_pred):
+        sample_precision = _precision_micro_3d([ground_truth], [predicted])
         sum_precisions = sum_precisions + sample_precision
     return sum_precisions / len(y_true)
 
@@ -127,6 +158,10 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
         2: {
             "micro": _recall_micro_2d,
             "macro": _recall_macro_2d,
+        },
+        3: {
+            "micro": _recall_micro_3d,
+            "macro": _recall_macro_3d,
         },
     }
     return average_functions[y_true.ndim][average](y_true, y_pred)
@@ -168,6 +203,27 @@ def _recall_micro_2d(y_true: np.ndarray, y_pred: np.ndarray):
     return recall
 
 
+def _recall_micro_3d(y_true: np.ndarray, y_pred: np.ndarray):
+    sum_intersection = 0
+    sum_prediction_and_ancestors = 0
+    for row_ground_truth, row_prediction in zip(y_true, y_pred):
+        ground_truth_set = set()
+        predicted_set = set()
+        for ground_truth, prediction in zip(row_ground_truth, row_prediction):
+            ground_truth_set.update(ground_truth)
+            predicted_set.update(prediction)
+        ground_truth_set.discard("")
+        predicted_set.discard("")
+        sum_intersection = sum_intersection + len(
+            ground_truth_set.intersection(predicted_set)
+        )
+        sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(
+            ground_truth_set
+        )
+    recall = sum_intersection / sum_prediction_and_ancestors
+    return recall
+
+
 def _recall_macro_1d(y_true: np.ndarray, y_pred: np.ndarray):
     sum_recalls = 0
     for ground_truth, prediction in zip(y_true, y_pred):
@@ -180,6 +236,14 @@ def _recall_macro_2d(y_true: np.ndarray, y_pred: np.ndarray):
     sum_recalls = 0
     for ground_truth, prediction in zip(y_true, y_pred):
         sample_recall = _recall_micro_2d([ground_truth], [prediction])
+        sum_recalls = sum_recalls + sample_recall
+    return sum_recalls / len(y_true)
+
+
+def _recall_macro_3d(y_true: np.ndarray, y_pred: np.ndarray):
+    sum_recalls = 0
+    for ground_truth, prediction in zip(y_true, y_pred):
+        sample_recall = _recall_micro_3d([ground_truth], [prediction])
         sum_recalls = sum_recalls + sample_recall
     return sum_recalls / len(y_true)
 

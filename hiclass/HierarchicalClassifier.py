@@ -60,7 +60,7 @@ def make_leveled(y):
         rows = len(y)
         multi_labels = max([len(row) for row in y])
         levels = max([len(label) for row in y for label in row])
-        leveled_y = np.full((rows, multi_labels, levels), "")
+        leveled_y = np.full((rows, multi_labels, levels), "", dtype=object)
         for i, row in enumerate(y):
             for j, multi_label in enumerate(row):
                 for k, label in enumerate(multi_label):

@@ -308,7 +308,20 @@ def empty_levels_3d():
     return y
 
 
-def test_make_leveled_3d(empty_levels_3d):
+@pytest.fixture
+def empty_levels_3d_large_strings():
+    y = [
+        [["fish", "mermaid"]],
+        [["human", "mermaid"]],
+        [["bull", "minotaur"]],
+        [["human", "minotaur"]],
+        [["fish", "mermaid"], ["human", "mermaid"]],
+        [["bull", "minotaur"], ["human", "minotaur"]],
+    ]
+    return y
+
+
+def test_make_leveled_3d_1(empty_levels_3d):
     ground_truth = [
         # Labels that are the same as in the Single-Label Test case
         [["a", "", ""], ["", "", ""]],
@@ -319,6 +332,21 @@ def test_make_leveled_3d(empty_levels_3d):
         [["m", "n", "o"], ["", "", ""]],
     ]
     result = make_leveled(empty_levels_3d)
+    assert_array_equal(ground_truth, result)
+
+
+def test_make_leveled_3d_2(empty_levels_3d_large_strings):
+    ground_truth = [
+        # Labels that are the same as in the Single-Label Test case
+        [["fish", "mermaid"], ["", ""]],
+        [["human", "mermaid"], ["", ""]],
+        [["bull", "minotaur"], ["", ""]],
+        [["human", "minotaur"], ["", ""]],
+        # Multi-label Test cases
+        [["fish", "mermaid"], ["human", "mermaid"]],
+        [["bull", "minotaur"], ["human", "minotaur"]],
+    ]
+    result = make_leveled(empty_levels_3d_large_strings)
     assert_array_equal(ground_truth, result)
 
 
