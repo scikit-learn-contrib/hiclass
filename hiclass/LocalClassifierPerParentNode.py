@@ -45,7 +45,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         n_jobs: int = 1,
         bert: bool = False,
     ):
-        """
+        r"""
         Initialize a local classifier per parent node.
 
         Parameters

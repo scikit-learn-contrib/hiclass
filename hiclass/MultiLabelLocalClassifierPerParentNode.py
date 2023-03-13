@@ -50,7 +50,7 @@ class MultiLabelLocalClassifierPerParentNode(
         n_jobs: int = 1,
         bert: bool = False,
     ):
-        """
+        r"""
         Initialize a multi-label local classifier per parent node.
 
         Parameters
@@ -124,7 +124,7 @@ class MultiLabelLocalClassifierPerParentNode(
         return self
 
     def predict(self, X, tolerance: float = None):
-        """
+        r"""
         Predict classes for the given data.
 
         Hierarchical labels are returned.

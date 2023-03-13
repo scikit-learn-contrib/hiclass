@@ -87,7 +87,7 @@ class HierarchicalClassifier(abc.ABC):
         bert: bool = False,
         classifier_abbreviation: str = "",
     ):
-        """
+        r"""
         Initialize a local hierarchical classifier.
 
         Parameters

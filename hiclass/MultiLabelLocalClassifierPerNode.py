@@ -58,7 +58,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         n_jobs: int = 1,
         bert: bool = False,
     ):
-        """
+        r"""
         Initialize a local classifier per node.
 
         Parameters
@@ -147,7 +147,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         return self
 
     def predict(self, X, tolerance: float = None) -> np.ndarray:
-        """
+        r"""
         Predict classes for the given data.
 
         Hierarchical labels are returned.
