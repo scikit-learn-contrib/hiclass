@@ -36,11 +36,11 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
         What proportion of positive identifications was actually correct?
     """
     y_true, y_pred = _validate_input(y_true, y_pred)
-    average_functions = {
+    functions = {
         "micro": _precision_micro,
         "macro": _precision_macro,
     }
-    return average_functions[average](y_true, y_pred)
+    return functions[average](y_true, y_pred)
 
 
 def _precision_micro(y_true: np.ndarray, y_pred: np.ndarray):
@@ -64,8 +64,7 @@ def _precision_micro_1d(y_true: np.ndarray, y_pred: np.ndarray):
             ground_truth_set.intersection(predicted_set)
         )
         sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(predicted_set)
-    precision = sum_intersection / sum_prediction_and_ancestors
-    return precision
+    return sum_intersection / sum_prediction_and_ancestors
 
 
 def _precision_micro_2d(y_true: np.ndarray, y_pred: np.ndarray):
@@ -80,8 +79,7 @@ def _precision_micro_2d(y_true: np.ndarray, y_pred: np.ndarray):
             ground_truth_set.intersection(predicted_set)
         )
         sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(predicted_set)
-    precision = sum_intersection / sum_prediction_and_ancestors
-    return precision
+    return sum_intersection / sum_prediction_and_ancestors
 
 
 def _precision_micro_3d(y_true: np.ndarray, y_pred: np.ndarray):
@@ -99,8 +97,7 @@ def _precision_micro_3d(y_true: np.ndarray, y_pred: np.ndarray):
             ground_truth_set.intersection(predicted_set)
         )
         sum_prediction_and_ancestors = sum_prediction_and_ancestors + len(predicted_set)
-    precision = sum_intersection / sum_prediction_and_ancestors
-    return precision
+    return sum_intersection / sum_prediction_and_ancestors
 
 
 def _precision_macro(y_true: np.ndarray, y_pred: np.ndarray):
@@ -129,11 +126,11 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
         What proportion of actual positives was identified correctly?
     """
     y_true, y_pred = _validate_input(y_true, y_pred)
-    average_functions = {
+    functions = {
         "micro": _recall_micro,
         "macro": _recall_macro,
     }
-    return average_functions[average](y_true, y_pred)
+    return functions[average](y_true, y_pred)
 
 
 def _recall_micro(y_true: np.ndarray, y_pred: np.ndarray):
@@ -227,18 +224,17 @@ def f1(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
         Weighted average of the precision and recall
     """
     y_true, y_pred = _validate_input(y_true, y_pred)
-    average_functions = {
+    functions = {
         "micro": _f_score_micro,
         "macro": _f_score_macro,
     }
-    return average_functions[average](y_true, y_pred)
+    return functions[average](y_true, y_pred)
 
 
 def _f_score_micro(y_true: np.ndarray, y_pred: np.ndarray):
     prec = precision(y_true, y_pred)
     rec = recall(y_true, y_pred)
-    f1 = 2 * prec * rec / (prec + rec)
-    return f1
+    return 2 * prec * rec / (prec + rec)
 
 
 def _f_score_macro(y_true: np.ndarray, y_pred: np.ndarray):
