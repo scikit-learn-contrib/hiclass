@@ -37,20 +37,19 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     """
     y_true, y_pred = _validate_input(y_true, y_pred)
     average_functions = {
-        1: {
-            "micro": _precision_micro_1d,
-            "macro": _precision_macro,
-        },
-        2: {
-            "micro": _precision_micro_2d,
-            "macro": _precision_macro,
-        },
-        3: {
-            "micro": _precision_micro_3d,
-            "macro": _precision_macro,
-        },
+        "micro": _precision_micro,
+        "macro": _precision_macro,
     }
-    return average_functions[y_true.ndim][average](y_true, y_pred)
+    return average_functions[average](y_true, y_pred)
+
+
+def _precision_micro(y_true: np.ndarray, y_pred: np.ndarray):
+    precision_micro = {
+        1: _precision_micro_1d,
+        2: _precision_micro_2d,
+        3: _precision_micro_3d,
+    }
+    return precision_micro[y_true.ndim](y_true, y_pred)
 
 
 def _precision_micro_1d(y_true: np.ndarray, y_pred: np.ndarray):
@@ -105,13 +104,7 @@ def _precision_micro_3d(y_true: np.ndarray, y_pred: np.ndarray):
 
 
 def _precision_macro(y_true: np.ndarray, y_pred: np.ndarray):
-    micro_functions = {
-        1: _precision_micro_1d,
-        2: _precision_micro_2d,
-        3: _precision_micro_3d,
-    }
-    precision = _compute_macro(y_true, y_pred, micro_functions[y_true.ndim])
-    return precision
+    return _compute_macro(y_true, y_pred, _precision_micro)
 
 
 def recall(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
@@ -137,20 +130,19 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     """
     y_true, y_pred = _validate_input(y_true, y_pred)
     average_functions = {
-        1: {
-            "micro": _recall_micro_1d,
-            "macro": _recall_macro,
-        },
-        2: {
-            "micro": _recall_micro_2d,
-            "macro": _recall_macro,
-        },
-        3: {
-            "micro": _recall_micro_3d,
-            "macro": _recall_macro,
-        },
+        "micro": _recall_micro,
+        "macro": _recall_macro,
     }
-    return average_functions[y_true.ndim][average](y_true, y_pred)
+    return average_functions[average](y_true, y_pred)
+
+
+def _recall_micro(y_true: np.ndarray, y_pred: np.ndarray):
+    recall_micro = {
+        1: _recall_micro_1d,
+        2: _recall_micro_2d,
+        3: _recall_micro_3d,
+    }
+    return recall_micro[y_true.ndim](y_true, y_pred)
 
 
 def _recall_micro_1d(y_true: np.ndarray, y_pred: np.ndarray):
@@ -211,13 +203,7 @@ def _recall_micro_3d(y_true: np.ndarray, y_pred: np.ndarray):
 
 
 def _recall_macro(y_true: np.ndarray, y_pred: np.ndarray):
-    micro_functions = {
-        1: _recall_micro_1d,
-        2: _recall_micro_2d,
-        3: _recall_micro_3d,
-    }
-    recall = _compute_macro(y_true, y_pred, micro_functions[y_true.ndim])
-    return recall
+    return _compute_macro(y_true, y_pred, _recall_micro)
 
 
 def f1(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
@@ -256,13 +242,12 @@ def _f_score_micro(y_true: np.ndarray, y_pred: np.ndarray):
 
 
 def _f_score_macro(y_true: np.ndarray, y_pred: np.ndarray):
-    f_score = _compute_macro(y_true, y_pred, _f_score_micro)
-    return f_score
+    return _compute_macro(y_true, y_pred, _f_score_micro)
 
 
 def _compute_macro(y_true: np.ndarray, y_pred: np.ndarray, _micro_function):
     overall_sum = 0
     for ground_truth, prediction in zip(y_true, y_pred):
-        sample_score = _micro_function([ground_truth], [prediction])
+        sample_score = _micro_function(np.array([ground_truth]), np.array([prediction]))
         overall_sum = overall_sum + sample_score
     return overall_sum / len(y_true)
