@@ -246,7 +246,7 @@ def test_recall_micro_3d_list():
         [["human", "minotaur"], ["bull", "minotaur"]],
     ]
     assert 0.8333 == approx(recall(y_true, y_pred, "micro"), rel=1e-3)
-    assert 1 == precision(y_true, y_true, "micro")
+    assert 1 == recall(y_true, y_true, "micro")
 
 
 def test_recall_micro_1d_np_array():
@@ -276,7 +276,7 @@ def test_recall_micro_3d_np_array():
         ]
     )
     assert 0.8333 == approx(recall(y_true, y_pred, "micro"), rel=1e-3)
-    assert 1 == precision(y_true, y_true, "micro")
+    assert 1 == recall(y_true, y_true, "micro")
 
 
 def test_recall_micro_1d_dataframe():
@@ -315,7 +315,7 @@ def test_recall_macro_3d_list():
         [["human", "minotaur"], ["bull", "minotaur"]],
     ]
     assert 0.8333 == approx(recall(y_true, y_pred, "macro"), rel=1e-3)
-    assert 1 == precision(y_true, y_true, "macro")
+    assert 1 == recall(y_true, y_true, "macro")
 
 
 def test_recall_macro_1d_np_array():
@@ -345,7 +345,7 @@ def test_recall_macro_3d_np_array():
         ]
     )
     assert 0.8333 == approx(recall(y_true, y_pred, "macro"), rel=1e-3)
-    assert 1 == precision(y_true, y_true, "macro")
+    assert 1 == recall(y_true, y_true, "macro")
 
 
 def test_recall_macro_1d_dataframe():
@@ -373,6 +373,19 @@ def test_f1_micro_2d_list():
     assert 0.5 == f1(y_true, y_pred, "micro")
 
 
+def test_f1_micro_3d_list():
+    y_true = [
+        [["human", "mermaid"], ["fish", "mermaid"]],
+        [["human", "minotaur"], ["bull", "minotaur"]],
+    ]
+    y_pred = [
+        [["human", "mermaid"]],
+        [["human", "minotaur"], ["bull", "minotaur"]],
+    ]
+    assert 0.9090 == approx(f1(y_true, y_pred, "micro"), rel=1e-3)
+    assert 1 == f1(y_true, y_true, "micro")
+
+
 def test_f1_micro_1d_np_array():
     y_true = np.array([1, 2, 3, 4])
     y_pred = np.array([1, 2, 5, 6])
@@ -383,6 +396,23 @@ def test_f1_micro_2d_np_array():
     y_true = np.array([[1, 2, 3, 4], [1, 2, 5, 6]])
     y_pred = np.array([[1, 2, 5, 6], [1, 2, 3, 4]])
     assert 0.5 == f1(y_true, y_pred, "micro")
+
+
+def test_f1_micro_3d_np_array():
+    y_true = np.array(
+        [
+            [["human", "mermaid"], ["fish", "mermaid"]],
+            [["human", "minotaur"], ["bull", "minotaur"]],
+        ]
+    )
+    y_pred = np.array(
+        [
+            [["human", "mermaid"], ["", ""]],
+            [["human", "minotaur"], ["bull", "minotaur"]],
+        ]
+    )
+    assert 0.9090 == approx(f1(y_true, y_pred, "micro"), rel=1e-3)
+    assert 1 == f1(y_true, y_true, "micro")
 
 
 def test_f1_micro_1d_dataframe():
@@ -409,6 +439,19 @@ def test_f1_macro_2d_list():
     assert 0.4285714 == approx(f1(y_true, y_pred, "macro"))
 
 
+def test_f1_macro_3d_list():
+    y_true = [
+        [["human", "mermaid"], ["fish", "mermaid"]],
+        [["human", "minotaur"], ["bull", "minotaur"]],
+    ]
+    y_pred = [
+        [["human", "mermaid"]],
+        [["human", "minotaur"], ["bull", "minotaur"]],
+    ]
+    assert 0.9 == approx(f1(y_true, y_pred, "macro"), rel=1e-3)
+    assert 1 == f1(y_true, y_true, "macro")
+
+
 def test_f1_macro_1d_np_array():
     y_true = np.array([1, 2, 3, 4])
     y_pred = np.array([1, 2, 3, 4])
@@ -419,6 +462,23 @@ def test_f1_macro_2d_np_array():
     y_true = np.array([[1, 2, 3, 4], [1, 2, 5, 6]])
     y_pred = np.array([[1, 5, 6], [1, 2, 3]])
     assert 0.4285714 == approx(f1(y_true, y_pred, "macro"))
+
+
+def test_f1_macro_3d_np_array():
+    y_true = np.array(
+        [
+            [["human", "mermaid"], ["fish", "mermaid"]],
+            [["human", "minotaur"], ["bull", "minotaur"]],
+        ]
+    )
+    y_pred = np.array(
+        [
+            [["human", "mermaid"], ["", ""]],
+            [["human", "minotaur"], ["bull", "minotaur"]],
+        ]
+    )
+    assert 0.9 == approx(f1(y_true, y_pred, "macro"), rel=1e-3)
+    assert 1 == f1(y_true, y_true, "macro")
 
 
 def test_f1_macro_1d_dataframe():
