@@ -39,15 +39,15 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     average_functions = {
         1: {
             "micro": _precision_micro_1d,
-            "macro": _precision_macro_1d,
+            "macro": _precision_macro,
         },
         2: {
             "micro": _precision_micro_2d,
-            "macro": _precision_macro_2d,
+            "macro": _precision_macro,
         },
         3: {
             "micro": _precision_micro_3d,
-            "macro": _precision_macro_3d,
+            "macro": _precision_macro,
         },
     }
     return average_functions[y_true.ndim][average](y_true, y_pred)
@@ -104,26 +104,15 @@ def _precision_micro_3d(y_true: np.ndarray, y_pred: np.ndarray):
     return precision
 
 
-def _precision_macro_1d(y_true: np.ndarray, y_pred: np.ndarray):
+def _precision_macro(y_true: np.ndarray, y_pred: np.ndarray):
+    precision_micro = {
+        1: _precision_micro_1d,
+        2: _precision_micro_2d,
+        3: _precision_micro_3d,
+    }
     sum_precisions = 0
     for ground_truth, predicted in zip(y_true, y_pred):
-        sample_precision = _precision_micro_1d([ground_truth], [predicted])
-        sum_precisions = sum_precisions + sample_precision
-    return sum_precisions / len(y_true)
-
-
-def _precision_macro_2d(y_true: np.ndarray, y_pred: np.ndarray):
-    sum_precisions = 0
-    for ground_truth, predicted in zip(y_true, y_pred):
-        sample_precision = _precision_micro_2d([ground_truth], [predicted])
-        sum_precisions = sum_precisions + sample_precision
-    return sum_precisions / len(y_true)
-
-
-def _precision_macro_3d(y_true: np.ndarray, y_pred: np.ndarray):
-    sum_precisions = 0
-    for ground_truth, predicted in zip(y_true, y_pred):
-        sample_precision = _precision_micro_3d([ground_truth], [predicted])
+        sample_precision = precision_micro[y_true.ndim]([ground_truth], [predicted])
         sum_precisions = sum_precisions + sample_precision
     return sum_precisions / len(y_true)
 
@@ -153,15 +142,15 @@ def recall(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro"):
     average_functions = {
         1: {
             "micro": _recall_micro_1d,
-            "macro": _recall_macro_1d,
+            "macro": _recall_macro,
         },
         2: {
             "micro": _recall_micro_2d,
-            "macro": _recall_macro_2d,
+            "macro": _recall_macro,
         },
         3: {
             "micro": _recall_micro_3d,
-            "macro": _recall_macro_3d,
+            "macro": _recall_macro,
         },
     }
     return average_functions[y_true.ndim][average](y_true, y_pred)
@@ -224,26 +213,15 @@ def _recall_micro_3d(y_true: np.ndarray, y_pred: np.ndarray):
     return recall
 
 
-def _recall_macro_1d(y_true: np.ndarray, y_pred: np.ndarray):
+def _recall_macro(y_true: np.ndarray, y_pred: np.ndarray):
+    recall_micro = {
+        1: _recall_micro_1d,
+        2: _recall_micro_2d,
+        3: _recall_micro_3d,
+    }
     sum_recalls = 0
     for ground_truth, prediction in zip(y_true, y_pred):
-        sample_recall = _recall_micro_1d([ground_truth], [prediction])
-        sum_recalls = sum_recalls + sample_recall
-    return sum_recalls / len(y_true)
-
-
-def _recall_macro_2d(y_true: np.ndarray, y_pred: np.ndarray):
-    sum_recalls = 0
-    for ground_truth, prediction in zip(y_true, y_pred):
-        sample_recall = _recall_micro_2d([ground_truth], [prediction])
-        sum_recalls = sum_recalls + sample_recall
-    return sum_recalls / len(y_true)
-
-
-def _recall_macro_3d(y_true: np.ndarray, y_pred: np.ndarray):
-    sum_recalls = 0
-    for ground_truth, prediction in zip(y_true, y_pred):
-        sample_recall = _recall_micro_3d([ground_truth], [prediction])
+        sample_recall = recall_micro[y_true.ndim]([ground_truth], [prediction])
         sum_recalls = sum_recalls + sample_recall
     return sum_recalls / len(y_true)
 
