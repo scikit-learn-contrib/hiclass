@@ -495,27 +495,27 @@ def test_f1_macro_2d_dataframe():
 
 def test_empty_levels_2d_list_1():
     y_true = [["2", "3"], ["1"], ["4", "5", "6"]]
-    y_pred = [["1", "", ""], ["2", "3", ""], ["4", "5", "6"]]
+    y_pred = [["1"], ["2", "3"], ["4", "5", "6"]]
     assert 0.5 == f1(y_true, y_pred)
     assert 1 == f1(y_true, y_true)
 
 
 def test_empty_levels_2d_dataframe_1():
     y_true = pd.DataFrame([["2", "3"], ["1"], ["4", "5", "6"]]).fillna("")
-    y_pred = pd.DataFrame([["1", "", ""], ["2", "3", ""], ["4", "5", "6"]])
+    y_pred = pd.DataFrame([["1"], ["2", "3"], ["4", "5", "6"]]).fillna("")
     assert 0.5 == f1(y_true, y_pred)
     assert 1 == f1(y_true, y_true)
 
 
 def test_empty_levels_2d_list_2():
     y_true = [["1"], ["2", "3"], ["4", "5", "6"]]
-    y_pred = [["1", "", ""], ["2", "3", ""], ["4", "5", "6"]]
+    y_pred = [["1"], ["2", "3"], ["4", "5", "6"]]
     assert 1 == f1(y_true, y_pred)
     assert 1 == f1(y_true, y_true)
 
 
 def test_empty_levels_2d_dataframe_2():
     y_true = pd.DataFrame([["1"], ["2", "3"], ["4", "5", "6"]]).fillna("")
-    y_pred = pd.DataFrame([["1", "", ""], ["2", "3", ""], ["4", "5", "6"]])
+    y_pred = pd.DataFrame([["1"], ["2", "3"], ["4", "5", "6"]]).fillna("")
     assert 1 == f1(y_true, y_pred)
     assert 1 == f1(y_true, y_true)
