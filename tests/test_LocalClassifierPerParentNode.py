@@ -8,6 +8,7 @@ from numpy.testing import assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 
@@ -241,3 +242,18 @@ def test_bert():
     check_is_fitted(lcpn)
     predictions = lcpn.predict(X)
     assert_array_equal(y, predictions)
+
+
+def test_knn():
+    knn = KNeighborsClassifier(
+        n_neighbors=2,
+    )
+    lcppn = LocalClassifierPerParentNode(
+        local_classifier=knn,
+    )
+    y = np.array([["a", "b"], ["a", "c"]])
+    X = np.array([[1, 2], [3, 4]])
+    lcppn.fit(X, y)
+    check_is_fitted(lcppn)
+    # predictions = lcppn.predict(X)
+    # assert_array_equal(y, predictions)

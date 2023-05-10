@@ -250,7 +250,10 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
         if not self.bert:
-            classifier.fit(X, y, sample_weight)
+            try:
+                classifier.fit(X, y, sample_weight)
+            except TypeError:
+                classifier.fit(X, y)
         else:
             classifier.fit(X, y)
         return classifier
