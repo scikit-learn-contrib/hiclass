@@ -7,8 +7,10 @@ from numpy.testing import assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
+
 from hiclass import LocalClassifierPerLevel
 from hiclass.ConstantClassifier import ConstantClassifier
 
@@ -185,13 +187,28 @@ def test_empty_levels(empty_levels):
 
 def test_fit_bert():
     bert = ConstantClassifier()
-    lcpn = LocalClassifierPerLevel(
+    lcpl = LocalClassifierPerLevel(
         local_classifier=bert,
         bert=True,
     )
     X = ["Text 1", "Text 2"]
     y = ["a", "a"]
-    lcpn.fit(X, y)
-    check_is_fitted(lcpn)
-    predictions = lcpn.predict(X)
+    lcpl.fit(X, y)
+    check_is_fitted(lcpl)
+    predictions = lcpl.predict(X)
     assert_array_equal(y, predictions)
+
+
+def test_knn():
+    knn = KNeighborsClassifier(
+        n_neighbors=2,
+    )
+    lcpl = LocalClassifierPerLevel(
+        local_classifier=knn,
+    )
+    y = np.array([["a", "b"], ["a", "c"]])
+    X = np.array([[1, 2], [3, 4]])
+    lcpl.fit(X, y)
+    check_is_fitted(lcpl)
+    # predictions = lcpl.predict(X)
+    # assert_array_equal(y, predictions)
