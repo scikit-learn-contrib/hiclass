@@ -47,7 +47,7 @@ def make_leveled(y):
         depth = max([len(row) for row in y])
     except TypeError:
         return y
-    y = np.array(y)
+    y = np.array(y, dtype=object)
     leveled_y = [[i for i in row] + [""] * (depth - len(row)) for row in y]
     return np.array(leveled_y)
 

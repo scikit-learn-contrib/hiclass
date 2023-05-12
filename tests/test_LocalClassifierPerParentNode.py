@@ -149,7 +149,14 @@ def test_get_successors(x_and_y_arrays):
 def fitted_logistic_regression():
     digraph = LocalClassifierPerParentNode(local_classifier=LogisticRegression())
     digraph.hierarchy_ = nx.DiGraph(
-        [("r", "1"), ("r", "2"), ("1", "1.1"), ("1", "1.2"), ("2", "2.1"), ("2", "2.2")]
+        [
+            ("r", "1"),
+            ("r", "2"),
+            ("1", "1.1"),
+            ("1", "1.2"),
+            ("2", "2.1"),
+            ("2", "2.2"),
+        ]
     )
     digraph.y_ = np.array([["1", "1.1"], ["1", "1.2"], ["2", "2.1"], ["2", "2.2"]])
     digraph.X_ = np.array([[1, 2], [3, 4], [5, 6], [7, 8]])
@@ -200,11 +207,14 @@ def empty_levels():
         [2],
         [3],
     ]
-    y = [
-        ["1"],
-        ["2", "2.1"],
-        ["3", "3.1", "3.1.2"],
-    ]
+    y = np.array(
+        [
+            ["1"],
+            ["2", "2.1"],
+            ["3", "3.1", "3.1.2"],
+        ],
+        dtype=object,
+    )
     return X, y
 
 
