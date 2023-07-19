@@ -119,7 +119,7 @@ This leads to only a single path through the hierarchy for each data sample.
 
 .. figure:: ../algorithms/hc_prediction.png
    :align: center
-   :figwidth: 80%
+   :width: 80%
 
    Predicting the labels for a sample using the top-down prediction strategy. Numeric values in red are the predicted probabilities for each node.
 
