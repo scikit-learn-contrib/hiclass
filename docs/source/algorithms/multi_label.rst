@@ -15,39 +15,39 @@ This occurs when the classes are not mutually exclusive.
 For instance, let's consider a problem involving the classification of dog breeds, where we aim to determine the breed of a dog based on available data.
 Without allowing for multiple paths through the dog breed hierarchy, we would have to assign a single label to each sample, which means we have to choose single path through the hierarchy resulting in assigning a dog to a single breed.
 However, this does not always reflect reality, since a dog can be a mix of multiple breeds.
-For example, a dog can be a mix of a dachshund and a Golden Retriever.
-In such a scenario, we aim to assign both the dachshund and Golden Retriever labels to the sample, which requires at least two paths through the hierarchy.
+For example, a dog can be a mix of a Dachshund and a Golden Retriever.
+In such a scenario, we aim to assign both the Dachshund and Golden Retriever labels to the sample, which requires at least two paths through the hierarchy.
 The following figure illustrates this example.
 
 .. _example_dog_breed_hierarchy:
 
 .. figure:: ../algorithms/hc_dog_breed_hierarchy.png
    :align: center
-   :width: 90%
+   :width: 80%
 
-   An example image of a dog that is a mix of a dachshund and a Golden Retriever, thereby requiring multiple paths through the hierarchy for correct classification.
+   An example image of a dog that is a mix of a Dachshund and a Golden Retriever, thereby requiring multiple paths through the hierarchy for correct classification.
 
-Another example in which multi-path hierarchical classification is useful, is document classification, in which we aim to classify a document based on its content.
-The categories can be hierarchical in nature, such as classifying documents into broad topics like "Technology", "Sports", and "Politics", which further have subcategories like "Artificial Intelligence", "Football", and "International Relations".
-A document can belong to multiple categories at the same level of the hierarchy, for example a text that deals with the influence of advancements in AI on International Relations.
+Another multi-path hierarchical classification example, is document classification, in which we aim to classify a document based on its content.
+The categories are often hierarchical in nature, such as classifying documents into broad topics like "Technology", "Sports", and "Politics", which further have subcategories like "Artificial Intelligence", "Football", and "International Relations".
+A document can belong to multiple categories, for example a text that deals with the influence of advancements in AI on International Relations, which can only be correctly classified by multiple paths through the hierarchy.
 
 ++++++++++++++++++++++++++++++++++++++++
 Background - Classification Terminology
 ++++++++++++++++++++++++++++++++++++++++
-To explain what we mean with multipath hierarchical classification, we first need to define some terminology.
+To explain what we mean with multi-path hierarchical classification, we first need to define some terminology.
 
 .. figure:: ../algorithms/hc_background.png
    :align: left
    :figwidth: 30%
 
-   The set of classification problems from most generic (mutliclass) to most specific (multi-path hierarchical classification).
+   The set of classification problems from most generic (multi-class) to most specific (multi-path hierarchical classification).
 
 In a multi-class classification problem, a sample can be assigned to one class among several options.
 In a multi-label classification problem, a sample can be associated with multiple classes simultaneously.
 A hierarchical classification problem is a type of multi-label classification problem where classes are organized in a hierarchical structure represented as a graph, such as a tree or directed acyclic graph (DAG).
 In this graph, the nodes correspond to the classes to be predicted.
 If not specified, it is usually assumed that at each level of the hierarchy, a sample can only belong to one class.
-This means that a sample, can only be associated with a single path through the hierarchy, starting from the root node and ending at a leave node.
+This means that a sample can only be associated with a single path through the hierarchy, starting from the root node and ending at a leave node.
 In multi-path hierarchical classification, this restriction is lifted.
 A sample can belong to multiple classes at the same level of the hierarchy, i.e., a sample can be classified by multiple paths through the hierarchy.
 
@@ -62,12 +62,13 @@ However, since there is no sklearn specific multi-label hierarchical format, HiC
 The HiClass target format extends the non-multi-label hierarchical classification format by adding a new dimension to the 2-dimensional array which captures the different paths through the hierarchy.
 
 .. figure:: ../algorithms/hc_format.png
-   :align: left
-   :figwidth: 40%
+   :align: center
+   :width: 80%
 
    HiClass multi-path hierarchical classification format extension for samples classified by the dog breed hierarchy.
 
-|
+This is implemented as a nested list of lists, in which the last dimension specifies a path through the hierarchy.
+
 .. code-block:: python
 
    y = [
@@ -76,9 +77,9 @@ The HiClass target format extends the non-multi-label hierarchical classificatio
    ]
 
 Important to note here is that we specify the whole list of nodes from the root to the most specific nodes for each path.
-Even in cases in which only the leave nodes are different, we still need to specify the whole path.
+Even in cases in which only the leave nodes are different we still need to specify the whole path.
 For example, if sample 1 would belong to the Labrador class instead of the Dachshund class, we still need to specify the whole path from the root to the Golden Retriever and Labrador nodes, which would be :code:`[["Retriever", "Golden Retriever"], ["Retriever", "Labrador"]]`.
-This is a consequence of requiring a fixed dimension for the target array, which is required by using Numpy arrays for implementation.
+This is a consequence using Numpy arrays for the implementation which require fixed dimensions for the target array.
 Furthermore, by explicitly specifying the whole path form root to leave nodes, the target format is readable and easy to comprehend and also works well for hierarchies that are not trees, but DAGs.
 
 
@@ -86,9 +87,8 @@ Furthermore, by explicitly specifying the whole path form root to leave nodes, t
 Fitting the Classifiers
 ++++++++++++++++++++++++++
 In this section we outline how fitting of the local classifiers is implemented in HiClass for multi-path hierarchical classification.
-.. For background information on the classifier strategies, please refer to the :ref:`hiclass_classifier_strategies` section.
-Here we only focus on the multi-label hierarchical classification case for the :class:`hiclass.MultiLabelLocalClassifierPerNode` and :class:`hiclass.MultiLabelLocalClassifierPerNode` classifiers.
-For a recap how the strategies work, refer to the :ref:`Algorithms<algorithms>` section.
+Here we only focus on the multi-path hierarchical classification case for the :class:`hiclass.MultiLabelLocalClassifierPerNode` and :class:`hiclass.MultiLabelLocalClassifierPerNode` classifiers.
+For a recap on how the strategies work, visit the :ref:`Algorithms<algorithms>` section.
 
 Local Classifier Per Node
 -------------------------
@@ -103,8 +103,8 @@ It is also assigned to the positive class for the Hound classifier, since it doe
 
 Local Classifier Per Node
 -------------------------
-The :class:`hiclass.MultiLabelLocalClassifierPerParentNode` trains a true multi-class classifier for each non-leaf/parent node, i.e., a node that has children in the hierarchy.
-The classes are the children of the node.
+The :class:`hiclass.MultiLabelLocalClassifierPerParentNode` trains a multi-class classifier for each non-leaf/parent node, i.e., a node that has children in the hierarchy.
+The classes to be predicted are the children of the node.
 For the multi-label case this means, that a sample can belong to multiple children of a node.
 Internally, this is implemented by duplicating the sample and assigning each duplicate to one of the children of the node.
 Thereby the classifier itself does not need to support the sklearn multi-label format and can be a standard sklearn classifier.
@@ -118,16 +118,14 @@ In the single path case, the data sample is assigned the label with the highest 
 This leads to only a single path through the hierarchy for each data sample.
 
 .. figure:: ../algorithms/hc_prediction.png
-   :align: left
-   :figwidth: 60%
+   :align: center
+   :figwidth: 80%
 
    Predicting the labels for a sample using the top-down prediction strategy. Numeric values in red are the predicted probabilities for each node.
 
-In the example given on the left, the sample would be assigned the label :code:`["Retriever", "Golden Retriever"]`, since this is the path with the highest probability starting at the root node.
+In the example given above, the sample would be assigned the label :code:`["Retriever", "Golden Retriever"]`, since this is the path with the highest probability starting at the root node.
 In contrast, when we want to allow for multiple paths through the hierarchy, we need to specify a criterion different from taking the highest probability to assign labels to data samples.
 HiClass implements two strategies for this: Threshold and Tolerance.
-
-|
 
 Theshold
 -------------------------
@@ -140,7 +138,7 @@ The threshold :math:`\lambda \in [0, 1]` is a parameter that is passed to the pr
 In the example given above, if we set :math:`\lambda = 0.6`, we would assign the label :code:`[["Retriever", "Golden Retriever"], ["Hound", "Dachshund"]]` to the sample, since the probabilities of the assigned nodes are greater than 0.6.
 While this strategy is simple to implement and understand, it has the disadvantage that it is not possible to specify a different threshold for each node in the hierarchy, requiring a global threshold for all nodes.
 Furthermore, with the top down-prediction strategy, if the predicted probability is below the threshold for a node, the prediction stops regardless of the probabilities of the nodes further down the hierarchy.
-For example, if :math:`\lambda = 0.85`, no label would be assigned to the sample since the probabilities for Retriever and Hound class are below the threshold value and traversing the hierarchy stops.
+For example, if :math:`\lambda = 0.85`, no label would be assigned to the sample since the probabilities for the Retriever and Hound class are below the threshold value and traversing the hierarchy stops.
 
 Tolerance
 -------------------------
@@ -165,11 +163,11 @@ Here we give an example of the hierarchical precision and recall for the multi-p
 
 .. figure:: ../algorithms/hc_metrics.png
    :align: center
-   :width: 90%
+   :width: 100%
 
 Note, that when calculating the hierarchical precision and recall for multiple samples, we can define micro and macro average.
 The micro precision/recall all predictions are considered together, regardless of the sample.
-In contrast, in the macro precision, we first calculate the hierarchical precision of a sample and then aggregate the results.
+In contrast, in the macro precision/recall, we first calculate the hierarchical precision/recall of a sample and then aggregate the results.
 Since samples can have differing numbers of labels assigned to them, micro and macro average can lead to different results.
 
 
