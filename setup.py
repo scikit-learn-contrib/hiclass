@@ -22,7 +22,7 @@ URL_GITHUB = "https://github.com/scikit-learn-contrib/hiclass"
 URL_ISSUES = "https://github.com/scikit-learn-contrib/hiclass/issues"
 EMAIL = "fabio.malchermiranda@hpi.de, Niklas.Koehnecke@student.hpi.uni-potsdam.de"
 AUTHOR = "Fabio Malcher Miranda, Niklas Koehnecke"
-REQUIRES_PYTHON = ">=3.7,<3.11.2"
+REQUIRES_PYTHON = ">=3.7,<3.12"
 KEYWORDS = ["hierarchical classification"]
 DACS_SOFTWARE = "https://gitlab.com/dacs-hpi"
 # What packages are required for this module to be executed?
