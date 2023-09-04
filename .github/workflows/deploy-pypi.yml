@@ -1,9 +1,11 @@
 name: pipeline
 
-on:
-  push:
-    branches:
-      - main
+#on:
+#  push:
+#    branches:
+#      - main
+
+on: [pull_request]
 
 jobs:
 
@@ -29,7 +31,7 @@ jobs:
         python -m pip install pydocstyle==6.1.1
         python -m pip install pytest-pydocstyle==2.3.0
         python -m pip install pytest-cov==3.0.0
-        python -m pip install ray==1.13.0
+        python -m pip install ray
         python -m pip install 'importlib-metadata<4.3'
         python -m pip install .
     - name: Test with pytest
@@ -40,41 +42,41 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       uses: codecov/codecov-action@v2
 
-  bump:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: '0'
-    - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@1.36.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        WITH_V: true
-        DEFAULT_BUMP: patch
-
-  build-n-publish:
-    needs: bump
-    name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Install pypa/build
-      run: |
-        git fetch --tags
-        git branch --create-reflog main origin/main
-        python -m pip install build --user .
-    - name: Build a binary wheel and a source tarball
-      run: |
-        python -m build --sdist --wheel --outdir dist/ .
-    - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
-        verbose: true
+#  bump:
+#    needs: test
+#    runs-on: ubuntu-latest
+#    steps:
+#    - uses: actions/checkout@v2
+#      with:
+#        fetch-depth: '0'
+#    - name: Bump version and push tag
+#      uses: anothrNick/github-tag-action@1.36.0
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        WITH_V: true
+#        DEFAULT_BUMP: patch
+#
+#  build-n-publish:
+#    needs: bump
+#    name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+#    runs-on: ubuntu-latest
+#    steps:
+#    - uses: actions/checkout@v1
+#    - name: Set up Python 3.8
+#      uses: actions/setup-python@v2
+#      with:
+#        python-version: 3.8
+#    - name: Install pypa/build
+#      run: |
+#        git fetch --tags
+#        git branch --create-reflog main origin/main
+#        python -m pip install build --user .
+#    - name: Build a binary wheel and a source tarball
+#      run: |
+#        python -m build --sdist --wheel --outdir dist/ .
+#    - name: Publish distribution 📦 to PyPI
+#      uses: pypa/gh-action-pypi-publish@release/v1
+#      with:
+#        user: __token__
+#        password: ${{ secrets.PYPI_API_TOKEN }}
+#        verbose: true
