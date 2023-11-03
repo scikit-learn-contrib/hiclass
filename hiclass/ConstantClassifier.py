@@ -7,7 +7,7 @@ class ConstantClassifier:
 
     def fit(self, X, y, sample_weight=None):
         """
-        Fit a constant classifier.
+        Fit a constant classifier
 
         Parameters
         ----------
