@@ -276,3 +276,18 @@ def test_knn():
     check_is_fitted(lcpn)
     # predictions = lcpn.predict(X)
     # assert_array_equal(y, predictions)
+
+
+def test_fit_multiple_dim_input():
+    lcpn = LocalClassifierPerNode()
+    X = np.random.rand(1, 275, 3)
+    y = np.array([["a", "b", "c"]])
+    lcpn.fit(X, y)
+    check_is_fitted(lcpn)
+
+def test_predict_multiple_dim_input():
+    lcpn = LocalClassifierPerNode()
+    X = np.random.rand(1, 275, 3)
+    y = np.array([["a", "b", "c"]])
+    lcpn.fit(X, y)
+    predictions = lcpn.predict(X)

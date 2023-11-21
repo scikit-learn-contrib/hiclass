@@ -140,7 +140,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         # Input validation
         if not self.bert:
-            X = check_array(X, accept_sparse="csr")
+            X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
         else:
             X = np.array(X)
 

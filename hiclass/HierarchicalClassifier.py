@@ -8,7 +8,6 @@ from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import _check_sample_weight
-
 try:
     import ray
 except ImportError:
@@ -136,7 +135,7 @@ class HierarchicalClassifier(abc.ABC):
 
         if not self.bert:
             self.X_, self.y_ = self._validate_data(
-                X, y, multi_output=True, accept_sparse="csr"
+                X, y, multi_output=True, accept_sparse="csr", allow_nd=True
             )
         else:
             self.X_ = np.array(X)
