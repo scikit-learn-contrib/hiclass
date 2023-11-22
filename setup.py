@@ -30,7 +30,11 @@ REQUIRED = ["networkx", "numpy", "scikit-learn"]
 
 # What packages are optional?
 # 'fancy feature': ['django'],}
-EXTRAS = {"ray": ["ray>=1.11.0"]}
+#EXTRAS = {"ray": ["ray>=1.11.0"], "xai": ["shap>=0.39"]}
+
+EXTRAS = dict()
+EXTRAS["ray"] = ["ray>=1.11.0"]
+EXTRAS["xai"] = ["shap"]
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
