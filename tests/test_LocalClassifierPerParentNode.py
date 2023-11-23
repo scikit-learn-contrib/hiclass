@@ -283,3 +283,4 @@ def test_predict_multiple_dim_input():
     y = np.array([["a", "b", "c"]])
     lcppn.fit(X, y)
     predictions = lcppn.predict(X)
+    assert predictions is not None
