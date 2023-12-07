@@ -105,7 +105,7 @@ def test_knn(classifier):
 @pytest.mark.parametrize("classifier", classifiers)
 def test_fit_multiple_dim_input(classifier):
     clf = classifier()
-    X = np.random.rand(1, 275, 3)
+    X = np.random.rand(1, 1, 275, 3)
     y = np.array([["a", "b", "c"]])
     clf.fit(X, y)
     check_is_fitted(clf)
@@ -119,3 +119,16 @@ def test_predict_multiple_dim_input(classifier):
     clf.fit(X, y)
     predictions = clf.predict(X)
     assert predictions is not None
+
+
+@pytest.mark.parametrize("classifier", classifiers)
+def test_change_local_classifier(classifier):
+    clf = classifier(local_classifier=LogisticRegression())
+    y = np.array([["a", "b", "c"], ["a", "b", "d"]])
+    X = np.random.randint(1, 11, size=(2, 10))
+
+    clf.fit(X, y)
+    assert isinstance(clf.local_classifier_, LogisticRegression)
+
+    clf._change_local_classifier(KNeighborsClassifier())
+    assert isinstance(clf.local_classifier_, KNeighborsClassifier)
