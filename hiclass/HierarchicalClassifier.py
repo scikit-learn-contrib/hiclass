@@ -4,6 +4,7 @@ import logging
 
 import networkx as nx
 import numpy as np
+import sklearn
 
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
