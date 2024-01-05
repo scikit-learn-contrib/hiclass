@@ -197,14 +197,14 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
                 y_row_indices = []
                 for row in range(X.shape[0]):
                     # create list of indices
-                    _t = [z for z, l in enumerate(y[row]) if l[-1] == predecessor]
+                    _t = [z for z, ls in enumerate(y[row]) if ls[-1] == predecessor]
 
                     # y_row_indices is a list of lists, each list contains the index of the row and a list of column indices
                     y_row_indices.append([row, _t])
 
                 # Filter
-                mask = [True if l[1] else False for l in y_row_indices]
-                y_row_indices = [l for l in y_row_indices if l[1]]
+                mask = [True if ld[1] else False for ld in y_row_indices]
+                y_row_indices = [k for k in y_row_indices if k[1]]
                 subset_x = X[mask]
 
             if subset_x.shape[0] > 0:
