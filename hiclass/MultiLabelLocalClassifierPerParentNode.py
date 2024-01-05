@@ -296,3 +296,10 @@ class MultiLabelLocalClassifierPerParentNode(
         self.logger_.info("Fitting local classifiers")
         nodes = self._get_parents()
         self._fit_node_classifier(nodes, local_mode, use_joblib)
+
+    def _more_tags(self):
+        return {
+            "_xfail_checks": {
+                "check_estimator_sparse_data": "Multi-label multi-output prediction format is not support in sklearn"
+            },
+        }

@@ -306,3 +306,10 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
     def _clean_up(self):
         super()._clean_up()
         del self.binary_policy_
+
+    def _more_tags(self):
+        return {
+            "_xfail_checks": {
+                "check_estimator_sparse_data": "Multi-label multi-output prediction format is not support in sklearn"
+            },
+        }
