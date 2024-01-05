@@ -11,81 +11,33 @@ from hiclass.HierarchicalClassifier import HierarchicalClassifier, make_leveled
 
 
 @pytest.fixture
-def ambiguous_node_str_2d():
+def ambiguous_node_str():
     classifier = HierarchicalClassifier()
     classifier.y_ = np.array([["a", "b"], ["b", "c"]])
     return classifier
 
 
-def test_disambiguate_str_2d(ambiguous_node_str_2d):
-    ground_truth = [
-        ["a", "a::HiClass::Separator::b"],
-        ["b", "b::HiClass::Separator::c"],
-    ]
-    ambiguous_node_str_2d._disambiguate()
-    assert_array_equal(ground_truth, ambiguous_node_str_2d.y_)
-
-
-@pytest.fixture
-def ambiguous_node_str_3d():
-    classifier = HierarchicalClassifier()
-    classifier.y_ = np.array(
-        [
-            [["a", "b"], ["", ""]],
-            [["b", "c"], ["", ""]],
-            [["d", "e"], ["f", "g"]],
-        ]
+def test_disambiguate_str(ambiguous_node_str):
+    ground_truth = np.array(
+        [["a", "a::HiClass::Separator::b"], ["b", "b::HiClass::Separator::c"]]
     )
-    return classifier
-
-
-def test_disambiguate_str_3d(ambiguous_node_str_3d):
-    ground_truth = [
-        [["a", "a::HiClass::Separator::b"], ["", ""]],
-        [["b", "b::HiClass::Separator::c"], ["", ""]],
-        [["d", "d::HiClass::Separator::e"], ["f", "f::HiClass::Separator::g"]],
-    ]
-    ambiguous_node_str_3d._disambiguate()
-    assert_array_equal(ground_truth, ambiguous_node_str_3d.y_)
+    ambiguous_node_str._disambiguate()
+    assert_array_equal(ground_truth, ambiguous_node_str.y_)
 
 
 @pytest.fixture
-def ambiguous_node_int_2d():
+def ambiguous_node_int():
     classifier = HierarchicalClassifier()
     classifier.y_ = np.array([[1, 2], [2, 3]])
     return classifier
 
 
-def test_disambiguate_int_2d(ambiguous_node_int_2d):
-    ground_truth = [
-        ["1", "1::HiClass::Separator::2"],
-        ["2", "2::HiClass::Separator::3"],
-    ]
-    ambiguous_node_int_2d._disambiguate()
-    assert_array_equal(ground_truth, ambiguous_node_int_2d.y_)
-
-
-@pytest.fixture
-def ambiguous_node_int_3d():
-    classifier = HierarchicalClassifier()
-    classifier.y_ = np.array(
-        [
-            [[1, 2], ["", ""]],
-            [[2, 3], ["", ""]],
-            [[4, 5], [6, 7]],
-        ]
+def test_disambiguate_int(ambiguous_node_int):
+    ground_truth = np.array(
+        [["1", "1::HiClass::Separator::2"], ["2", "2::HiClass::Separator::3"]]
     )
-    return classifier
-
-
-def test_disambiguate_int_3d(ambiguous_node_int_3d):
-    ground_truth = [
-        [["1", "1::HiClass::Separator::2"], ["", ""]],
-        [["2", "2::HiClass::Separator::3"], ["", ""]],
-        [["4", "4::HiClass::Separator::5"], ["6", "6::HiClass::Separator::7"]],
-    ]
-    ambiguous_node_int_3d._disambiguate()
-    assert_array_equal(ground_truth, ambiguous_node_int_3d.y_)
+    ambiguous_node_int._disambiguate()
+    assert_array_equal(ground_truth, ambiguous_node_int.y_)
 
 
 @pytest.fixture
@@ -98,7 +50,7 @@ def graph_1d():
 
 def test_create_digraph_1d(graph_1d):
     ground_truth = nx.DiGraph()
-    ground_truth.add_nodes_from(["a", "b", "c", "d"])
+    ground_truth.add_nodes_from(np.array(["a", "b", "c", "d"]))
     graph_1d._create_digraph()
     assert nx.is_isomorphic(ground_truth, graph_1d.hierarchy_)
     assert list(ground_truth.nodes) == list(graph_1d.hierarchy_.nodes)
@@ -115,7 +67,7 @@ def graph_1d_disguised_as_2d():
 
 def test_create_digraph_1d_disguised_as_2d(graph_1d_disguised_as_2d):
     ground_truth = nx.DiGraph()
-    ground_truth.add_nodes_from(["a", "b", "c", "d"])
+    ground_truth.add_nodes_from(np.array(["a", "b", "c", "d"]))
     graph_1d_disguised_as_2d._create_digraph()
     assert nx.is_isomorphic(ground_truth, graph_1d_disguised_as_2d.hierarchy_)
     assert list(ground_truth.nodes) == list(graph_1d_disguised_as_2d.hierarchy_.nodes)
@@ -126,7 +78,9 @@ def test_create_digraph_1d_disguised_as_2d(graph_1d_disguised_as_2d):
 def digraph_2d():
     classifier = HierarchicalClassifier()
     classifier.y_ = np.array([["a", "b", "c"], ["d", "e", "f"]])
+    classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
     classifier.logger_ = logging.getLogger("HC")
+    classifier.edge_list = tempfile.TemporaryFile()
     classifier.separator_ = "::HiClass::Separator::"
     return classifier
 
@@ -142,68 +96,17 @@ def test_create_digraph_2d(digraph_2d):
 @pytest.fixture
 def digraph_3d():
     classifier = HierarchicalClassifier()
-    classifier.y_ = np.array(
-        [
-            [["a", "b", "c"]],
-            [["d", "e", "f"]],
-        ]
-    )
+    classifier.y_ = np.arange(27).reshape((3, 3, 3))
     classifier.logger_ = logging.getLogger("HC")
-    classifier.separator_ = "::HiClass::Separator::"
     return classifier
 
 
 def test_create_digraph_3d(digraph_3d):
-    ground_truth = nx.DiGraph(
-        [
-            ("a", "b"),
-            ("b", "c"),
-            ("d", "e"),
-            ("e", "f"),
-        ]
-    )
-    digraph_3d._create_digraph()
-    assert nx.is_isomorphic(ground_truth, digraph_3d.hierarchy_)
-    assert list(ground_truth.nodes) == list(digraph_3d.hierarchy_.nodes)
-    assert list(ground_truth.edges) == list(digraph_3d.hierarchy_.edges)
-
-
-@pytest.fixture
-def digraph_3d_multi_label():
-    classifier = HierarchicalClassifier()
-    classifier.y_ = np.array(
-        [
-            [["a", "b", "c"], ["d", "e", "f"]],
-            [["g", "h", "i"], ["j", "k", "l"]],
-        ]
-    )
-    classifier.logger_ = logging.getLogger("HC")
-    classifier.separator_ = "::HiClass::Separator::"
-    return classifier
-
-
-def test_create_digraph_3d_multi_label(digraph_3d_multi_label):
-    ground_truth = nx.DiGraph(
-        [
-            ("a", "b"),
-            ("b", "c"),
-            ("d", "e"),
-            ("e", "f"),
-            ("g", "h"),
-            ("h", "i"),
-            ("j", "k"),
-            ("k", "l"),
-        ]
-    )
-    digraph_3d_multi_label._create_digraph()
-    assert nx.is_isomorphic(ground_truth, digraph_3d_multi_label.hierarchy_)
-    assert list(ground_truth.nodes) == list(digraph_3d_multi_label.hierarchy_.nodes)
-    assert list(ground_truth.edges) == list(digraph_3d_multi_label.hierarchy_.edges)
+    with pytest.raises(ValueError):
+        digraph_3d._create_digraph()
 
 
 def test_export_digraph(digraph_2d):
-    digraph_2d.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("d", "e"), ("e", "f")])
-    digraph_2d.edge_list = tempfile.TemporaryFile()
     ground_truth = b'"a","b",{}\n"b","c",{}\n"d","e",{}\n"e","f",{}\n'
     digraph_2d._export_digraph()
     digraph_2d.edge_list.seek(0)
@@ -277,7 +180,7 @@ def test_clean_up(digraph_multiple_roots):
 
 
 @pytest.fixture
-def empty_levels_2d():
+def empty_levels():
     y = [
         ["a"],
         ["b", "c"],
@@ -286,67 +189,15 @@ def empty_levels_2d():
     return y
 
 
-def test_make_leveled_2d(empty_levels_2d):
-    ground_truth = [
-        ["a", "", ""],
-        ["b", "c", ""],
-        ["d", "e", "f"],
-    ]
-    result = make_leveled(empty_levels_2d)
-    assert_array_equal(ground_truth, result)
-
-
-@pytest.fixture
-def empty_levels_3d():
-    y = [
-        [["a"]],
-        [["b", "c"]],
-        [["d", "e", "f"]],
-        [["g", "h", "i"], ["j", "k", "l"]],
-        [["m", "n", "o"]],
-    ]
-    return y
-
-
-@pytest.fixture
-def empty_levels_3d_large_strings():
-    y = [
-        [["fish", "mermaid"]],
-        [["human", "mermaid"]],
-        [["bull", "minotaur"]],
-        [["human", "minotaur"]],
-        [["fish", "mermaid"], ["human", "mermaid"]],
-        [["bull", "minotaur"], ["human", "minotaur"]],
-    ]
-    return y
-
-
-def test_make_leveled_3d_1(empty_levels_3d):
-    ground_truth = [
-        # Labels that are the same as in the Single-Label Test case
-        [["a", "", ""], ["", "", ""]],
-        [["b", "c", ""], ["", "", ""]],
-        [["d", "e", "f"], ["", "", ""]],
-        # Multi-label Test cases
-        [["g", "h", "i"], ["j", "k", "l"]],
-        [["m", "n", "o"], ["", "", ""]],
-    ]
-    result = make_leveled(empty_levels_3d)
-    assert_array_equal(ground_truth, result)
-
-
-def test_make_leveled_3d_2(empty_levels_3d_large_strings):
-    ground_truth = [
-        # Labels that are the same as in the Single-Label Test case
-        [["fish", "mermaid"], ["", ""]],
-        [["human", "mermaid"], ["", ""]],
-        [["bull", "minotaur"], ["", ""]],
-        [["human", "minotaur"], ["", ""]],
-        # Multi-label Test cases
-        [["fish", "mermaid"], ["human", "mermaid"]],
-        [["bull", "minotaur"], ["human", "minotaur"]],
-    ]
-    result = make_leveled(empty_levels_3d_large_strings)
+def test_make_leveled(empty_levels):
+    ground_truth = np.array(
+        [
+            ["a", "", ""],
+            ["b", "c", ""],
+            ["d", "e", "f"],
+        ]
+    )
+    result = make_leveled(empty_levels)
     assert_array_equal(ground_truth, result)
 
 
@@ -357,8 +208,7 @@ def noniterable_y():
 
 
 def test_make_leveled_non_iterable_y(noniterable_y):
-    result = make_leveled(noniterable_y)
-    assert_array_equal(noniterable_y, result)
+    assert noniterable_y == make_leveled(noniterable_y)
 
 
 def test_fit_classifier():
@@ -374,108 +224,3 @@ def test_pre_fit_bert():
     y = [["a", "b"], ["c", "d"]]
     sample_weight = None
     classifier._pre_fit(x, y, sample_weight)
-
-
-@pytest.fixture
-def separator_2d():
-    hc = HierarchicalClassifier()
-    hc.separator_ = "::HiClass::Separator::"
-    y = np.array(
-        [
-            [
-                "a",
-                "a::HiClass::Separator::b",
-                "a::HiClass::Separator::b::HiClass::Separator::c",
-            ],
-            [
-                "d",
-                "d::HiClass::Separator::e",
-                "d::HiClass::Separator::e::HiClass::Separator::f",
-            ],
-            [
-                "g",
-                "g::HiClass::Separator::h",
-                "g::HiClass::Separator::h::HiClass::Separator::i",
-            ],
-        ]
-    )
-    return hc, y
-
-
-def test_remove_separator_2d(separator_2d):
-    ground_truth = [
-        ["a", "b", "c"],
-        ["d", "e", "f"],
-        ["g", "h", "i"],
-    ]
-    hc, y = separator_2d
-    hc._remove_separator(y)
-    assert_array_equal(ground_truth, y)
-
-
-@pytest.fixture
-def separator_3d():
-    hc = HierarchicalClassifier()
-    hc.separator_ = "::HiClass::Separator::"
-    y = np.array(
-        [
-            [
-                [
-                    "a",
-                    "a::HiClass::Separator::b",
-                    "a::HiClass::Separator::b::HiClass::Separator::c",
-                ]
-            ],
-            [
-                [
-                    "d",
-                    "d::HiClass::Separator::e",
-                    "d::HiClass::Separator::e::HiClass::Separator::f",
-                ]
-            ],
-            [
-                [
-                    "g",
-                    "g::HiClass::Separator::h",
-                    "g::HiClass::Separator::h::HiClass::Separator::i",
-                ]
-            ],
-        ]
-    )
-    return hc, y
-
-
-def test_remove_separator_3d(separator_3d):
-    ground_truth = [
-        [["a", "b", "c"]],
-        [["d", "e", "f"]],
-        [["g", "h", "i"]],
-    ]
-    hc, y = separator_3d
-    hc._remove_separator(y)
-    assert_array_equal(ground_truth, y)
-
-
-@pytest.fixture
-def separator_3d_multi_label():
-    hc = HierarchicalClassifier()
-    hc.separator_ = "::HiClass::Separator::"
-    y = np.array(
-        [
-            [["a", "a::HiClass::Separator::b"], ["a", "a::HiClass::Separator::c"]],
-            [["d", "d::HiClass::Separator::e"], ["d", "d::HiClass::Separator::f"]],
-            [["g", "g::HiClass::Separator::h"], ["g", "g::HiClass::Separator::i"]],
-        ]
-    )
-    return hc, y
-
-
-def test_remove_separator_3d_multi_label(separator_3d_multi_label):
-    ground_truth = [
-        [["a", "b"], ["a", "c"]],
-        [["d", "e"], ["d", "f"]],
-        [["g", "h"], ["g", "i"]],
-    ]
-    hc, y = separator_3d_multi_label
-    hc._remove_separator(y)
-    assert_array_equal(ground_truth, y)

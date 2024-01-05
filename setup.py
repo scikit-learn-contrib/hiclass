@@ -22,11 +22,11 @@ URL_GITHUB = "https://github.com/scikit-learn-contrib/hiclass"
 URL_ISSUES = "https://github.com/scikit-learn-contrib/hiclass/issues"
 EMAIL = "fabio.malchermiranda@hpi.de, Niklas.Koehnecke@student.hpi.uni-potsdam.de"
 AUTHOR = "Fabio Malcher Miranda, Niklas Koehnecke"
-REQUIRES_PYTHON = ">=3.7,<3.10"
+REQUIRES_PYTHON = ">=3.7,<3.12"
 KEYWORDS = ["hierarchical classification"]
 DACS_SOFTWARE = "https://gitlab.com/dacs-hpi"
 # What packages are required for this module to be executed?
-REQUIRED = ["networkx", "scikit-learn", "numpy<1.24"]
+REQUIRED = ["networkx", "numpy", "scikit-learn"]
 
 # What packages are optional?
 # 'fancy feature': ['django'],}
@@ -142,6 +142,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],

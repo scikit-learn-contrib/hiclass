@@ -7,8 +7,6 @@ from copy import deepcopy
 
 import networkx as nx
 import numpy as np
-from numpy import vstack
-from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
@@ -38,14 +36,13 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
     def __init__(
         self,
         local_classifier: BaseEstimator = None,
-        tolerance: float = None,
         verbose: int = 0,
         edge_list: str = None,
         replace_classifiers: bool = True,
         n_jobs: int = 1,
         bert: bool = False,
     ):
-        r"""
+        """
         Initialize a local classifier per parent node.
 
         Parameters
@@ -53,9 +50,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         local_classifier : BaseEstimator, default=LogisticRegression
             The local_classifier used to create the collection of local classifiers. Needs to have fit, predict and
             clone methods.
-        tolerance : float, default=None
-            The tolerance used to determine multi-labels. If set to None, only the child class with highest probability is predicted.
-            Otherwise, all child classes with :math:`probability >= max\_prob - tolerance` are predicted.
         verbose : int, default=0
             Controls the verbosity when fitting and predicting.
             See https://verboselogs.readthedocs.io/en/latest/readme.html#overview-of-logging-levels
@@ -73,7 +67,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         """
         super().__init__(
             local_classifier=local_classifier,
-            tolerance=tolerance,
             verbose=verbose,
             edge_list=edge_list,
             replace_classifiers=replace_classifiers,
@@ -109,6 +102,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # Fit local classifiers in DAG
         super().fit(X, y)
 
+        # TODO: Store the classes seen during fit
+
         # TODO: Add function to allow user to change local classifier
 
         # TODO: Add parameter to receive hierarchy as parameter in constructor
@@ -138,20 +133,12 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
         # Input validation
         if not self.bert:
-            X = check_array(X, accept_sparse="csr")
+            X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
         else:
             X = np.array(X)
 
         # Initialize array that holds predictions
-        # y = np.empty(
-        #     (X.shape[0], self.multi_labels_, self.max_levels_), dtype=self.dtype_
-        # )
-        if self.ndim_ <= 2:
-            y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
-        elif self.ndim_ == 3:
-            y = np.empty(
-                (X.shape[0], self.multi_labels_, self.max_levels_), dtype=self.dtype_
-            )
+        y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
 
         # TODO: Add threshold to stop prediction halfway if need be
 
@@ -168,44 +155,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         self._remove_separator(y)
 
         return y
-
-    def predict_proba(self, X):
-        """
-        Probability estimates.
-
-        The returned estimates for all classes are ordered by the label of classes.
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            Vector to be scored, where ``n_samples`` is the number of samples and
-            ``n_features`` is the number of features.
-            Internally, its dtype will be converted
-            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
-            converted into a sparse ``csr_matrix``.
-        Returns
-        -------
-        T : ndarray of shape (n_samples, n_classes)
-            Returns the probability of the sample for each class in the model,
-            where classes are ordered as they are in :code:`self.classes_`.
-        """
-        # Check if fit has been called
-        check_is_fitted(self)
-
-        # Input validation
-        if not self.bert:
-            X = check_array(X, accept_sparse="csr")
-        else:
-            X = np.array(X)
-
-        T = np.zeros((X.shape[0], len(self.classes_)))
-
-        # for i, node in enumerate(self.classes_):
-        #     classifier = self.hierarchy_.nodes[node]["classifier"]
-        #     positive_index = np.where(classifier.classes_ == 1)[0]
-        #     T[:, i] = classifier.predict_proba(X)[:, positive_index][:, 0]
-
-        return T
 
     def _predict_remaining_levels(self, X, y):
         for level in range(1, y.shape[1]):
@@ -238,12 +187,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         return nodes
 
     def _get_successors(self, node):
-        if self.y_.ndim == 2:
-            return self._get_successors_2d(node)
-        elif self.y_.ndim == 3:
-            return self._get_successors_3d(node)
-
-    def _get_successors_2d(self, node):
         successors = list(self.hierarchy_.successors(node))
         mask = np.isin(self.y_, successors).any(axis=1)
         X = self.X_[mask]
@@ -259,32 +202,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         )
         return X, y, sample_weight
 
-    def _get_successors_3d(self, node):
-        successors = list(self.hierarchy_.successors(node))
-        mask = np.isin(self.y_, successors).any(axis=(2, 1))
-        y = []
-        if isinstance(self.X_, csr_matrix):
-            X = csr_matrix((0, self.X_.shape[1]), dtype=self.X_.dtype)
-        else:
-            X = []
-        sample_weight = [] if self.sample_weight_ is not None else None
-        for i in range(self.y_.shape[0]):
-            if mask[i]:
-                row = self.y_[i]
-                labels = row[np.isin(row, successors)]
-                y.extend(labels)
-                for _ in range(labels.shape[0]):
-                    if isinstance(self.X_, csr_matrix):
-                        X = vstack([X, self.X_[i]])
-                    else:
-                        X.append(self.X_[i])
-                    if self.sample_weight_ is not None:
-                        sample_weight.append(self.sample_weight_[i])
-        y = np.array(y)
-        if isinstance(self.X_, np.ndarray):
-            X = np.array(X)
-        return X, y, sample_weight
-
     @staticmethod
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
@@ -294,7 +211,10 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
         if not self.bert:
-            classifier.fit(X, y, sample_weight)
+            try:
+                classifier.fit(X, y, sample_weight)
+            except TypeError:
+                classifier.fit(X, y)
         else:
             classifier.fit(X, y)
         return classifier
