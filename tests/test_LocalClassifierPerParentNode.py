@@ -12,6 +12,8 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 
 from hiclass import LocalClassifierPerParentNode
+import shap
+from hiclass.Explainer import Explainer
 
 
 @parametrize_with_checks([LocalClassifierPerParentNode()])
@@ -184,3 +186,34 @@ def test_fit_predict():
     lcppn.fit(x, y)
     predictions = lcppn.predict(x)
     assert_array_equal(y, predictions)
+
+
+def test_explainer():
+    logreg = LogisticRegression()
+    lcppn = LocalClassifierPerParentNode(
+        local_classifier=logreg,
+    )
+
+    #           a
+    #         /    \
+    #       b       c
+    #      /  \     / \
+    #    d     e   f   g
+
+    y = np.array([["a", "b", "d"], ["a", "b", "e"], ["a", "c", "f"], ["a", "c", "g"]])
+    X = np.array(
+        [
+            [1, 2, 3],
+            [1, 2, 4],
+            [5, 6, 7],
+            [5, 6, 8],
+        ]
+    )
+
+    lcppn.fit(X, y)
+
+    explainer = Explainer(lcppn)
+
+    shap_dict = explainer.explain(X)
+
+    print(shap_dict)

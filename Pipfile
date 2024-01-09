@@ -7,6 +7,7 @@ name = "pypi"
 networkx = "*"
 numpy = "*"
 scikit-learn = "*"
+shap = "*"
 
 [dev-packages]
 pytest = "*"
