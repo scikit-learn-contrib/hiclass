@@ -10,7 +10,7 @@ from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
-
+from sklearn.ensemble import RandomForestClassifier
 from hiclass import LocalClassifierPerParentNode
 import shap
 from hiclass.Explainer import Explainer
@@ -189,9 +189,9 @@ def test_fit_predict():
 
 
 def test_explainer():
-    logreg = LogisticRegression()
+    rfc = RandomForestClassifier()
     lcppn = LocalClassifierPerParentNode(
-        local_classifier=logreg,
+        local_classifier=rfc,
     )
 
     #           a
@@ -200,20 +200,18 @@ def test_explainer():
     #      /  \     / \
     #    d     e   f   g
 
-    y = np.array([["a", "b", "d"], ["a", "b", "e"], ["a", "c", "f"], ["a", "c", "g"]])
     X = np.array(
         [
-            [1, 2, 3],
             [1, 2, 4],
-            [5, 6, 7],
-            [5, 6, 8],
+            [1, 2, 5],
+            [1, 3, 6],
+            [1, 3, 7],
         ]
     )
+    y = np.array([["a", "b", "d"], ["a", "b", "e"], ["a", "c", "f"], ["a", "c", "g"]])
+    X_test = np.array([[1, 2.5, 7]])
 
     lcppn.fit(X, y)
-
-    explainer = Explainer(lcppn)
-
-    shap_dict = explainer.explain(X)
-
-    print(shap_dict)
+    explainer = Explainer(lcppn, data=X, mode="tree")
+    shap_dict = explainer.explain(X_test)
+    assert shap_dict is not None
