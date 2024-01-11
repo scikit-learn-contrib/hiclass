@@ -67,6 +67,7 @@ class HierarchicalClassifier(abc.ABC):
         n_jobs: int = 1,
         bert: bool = False,
         classifier_abbreviation: str = "",
+        calibration_method: str = None,
     ):
         """
         Initialize a local hierarchical classifier.
@@ -92,6 +93,8 @@ class HierarchicalClassifier(abc.ABC):
             If True, skip scikit-learn's checks and sample_weight passing for BERT.
         classifier_abbreviation : str, default=""
             The abbreviation of the local hierarchical classifier to be displayed during logging.
+        calibration_method : {"ivap", "cvap", "platt", "isotonic"}, str, default=None
+            If set, use the desired method to calibrate probabilities returned by predict_proba().
         """
         self.local_classifier = local_classifier
         self.verbose = verbose
@@ -100,6 +103,7 @@ class HierarchicalClassifier(abc.ABC):
         self.n_jobs = n_jobs
         self.bert = bert
         self.classifier_abbreviation = classifier_abbreviation
+        self.calibration_method = calibration_method
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -174,6 +178,16 @@ class HierarchicalClassifier(abc.ABC):
 
         # Initialize local classifiers in DAG
         self._initialize_local_classifiers()
+
+    def _calibrate(self, X, y):
+        # Create calibrator object
+        # seed
+        # fit calibrator using calibration data
+        # predict_proba can then use the calibrator to predict calibrated probabilities
+        pass
+
+    def predict_ood():
+        pass
 
     def _create_logger(self):
         # Create logger

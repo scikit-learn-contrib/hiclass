@@ -48,6 +48,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         replace_classifiers: bool = True,
         n_jobs: int = 1,
         bert: bool = False,
+        calibration_method: str = None,
     ):
         """
         Initialize a local classifier per level.
@@ -71,6 +72,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
         bert : bool, default=False
             If True, skip scikit-learn's checks and sample_weight passing for BERT.
+        calibration_method : {"ivap", "cvap", "platt", "isotonic"}, str, default=None
+            If set, use the desired method to calibrate probabilities returned by predict_proba().
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -80,6 +83,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             n_jobs=n_jobs,
             classifier_abbreviation="LCPL",
             bert=bert,
+            calibration_method=calibration_method,
         )
 
     def fit(self, X, y, sample_weight=None):
