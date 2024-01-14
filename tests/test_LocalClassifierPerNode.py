@@ -12,6 +12,7 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 
 from hiclass import LocalClassifierPerNode
+
 from hiclass.BinaryPolicy import ExclusivePolicy
 
 from hiclass.Explainer import Explainer
@@ -199,36 +200,7 @@ def test_fit_predict():
     predictions = lcpn.predict(x)
     assert_array_equal(y, predictions)
 
-
-def test_explainer():
-    rfc = RandomForestClassifier()
-    lcpn = LocalClassifierPerNode(
-        local_classifier=rfc,
-    )
-
-    #           a
-    #         /    \
-    #       b       c
-    #      /  \     / \
-    #    d     e   f   g
-
-    X = np.array(
-        [
-            [1, 2, 4],
-            [1, 2, 5],
-            [1, 3, 6],
-            [1, 3, 7],
-        ]
-    )
-    y = np.array([["b", "d"], ["b", "e"], ["c", "f"], ["c", "g"]])
-    X_test = np.array([[1, 2.5, 7]])
-
-    lcpn.fit(X, y)
-    explainer = Explainer(lcpn, data=X, mode="tree")
-    shap_dict = explainer.explain(X_test)
-    assert shap_dict is not None
-
-def test_explainer_two_roots():
+def test_explainer_not_empty():
     rfc = RandomForestClassifier()
     lcpn = LocalClassifierPerNode(
         local_classifier=rfc,

@@ -6,6 +6,7 @@ from hiclass import (
     LocalClassifierPerParentNode,
     LocalClassifierPerNode,
     LocalClassifierPerLevel,
+    ConstantClassifier
 )
 
 
@@ -100,6 +101,9 @@ class Explainer:
         shap_values_dict = {}
         for node in self.hierarchical_model.hierarchy_.nodes:
             if node == self.hierarchical_model.root_:
+                continue
+
+            if isinstance(self.hierarchical_model.hierarchy_.nodes[node]["classifier"], ConstantClassifier.ConstantClassifier):
                 continue
 
             local_classifier = self.hierarchical_model.hierarchy_.nodes[node]["classifier"]
