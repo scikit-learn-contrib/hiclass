@@ -38,19 +38,6 @@ class Explainer:
                 f"Invalid mode: {mode}. Supported modes are 'tree', 'gradient', 'deep', and 'linear'."
             )
 
-    def fit(self, background_data):
-        """
-        Fits SHAP explainers on the model for each node using background data.
-
-        :param background_data: Background data examples to initialize the SHAP values.
-                                This is often a sample of the training data.
-        """
-        # Assuming hierarchical_model.nodes provides access to individual node classifiers
-        for node in self.hierarchical_model.nodes:
-            model_at_node = self.hierarchical_model.get_model_at_node(node)
-            # Create a SHAP explainer for each node model
-            self.explainers[node] = shap.Explainer(model_at_node, background_data[node])
-
     def explain(self, X):
         """
         Generate SHAP values for each node in the hierarchy for the given data.
@@ -91,7 +78,7 @@ class Explainer:
                 local_explainer = self.explainers[parent_node]
 
             # Calculate SHAP values for the given sample X
-            shap_values = local_explainer.shap_values(X)
+            shap_values = np.array(local_explainer.shap_values(X))
             shap_values_dict[parent_node] = shap_values
 
         return shap_values_dict

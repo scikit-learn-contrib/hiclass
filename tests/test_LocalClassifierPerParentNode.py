@@ -12,7 +12,7 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 from sklearn.ensemble import RandomForestClassifier
 from hiclass import LocalClassifierPerParentNode
-import shap
+from sklearn.neural_network import MLPClassifier
 from hiclass.Explainer import Explainer
 
 
@@ -188,30 +188,60 @@ def test_fit_predict():
     assert_array_equal(y, predictions)
 
 
-def test_explainer():
-    rfc = RandomForestClassifier()
-    lcppn = LocalClassifierPerParentNode(
-        local_classifier=rfc,
-    )
-
+@pytest.fixture
+def explainer_data():
     #           a
     #         /    \
     #       b       c
     #      /  \     / \
     #    d     e   f   g
-
-    X = np.array(
-        [
-            [1, 2, 4],
-            [1, 2, 5],
-            [1, 3, 6],
-            [1, 3, 7],
-        ]
+    x_train = np.random.randn(4, 3)
+    y_train = np.array(
+        [["a", "b", "d"], ["a", "b", "e"], ["a", "c", "f"], ["a", "c", "g"]]
     )
-    y = np.array([["a", "b", "d"], ["a", "b", "e"], ["a", "c", "f"], ["a", "c", "g"]])
-    X_test = np.array([[1, 2.5, 7]])
+    x_test = np.random.randn(5, 3)
 
-    lcppn.fit(X, y)
-    explainer = Explainer(lcppn, data=X, mode="tree")
-    shap_dict = explainer.explain(X_test)
-    assert shap_dict is not None
+    return x_train, x_test, y_train
+
+
+def test_explainer_tree(explainer_data):
+    rfc = RandomForestClassifier()
+    lcppn = LocalClassifierPerParentNode(
+        local_classifier=rfc,
+    )
+
+    x_train, x_test, y_train = explainer_data
+
+    lcppn.fit(x_train, y_train)
+
+    lcppn.predict(x_test)
+    explainer = Explainer(lcppn, data=x_train, mode="tree")
+    shap_dict = explainer.explain(x_test)
+
+    for key, val in shap_dict.items():
+        # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
+        model = lcppn.hierarchy_.nodes[key]["classifier"]
+        assert shap_dict[key].shape == (
+            len(model.classes_),
+            x_test.shape[0],
+            x_test.shape[1],
+        )
+
+
+def test_explainer_linear(explainer_data):
+    logreg = LogisticRegression()
+    lcppn = LocalClassifierPerParentNode(
+        local_classifier=logreg,
+    )
+
+    x_train, x_test, y_train = explainer_data
+    lcppn.fit(x_train, y_train)
+
+    lcppn.predict(x_test)
+    explainer = Explainer(lcppn, data=x_train, mode="linear")
+    shap_dict = explainer.explain(x_test)
+
+    for key, val in shap_dict.items():
+        # Assert on shapes of shap values, must match (num_samples, num_features) Note: Logistic regression is based
+        # on sigmoid and not softmax, hence there are no separate predictions for each target class
+        assert shap_dict[key].shape == x_test.shape
