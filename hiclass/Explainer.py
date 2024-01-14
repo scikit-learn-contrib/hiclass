@@ -12,12 +12,20 @@ from hiclass import (
 class Explainer:
     """Explainer class for returning shap values for each of the three hierarchical classifiers."""
 
-    def __init__(self, hierarchical_model, data=None, algorithm="auto", mode="linear"):
+    def __init__(self, hierarchical_model, data=None, algorithm="auto", mode=""):
         """
         Initialize the SHAP explainer for a hierarchical model.
 
-        :param hierarchical_model: The hierarchical classification model to explain.
-        :param mode: Can be `tree`, `gradient`, `deep`, or `linear`
+        Parameters
+        ----------
+        hierarchical_model : HierarchicalClassifier
+            The hierarchical classification model to explain.
+        data : array-like or None, default=None
+            The dataset used for creating the SHAP explainer.
+        algorithm : str, default="auto"
+            The algorithm to use for SHAP explainer.
+        mode : str, default=""
+            The mode of the SHAP explainer. Can be 'tree', 'gradient', 'deep', 'linear', or '' for default SHAP explainer.
         """
         self.hierarchical_model = hierarchical_model
         self.explainers = {}  # To store a SHAP explainer for each node
@@ -34,16 +42,21 @@ class Explainer:
         elif mode == "linear":
             self.explainer = shap.LinearExplainer
         else:
-            raise ValueError(
-                f"Invalid mode: {mode}. Supported modes are 'tree', 'gradient', 'deep', and 'linear'."
-            )
+            self.explainer = shap.Explainer
 
     def explain(self, X):
         """
         Generate SHAP values for each node in the hierarchy for the given data.
 
-        :param X: Data for which to generate SHAP values.
-        :return: A dictionary of SHAP values for each node.
+        Parameters
+        ----------
+        X : array-like
+            Training data to fit the SHAP explainer.
+
+        Returns
+        -------
+        shap_values_dict : dict
+            A dictionary of SHAP values for each node.
         """
         if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
             return self._explain_lcppn(X)
@@ -55,6 +68,19 @@ class Explainer:
             raise ValueError(f"Invalid model: {self.hierarchical_model}.")
 
     def _explain_lcppn(self, X):
+        """
+        Generate SHAP values for each node using Local Classifier Per Parent Node (LCPPN) strategy.
+
+        Parameters
+        ----------
+        X : array-like
+            Sample data for which to generate SHAP values.
+
+        Returns
+        -------
+        shap_values_dict : dict
+            A dictionary of SHAP values for each node.
+        """
         shap_values_dict = {}
         # TODO: Use predictions to restrict traversal to only visited path while computing shap values
 
