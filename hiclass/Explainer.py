@@ -113,4 +113,17 @@ class Explainer:
         pass
 
     def _explain_lcpl(self, X):
-        pass
+        """
+        Generate SHAP values for each node using Local Classifier Per Level (LCPL) strategy.
+
+        Parameters
+        ----------
+        X : array-like
+            Sample data for which to generate SHAP values.
+
+        Returns
+        -------
+        shap_values_dict : dict
+            A dictionary of SHAP values for each node.
+        """
+
