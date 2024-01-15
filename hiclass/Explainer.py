@@ -128,7 +128,7 @@ class Explainer:
                 local_explainer = self.explainers[node]
 
         # Calculate SHAP values for the given sample X
-            shap_values = local_explainer.shap_values(X)
+            shap_values = np.array(local_explainer.shap_values(X))
             shap_values_dict[node] = shap_values
 
         return shap_values_dict
