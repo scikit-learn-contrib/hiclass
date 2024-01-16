@@ -8,6 +8,7 @@ from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import _check_sample_weight
+from calibration.Calibrator import _Calibrator
 
 try:
     import ray
