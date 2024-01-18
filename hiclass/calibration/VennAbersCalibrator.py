@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.exceptions import NotFittedError
-from calibration.BinaryCalibrator import BinaryCalibrator
+from hiclass.calibration.BinaryCalibrator import BinaryCalibrator
 from scipy.stats import gmean
 
 

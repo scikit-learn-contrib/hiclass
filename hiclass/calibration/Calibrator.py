@@ -2,9 +2,9 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.preprocessing import LabelEncoder
-from calibration.VennAbersCalibrator import InductiveVennAbersCalibrator, CrossVennAbersCalibrator
-from calibration.IsotonicRegression import IsotonicRegression
-from calibration.PlattScaling import PlattScaling
+from hiclass.calibration.VennAbersCalibrator import InductiveVennAbersCalibrator, CrossVennAbersCalibrator
+from hiclass.calibration.IsotonicRegression import IsotonicRegression
+from hiclass.calibration.PlattScaling import PlattScaling
 
 class _Calibrator(BaseEstimator):
     available_methods = ["ivap", "cvap", "sigmoid", "isotonic"]

@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import _check_sample_weight
-from calibration.Calibrator import _Calibrator
+from hiclass.calibration.Calibrator import _Calibrator
 
 try:
     import ray
@@ -146,6 +146,13 @@ class HierarchicalClassifier(abc.ABC):
         else:
             self.X_ = np.array(X)
             self.y_ = np.array(y)
+        
+        if self.calibration_method:
+            n_train_samples = int(0.7 * self.X_.shape[0])
+            print(self.X_.shape)
+            print(self.X_[:10])
+            self.X_, self.X_cal_ = np.split(self.X_, [n_train_samples], axis=0)
+            self.y_, self.y_cal = np.split(self.y_, [n_train_samples], axis=0)
 
         if sample_weight is not None:
             self.sample_weight_ = _check_sample_weight(sample_weight, X)
@@ -352,6 +359,12 @@ class HierarchicalClassifier(abc.ABC):
             classifiers = [self._fit_classifier(self, node) for node in nodes]
         for classifier, node in zip(classifiers, nodes):
             self.hierarchy_.nodes[node]["classifier"] = classifier
+
+    def _fit_node_calibrator():
+        pass
+
+    def _create_train_calibration_split(X, y, sample_weight):
+        pass
 
     @staticmethod
     def _fit_classifier(self, node):

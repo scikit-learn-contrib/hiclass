@@ -1,4 +1,4 @@
-from calibration.BinaryCalibrator import BinaryCalibrator
+from hiclass.calibration.BinaryCalibrator import BinaryCalibrator
 from sklearn.isotonic import IsotonicRegression as SkLearnIR
 from sklearn.exceptions import NotFittedError
 

@@ -1,4 +1,4 @@
-from calibration.BinaryCalibrator import BinaryCalibrator
+from hiclass.calibration.BinaryCalibrator import BinaryCalibrator
 from sklearn.calibration import _SigmoidCalibration
 from sklearn.exceptions import NotFittedError
 
