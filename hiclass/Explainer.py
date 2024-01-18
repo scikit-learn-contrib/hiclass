@@ -126,4 +126,22 @@ class Explainer:
         shap_values_dict : dict
             A dictionary of SHAP values for each node.
         """
+        shap_values_dict = {}
+
+        for level in range(1, len(self.hierarchical_model.local_classifiers_)):
+            local_classifier = self.hierarchical_model.local_classifiers_[level]
+
+            if level not in self.explainers:
+                # Create explainer with train data
+                local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
+                self.explainers[level] = local_explainer
+            else:
+                local_explainer = self.explainers[level]
+
+            # Calculate SHAP values for the given sample X
+            shap_values = np.array(local_explainer.shap_values(X))
+            shap_values_dict[level] = shap_values
+
+        return shap_values_dict
+
 
