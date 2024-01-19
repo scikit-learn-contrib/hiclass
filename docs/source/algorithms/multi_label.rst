@@ -101,7 +101,7 @@ For instance, the :ref:`example image <example_dog_breed_hierarchy>` is assigned
 It is also assigned to the positive class for the Hound classifier, since it does not belong to the Dachshund class, which is a child of the Hound node.
 
 
-Local Classifier Per Node
+Local Classifier Per Parent Node
 -------------------------
 The :class:`hiclass.MultiLabelLocalClassifierPerParentNode` trains a multi-class classifier for each non-leaf/parent node, i.e., a node that has children in the hierarchy.
 The classes to be predicted are the children of the node.
