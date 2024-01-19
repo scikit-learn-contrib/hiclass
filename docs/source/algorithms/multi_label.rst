@@ -87,7 +87,7 @@ Furthermore, by explicitly specifying the whole path form root to leave nodes, t
 Fitting the Classifiers
 ++++++++++++++++++++++++++
 In this section we outline how fitting of the local classifiers is implemented in HiClass for multi-path hierarchical classification.
-Here we only focus on the multi-path hierarchical classification case for the :class:`hiclass.MultiLabelLocalClassifierPerNode` and :class:`hiclass.MultiLabelLocalClassifierPerNode` classifiers.
+Here we only focus on the multi-path hierarchical classification case for the :class:`hiclass.MultiLabelLocalClassifierPerNode` and :class:`hiclass.MultiLabelLocalClassifierPerParentNode` classifiers.
 For a recap on how the strategies work, visit the :ref:`Algorithms<algorithms>` section.
 
 Local Classifier Per Node
