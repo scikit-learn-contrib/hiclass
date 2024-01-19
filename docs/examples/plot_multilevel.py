@@ -30,7 +30,6 @@ Since HiClass is a sklearn-compatible library, we use the same terminology as sk
 In a multi-class classification problem, a sample can belong to only one of multiple classes.
 In a multi-label classification problem, a sample can belong to multiple classes.
 Hierarchical classification problem is a multi-label classification problem, in which the classes are organized in a hierarchy that is represented as graph, such as a tree or directed acyclic graph (DAG), in which the nodes correspond to the classes to be predicted.
-In a hierarchical classification problem, the classes are organized in a hierarchy that is represented as graph, such as a tree or directed acyclic graph (DAG), in which the nodes correspond to the classes to be predicted.
 A sample belonging to a single class at each level of the hierarchy, in which the level is defined as the all nodes, i.e., classes, that are the same distance from the root node.
 A consequence of this definition is that a sample can only be classified by a single path through the hierarchy.
 In multi-label hierarchical classification, a sample can belong to multiple classes at the same level of the hierarchy, i.e., a sample can be classified by multiple paths through the hierarchy.
