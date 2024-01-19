@@ -1,3 +1,4 @@
+.. _Multi-Path-Classification-Overview:
 
 ==========================
 Multi-Path Classification
@@ -52,7 +53,7 @@ In multi-path hierarchical classification, this restriction is lifted.
 A sample can belong to multiple classes at the same level of the hierarchy, i.e., a sample can be classified by multiple paths through the hierarchy.
 
 |
-|
+
 ++++++++++++++++++++++++++
 Design - Target Format
 ++++++++++++++++++++++++++
@@ -90,8 +91,10 @@ In this section we outline how fitting of the local classifiers is implemented i
 Here we only focus on the multi-path hierarchical classification case for the :class:`hiclass.MultiLabelLocalClassifierPerNode` and :class:`hiclass.MultiLabelLocalClassifierPerParentNode` classifiers.
 For a recap on how the strategies work, visit the :ref:`Algorithms<algorithms>` section.
 
+.. _multi-path-local-classifier-per-node:
+
 Local Classifier Per Node
--------------------------
+---------------------------
 The :class:`hiclass.MultiLabelLocalClassifierPerNode` strategy fits a binary local classifier for each node in the hierarchy.
 :class:`hiclass.BinaryPolicy` defines which samples belong to the positive and which ones to the negative class for a given local classifier.
 HiClass implements that positive and negative samples for a local classifier are mutually exclusive, i.e., a sample can only belong to the positive or negative class of a local classifier.
@@ -101,8 +104,10 @@ For instance, the :ref:`example image <example_dog_breed_hierarchy>` is assigned
 It is also assigned to the positive class for the Hound classifier, since it does not belong to the Dachshund class, which is a child of the Hound node.
 
 
+.. _multi-path-local-classifier-per-parent-node:
+
 Local Classifier Per Parent Node
--------------------------
+---------------------------------
 The :class:`hiclass.MultiLabelLocalClassifierPerParentNode` trains a multi-class classifier for each non-leaf/parent node, i.e., a node that has children in the hierarchy.
 The classes to be predicted are the children of the node.
 For the multi-label case this means, that a sample can belong to multiple children of a node.
@@ -152,6 +157,8 @@ The tolerance :math:`\gamma \in [0, 1]` is a parameter that is passed to the pre
 This strategy has the advantage of always predicting at least one class at each level since the tolerance is relative to the highest probability.
 For example, with :math:`\gamma = 0.3` we would predict the labels :code:`[["Retriever", "Golden Retriever"], ["Hound", "Dachshund"], ["Hound", "Beagle"]]`.
 Note, that in the second level, the Beagle label is assigned because its probability of 0.5 is within the threshold of 0.3 of the highest probability of 0.8 (Dachshund class) of a neighboring node.
+
+.. _multi-path-metrics:
 
 ++++++++++++++++++++++++++
 Metrics
@@ -208,11 +215,11 @@ Code example - Putting it all together
     X_test = [[1, 2], [3, 4], [5, 6]]
 
     # Define Labels
-    Y_train = [
+    Y_train = np.array([
         [["Retriever", "Golden Retriever"], ["Hound", "Dachshund"]],
         [["Retriever", "Labrador"]],
         [["Hound", "Dachshund"], ["Hound", "Beagle"]],
-    ]
+    ], dtype=object)
 
     # Use decision tree classifiers for every node
     tree = DecisionTreeClassifier()
