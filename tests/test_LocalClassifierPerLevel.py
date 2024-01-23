@@ -156,7 +156,7 @@ def explainer_data():
 def test_explainer_tree(explainer_data):
     rfc = RandomForestClassifier()
     lcpl = LocalClassifierPerLevel(
-        local_classifier=LogisticRegression(),
+        local_classifier=rfc,
     )
 
     x_train, x_test, y_train = explainer_data
@@ -167,31 +167,9 @@ def test_explainer_tree(explainer_data):
     explainer = Explainer(lcpl, data=x_train, mode="tree")
     shap_dict = explainer.explain(x_test)
 
-    print(shap_dict)
-    #for key, val in shap_dict.items():
-    #    # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
-    #    model = lcpl.hierarchy_.nodes[key]["classifier"]
-    #    assert shap_dict[key].shape == (
-    #        len(model.classes_),
-    #        x_test.shape[0],
-    #        x_test.shape[1],
-    #    )
-
-
-def test_explainer_linear(explainer_data):
-    logreg = LogisticRegression()
-    lcppn = LocalClassifierPerParentNode(
-        local_classifier=logreg,
-    )
-
-    x_train, x_test, y_train = explainer_data
-    lcppn.fit(x_train, y_train)
-
-    lcppn.predict(x_test)
-    explainer = Explainer(lcppn, data=x_train, mode="linear")
-    shap_dict = explainer.explain(x_test)
-
-    for key, val in shap_dict.items():
-        # Assert on shapes of shap values, must match (num_samples, num_features) Note: Logistic regression is based
-        # on sigmoid and not softmax, hence there are no separate predictions for each target class
-        assert shap_dict[key].shape == x_test.shape
+    for level in range(1, len(lcpl.local_classifiers_)):
+        assert shap_dict[level].shape == (
+            len(lcpl.local_classifiers_[level].classes_),
+            x_test.shape[0],
+            x_test.shape[1]
+        )
