@@ -59,14 +59,14 @@ class _Calibrator(BaseEstimator):
         if self.multiclass:
             score_splits = [test_scores[:, i] for i in range(test_scores.shape[1])]
 
-            probabilities = np.zeros((len(X), len(self.estimator.classes_)))
+            probabilities = np.zeros((X.shape[0], len(self.estimator.classes_)))
             for idx, split in enumerate(score_splits):
                 probabilities[:, idx] = self.calibrators[idx].predict_proba(split)
         
             probabilities /= probabilities.sum(axis=1, keepdims=True)
         
         else:
-            probabilities = np.zeros((len(X), 2))
+            probabilities = np.zeros((X.shape[0], 2))
             probabilities[:, 1] = self.calibrators[0].predict_proba(test_scores[:, 1])
             probabilities[:, 0] = 1.0 - probabilities[:, 1]
 

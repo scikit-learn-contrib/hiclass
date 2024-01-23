@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import _check_sample_weight
-from hiclass.calibration.Calibrator import _Calibrator
+from sklearn.utils.validation import check_array, check_is_fitted
 
 try:
     import ray
@@ -146,13 +146,6 @@ class HierarchicalClassifier(abc.ABC):
         else:
             self.X_ = np.array(X)
             self.y_ = np.array(y)
-        
-        if self.calibration_method:
-            n_train_samples = int(0.7 * self.X_.shape[0])
-            print(self.X_.shape)
-            print(self.X_[:10])
-            self.X_, self.X_cal_ = np.split(self.X_, [n_train_samples], axis=0)
-            self.y_, self.y_cal = np.split(self.y_, [n_train_samples], axis=0)
 
         if sample_weight is not None:
             self.sample_weight_ = _check_sample_weight(sample_weight, X)
@@ -188,11 +181,29 @@ class HierarchicalClassifier(abc.ABC):
         self._initialize_local_classifiers()
 
     def _calibrate(self, X, y):
+        # check if fitted
+        check_is_fitted(self)
+
+        # Input validation
+        if not self.bert:
+            X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
+        else:
+            X = np.array(X)
+
+        self.X_cal = X
+        self.y_cal = y
+
+        self.cal_binary_policy_ = self._initialize_binary_policy(calibration=True)
+        self.logger_.info("Calibrating")
+
+        #Create a calibrator for each local classifier
+        self._initialize_local_calibrators()
+        self._calibrate_digraph()
+
         # Create calibrator object
         # seed
         # fit calibrator using calibration data
         # predict_proba can then use the calibrator to predict calibrated probabilities
-        pass
 
     def predict_ood():
         pass
@@ -322,6 +333,10 @@ class HierarchicalClassifier(abc.ABC):
             self.local_classifier_ = LogisticRegression()
         else:
             self.local_classifier_ = self.local_classifier
+    
+        @abc.abstractmethod
+        def _initialize_local_calibrators(self):
+            raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
 
     def _convert_to_1d(self, y):
         # Convert predictions to 1D if there is only 1 column
@@ -360,15 +375,22 @@ class HierarchicalClassifier(abc.ABC):
         for classifier, node in zip(classifiers, nodes):
             self.hierarchy_.nodes[node]["classifier"] = classifier
 
-    def _fit_node_calibrator():
-        pass
+    def _fit_node_calibrator(self, nodes, local_mode: bool = False, use_joblib: bool = False
+    ):
+        # TODO: add support for multithreading
+        calibrators = [self._fit_calibrator(self, node) for node in nodes]
+        for calibrator, node in zip(calibrators, nodes):
+            self.hierarchy_.nodes[node]["calibrator"] = calibrator
 
-    def _create_train_calibration_split(X, y, sample_weight):
-        pass
 
     @staticmethod
     def _fit_classifier(self, node):
         raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
+    
+    @staticmethod
+    def _fit_calibrator(self, node):
+        raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
+
 
     def _clean_up(self):
         self.logger_.info("Cleaning up variables that can take a lot of disk space")
