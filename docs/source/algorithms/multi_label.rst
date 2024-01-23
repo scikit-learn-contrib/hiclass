@@ -1,12 +1,13 @@
-.. _Multi-Path-Classification-Overview:
+.. _hierarchical-multi-label-Classification-Overview:
 
 ==========================
-Multi-Path Classification
+Multi-Label Classification
 ==========================
 
-HiClass supports multi-path hierarchical classification.
+HiClass supports hierarchical multi-label classification.
 This means that a sample can belong to multiple classes at the same level of the hierarchy.
-On this page, we motivate, explain and demonstrate how multi-path hierarchical classification is implemented in HiClass.
+
+On this page, we motivate, explain and demonstrate how hierarchical mutli-label classification is implemented in HiClass.
 
 ++++++++++++++++++++++++++
 Motivation
@@ -28,20 +29,20 @@ The following figure illustrates this example.
 
    An example image of a dog that is a mix of a Dachshund and a Golden Retriever, thereby requiring multiple paths through the hierarchy for correct classification.
 
-Another multi-path hierarchical classification example, is document classification, in which we aim to classify a document based on its content.
+Another multi-label classification example, is document classification, in which we aim to classify a document based on its content.
 The categories are often hierarchical in nature, such as classifying documents into broad topics like "Technology", "Sports", and "Politics", which further have subcategories like "Artificial Intelligence", "Football", and "International Relations".
 A document can belong to multiple categories, for example a text that deals with the influence of advancements in AI on International Relations, which can only be correctly classified by multiple paths through the hierarchy.
 
 ++++++++++++++++++++++++++++++++++++++++
 Background - Classification Terminology
 ++++++++++++++++++++++++++++++++++++++++
-To explain what we mean with multi-path hierarchical classification, we first need to define some terminology.
+To explain what we mean with hierarchical multi-label classification, we first need to define some terminology.
 
 .. figure:: ../algorithms/hc_background.png
    :align: left
    :figwidth: 30%
 
-   The set of classification problems from most generic (multi-class) to most specific (multi-path hierarchical classification).
+   The set of classification problems from most generic (multi-class) to most specific (hierarchical multi-label classification).
 
 In a multi-class classification problem, a sample can be assigned to one class among several options.
 In a multi-label classification problem, a sample can be associated with multiple classes simultaneously.
@@ -49,8 +50,8 @@ A hierarchical classification problem is a type of multi-label classification pr
 In this graph, the nodes correspond to the classes to be predicted.
 If not specified, it is usually assumed that at each level of the hierarchy, a sample can only belong to one class.
 This means that a sample can only be associated with a single path through the hierarchy, starting from the root node and ending at a leave node.
-In multi-path hierarchical classification, this restriction is lifted.
-A sample can belong to multiple classes at the same level of the hierarchy, i.e., a sample can be classified by multiple paths through the hierarchy.
+In hierarchical multi-label classification, this restriction is lifted.
+A sample can belong to multiple classes at any level of the hierarchy, i.e., a sample can be classified by multiple paths through the hierarchy.
 
 |
 
@@ -66,7 +67,7 @@ The HiClass target format extends the non-multi-label hierarchical classificatio
    :align: center
    :width: 80%
 
-   HiClass multi-path hierarchical classification format extension for samples classified by the dog breed hierarchy.
+   HiClass hierarchical multi-label classification format extension for samples classified by the dog breed hierarchy.
 
 This is implemented as a nested list of lists, in which the last dimension specifies a path through the hierarchy.
 
@@ -87,24 +88,25 @@ Furthermore, by explicitly specifying the whole path form root to leave nodes, t
 ++++++++++++++++++++++++++
 Fitting the Classifiers
 ++++++++++++++++++++++++++
-In this section we outline how fitting of the local classifiers is implemented in HiClass for multi-path hierarchical classification.
-Here we only focus on the multi-path hierarchical classification case for the :class:`hiclass.MultiLabelLocalClassifierPerNode` and :class:`hiclass.MultiLabelLocalClassifierPerParentNode` classifiers.
+In this section we outline how fitting of the local classifiers is implemented in HiClass for hierarchical multi-label classification.
+Here we only focus on the hierarchical multi-label classification case for the :class:`hiclass.MultiLabelLocalClassifierPerNode` and :class:`hiclass.MultiLabelLocalClassifierPerParentNode` classifiers.
 For a recap on how the strategies work, visit the :ref:`Algorithms<algorithms>` section.
 
-.. _multi-path-local-classifier-per-node:
+
+.. _hierarchical-multi-label-local-classifier-per-node:
 
 Local Classifier Per Node
 ---------------------------
 The :class:`hiclass.MultiLabelLocalClassifierPerNode` strategy fits a binary local classifier for each node in the hierarchy.
 :class:`hiclass.BinaryPolicy` defines which samples belong to the positive and which ones to the negative class for a given local classifier.
 HiClass implements that positive and negative samples for a local classifier are mutually exclusive, i.e., a sample can only belong to the positive or negative class of a local classifier.
-In the multi-path case, a sample belongs to the positive class if it belongs to any of the paths through the hierarchy that are associated with the local classifier.
+In the hierarchical multi-label case, a sample belongs to the positive class if it belongs to any of the paths through the hierarchy that are associated with the local classifier.
 
 For instance, the :ref:`example image <example_dog_breed_hierarchy>` is assigned to the positive class for the Retriever classifier since it belongs to the Golden Retriever class, which is a child of the Retriever node.
 It is also assigned to the positive class for the Hound classifier, since it does not belong to the Dachshund class, which is a child of the Hound node.
 
 
-.. _multi-path-local-classifier-per-parent-node:
+.. _hierarchical-multi-label-local-classifier-per-parent-node:
 
 Local Classifier Per Parent Node
 ---------------------------------
@@ -158,15 +160,16 @@ This strategy has the advantage of always predicting at least one class at each 
 For example, with :math:`\gamma = 0.3` we would predict the labels :code:`[["Retriever", "Golden Retriever"], ["Hound", "Dachshund"], ["Hound", "Beagle"]]`.
 Note, that in the second level, the Beagle label is assigned because its probability of 0.5 is within the threshold of 0.3 of the highest probability of 0.8 (Dachshund class) of a neighboring node.
 
-.. _multi-path-metrics:
+
+.. _hierarchical-multi-label-metrics:
 
 ++++++++++++++++++++++++++
 Metrics
 ++++++++++++++++++++++++++
-To evaluate the performance of the multi-path hierarchical classifiers, we extend the hierarchical precision, recall and F-Score metrics.
+To evaluate the performance of the hierarchical multi-label classifiers, we extend the hierarchical precision, recall and F-Score metrics.
 The hierarchical precision, recall and F-Score are defined as follows are defined in :ref:`Metrics <metrics-overview>`.
 
-Here we give an example of the hierarchical precision and recall for the multi-path case.
+Here we give an example of the hierarchical precision and recall for the multi-label case.
 
 .. figure:: ../algorithms/hc_metrics.png
    :align: center

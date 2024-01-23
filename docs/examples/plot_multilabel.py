@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-================================
-Using Multi-Path Classification
-================================
+==============================================
+Using Hierarchical Multi-Label Classification
+==============================================
 
-A simple example to show how to use Multi-Path classification in HiClass.
-Please have a look at Algorithms Overview Section for :ref:`Multi-Path-Classification-Overview` for the motivation and background behind the implementation.
-
+A simple example to show how to use multi-label classification in HiClass.
+Please have a look at Algorithms Overview Section for :ref:`hierarchical-multi-label for the motivation and background behind the implementation.
 """
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
