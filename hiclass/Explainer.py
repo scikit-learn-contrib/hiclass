@@ -1,4 +1,5 @@
 """Explainer API for explaining predictions using shapley values."""
+
 import shap
 import numpy as np
 from copy import deepcopy
@@ -6,7 +7,7 @@ from hiclass import (
     LocalClassifierPerParentNode,
     LocalClassifierPerNode,
     LocalClassifierPerLevel,
-    ConstantClassifier
+    ConstantClassifier,
 )
 
 
@@ -116,10 +117,15 @@ class Explainer:
             if node == self.hierarchical_model.root_:
                 continue
 
-            if isinstance(self.hierarchical_model.hierarchy_.nodes[node]["classifier"], ConstantClassifier.ConstantClassifier):
+            if isinstance(
+                self.hierarchical_model.hierarchy_.nodes[node]["classifier"],
+                ConstantClassifier.ConstantClassifier,
+            ):
                 continue
 
-            local_classifier = self.hierarchical_model.hierarchy_.nodes[node]["classifier"]
+            local_classifier = self.hierarchical_model.hierarchy_.nodes[node][
+                "classifier"
+            ]
 
             if node not in self.explainers:
                 local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
@@ -127,10 +133,11 @@ class Explainer:
             else:
                 local_explainer = self.explainers[node]
 
-        # Calculate SHAP values for the given sample X
+            # Calculate SHAP values for the given sample X
             shap_values = np.array(local_explainer.shap_values(X))
             shap_values_dict[node] = shap_values
 
         return shap_values_dict
+
     def _explain_lcpl(self, X):
         pass

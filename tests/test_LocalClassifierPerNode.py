@@ -200,6 +200,7 @@ def test_fit_predict():
     predictions = lcpn.predict(x)
     assert_array_equal(y, predictions)
 
+
 def test_explainer_not_empty():
     rfc = RandomForestClassifier()
     lcpn = LocalClassifierPerNode(
