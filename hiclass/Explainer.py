@@ -217,9 +217,3 @@ class Explainer:
 
     def _filter_shap(self, sample, level):
         pass
-
-    def _use_xarray(self, X, traverse_prediction=False):
-        shap_values = self.explain(X, traverse_prediction=traverse_prediction)
-        if not xarray_installed:
-            return shap_values
-
