@@ -13,4 +13,5 @@ __all__ = [
     "LocalClassifierPerNode",
     "LocalClassifierPerParentNode",
     "LocalClassifierPerLevel",
+    "Explainer",
 ]

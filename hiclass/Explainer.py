@@ -9,6 +9,13 @@ from hiclass import (
     LocalClassifierPerLevel,
 )
 
+try:
+    import xarray as xar
+except ImportError:
+    xarray_installed = False
+else:
+    xarray_installed = True
+
 
 class Explainer:
     """Explainer class for returning shap values for each of the three hierarchical classifiers."""
@@ -45,7 +52,7 @@ class Explainer:
         else:
             self.explainer = shap.Explainer
 
-    def explain(self, X):
+    def explain(self, X, traverse_prediction=False):
         """
         Generate SHAP values for each node in the hierarchy for the given data.
 
@@ -60,7 +67,7 @@ class Explainer:
             A dictionary of SHAP values for each node.
         """
         if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
-            return self._explain_lcppn(X)
+            return self._explain_lcppn(X, traverse_prediction)
         elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
             return self._explain_lcpl(X)
         elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
@@ -68,7 +75,7 @@ class Explainer:
         else:
             raise ValueError(f"Invalid model: {self.hierarchical_model}.")
 
-    def _explain_lcppn(self, X):
+    def _explain_lcppn(self, X, traverse_prediction=False):
         """
         Generate SHAP values for each node using Local Classifier Per Parent Node (LCPPN) strategy.
 
@@ -77,24 +84,81 @@ class Explainer:
         X : array-like
             Sample data for which to generate SHAP values.
 
+        traverse_prediction : True or False
+            If True, restricts calculation of shap values to only traversed hierarchy as predicted by hiclass model.
+
         Returns
         -------
         shap_values_dict : dict
             A dictionary of SHAP values for each node.
         """
         shap_values_dict = {}
-        # TODO: Use predictions to restrict traversal to only visited path while computing shap values
+
+        if traverse_prediction:
+            y_pred = self.hierarchical_model.predict(X)
+            print(f"y_pred: {y_pred}")
+            traversal_path = str(y_pred[0][0])
+            for pred in y_pred[0][1:]:
+                traversal_path = (
+                    traversal_path + self.hierarchical_model.separator_ + pred
+                )
+            for i in range(self.hierarchical_model.max_levels_)[:-1]:
+                node = self.hierarchical_model.separator_.join(
+                    traversal_path.split(self.hierarchical_model.separator_)[: i + 1]
+                )
+
+                local_classifier = self.hierarchical_model.hierarchy_.nodes[node][
+                    "classifier"
+                ]
+
+                if node not in self.explainers:
+                    # Create explainer with train data
+                    local_explainer = deepcopy(self.explainer)(
+                        local_classifier, self.data
+                    )
+                    self.explainers[node] = local_explainer
+                else:
+                    local_explainer = self.explainers[node]
+
+                shap_values = np.array(local_explainer.shap_values(X))
+                print(shap_values)
+                shap_values_dict[node] = shap_values
+            for node in self.hierarchical_model.hierarchy_.nodes:
+                if node not in self.explainers:
+                    local_classifier = self.hierarchical_model.hierarchy_.nodes[node]
+                    if len(local_classifier) != 0:
+                        shap_val = np.full(
+                            (
+                                len(local_classifier["classifier"].classes_),
+                                X.shape[0],
+                                X.shape[1],
+                            ),
+                            np.nan,
+                        )
+                        shap_values_dict[node] = shap_val
+            return shap_values_dict
 
         parent_nodes = self.hierarchical_model._get_parents()
         for parent_node in parent_nodes:
-            # Ignore the designated root node which appears twice
-            if parent_node == self.hierarchical_model.root_:
+            # Ignore the root node if redundant, do NOT ignore in case of disjoint subtrees
+            if (
+                parent_node == self.hierarchical_model.root_
+                and len(
+                    self.hierarchical_model.hierarchy_.nodes[
+                        self.hierarchical_model.root_
+                    ]["classifier"].classes_
+                )
+                < 2
+            ):
                 continue
 
             # Get the local classifier for the parent node
             local_classifier = self.hierarchical_model.hierarchy_.nodes[parent_node][
                 "classifier"
             ]
+
+            y_pred_local = local_classifier.predict(X)
+            print(f"y_pred_local: {y_pred_local}")
 
             # Create a SHAP explainer for the local classifier
             if parent_node not in self.explainers:
@@ -150,3 +214,12 @@ class Explainer:
             shap_values_dict[level] = shap_values
 
         return shap_values_dict
+
+    def _filter_shap(self, sample, level):
+        pass
+
+    def _use_xarray(self, X, traverse_prediction=False):
+        shap_values = self.explain(X, traverse_prediction=traverse_prediction)
+        if not xarray_installed:
+            return shap_values
+
