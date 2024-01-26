@@ -14,7 +14,6 @@ from hiclass import LocalClassifierPerLevel
 from hiclass.Explainer import Explainer
 
 
-
 @parametrize_with_checks([LocalClassifierPerLevel()])
 def test_sklearn_compatible_estimator(estimator, check):
     check(estimator)
@@ -137,6 +136,7 @@ def test_fit_predict():
     predictions = lcpl.predict(x)
     assert_array_equal(y, predictions)
 
+
 @pytest.fixture
 def explainer_data():
     #           a
@@ -171,5 +171,5 @@ def test_explainer_tree(explainer_data):
         assert shap_dict[level].shape == (
             len(lcpl.local_classifiers_[level].classes_),
             x_test.shape[0],
-            x_test.shape[1]
+            x_test.shape[1],
         )

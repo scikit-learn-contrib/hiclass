@@ -1,4 +1,5 @@
 """Classes to create binary policies for positive and negative samples. Used by the :code:LocalClassifierPerNode."""
+
 from abc import ABC
 
 from scipy.sparse import vstack, csr_matrix
