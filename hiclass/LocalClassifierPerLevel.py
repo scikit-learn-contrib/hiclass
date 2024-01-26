@@ -3,6 +3,7 @@ Local classifier per level approach.
 
 Numeric and string output labels are both handled.
 """
+
 from copy import deepcopy
 
 import numpy as np
@@ -177,9 +178,11 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                 np.argmax(prob) if len(prob) > 0 else None for prob in successors_prob
             ]
             y[:, level] = [
-                successors_list[index_max_probability[i]]
-                if index_max_probability[i] is not None
-                else ""
+                (
+                    successors_list[index_max_probability[i]]
+                    if index_max_probability[i] is not None
+                    else ""
+                )
                 for i, successors_list in enumerate(successors)
             ]
 
@@ -195,9 +198,11 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
     def _get_successors(self, level):
         successors = [
-            list(self.hierarchy_.successors(node))
-            if self.hierarchy_.has_node(node)
-            else []
+            (
+                list(self.hierarchy_.successors(node))
+                if self.hierarchy_.has_node(node)
+                else []
+            )
             for node in level
         ]
         return successors

@@ -1,4 +1,5 @@
 """Explainer API for explaining predictions using shapley values."""
+
 import shap
 import numpy as np
 from copy import deepcopy
@@ -173,9 +174,12 @@ class Explainer:
 
         return shap_values_dict
 
-    def _explain_lcppn_numpy(self, X, traverse_prediction=False):
+    def _explain_lcpn(self, X):
+        pass
+
+    def _explain_lcpl(self, X):
         """
-        Generate SHAP values for each node using Local Classifier Per Parent Node (LCPPN) strategy.
+        Generate SHAP values for each node using Local Classifier Per Level (LCPL) strategy.
 
         Parameters
         ----------
@@ -187,46 +191,29 @@ class Explainer:
         shap_values_dict : dict
             A dictionary of SHAP values for each node.
         """
-        shap_values_dict = []
+        shap_values_dict = {}
 
-        parent_nodes = self.hierarchical_model._get_parents()
-        for parent_node in parent_nodes:
-            # Ignore the designated root node which appears twice
-            if parent_node == self.hierarchical_model.root_:
-                continue
+        start_level = 1
+        if len(self.hierarchical_model.local_classifiers_[start_level]) == 1:
+            start_level = 2
 
-            # Get the local classifier for the parent node
-            local_classifier = self.hierarchical_model.hierarchy_.nodes[parent_node][
-                "classifier"
-            ]
+        for level in range(
+            start_level, len(self.hierarchical_model.local_classifiers_)
+        ):
+            local_classifier = self.hierarchical_model.local_classifiers_[level]
 
-            y_pred_local = local_classifier.predict(X)
-            print(f"y_pred_local: {y_pred_local}")
-
-            # Create a SHAP explainer for the local classifier
-            if parent_node not in self.explainers:
+            if level not in self.explainers:
                 # Create explainer with train data
                 local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
-                self.explainers[parent_node] = local_explainer
+                self.explainers[level] = local_explainer
             else:
-                local_explainer = self.explainers[parent_node]
+                local_explainer = self.explainers[level]
 
             # Calculate SHAP values for the given sample X
             shap_values = np.array(local_explainer.shap_values(X))
-            shap_values_dict[parent_node] = shap_values
+            shap_values_dict[level] = shap_values
 
         return shap_values_dict
 
-    def _explain_lcpn(self, X):
-        pass
-
-    def _explain_lcpl(self, X):
-        pass
-
     def _filter_shap(self, sample, level):
         pass
-
-    def _use_xarray(self, X, traverse_prediction=False):
-        shap_values = self.explain(X, traverse_prediction=traverse_prediction)
-        if not xarray_installed:
-            return shap_values
