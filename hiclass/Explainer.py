@@ -7,7 +7,13 @@ from hiclass import (
     LocalClassifierPerNode,
     LocalClassifierPerLevel,
 )
-import pandas as pd
+
+try:
+    import xarray as xar
+except ImportError:
+    xarray_installed = False
+else:
+    xarray_installed = True
 
 
 class Explainer:
@@ -76,6 +82,9 @@ class Explainer:
         ----------
         X : array-like
             Sample data for which to generate SHAP values.
+
+        traverse_prediction : True or False
+            If True, restricts calculation of shap values to only traversed hierarchy as predicted by hiclass model.
 
         Returns
         -------
@@ -216,3 +225,8 @@ class Explainer:
 
     def _filter_shap(self, sample, level):
         pass
+
+    def _use_xarray(self, X, traverse_prediction=False):
+        shap_values = self.explain(X, traverse_prediction=traverse_prediction)
+        if not xarray_installed:
+            return shap_values
