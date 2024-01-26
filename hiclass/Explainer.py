@@ -128,7 +128,11 @@ class Explainer:
         """
         shap_values_dict = {}
 
-        for level in range(1, len(self.hierarchical_model.local_classifiers_)):
+        start_level = 1
+        if len(self.hierarchical_model.local_classifiers_[start_level]) == 1:
+            start_level = 2
+
+        for level in range(start_level, len(self.hierarchical_model.local_classifiers_)):
             local_classifier = self.hierarchical_model.local_classifiers_[level]
 
             if level not in self.explainers:
