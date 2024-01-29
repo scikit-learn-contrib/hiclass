@@ -1,4 +1,5 @@
 """Shared code for all classifiers."""
+
 import abc
 import logging
 
