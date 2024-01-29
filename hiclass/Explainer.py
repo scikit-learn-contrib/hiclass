@@ -76,7 +76,7 @@ class Explainer:
         else:
             raise ValueError(f"Invalid model: {self.hierarchical_model}.")
 
-    def _explain_lcppn(self, X, traverse_prediction):
+    def _explain_lcppn(self, X, traverse_prediction=False):
         """
         Generate SHAP values for each node using Local Classifier Per Parent Node (LCPPN) strategy.
 
