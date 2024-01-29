@@ -225,7 +225,7 @@ class Explainer:
             local_classifier = self.hierarchical_model.local_classifiers_[level]
 
             if level not in self.explainers:
-              # Create explainer with train data
+                # Create explainer with train data
                 local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
                 self.explainers[level] = local_explainer
             else:
