@@ -217,6 +217,30 @@ def test_explainer_tree(explainer_data):
     lcppn.fit(x_train, y_train)
 
     explainer = Explainer(lcppn, data=x_train, mode="tree")
+    shap_dict = explainer.explain(x_test, traverse_prediction=False)
+    print(shap_dict)
+
+    for key, val in shap_dict.items():
+        # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
+        model = lcppn.hierarchy_.nodes[key]["classifier"]
+        assert shap_dict[key].shape == (
+            len(model.classes_),
+            x_test.shape[0],
+            x_test.shape[1],
+        )
+
+
+def test_explainer_tree_traversal(explainer_data):
+    rfc = RandomForestClassifier()
+    lcppn = LocalClassifierPerParentNode(
+        local_classifier=rfc, replace_classifiers=False
+    )
+
+    x_train, x_test, y_train = explainer_data
+
+    lcppn.fit(x_train, y_train)
+
+    explainer = Explainer(lcppn, data=x_train, mode="tree")
     shap_dict = explainer.explain(x_test, traverse_prediction=True)
     print(shap_dict)
 
