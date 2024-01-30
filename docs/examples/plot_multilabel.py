@@ -5,7 +5,7 @@ Using Hierarchical Multi-Label Classification
 ==============================================
 
 A simple example to show how to use multi-label classification in HiClass.
-Please have a look at Algorithms Overview Section for :ref:`hierarchical-multi-label for the motivation and background behind the implementation.
+Please have a look at Algorithms Overview Section for :ref:`Multi-Label Classification` for the motivation and background behind the implementation.
 """
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
