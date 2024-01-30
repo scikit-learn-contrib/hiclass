@@ -66,7 +66,9 @@ class Explainer:
             A dictionary of SHAP values for each node.
         """
         if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
-            return self._explain_lcppn(X, traverse_prediction)
+            return self._explain_lcppn_xr(
+                X,
+            )
         elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
             return self._explain_lcpl(X)
         elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
@@ -114,7 +116,6 @@ class Explainer:
             ]
 
             y_pred_local = local_classifier.predict(X)
-            print(f"y_pred_local: {y_pred_local}")
 
             # Create a SHAP explainer for the local classifier
             if parent_node not in self.explainers:
@@ -125,7 +126,9 @@ class Explainer:
                 local_explainer = self.explainers[parent_node]
 
             # Calculate SHAP values for the given sample X
-            shap_values = np.array(local_explainer.shap_values(X))
+            shap_values = np.array(
+                local_explainer.shap_values(X, check_additivity=False)
+            )
             shap_values_dict[parent_node] = shap_values
         return shap_values_dict
 
@@ -214,7 +217,13 @@ class Explainer:
                 local_explainer = self.explainers[parent_node]
 
             # Calculate SHAP values for the given sample X
-            shap_values = np.array(local_explainer.shap_values(X))
+            shap_values = np.array(
+                local_explainer.shap_values(X, check_additivity=False)
+            )
+            if len(shap_values.shape) < 3:
+                shap_values = shap_values.reshape(
+                    1, shap_values.shape[0], shap_values.shape[1]
+                )
             shap_values_dict[parent_node] = shap_values
 
             predict_proba = xr.DataArray(
