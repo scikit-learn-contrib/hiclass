@@ -1,4 +1,5 @@
 """Init module for the library."""
+
 from .LocalClassifierPerLevel import LocalClassifierPerLevel
 from .LocalClassifierPerNode import LocalClassifierPerNode
 from .LocalClassifierPerParentNode import LocalClassifierPerParentNode

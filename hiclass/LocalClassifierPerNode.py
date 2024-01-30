@@ -3,6 +3,7 @@ Local classifier per node approach.
 
 Numeric and string output labels are both handled.
 """
+
 from copy import deepcopy
 
 import networkx as nx
