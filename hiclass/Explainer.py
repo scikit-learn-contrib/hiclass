@@ -35,7 +35,6 @@ class Explainer:
             The mode of the SHAP explainer. Can be 'tree', 'gradient', 'deep', 'linear', or '' for default SHAP explainer.
         """
         self.hierarchical_model = hierarchical_model
-        self.explainers = {}  # To store a SHAP explainer for each node
         self.algorithm = algorithm
         self.mode = mode
         self.data = data
@@ -66,7 +65,7 @@ class Explainer:
             A dictionary of SHAP values for each node.
         """
         if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
-            return self._explain_lcppn_xr(
+            return self.explain_with_xr(
                 X,
             )
         elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
@@ -76,7 +75,7 @@ class Explainer:
         else:
             raise ValueError(f"Invalid model: {self.hierarchical_model}.")
 
-    def _explain_lcppn(self, X, traverse_prediction):
+    def explain_with_dict(self, X, traverse_prediction):
         """
         Generate SHAP values for each node using Local Classifier Per Parent Node (LCPPN) strategy.
 
@@ -94,7 +93,7 @@ class Explainer:
             A dictionary of SHAP values for each node.
         """
         if traverse_prediction:
-            return self._explain_traversed_nodes(X)
+            return self.explain_traversed_nodes(X)
         shap_values_dict = {}
         parent_nodes = self.hierarchical_model._get_parents()
         for parent_node in parent_nodes:
@@ -115,27 +114,38 @@ class Explainer:
                 "classifier"
             ]
 
-            y_pred_local = local_classifier.predict(X)
-
             # Create a SHAP explainer for the local classifier
-            if parent_node not in self.explainers:
-                # Create explainer with train data
-                local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
-                self.explainers[parent_node] = local_explainer
-            else:
-                local_explainer = self.explainers[parent_node]
+            local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
 
+            # TODO: Tree models do not sometimes work if check_additivity is enabled
             # Calculate SHAP values for the given sample X
-            shap_values = np.array(
-                local_explainer.shap_values(X, check_additivity=False)
-            )
+            if isinstance(local_explainer, shap.TreeExplainer):
+                shap_values = np.array(
+                    local_explainer.shap_values(X, check_additivity=False)
+                )
+            else:
+                shap_values = np.array(local_explainer.shap_values(X))
             shap_values_dict[parent_node] = shap_values
         return shap_values_dict
 
-    def _explain_traversed_nodes(self, X):
+    def explain_traversed_nodes(self, X):
+        """
+        Generate SHAP values for each node while only calculating shap values for the traversed nodes. Unvisited nodes return `nan` as the shap values.
+
+        Parameters
+        ----------
+        X : array-like
+            Sample data for which to generate SHAP values.
+
+        Returns
+        -------
+        shap_values_dict : dict
+            A dictionary of SHAP values for each node.
+        """
         shap_values_dict = {}
+        traversed_nodes = []
         y_pred = self.hierarchical_model.predict(X)
-        print(f"y_pred: {y_pred}")
+
         traversal_path = str(y_pred[0][0])
         for pred in y_pred[0][1:]:
             traversal_path = traversal_path + self.hierarchical_model.separator_ + pred
@@ -148,18 +158,20 @@ class Explainer:
                 "classifier"
             ]
 
-            if node not in self.explainers:
-                # Create explainer with train data
-                local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
-                self.explainers[node] = local_explainer
-            else:
-                local_explainer = self.explainers[node]
-
+            traversed_nodes.append(node)
+            # Create explainer with train data
+            local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
             shap_values = np.array(local_explainer.shap_values(X))
-            print(shap_values)
+
+            if len(shap_values.shape) < 3:
+                shap_values = shap_values.reshape(
+                    1, shap_values.shape[0], shap_values.shape[1]
+                )
+
             shap_values_dict[node] = shap_values
+
         for node in self.hierarchical_model.hierarchy_.nodes:
-            if node not in self.explainers:
+            if node not in traversed_nodes:
                 local_classifier = self.hierarchical_model.hierarchy_.nodes[node]
                 if len(local_classifier) != 0:
                     shap_val = np.full(
@@ -173,7 +185,7 @@ class Explainer:
                     shap_values_dict[node] = shap_val
         return shap_values_dict
 
-    def _explain_lcppn_xr(self, X):
+    def explain_with_xr(self, X):
         """
         Generate SHAP values for each node using Local Classifier Per Parent Node (LCPPN) strategy.
 
@@ -187,7 +199,6 @@ class Explainer:
         shap_values_dict : dict
             A dictionary of SHAP values for each node.
         """
-        shap_values_dict = {}
         local_datasets = []
         parent_nodes = self.hierarchical_model._get_parents()
         for parent_node in parent_nodes:
@@ -209,12 +220,7 @@ class Explainer:
             ]
 
             # Create a SHAP explainer for the local classifier
-            if parent_node not in self.explainers:
-                # Create explainer with train data
-                local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
-                self.explainers[parent_node] = local_explainer
-            else:
-                local_explainer = self.explainers[parent_node]
+            local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
 
             # Calculate SHAP values for the given sample X
             shap_values = np.array(
@@ -224,7 +230,6 @@ class Explainer:
                 shap_values = shap_values.reshape(
                     1, shap_values.shape[0], shap_values.shape[1]
                 )
-            shap_values_dict[parent_node] = shap_values
 
             predict_proba = xr.DataArray(
                 local_classifier.predict_proba(X),

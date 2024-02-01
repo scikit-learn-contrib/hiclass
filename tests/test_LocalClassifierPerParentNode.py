@@ -217,16 +217,16 @@ def test_explainer_tree(explainer_data):
     lcppn.fit(x_train, y_train)
 
     explainer = Explainer(lcppn, data=x_train, mode="tree")
-    shap_dict = explainer.explain(x_test, traverse_prediction=False)
+    shap_dict = explainer.explain_with_dict(x_test, traverse_prediction=False)
 
-    # for key, val in shap_dict.items():
-    #     # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
-    #     model = lcppn.hierarchy_.nodes[key]["classifier"]
-    #     assert shap_dict[key].shape == (
-    #         len(model.classes_),
-    #         x_test.shape[0],
-    #         x_test.shape[1],
-    #     )
+    for key, val in shap_dict.items():
+        # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
+        model = lcppn.hierarchy_.nodes[key]["classifier"]
+        assert shap_dict[key].shape == (
+            len(model.classes_),
+            x_test.shape[0],
+            x_test.shape[1],
+        )
 
 
 def test_explainer_tree_traversal(explainer_data):
@@ -240,17 +240,17 @@ def test_explainer_tree_traversal(explainer_data):
     lcppn.fit(x_train, y_train)
 
     explainer = Explainer(lcppn, data=x_train, mode="tree")
-    shap_dict = explainer.explain(x_test, traverse_prediction=True)
+    shap_dict = explainer.explain_traversed_nodes(x_test)
     print(shap_dict)
 
-    # for key, val in shap_dict.items():
-    #     # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
-    #     model = lcppn.hierarchy_.nodes[key]["classifier"]
-    #     assert shap_dict[key].shape == (
-    #         len(model.classes_),
-    #         x_test.shape[0],
-    #         x_test.shape[1],
-    #     )
+    for key, val in shap_dict.items():
+        # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
+        model = lcppn.hierarchy_.nodes[key]["classifier"]
+        assert shap_dict[key].shape == (
+            len(model.classes_),
+            x_test.shape[0],
+            x_test.shape[1],
+        )
 
 
 # TODO: Add new test cases with hierarchies without root nodes
@@ -265,12 +265,12 @@ def test_explainer_linear(explainer_data):
 
     lcppn.predict(x_test)
     explainer = Explainer(lcppn, data=x_train, mode="linear")
-    shap_dict = explainer.explain(x_test)
+    shap_dict = explainer.explain_with_dict(x_test, traverse_prediction=False)
 
-    # for key, val in shap_dict.items():
-    #     # Assert on shapes of shap values, must match (num_samples, num_features) Note: Logistic regression is based
-    #     # on sigmoid and not softmax, hence there are no separate predictions for each target class
-    #     assert shap_dict[key].shape == x_test.shape
+    for key, val in shap_dict.items():
+        # Assert on shapes of shap values, must match (num_samples, num_features) Note: Logistic regression is based
+        # on sigmoid and not softmax, hence there are no separate predictions for each target class
+        assert shap_dict[key].shape == x_test.shape
 
 
 @pytest.fixture
@@ -302,16 +302,13 @@ def test_explainer_tree_no_root(explainer_data_no_root):
 
     lcppn.predict(x_test)
     explainer = Explainer(lcppn, data=x_train, mode="tree")
-    shap_dict = explainer.explain(x_test)
+    shap_dict = explainer.explain_with_dict(x_test, traverse_prediction=True)
 
-    # for key, val in shap_dict.items():
-    #     # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
-    #     model = lcppn.hierarchy_.nodes[key]["classifier"]
-    #     if len(model.classes_) == 1:
-    #         assert shap_dict[key].shape == x_test.shape
-    #     else:
-    #         assert shap_dict[key].shape == (
-    #             len(model.classes_),
-    #             x_test.shape[0],
-    #             x_test.shape[1],
-    #         )
+    for key, val in shap_dict.items():
+        # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
+        model = lcppn.hierarchy_.nodes[key]["classifier"]
+        assert shap_dict[key].shape == (
+            len(model.classes_),
+            x_test.shape[0],
+            x_test.shape[1],
+        )
