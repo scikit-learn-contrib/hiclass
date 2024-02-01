@@ -225,14 +225,18 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         nodes = self._get_parents()
         self._fit_node_classifier(nodes, local_mode, use_joblib)
 
-    def _get_predict_proba(model, X):
-        classifiers = [
-            model.hierarchy_.nodes[node]["classifier"]
-            for node in model.hierarchy_.nodes
-            if "classifier" in model.hierarchy_.nodes[node]
+    def get_predict_proba(self, X):
+        classifier_nodes = [
+            node
+            for node in self.hierarchy_.nodes
+            if "classifier" in self.hierarchy_.nodes[node]
         ]
 
-        # This will give list of target labels in the same order as predict_proba probabilities
-        # target_labels = [clf.classes_ for clf in classifiers]
-        predict_proba_per_classifier = [clf.predict_proba(X) for clf in classifiers]
-        return predict_proba_per_classifier
+        predict_proba_dict = {}
+        for node in classifier_nodes:
+            pred_probabilities = self.hierarchy_.nodes[node][
+                "classifier"
+            ].predict_proba(X)
+            predict_proba_dict[node] = pred_probabilities
+
+        return predict_proba_dict
