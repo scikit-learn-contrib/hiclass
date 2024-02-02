@@ -4,15 +4,17 @@ Local classifier per parent node approach.
 Numeric and string output labels are both handled.
 """
 
-from copy import deepcopy
-
 import networkx as nx
 import numpy as np
+from copy import deepcopy
 from sklearn.base import BaseEstimator
+from sklearn.utils.validation import _check_sample_weight
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
+from hiclass.DirectedAcyclicGraph import DirectedAcyclicGraph
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
+from hiclass.HierarchicalClassifier import make_leveled
 
 
 class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
@@ -98,7 +100,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             Fitted estimator.
         """
         # Execute common methods necessary before fitting
-        super()._pre_fit(X, y, sample_weight)
+        self._pre_fit(X, y, sample_weight)
 
         # Fit local classifiers in DAG
         super().fit(X, y)
@@ -156,6 +158,93 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         self._remove_separator(y)
 
         return y
+
+    def _pre_fit(self, X, y, sample_weight):
+        # Check that X and y have correct shape
+        # and convert them to np.ndarray if need be
+
+        if not self.bert:
+            self.X_, self.y_ = self._validate_data(
+                X, y, multi_output=True, accept_sparse="csr", allow_nd=True
+            )
+        else:
+            self.X_ = np.array(X)
+            self.y_ = np.array(y)
+
+        if sample_weight is not None:
+            self.sample_weight_ = _check_sample_weight(sample_weight, X)
+        else:
+            self.sample_weight_ = None
+
+        self.y_ = make_leveled(self.y_)
+
+        # Create and configure logger
+        self._create_logger()
+
+        # Create DAG from self.y_ and store to self.hierarchy_
+        self._create_digraph()
+
+        # If user passes edge_list, then export
+        # DAG to CSV file to visualize with Gephi
+        self._export_digraph()
+
+        # Assert that graph is directed acyclic
+        self._assert_digraph_is_dag()
+
+        # If y is 1D, convert to 2D for binary policies
+        self._convert_1d_y_to_2d()
+
+        # Detect root(s) and add artificial root to DAG
+        self._add_artificial_root()
+
+        # Initialize local classifiers in DAG
+        self._initialize_local_classifiers()
+
+    def _create_digraph(self):
+        # Create DiGraph
+        self.hierarchy_ = DirectedAcyclicGraph(self.X_.shape[0])
+
+        # Save dtype of y_
+        self.dtype_ = self.y_.dtype
+
+        self._create_digraph_1d()
+
+        self._create_digraph_2d()
+
+        if self.y_.ndim > 2:
+            # Unsuported dimension
+            self.logger_.error(f"y with {self.y_.ndim} dimensions detected")
+            raise ValueError(
+                f"Creating graph from y with {self.y_.ndim} dimensions is not supported"
+            )
+
+    def _create_digraph_1d(self):
+        # Flatten 1D disguised as 2D
+        if self.y_.ndim == 2 and self.y_.shape[1] == 1:
+            self.logger_.info("Converting y to 1D")
+            self.y_ = self.y_.flatten()
+        if self.y_.ndim == 1:
+            # Create max_levels_ variable
+            self.max_levels_ = 1
+            self.logger_.info(f"Creating digraph from {self.y_.size} 1D labels")
+            for label in self.y_:
+                self.hierarchy_.add_node(label)
+
+    def _create_digraph_2d(self):
+        if self.y_.ndim == 2:
+            # Create max_levels variable
+            self.max_levels_ = self.y_.shape[1]
+            rows, columns = self.y_.shape
+            self.logger_.info(f"Creating digraph from {rows} 2D labels")
+            for row in range(rows):
+                path = self.y_[row, :]
+                self.hierarchy_.add_path(path)
+
+    def _assert_digraph_is_dag(self):
+        # Assert that graph is directed acyclic
+        if not self.hierarchy_.is_acyclic_graph():
+            self.logger_.error("Cycle detected in graph")
+            raise ValueError("Graph is not directed acyclic")
 
     def _predict_remaining_levels(self, X, y):
         for level in range(1, y.shape[1]):
