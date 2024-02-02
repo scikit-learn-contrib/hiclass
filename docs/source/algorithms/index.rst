@@ -1,3 +1,5 @@
+.. _algorithms:
+
 Algorithms Overview
 ===================
 
@@ -12,4 +14,5 @@ HiClass provides implementations for the most popular machine learning models fo
     local_classifier_per_node
     local_classifier_per_parent_node
     local_classifier_per_level
+    multi_label
     metrics
