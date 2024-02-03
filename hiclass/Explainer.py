@@ -67,9 +67,7 @@ class Explainer:
             A dictionary of SHAP values for each node.
         """
         if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
-            return self.explain_with_xr(
-                X,
-            )
+            return self.explain_with_dict(X, traverse_prediction)
         elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
             return self._explain_lcpl(X)
         elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
@@ -145,23 +143,12 @@ class Explainer:
             A dictionary of SHAP values for each node.
         """
         shap_values_dict = {}
-        traversed_nodes = []
-        y_pred = self.hierarchical_model.predict(X)
-
-        traversal_path = str(y_pred[0][0])
-        for pred in y_pred[0][1:]:
-            traversal_path = traversal_path + self.hierarchical_model.separator_ + pred
-
-        for i in range(self.hierarchical_model.max_levels_)[:-1]:
-            node = self.hierarchical_model.separator_.join(
-                traversal_path.split(self.hierarchical_model.separator_)[: i + 1]
-            )
-
+        traversed_nodes = self._get_traversed_nodes(X)
+        for node in traversed_nodes:
             local_classifier = self.hierarchical_model.hierarchy_.nodes[node][
                 "classifier"
             ]
 
-            traversed_nodes.append(node)
             # Create explainer with train data
             local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
             shap_values = np.array(local_explainer.shap_values(X))
@@ -203,8 +190,8 @@ class Explainer:
             A dictionary of SHAP values for each node.
         """
         local_datasets = []
-        parent_nodes = self.hierarchical_model._get_parents()
-        for parent_node in parent_nodes:
+        traversed_nodes = self._get_traversed_nodes(X)
+        for parent_node in traversed_nodes:
             # Ignore the root node if redundant, do NOT ignore in case of disjoint subtrees
             if (
                 parent_node == self.hierarchical_model.root_
@@ -268,7 +255,6 @@ class Explainer:
                 }
             )
             local_datasets.append(local_dataset)
-
         return local_datasets
 
     def _explain_lcpn(self, X):
@@ -325,3 +311,26 @@ class Explainer:
             shap_values_dict[level] = shap_values
 
         return shap_values_dict
+
+    def _get_traversed_nodes(self, sample):
+        # Helper function to return traversed nodes
+        traversed_nodes = []
+        if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
+            y_pred = self.hierarchical_model.predict(sample)
+
+            traversal_path = str(y_pred[0][0])
+            for pred in y_pred[0][1:]:
+                traversal_path = (
+                    traversal_path + self.hierarchical_model.separator_ + pred
+                )
+
+            for i in range(self.hierarchical_model.max_levels_)[:-1]:
+                node = self.hierarchical_model.separator_.join(
+                    traversal_path.split(self.hierarchical_model.separator_)[: i + 1]
+                )
+                traversed_nodes.append(node)
+            return traversed_nodes
+        elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
+            pass
+        elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
+            pass

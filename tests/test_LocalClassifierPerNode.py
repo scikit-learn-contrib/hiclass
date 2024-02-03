@@ -241,7 +241,7 @@ def explainer_data():
     y_train = np.array(
         [["a", "b", "d"], ["a", "b", "e"], ["a", "c", "f"], ["a", "c", "g"]]
     )
-    x_test = np.random.randn(5, 3)
+    x_test = np.random.randn(1, 3)
 
     return x_train, x_test, y_train
 
@@ -253,13 +253,14 @@ def test_explainer_tree(explainer_data):
     )
 
     x_train, x_test, y_train = explainer_data
-    print(explainer_data)
 
     lcpn.fit(x_train, y_train)
 
     lcpn.predict(x_test)
     explainer = Explainer(lcpn, data=x_train, mode="tree")
     shap_dict = explainer.explain(x_test)
+    print(lcpn.predict(x_test))
+    print(shap_dict)
 
     for key, val in shap_dict.items():
         # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
