@@ -226,17 +226,42 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         self._fit_node_classifier(nodes, local_mode, use_joblib)
 
     def get_predict_proba(self, X):
-        classifier_nodes = [
-            node
-            for node in self.hierarchy_.nodes
-            if "classifier" in self.hierarchy_.nodes[node]
-        ]
+        """
+        Prediction probabilities for each class for the given data.
 
-        predict_proba_dict = {}
-        for node in classifier_nodes:
-            pred_probabilities = self.hierarchy_.nodes[node][
-                "classifier"
-            ].predict_proba(X)
-            predict_proba_dict[node] = pred_probabilities
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            The input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csr_matrix``.
+        Returns
+        -------
+        prediction_probabilities : dict or list of dicts if X contains multiple samples.
+            Each dict contains the node as its key and prediction probabilities for
+            the predicted classes as value.
+        """
+        prediction_probabilities = []
+        for sample in X:
+            predict_proba_dict = {}
+            y_pred = self.predict(sample.reshape(1, -1))
+            traversal_path = str(y_pred[0][0])
+            for pred in y_pred[0][1:]:
+                traversal_path = traversal_path + self.separator_ + pred
 
-        return predict_proba_dict
+            for i in range(self.max_levels_)[:-1]:
+                node = self.separator_.join(
+                    traversal_path.split(self.separator_)[: i + 1]
+                )
+
+                local_classifier = self.hierarchy_.nodes[node]["classifier"]
+                pred_probabilities = local_classifier.predict_proba(
+                    sample.reshape(1, -1)
+                )
+                predict_proba_dict[node] = pred_probabilities
+            prediction_probabilities.append(predict_proba_dict)
+
+        if len(prediction_probabilities) == 1:
+            return prediction_probabilities[0]
+
+        return prediction_probabilities

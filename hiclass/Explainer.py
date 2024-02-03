@@ -151,6 +151,7 @@ class Explainer:
         traversal_path = str(y_pred[0][0])
         for pred in y_pred[0][1:]:
             traversal_path = traversal_path + self.hierarchical_model.separator_ + pred
+
         for i in range(self.hierarchical_model.max_levels_)[:-1]:
             node = self.hierarchical_model.separator_.join(
                 traversal_path.split(self.hierarchical_model.separator_)[: i + 1]

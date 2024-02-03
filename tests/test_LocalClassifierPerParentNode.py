@@ -315,13 +315,22 @@ def test_explainer_tree_no_root(explainer_data_no_root):
         )
 
 
-def test_predict_proba(explainer_data):
+def test_predict_proba():
     rfc = RandomForestClassifier()
     lcppn = LocalClassifierPerParentNode(
         local_classifier=rfc, replace_classifiers=False
     )
 
-    x_train, x_test, y_train = explainer_data
+    x_train = np.random.randn(4, 3)
+    y_train = np.array(
+        [
+            ["a", "b", "d", "k"],
+            ["a", "b", "e", "l"],
+            ["a", "c", "f", "k"],
+            ["a", "c", "g", "l"],
+        ]
+    )
+    x_test = np.random.randn(1, 3)
 
     lcppn.fit(x_train, y_train)
 
