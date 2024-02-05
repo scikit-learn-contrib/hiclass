@@ -1,4 +1,5 @@
 """setup file for the project."""
+
 # code gratefully take from https://github.com/navdeep-G/setup.py
 
 # Note: To use the 'upload' functionality of this file, you must:

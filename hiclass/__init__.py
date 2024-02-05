@@ -1,4 +1,5 @@
 """Init module for the library."""
+
 import os
 from ._version import get_versions
 from .LocalClassifierPerNode import LocalClassifierPerNode
