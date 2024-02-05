@@ -13,3 +13,12 @@ __all__ = [
     "LocalClassifierPerParentNode",
     "LocalClassifierPerLevel",
 ]
+
+# Try to import the Explainer module
+try:
+    from .explainer import Explainer
+    # If successful, add 'Explainer' to __all__
+    __all__.append('Explainer')
+except ImportError:
+    # If the import fails, Explainer is not available
+    pass
