@@ -190,7 +190,7 @@ class Explainer:
             A dictionary of SHAP values for each node.
         """
         local_datasets = []
-        traversed_nodes = self._get_traversed_nodes(X)
+        traversed_nodes = self.hierarchical_model._get_parents()
         for parent_node in traversed_nodes:
             # Ignore the root node if redundant, do NOT ignore in case of disjoint subtrees
             if (
