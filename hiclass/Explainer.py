@@ -315,22 +315,17 @@ class Explainer:
     def _get_traversed_nodes(self, sample):
         # Helper function to return traversed nodes
         traversed_nodes = []
-        if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
-            y_pred = self.hierarchical_model.predict(sample)
+        y_pred = self.hierarchical_model.predict(sample)
 
-            traversal_path = str(y_pred[0][0])
-            for pred in y_pred[0][1:]:
-                traversal_path = (
-                    traversal_path + self.hierarchical_model.separator_ + pred
-                )
+        traversal_path = str(y_pred[0][0])
+        for pred in y_pred[0][1:]:
+            traversal_path = (
+                traversal_path + self.hierarchical_model.separator_ + pred
+            )
 
-            for i in range(self.hierarchical_model.max_levels_)[:-1]:
-                node = self.hierarchical_model.separator_.join(
-                    traversal_path.split(self.hierarchical_model.separator_)[: i + 1]
-                )
-                traversed_nodes.append(node)
-            return traversed_nodes
-        elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
-            pass
-        elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
-            pass
+        for i in range(self.hierarchical_model.max_levels_)[:-1]:
+            node = self.hierarchical_model.separator_.join(
+                traversal_path.split(self.hierarchical_model.separator_)[: i + 1]
+            )
+            traversed_nodes.append(node)
+        return traversed_nodes
