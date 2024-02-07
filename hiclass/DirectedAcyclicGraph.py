@@ -20,7 +20,7 @@ class DirectedAcyclicGraph:
         n_rows : int
             The number of rows in x and y, i.e., the features and labels matrices.
         """
-        self.root = Node(n_rows, "root")
+        self.root = Node(n_rows, "root", True)
         self.nodes = {
             "root": self.root
         }
@@ -57,3 +57,23 @@ class DirectedAcyclicGraph:
                 leaf = leaf.add_successor(successor)
                 self.nodes[successor] = leaf
             index = index + 1
+
+    def is_acyclic(self):
+        visited = set()
+        to_visit = [self.root]
+        while len(to_visit) > 0:
+            next = to_visit.pop(0)
+            if next in visited:
+                return False
+            visited.add(next)
+            to_visit.extend(next.successors.values())
+        return True
+
+    def get_parent_nodes(self):
+        parent_nodes = []
+        for node in self.nodes.values():
+            # Skip only leaf nodes
+            successors = node.successors.values()
+            if len(successors) > 0:
+                parent_nodes.append(node)
+        return parent_nodes

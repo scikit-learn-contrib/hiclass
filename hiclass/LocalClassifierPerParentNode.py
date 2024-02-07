@@ -194,9 +194,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # If y is 1D, convert to 2D for binary policies
         self._convert_1d_y_to_2d()
 
-        # Detect root(s) and add artificial root to DAG
-        self._add_artificial_root()
-
         # Initialize local classifiers in DAG
         self._initialize_local_classifiers()
 
@@ -242,7 +239,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
     def _assert_digraph_is_dag(self):
         # Assert that graph is directed acyclic
-        if not self.hierarchy_.is_acyclic_graph():
+        if not self.hierarchy_.is_acyclic():
             self.logger_.error("Cycle detected in graph")
             raise ValueError("Graph is not directed acyclic")
 
@@ -261,32 +258,14 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
     def _initialize_local_classifiers(self):
         super()._initialize_local_classifiers()
-        local_classifiers = {}
-        nodes = self._get_parents()
-        for node in nodes:
-            local_classifiers[node] = {"classifier": deepcopy(self.local_classifier_)}
-        nx.set_node_attributes(self.hierarchy_, local_classifiers)
-
-    def _get_parents(self):
-        nodes = []
-        for node in self.hierarchy_.nodes:
-            # Skip only leaf nodes
-            successors = list(self.hierarchy_.successors(node))
-            if len(successors) > 0:
-                nodes.append(node)
-        return nodes
+        parent_nodes = self.hierarchy_.get_parent_nodes()
+        for node in parent_nodes:
+            node.classifier = deepcopy(self.local_classifier_)
 
     def _get_successors(self, node):
-        successors = list(self.hierarchy_.successors(node))
-        mask = np.isin(self.y_, successors).any(axis=1)
+        mask = node.get_successors_mask()
         X = self.X_[mask]
-        y = []
-        for row in self.y_[mask]:
-            if node == self.root_:
-                y.append(row[0])
-            else:
-                y.append(row[np.where(row == node)[0][0] + 1])
-        y = np.array(y)
+        y = self.y_[mask]
         sample_weight = (
             self.sample_weight_[mask] if self.sample_weight_ is not None else None
         )
@@ -294,7 +273,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
     @staticmethod
     def _fit_classifier(self, node):
-        classifier = self.hierarchy_.nodes[node]["classifier"]
+        classifier = self.hierarchy_.nodes[node.name].classifier
         # get children examples
         X, y, sample_weight = self._get_successors(node)
         unique_y = np.unique(y)
@@ -311,5 +290,5 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
     def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local classifiers")
-        nodes = self._get_parents()
+        nodes = self.hierarchy_.get_parent_nodes()
         self._fit_node_classifier(nodes, local_mode, use_joblib)
