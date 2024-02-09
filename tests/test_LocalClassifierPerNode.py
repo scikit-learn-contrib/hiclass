@@ -23,15 +23,15 @@ def test_sklearn_compatible_estimator(estimator, check):
 def digraph_with_policy():
     digraph = LocalClassifierPerNode(binary_policy="exclusive")
     digraph.hierarchy_ = nx.DiGraph([("a", "b")])
-    digraph.X_ = np.array([1, 2])
-    digraph.y_ = np.array(["a", "b"])
+    digraph.X_ = np.array([[1, 2]])
+    digraph.y_ = np.array([["a", "b"]])
     digraph.logger_ = logging.getLogger("LCPN")
     digraph.sample_weight_ = None
     return digraph
 
 
 def test_initialize_binary_policy(digraph_with_policy):
-    digraph_with_policy._initialize_binary_policy()
+    digraph_with_policy.binary_policy_ = digraph_with_policy._initialize_binary_policy()
     assert isinstance(digraph_with_policy.binary_policy_, ExclusivePolicy)
 
 
@@ -46,6 +46,7 @@ def digraph_with_unknown_policy():
 
 def test_initialize_unknown_binary_policy(digraph_with_unknown_policy):
     with pytest.raises(KeyError):
+        digraph_with_unknown_policy.binary_policy_ = digraph_with_unknown_policy._initialize_binary_policy()
         digraph_with_unknown_policy._initialize_binary_policy()
 
 

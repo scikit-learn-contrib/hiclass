@@ -151,13 +151,17 @@ class HierarchicalClassifier(abc.ABC):
             self.sample_weight_ = _check_sample_weight(sample_weight, X)
         else:
             self.sample_weight_ = None
-        
-        self.max_level_dimensions = np.array([len(np.unique(self.y_[:, level])) for level in range(self.y_.shape[1])])
-
-        self.classes_ = [np.unique(self.y_[:, level]) for level in range(self.y_.shape[1])]
-        self.class_to_index_mapping = [{self.classes_[level][index]: index for index in range(len(self.classes_[level]))} for level in range(self.y_.shape[1])]
 
         self.y_ = make_leveled(self.y_)
+        
+        if self.y_.ndim > 1:
+            self.max_level_dimensions_ = np.array([len(np.unique(self.y_[:, level])) for level in range(self.y_.shape[1])])
+            self.classes_ = [np.unique(self.y_[:, level]).astype("str") for level in range(self.y_.shape[1])]
+            self.class_to_index_mapping_ = [{self.classes_[level][index]: index for index in range(len(self.classes_[level]))} for level in range(self.y_.shape[1])]
+        else:
+            self.max_level_dimensions_ = np.array([len(np.unique(self.y_))])
+            self.classes_ = [np.unique(self.y_).astype("str")]
+            self.class_to_index_mapping_ = [{self.classes_[0][index] : index for index in range(len(self.classes_[0]))}]
 
         # Create and configure logger
         self._create_logger()
@@ -186,7 +190,6 @@ class HierarchicalClassifier(abc.ABC):
         self._initialize_local_classifiers()
 
     def _calibrate(self, X, y):
-
         if not self.calibration_method:
             raise ValueError("No calibration method specified")
 

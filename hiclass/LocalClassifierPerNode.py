@@ -230,7 +230,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             level = nx.shortest_path_length(
                 self.hierarchy_, self.root_, predecessor
             )
-            level_dimension = self.max_level_dimensions[level]
+            level_dimension = self.max_level_dimensions_[level]
 
             if last_level != level:
                 last_level = level
@@ -255,7 +255,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                     positive_index = np.where(calibrator.classes_ == 1)[0]
                     proba = calibrator.predict_proba(subset_x)[:, positive_index][:, 0]
                     local_probabilities[:, i] = proba
-                    class_index = self.class_to_index_mapping[level][successor_name]
+                    class_index = self.class_to_index_mapping_[level][successor_name]
                     level_probability_list[-1][mask, class_index] = proba
 
                 highest_local_probability = np.argmax(local_probabilities, axis=1)
@@ -282,12 +282,13 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             self.logger_.info(f"Initializing {self.binary_policy} binary policy")
             try:
                 if calibration:
-                    X, y, sample_weight = self.X_cal, self.y_cal, None
-                else:
-                    X, y, sample_weight = self.X_, self.y_, self.sample_weight_
-                binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
+                    binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
                     self.binary_policy.lower()
-                ](self.hierarchy_, X, y, sample_weight)
+                ](self.hierarchy_, self.X_cal, self.y_cal, None)
+                else:
+                    binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
+                        self.binary_policy.lower()
+                    ](self.hierarchy_, self.X_, self.y_, self.sample_weight_)
                 return binary_policy_
             except KeyError:
                 self.logger_.error(
@@ -358,7 +359,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
     
     @staticmethod
     def _fit_calibrator(self, node):
-        # TODO: use binary policy
         try:
             calibrator = self.hierarchy_.nodes[node]["calibrator"]
         except KeyError:
@@ -369,10 +369,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             self.logger_.info(f"No calibration samples to fit calibrator for node: {str(node)}") 
             return None
         unique_y = np.unique(y)
-        self.logger_.info(f"unique y: {unique_y}")
-        #if len(unique_y) == 1 and self.replace_classifiers:
-        #    self.logger_.info("adding constant calibrator")
-        #    calibrator = ConstantClassifier()
         calibrator.fit(X, y)
         return calibrator
 
