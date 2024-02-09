@@ -151,6 +151,11 @@ class HierarchicalClassifier(abc.ABC):
             self.sample_weight_ = _check_sample_weight(sample_weight, X)
         else:
             self.sample_weight_ = None
+        
+        self.max_level_dimensions = np.array([len(np.unique(self.y_[:, level])) for level in range(self.y_.shape[1])])
+
+        self.classes_ = [np.unique(self.y_[:, level]) for level in range(self.y_.shape[1])]
+        self.class_to_index_mapping = [{self.classes_[level][index]: index for index in range(len(self.classes_[level]))} for level in range(self.y_.shape[1])]
 
         self.y_ = make_leveled(self.y_)
 
@@ -159,7 +164,7 @@ class HierarchicalClassifier(abc.ABC):
 
         # Avoids creating more columns in prediction if edges are a->b and b->c,
         # which would generate the prediction a->b->c
-        self._disambiguate()
+        self.y_ = self._disambiguate(self.y_)
 
         # Create DAG from self.y_ and store to self.hierarchy_
         self._create_digraph()
@@ -172,7 +177,7 @@ class HierarchicalClassifier(abc.ABC):
         self._assert_digraph_is_dag()
 
         # If y is 1D, convert to 2D for binary policies
-        self._convert_1d_y_to_2d()
+        self.y_ = self._convert_1d_y_to_2d(self.y_)
 
         # Detect root(s) and add artificial root to DAG
         self._add_artificial_root()
@@ -181,6 +186,10 @@ class HierarchicalClassifier(abc.ABC):
         self._initialize_local_classifiers()
 
     def _calibrate(self, X, y):
+
+        if not self.calibration_method:
+            raise ValueError("No calibration method specified")
+
         # check if fitted
         check_is_fitted(self)
 
@@ -193,17 +202,16 @@ class HierarchicalClassifier(abc.ABC):
         self.X_cal = X
         self.y_cal = y
 
+        self.y_cal = make_leveled(self.y_cal)
+        self.y_cal = self._disambiguate(self.y_cal)
+        self.y_cal = self._convert_1d_y_to_2d(self.y_cal)
+
         self.cal_binary_policy_ = self._initialize_binary_policy(calibration=True)
         self.logger_.info("Calibrating")
 
         #Create a calibrator for each local classifier
         self._initialize_local_calibrators()
         self._calibrate_digraph()
-
-        # Create calibrator object
-        # seed
-        # fit calibrator using calibration data
-        # predict_proba can then use the calibrator to predict calibrated probabilities
 
     def predict_ood():
         pass
@@ -229,18 +237,19 @@ class HierarchicalClassifier(abc.ABC):
             # Add ch to logger
             self.logger_.addHandler(ch)
 
-    def _disambiguate(self):
+    def _disambiguate(self, y):
         self.separator_ = "::HiClass::Separator::"
-        if self.y_.ndim == 2:
+        if y.ndim == 2:
             new_y = []
-            for i in range(self.y_.shape[0]):
-                row = [str(self.y_[i, 0])]
-                for j in range(1, self.y_.shape[1]):
+            for i in range(y.shape[0]):
+                row = [str(y[i, 0])]
+                for j in range(1, y.shape[1]):
                     parent = str(row[-1])
-                    child = str(self.y_[i, j])
+                    child = str(y[i, j])
                     row.append(parent + self.separator_ + child)
                 new_y.append(np.asarray(row, dtype=np.str_))
-            self.y_ = np.array(new_y)
+            return np.array(new_y)
+        return y
 
     def _create_digraph(self):
         # Create DiGraph
@@ -308,10 +317,11 @@ class HierarchicalClassifier(abc.ABC):
             self.logger_.error("Cycle detected in graph")
             raise ValueError("Graph is not directed acyclic")
 
-    def _convert_1d_y_to_2d(self):
+    def _convert_1d_y_to_2d(self, y):
         # This conversion is necessary for the binary policies
-        if self.y_.ndim == 1:
-            self.y_ = np.reshape(self.y_, (-1, 1))
+        #if y.ndim == 1:
+            #self.y_ = np.reshape(self.y_, (-1, 1))
+        return np.reshape(y, (-1, 1)) if y.ndim == 1 else y
 
     def _add_artificial_root(self):
         # Detect root(s)
