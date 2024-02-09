@@ -7,6 +7,7 @@ name = "pypi"
 networkx = "*"
 numpy = "*"
 scikit-learn = "*"
+scipy = "*"
 
 [dev-packages]
 pytest = "7.1.2"
