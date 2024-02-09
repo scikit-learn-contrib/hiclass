@@ -153,7 +153,7 @@ class HierarchicalClassifier(abc.ABC):
             self.sample_weight_ = None
 
         self.y_ = make_leveled(self.y_)
-        
+
         if self.y_.ndim > 1:
             self.max_level_dimensions_ = np.array([len(np.unique(self.y_[:, level])) for level in range(self.y_.shape[1])])
             self.classes_ = [np.unique(self.y_[:, level]).astype("str") for level in range(self.y_.shape[1])]
@@ -189,7 +189,24 @@ class HierarchicalClassifier(abc.ABC):
         # Initialize local classifiers in DAG
         self._initialize_local_classifiers()
 
-    def _calibrate(self, X, y):
+    def calibrate(self, X, y):
+        """
+        Fit a local calibrator per node.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            The calibration input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csc_matrix``.
+        y : array-like of shape (n_samples, n_levels)
+            The target values, i.e., hierarchical class labels for classification.
+
+        Returns
+        -------
+        self : object
+            Calibrated estimator.
+        """
         if not self.calibration_method:
             raise ValueError("No calibration method specified")
 
@@ -212,11 +229,12 @@ class HierarchicalClassifier(abc.ABC):
         self.cal_binary_policy_ = self._initialize_binary_policy(calibration=True)
         self.logger_.info("Calibrating")
 
-        #Create a calibrator for each local classifier
+        # Create a calibrator for each local classifier
         self._initialize_local_calibrators()
         self._calibrate_digraph()
+        return self
 
-    def predict_ood():
+    def _predict_ood():
         pass
 
     def _create_logger(self):
@@ -321,9 +339,6 @@ class HierarchicalClassifier(abc.ABC):
             raise ValueError("Graph is not directed acyclic")
 
     def _convert_1d_y_to_2d(self, y):
-        # This conversion is necessary for the binary policies
-        #if y.ndim == 1:
-            #self.y_ = np.reshape(self.y_, (-1, 1))
         return np.reshape(y, (-1, 1)) if y.ndim == 1 else y
 
     def _add_artificial_root(self):
@@ -346,7 +361,7 @@ class HierarchicalClassifier(abc.ABC):
             self.local_classifier_ = LogisticRegression()
         else:
             self.local_classifier_ = self.local_classifier
-    
+
         @abc.abstractmethod
         def _initialize_local_calibrators(self):
             raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
@@ -388,22 +403,19 @@ class HierarchicalClassifier(abc.ABC):
         for classifier, node in zip(classifiers, nodes):
             self.hierarchy_.nodes[node]["classifier"] = classifier
 
-    def _fit_node_calibrator(self, nodes, local_mode: bool = False, use_joblib: bool = False
-    ):
+    def _fit_node_calibrator(self, nodes, local_mode: bool = False, use_joblib: bool = False):
         # TODO: add support for multithreading
         calibrators = [self._fit_calibrator(self, node) for node in nodes]
         for calibrator, node in zip(calibrators, nodes):
             self.hierarchy_.nodes[node]["calibrator"] = calibrator
 
-
     @staticmethod
     def _fit_classifier(self, node):
         raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
-    
+
     @staticmethod
     def _fit_calibrator(self, node):
         raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
-
 
     def _clean_up(self):
         self.logger_.info("Cleaning up variables that can take a lot of disk space")

@@ -1,10 +1,9 @@
-from hiclass.calibration.BinaryCalibrator import BinaryCalibrator
+from hiclass._calibration.BinaryCalibrator import _BinaryCalibrator
 from sklearn.isotonic import IsotonicRegression as SkLearnIR
 from sklearn.exceptions import NotFittedError
 
 
-
-class IsotonicRegression(BinaryCalibrator):
+class _IsotonicRegression(_BinaryCalibrator):
     name = "IsotonicRegression"
 
     def __init__(self, params={}) -> None:

@@ -1,8 +1,9 @@
-from hiclass.calibration.BinaryCalibrator import BinaryCalibrator
+from hiclass._calibration.BinaryCalibrator import _BinaryCalibrator
 from sklearn.calibration import _SigmoidCalibration
 from sklearn.exceptions import NotFittedError
 
-class PlattScaling(BinaryCalibrator):
+
+class _PlattScaling(_BinaryCalibrator):
     name = "PlattScaling"
 
     def __init__(self) -> None:
@@ -18,4 +19,3 @@ class PlattScaling(BinaryCalibrator):
         if not self.fitted:
             raise NotFittedError(f"This {self.name} calibrator is not fitted yet. Call 'fit' with appropriate arguments before using this calibrator.")
         return self.platt_scaling.predict(scores)
-

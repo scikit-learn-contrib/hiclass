@@ -2,9 +2,10 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.preprocessing import LabelEncoder
-from hiclass.calibration.VennAbersCalibrator import InductiveVennAbersCalibrator, CrossVennAbersCalibrator
-from hiclass.calibration.IsotonicRegression import IsotonicRegression
-from hiclass.calibration.PlattScaling import PlattScaling
+from hiclass._calibration.VennAbersCalibrator import _InductiveVennAbersCalibrator, _CrossVennAbersCalibrator
+from hiclass._calibration.IsotonicRegression import _IsotonicRegression
+from hiclass._calibration.PlattScaling import _PlattScaling
+
 
 class _Calibrator(BaseEstimator):
     available_methods = ["ivap", "cvap", "sigmoid", "isotonic"]
@@ -18,18 +19,30 @@ class _Calibrator(BaseEstimator):
         if method not in self.available_methods:
             raise ValueError(f"{method} is not a valid calibration method.")
         self.method = method
-    
+
     def fit(self, X, y):
-        '''
-        X = all datapoints if method == cvap and X_cal else
-        y = all labels if method == cvap and y_cal else
-        
-        '''
+        """
+        Fit a calibrator.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            The calibration input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csc_matrix``.
+        y : array-like of shape (n_samples, n_levels)
+            The target values, i.e., hierarchical class labels for classification.
+
+        Returns
+        -------
+        self : object
+            Calibrated estimator.
+        """
         calibration_scores = self.estimator.predict_proba(X)
 
         if calibration_scores.shape[1] > 2:
             self.multiclass = True
-        
+
         self.calibrators = []
 
         if self.multiclass:
@@ -52,6 +65,7 @@ class _Calibrator(BaseEstimator):
             calibrator = self._create_calibrator(self.method, self.method_params)
             calibrator.fit(encoded_y, calibration_scores[:, 1], X)
             self.calibrators.append(calibrator)
+        return self
 
     def predict_proba(self, X):
         test_scores = self.estimator.predict_proba(X)
@@ -62,9 +76,9 @@ class _Calibrator(BaseEstimator):
             probabilities = np.zeros((X.shape[0], len(self.estimator.classes_)))
             for idx, split in enumerate(score_splits):
                 probabilities[:, idx] = self.calibrators[idx].predict_proba(split)
-        
+
             probabilities /= probabilities.sum(axis=1, keepdims=True)
-        
+
         else:
             probabilities = np.zeros((X.shape[0], 2))
             probabilities[:, 1] = self.calibrators[0].predict_proba(test_scores[:, 1])
@@ -74,10 +88,10 @@ class _Calibrator(BaseEstimator):
 
     def _create_calibrator(self, name, params):
         if name == "ivap":
-            return InductiveVennAbersCalibrator(**params)
+            return _InductiveVennAbersCalibrator(**params)
         elif name == "cvap":
-            return CrossVennAbersCalibrator(self.estimator, **params)
+            return _CrossVennAbersCalibrator(self.estimator, **params)
         elif name == "sigmoid":
-            return PlattScaling()
+            return _PlattScaling()
         elif name == "isotonic":
-            return IsotonicRegression(params)
+            return _IsotonicRegression(params)
