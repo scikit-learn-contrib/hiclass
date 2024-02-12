@@ -106,6 +106,15 @@ HiClass and its dependencies can be easily installed with pip:
 pip install hiclass
 ```
 
+If you need additional functionality, you can install extra dependencies using the following syntax:
+```shell
+pip install hiclass[<extra_name>]
+```
+Replace <extra_name> with one of the following options:
+
+- ray: Installs the ray package, which is required for parallel processing support.
+- xai: Installs the shap and xarray packages, which are required for explaining Hiclass predictions.
+
 ### Option 2: Conda
 
 Alternatively, HiClass and its dependencies can also be installed with conda:
