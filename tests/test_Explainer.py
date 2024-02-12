@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 from hiclass import (
     LocalClassifierPerParentNode,
     LocalClassifierPerNode,
@@ -22,6 +21,7 @@ classifiers = [
     LocalClassifierPerNode,
 ]
 
+
 # TODO : Add parametrized tests
 
 
@@ -38,6 +38,7 @@ def explainer_data():
     return x_train, x_test, y_train
 
 
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
 def test_explainer_tree(explainer_data):
     rfc = RandomForestClassifier()
     lcppn = LocalClassifierPerParentNode(
@@ -49,7 +50,7 @@ def test_explainer_tree(explainer_data):
     lcppn.fit(x_train, y_train)
 
     explainer = Explainer(lcppn, data=x_train, mode="tree")
-    shap_dict = explainer.explain(x_test, traverse_prediction=False)
+    shap_dict = explainer.explain(x_test)
     assert shap_dict is not None
 
     # for key, val in shap_dict.items():
@@ -62,6 +63,7 @@ def test_explainer_tree(explainer_data):
     #     )
 
 
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
 def test_explainer_tree_traversal(explainer_data):
     rfc = RandomForestClassifier()
     lcppn = LocalClassifierPerParentNode(
@@ -86,27 +88,6 @@ def test_explainer_tree_traversal(explainer_data):
     #     )
 
 
-# TODO: Add new test cases with hierarchies without root nodes
-# def test_explainer_linear(explainer_data):
-#     logreg = LogisticRegression()
-#     lcppn = LocalClassifierPerParentNode(
-#         local_classifier=logreg, replace_classifiers=False
-#     )
-#
-#     x_train, x_test, y_train = explainer_data
-#     lcppn.fit(x_train, y_train)
-#
-#     lcppn.predict(x_test)
-#     explainer = Explainer(lcppn, data=x_train, mode="linear")
-#     shap_dict = explainer.explain(x_test)
-#     assert shap_dict is not None
-
-# for key, val in shap_dict.items():
-#     # Assert on shapes of shap values, must match (num_samples, num_features) Note: Logistic regression is based
-#     # on sigmoid and not softmax, hence there are no separate predictions for each target class
-#     assert shap_dict[key].shape == x_test.shape
-
-
 @pytest.fixture
 def explainer_data_no_root():
     x_train = np.random.randn(6, 3)
@@ -124,6 +105,7 @@ def explainer_data_no_root():
     return x_train, x_test, y_train
 
 
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
 def test_explainer_tree_no_root(explainer_data_no_root):
     rfc = RandomForestClassifier()
     lcppn = LocalClassifierPerParentNode(
@@ -149,6 +131,7 @@ def test_explainer_tree_no_root(explainer_data_no_root):
     #     )
 
 
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 def test_traversal_path(data, request):
     x_train, x_test, y_train = request.getfixturevalue(data)

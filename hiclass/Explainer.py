@@ -1,8 +1,9 @@
 """Explainer API for explaining predictions using shapley values."""
 
-import shap
-import numpy as np
 from copy import deepcopy
+
+import numpy as np
+
 from hiclass import (
     LocalClassifierPerParentNode,
     LocalClassifierPerNode,
@@ -16,6 +17,24 @@ except ImportError:
     xarray_installed = False
 else:
     xarray_installed = True
+
+try:
+    import shap
+except ImportError:
+    shap_installed = False
+else:
+    shap_installed = True
+
+
+def _check_imports():
+    if not shap_installed:
+        raise ImportError(
+            "Shap is not installed. Please install it using `pip install shap` first."
+        )
+    elif not xarray_installed:
+        raise ImportError(
+            "xarray is not installed. Please install it using `pip install xarray` first."
+        )
 
 
 class Explainer:
@@ -41,6 +60,8 @@ class Explainer:
         self.mode = mode
         self.data = data
 
+        _check_imports()
+
         if mode == "tree":
             self.explainer = shap.TreeExplainer
         elif mode == "gradient":
@@ -52,7 +73,7 @@ class Explainer:
         else:
             self.explainer = shap.Explainer
 
-    def explain(self, X, traverse_prediction=False):
+    def explain(self, X):
         """
         Generate SHAP values for each node in the hierarchy for the given data.
 
@@ -66,8 +87,9 @@ class Explainer:
         shap_values_dict : dict
             A dictionary of SHAP values for each node.
         """
+        _check_imports()
         if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
-            return self.explain_with_xr(X)
+            return self._explain_with_xr(X)
         elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
             return self._explain_lcpl(X)
         elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
@@ -75,7 +97,7 @@ class Explainer:
         else:
             raise ValueError(f"Invalid model: {self.hierarchical_model}.")
 
-    def explain_with_dict(self, X, traverse_prediction):
+    def _explain_with_dict(self, X):
         """
         Generate SHAP values for each node using Local Classifier Per Parent Node (LCPPN) strategy.
 
@@ -86,56 +108,6 @@ class Explainer:
 
         traverse_prediction : True or False
             If True, restricts calculation of shap values to only traversed hierarchy as predicted by hiclass model.
-
-        Returns
-        -------
-        shap_values_dict : dict
-            A dictionary of SHAP values for each node.
-        """
-        if traverse_prediction:
-            return self.explain_traversed_nodes(X)
-        shap_values_dict = {}
-        parent_nodes = self.hierarchical_model._get_parents()
-        for parent_node in parent_nodes:
-            # Ignore the root node if redundant, do NOT ignore in case of disjoint subtrees
-            if (
-                parent_node == self.hierarchical_model.root_
-                and len(
-                    self.hierarchical_model.hierarchy_.nodes[
-                        self.hierarchical_model.root_
-                    ]["classifier"].classes_
-                )
-                < 2
-            ):
-                continue
-
-            # Get the local classifier for the parent node
-            local_classifier = self.hierarchical_model.hierarchy_.nodes[parent_node][
-                "classifier"
-            ]
-
-            # Create a SHAP explainer for the local classifier
-            local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
-
-            # TODO: Tree models do not sometimes work if check_additivity is enabled
-            # Calculate SHAP values for the given sample X
-            if isinstance(local_explainer, shap.TreeExplainer):
-                shap_values = np.array(
-                    local_explainer.shap_values(X, check_additivity=False)
-                )
-            else:
-                shap_values = np.array(local_explainer.shap_values(X))
-            shap_values_dict[parent_node] = shap_values
-        return shap_values_dict
-
-    def explain_traversed_nodes(self, X):
-        """
-        Generate SHAP values for each node while only calculating shap values for the traversed nodes. Unvisited nodes return `nan` as the shap values.
-
-        Parameters
-        ----------
-        X : array-like
-            Sample data for which to generate SHAP values.
 
         Returns
         -------
@@ -175,7 +147,7 @@ class Explainer:
                     shap_values_dict[node] = shap_val
         return shap_values_dict
 
-    def explain_with_xr(self, X):
+    def _explain_with_xr(self, X):
         """
         Generate SHAP values for each node using Local Classifier Per Parent Node (LCPPN) strategy.
 
@@ -259,7 +231,6 @@ class Explainer:
                 current = start_node
                 traversal_order = []
                 while self.hierarchical_model.hierarchy_.neighbors(current):
-                    print(f"Currently traversing: {current}")
                     if (
                         "classifier"
                         not in self.hierarchical_model.hierarchy_.nodes[current]
@@ -278,6 +249,11 @@ class Explainer:
             pass
 
     def _calculate_shap_values(self, X):
+        if not xarray_installed:
+            raise ImportError(
+                "xarray is not installed. Please install it using `pip install xarray` before using "
+                "this method."
+            )
         traversed_nodes = self._get_traversed_nodes(X)[0]
         datasets = []
         for node in traversed_nodes:
