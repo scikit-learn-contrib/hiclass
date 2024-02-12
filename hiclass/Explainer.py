@@ -8,7 +8,6 @@ from hiclass import (
     LocalClassifierPerParentNode,
     LocalClassifierPerNode,
     LocalClassifierPerLevel,
-    ConstantClassifier,
 )
 
 try:
@@ -91,61 +90,11 @@ class Explainer:
         if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
             return self._explain_with_xr(X)
         elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
-            return self._explain_lcpl(X)
+            pass
         elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
-            return self._explain_lcpn(X)
+            pass
         else:
             raise ValueError(f"Invalid model: {self.hierarchical_model}.")
-
-    def _explain_with_dict(self, X):
-        """
-        Generate SHAP values for each node using Local Classifier Per Parent Node (LCPPN) strategy.
-
-        Parameters
-        ----------
-        X : array-like
-            Sample data for which to generate SHAP values.
-
-        traverse_prediction : True or False
-            If True, restricts calculation of shap values to only traversed hierarchy as predicted by hiclass model.
-
-        Returns
-        -------
-        shap_values_dict : dict
-            A dictionary of SHAP values for each node.
-        """
-        shap_values_dict = {}
-        traversed_nodes = self._get_traversed_nodes(X)
-        for node in traversed_nodes:
-            local_classifier = self.hierarchical_model.hierarchy_.nodes[node][
-                "classifier"
-            ]
-
-            # Create explainer with train data
-            local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
-            shap_values = np.array(local_explainer.shap_values(X))
-
-            if len(shap_values.shape) < 3:
-                shap_values = shap_values.reshape(
-                    1, shap_values.shape[0], shap_values.shape[1]
-                )
-
-            shap_values_dict[node] = shap_values
-
-        for node in self.hierarchical_model.hierarchy_.nodes:
-            if node not in traversed_nodes:
-                local_classifier = self.hierarchical_model.hierarchy_.nodes[node]
-                if len(local_classifier) != 0:
-                    shap_val = np.full(
-                        (
-                            len(local_classifier["classifier"].classes_),
-                            X.shape[0],
-                            X.shape[1],
-                        ),
-                        np.nan,
-                    )
-                    shap_values_dict[node] = shap_val
-        return shap_values_dict
 
     def _explain_with_xr(self, X):
         """
@@ -166,61 +115,6 @@ class Explainer:
             explanation = self._calculate_shap_values(sample.reshape(1, -1))
             explanations.append(explanation)
         return explanations
-
-    def _explain_lcpn(self, X):
-        shap_values_dict = {}
-        for node in self.hierarchical_model.hierarchy_.nodes:
-            if node == self.hierarchical_model.root_:
-                continue
-
-            if isinstance(
-                self.hierarchical_model.hierarchy_.nodes[node]["classifier"],
-                ConstantClassifier.ConstantClassifier,
-            ):
-                continue
-
-            local_classifier = self.hierarchical_model.hierarchy_.nodes[node][
-                "classifier"
-            ]
-
-            local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
-
-            # Calculate SHAP values for the given sample X
-            shap_values = np.array(local_explainer.shap_values(X))
-            shap_values_dict[node] = shap_values
-
-        return shap_values_dict
-
-    def _explain_lcpl(self, X):
-        """
-        Generate SHAP values for each node using Local Classifier Per Level (LCPL) strategy.
-
-        Parameters
-        ----------
-        X : array-like
-            Sample data for which to generate SHAP values.
-
-        Returns
-        -------
-        shap_values_dict : dict
-            A dictionary of SHAP values for each node.
-        """
-        shap_values_dict = {}
-        start_level = 1
-        if len(self.hierarchical_model.local_classifiers_[start_level]) == 1:
-            start_level = 2
-
-        for level in range(
-            start_level, len(self.hierarchical_model.local_classifiers_)
-        ):
-            local_classifier = self.hierarchical_model.local_classifiers_[level]
-            local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
-
-            # Calculate SHAP values for the given sample X
-            shap_values = np.array(local_explainer.shap_values(X))
-            shap_values_dict[level] = shap_values
-
-        return shap_values_dict
 
     def _get_traversed_nodes(self, samples):
         # Helper function to return traversed nodes
@@ -249,11 +143,6 @@ class Explainer:
             pass
 
     def _calculate_shap_values(self, X):
-        if not xarray_installed:
-            raise ImportError(
-                "xarray is not installed. Please install it using `pip install xarray` before using "
-                "this method."
-            )
         traversed_nodes = self._get_traversed_nodes(X)[0]
         datasets = []
         for node in traversed_nodes:

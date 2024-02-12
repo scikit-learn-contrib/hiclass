@@ -22,10 +22,9 @@ classifiers = [
 ]
 
 
-# TODO : Add parametrized tests
+# TODO : Parametrize tests for remaining classifiers
 
 
-@pytest.mark.skipif(not shap_installed, reason="shap not installed")
 @pytest.fixture
 def explainer_data():
     np.random.seed(42)
@@ -33,59 +32,9 @@ def explainer_data():
     y_train = np.array(
         [["a", "b", "d"], ["a", "b", "e"], ["a", "c", "f"], ["a", "c", "g"]]
     )
-    x_test = np.random.randn(3, 3)
+    x_test = np.random.randn(5, 3)
 
     return x_train, x_test, y_train
-
-
-@pytest.mark.skipif(not shap_installed, reason="shap not installed")
-def test_explainer_tree(explainer_data):
-    rfc = RandomForestClassifier()
-    lcppn = LocalClassifierPerParentNode(
-        local_classifier=rfc, replace_classifiers=False
-    )
-
-    x_train, x_test, y_train = explainer_data
-
-    lcppn.fit(x_train, y_train)
-
-    explainer = Explainer(lcppn, data=x_train, mode="tree")
-    shap_dict = explainer.explain(x_test)
-    assert shap_dict is not None
-
-    # for key, val in shap_dict.items():
-    #     # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
-    #     model = lcppn.hierarchy_.nodes[key]["classifier"]
-    #     assert shap_dict[key].shape == (
-    #         len(model.classes_),
-    #         x_test.shape[0],
-    #         x_test.shape[1],
-    #     )
-
-
-@pytest.mark.skipif(not shap_installed, reason="shap not installed")
-def test_explainer_tree_traversal(explainer_data):
-    rfc = RandomForestClassifier()
-    lcppn = LocalClassifierPerParentNode(
-        local_classifier=rfc, replace_classifiers=False
-    )
-
-    x_train, x_test, y_train = explainer_data
-
-    lcppn.fit(x_train, y_train)
-
-    explainer = Explainer(lcppn, data=x_train, mode="tree")
-    shap_dict = explainer.explain(x_test)
-    assert shap_dict is not None
-    #
-    # for key, val in shap_dict.items():
-    #     # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
-    #     model = lcppn.hierarchy_.nodes[key]["classifier"]
-    #     assert shap_dict[key].shape == (
-    #         len(model.classes_),
-    #         x_test.shape[0],
-    #         x_test.shape[1],
-    #     )
 
 
 @pytest.fixture
@@ -101,34 +50,34 @@ def explainer_data_no_root():
             ["x", "y", "z"],
         ]
     )
-    x_test = np.random.randn(1, 3)
+    x_test = np.random.randn(5, 3)
     return x_train, x_test, y_train
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
-def test_explainer_tree_no_root(explainer_data_no_root):
+@pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
+def test_explainer_tree(data, request):
     rfc = RandomForestClassifier()
     lcppn = LocalClassifierPerParentNode(
         local_classifier=rfc, replace_classifiers=False
     )
 
-    x_train, x_test, y_train = explainer_data_no_root
+    x_train, x_test, y_train = request.getfixturevalue(data)
 
     lcppn.fit(x_train, y_train)
 
-    lcppn.predict(x_test)
     explainer = Explainer(lcppn, data=x_train, mode="tree")
-    shap_dict = explainer.explain(x_test)
-    assert shap_dict is not None
-
-    # for key, val in shap_dict.items():
-    #     # Assert on shapes of shap values, must match (target_classes, num_samples, num_features)
-    #     model = lcppn.hierarchy_.nodes[key]["classifier"]
-    #     assert shap_dict[key].shape == (
-    #         len(model.classes_),
-    #         x_test.shape[0],
-    #         x_test.shape[1],
-    #     )
+    explanations = explainer.explain(x_test)
+    assert explanations is not None
+    y_preds = lcppn.predict(x_test)
+    for i in range(len(x_test)):
+        y_pred = y_preds[i]
+        explanation = explanations[i]
+        for j in range(len(y_pred)):
+            assert (
+                explanation[j]["predicted_class"].data[0].split(lcppn.separator_)[-1]
+                == y_pred[j]
+            )
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
