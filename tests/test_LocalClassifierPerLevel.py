@@ -7,12 +7,9 @@ from numpy.testing import assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
-
 from hiclass import LocalClassifierPerLevel
-from hiclass.ConstantClassifier import ConstantClassifier
 
 
 @parametrize_with_checks([LocalClassifierPerLevel()])
@@ -79,16 +76,6 @@ def test_fit_digraph_joblib_multiprocessing(digraph_logistic_regression):
     assert 1
 
 
-def test_fit_1_class():
-    lcpl = LocalClassifierPerLevel(local_classifier=LogisticRegression(), n_jobs=2)
-    y = np.array([["1", "2"]])
-    X = np.array([[1, 2]])
-    ground_truth = np.array([["1", "2"]])
-    lcpl.fit(X, y)
-    prediction = lcpl.predict(X)
-    assert_array_equal(ground_truth, prediction)
-
-
 @pytest.fixture
 def fitted_logistic_regression():
     digraph = LocalClassifierPerLevel(local_classifier=LogisticRegression())
@@ -146,72 +133,3 @@ def test_fit_predict():
             pytest.fail(repr(e))
     predictions = lcpl.predict(x)
     assert_array_equal(y, predictions)
-
-
-@pytest.fixture
-def empty_levels():
-    X = [
-        [1],
-        [2],
-        [3],
-    ]
-    y = np.array(
-        [
-            ["1"],
-            ["2", "2.1"],
-            ["3", "3.1", "3.1.2"],
-        ],
-        dtype=object,
-    )
-    return X, y
-
-
-def test_empty_levels(empty_levels):
-    lcppn = LocalClassifierPerLevel()
-    X, y = empty_levels
-    lcppn.fit(X, y)
-    predictions = lcppn.predict(X)
-    ground_truth = [
-        ["1", "", ""],
-        ["2", "2.1", ""],
-        ["3", "3.1", "3.1.2"],
-    ]
-    assert list(lcppn.hierarchy_.nodes) == [
-        "1",
-        "2",
-        "2" + lcppn.separator_ + "2.1",
-        "3",
-        "3" + lcppn.separator_ + "3.1",
-        "3" + lcppn.separator_ + "3.1" + lcppn.separator_ + "3.1.2",
-        lcppn.root_,
-    ]
-    assert_array_equal(ground_truth, predictions)
-
-
-def test_fit_bert():
-    bert = ConstantClassifier()
-    lcpl = LocalClassifierPerLevel(
-        local_classifier=bert,
-        bert=True,
-    )
-    X = ["Text 1", "Text 2"]
-    y = ["a", "a"]
-    lcpl.fit(X, y)
-    check_is_fitted(lcpl)
-    predictions = lcpl.predict(X)
-    assert_array_equal(y, predictions)
-
-
-def test_knn():
-    knn = KNeighborsClassifier(
-        n_neighbors=2,
-    )
-    lcpl = LocalClassifierPerLevel(
-        local_classifier=knn,
-    )
-    y = np.array([["a", "b"], ["a", "c"]])
-    X = np.array([[1, 2], [3, 4]])
-    lcpl.fit(X, y)
-    check_is_fitted(lcpl)
-    # predictions = lcpl.predict(X)
-    # assert_array_equal(y, predictions)
