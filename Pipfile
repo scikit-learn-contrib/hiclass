@@ -21,3 +21,5 @@ sphinx-rtd-theme = "0.5.2"
 
 [extras]
 ray = "*"
+shap = "*"
+xarray = "*"
