@@ -108,7 +108,7 @@ pip install hiclass
 
 If you need additional functionality, you can install extra dependencies using the following syntax:
 ```shell
-pip install hiclass[<extra_name>]
+pip install hiclass"[<extra_name>]"
 ```
 Replace <extra_name> with one of the following options:
 
