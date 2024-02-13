@@ -1,9 +1,8 @@
 import logging
-import tempfile
-
 import networkx as nx
 import numpy as np
 import pytest
+import tempfile
 from numpy.testing import assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError
@@ -11,6 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 
+from hiclass import DirectedAcyclicGraph
 from hiclass import LocalClassifierPerParentNode
 
 
@@ -22,30 +22,28 @@ def test_sklearn_compatible_estimator(estimator, check):
 @pytest.fixture
 def digraph_logistic_regression():
     digraph = LocalClassifierPerParentNode(local_classifier=LogisticRegression())
-    digraph.hierarchy_ = nx.DiGraph([("a", "b"), ("a", "c")])
     digraph.y_ = np.array([["a", "b"], ["a", "c"]])
     digraph.X_ = np.array([[1, 2], [3, 4]])
+    rows = digraph.y_.shape[0]
+    digraph.hierarchy_ = DirectedAcyclicGraph(rows)
+    for row in range(rows):
+        path = digraph.y_[row, :]
+        digraph.hierarchy_.add_path(path)
     digraph.logger_ = logging.getLogger("LCPPN")
-    digraph.root_ = "a"
-    digraph.separator_ = "::HiClass::Separator::"
     digraph.sample_weight_ = None
     return digraph
 
 
 def test_initialize_local_classifiers(digraph_logistic_regression):
     digraph_logistic_regression._initialize_local_classifiers()
-    for node in digraph_logistic_regression.hierarchy_.nodes:
-        if node == digraph_logistic_regression.root_:
+    for node in digraph_logistic_regression.hierarchy_.nodes.values():
+        if node.name in ["root", "a"]:
             assert isinstance(
-                digraph_logistic_regression.hierarchy_.nodes[node]["classifier"],
+                digraph_logistic_regression.hierarchy_.nodes[node.name].classifier,
                 LogisticRegression,
             )
         else:
-            with pytest.raises(KeyError):
-                isinstance(
-                    digraph_logistic_regression.hierarchy_.nodes[node]["classifier"],
-                    LogisticRegression,
-                )
+            digraph_logistic_regression.hierarchy_.nodes[node.name].classifier is None
 
 
 def test_fit_digraph(digraph_logistic_regression):
@@ -95,12 +93,6 @@ def digraph_2d():
     classifier.edge_list = tempfile.TemporaryFile()
     classifier.separator_ = "::HiClass::Separator::"
     return classifier
-
-
-def test_get_parents(digraph_2d):
-    ground_truth = np.array(["a", "b", "d", "e"])
-    nodes = digraph_2d._get_parents()
-    assert_array_equal(ground_truth, nodes)
 
 
 @pytest.fixture
