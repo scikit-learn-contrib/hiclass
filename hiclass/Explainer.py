@@ -92,7 +92,7 @@ class Explainer:
         elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
             pass
         elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
-            pass
+            return self._explain_with_xr(X)
         else:
             raise ValueError(f"Invalid model: {self.hierarchical_model}.")
 
@@ -138,7 +138,24 @@ class Explainer:
                 traversals.append(traversal_order)
             return traversals
         elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
-            pass
+            traversals = []
+            predictions = self.hierarchical_model.predict(samples)
+            for pred in predictions:
+                traversal_order = []
+                for i in range(len(pred)):
+                    if i == 0:
+                        traversal_order.append(pred[i])
+                    else:
+                        node = (
+                            str(traversal_order[i - 1])
+                            + self.hierarchical_model.separator_
+                            + str(pred[i])
+                        )
+                        if node in self.hierarchical_model.hierarchy_.nodes:
+                            traversal_order.append(node)
+                traversals.append(traversal_order)
+            return traversals
+
         elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
             pass
 
