@@ -206,9 +206,7 @@ class Explainer:
             A dictionary of SHAP values for each node.
         """
         shap_values_dict = {}
-        start_level = 1
-        if len(self.hierarchical_model.local_classifiers_[start_level]) == 1:
-            start_level = 2
+        start_level = 0
 
         for level in range(
             start_level, len(self.hierarchical_model.local_classifiers_)
@@ -246,7 +244,29 @@ class Explainer:
         elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
             pass
         elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
-            pass
+            traversals = []
+            for sample in samples:
+                current_level = 0
+                traversal_order = []
+                while current_level < len(self.hierarchical_model.local_classifiers_):
+                    local_classifier = self.hierarchical_model.local_classifiers_[current_level]
+                    predicted_label = local_classifier.predict(sample.reshape(1, -1))[0]
+
+                    if current_level == 0:
+                        traversal_order.append(predicted_label)
+                    else:
+                        node = (
+                                str(traversal_order[-1])
+                                + self.hierarchical_model.separator_
+                                + str(predicted_label)
+                        )
+                        if node in self.hierarchical_model.hierarchy_.nodes:
+                            traversal_order.append(node)
+                        else:
+                            break
+                    current_level += 1
+                traversals.append(traversal_order)
+            return traversals
 
     def _calculate_shap_values(self, X):
         if not xarray_installed:
@@ -256,49 +276,93 @@ class Explainer:
             )
         traversed_nodes = self._get_traversed_nodes(X)[0]
         datasets = []
-        for node in traversed_nodes:
-            local_classifier = self.hierarchical_model.hierarchy_.nodes[node][
-                "classifier"
-            ]
+        if isinstance(self.hierarchical_model, LocalClassifierPerLevel):
+            for node in traversed_nodes:
+                # Define the level of the node in hierarchy
+                level = len(node.split(self.hierarchical_model.separator_)) - 1
 
-            # Create a SHAP explainer for the local classifier
-            local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
+                local_classifier = self.hierarchical_model.local_classifiers_[level]
 
-            # Calculate SHAP values for the given sample X
-            shap_values = np.array(
-                local_explainer.shap_values(X, check_additivity=False)
-            )
-            if len(shap_values.shape) < 3:
-                shap_values = shap_values.reshape(
-                    1, shap_values.shape[0], shap_values.shape[1]
+                # Create a SHAP explainer for the local classifier
+                local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
+
+                # Calculate SHAP values for the given sample X
+                shap_values = np.array(local_explainer.shap_values(X, check_additivity=False))
+                if len(shap_values.shape) < 3:
+                    shap_values = shap_values.reshape(1, shap_values.shape[0], shap_values.shape[1])
+
+                predict_proba = xr.DataArray(
+                    local_classifier.predict_proba(X)[0],
+                    dims=["class"],
+                    coords={"class": local_classifier.classes_},
+                )
+                classes = xr.DataArray(
+                    local_classifier.classes_,
+                    dims=["class"],
+                    coords={"class": local_classifier.classes_},
                 )
 
-            predict_proba = xr.DataArray(
-                local_classifier.predict_proba(X)[0],
-                dims=["class"],
-                coords={
-                    "class": local_classifier.classes_,
-                },
-            )
-            classes = xr.DataArray(
-                local_classifier.classes_,
-                dims=["class"],
-                coords={"class": local_classifier.classes_},
-            )
+                shap_val_local = xr.DataArray(
+                    shap_values,
+                    dims=["class", "sample", "feature"],
+                )
 
-            shap_val_local = xr.DataArray(
-                shap_values,
-                dims=["class", "sample", "feature"],
-            )
+                local_dataset = xr.Dataset(
+                    {
+                        "node": node.split(self.hierarchical_model.separator_)[-1],
+                        "level": level,
+                        "predicted_class": local_classifier.predict(X),
+                        "predict_proba": predict_proba,
+                        "classes": classes,
+                        "shap_values": shap_val_local,
+                    }
+                )
+                datasets.append(local_dataset)
 
-            local_dataset = xr.Dataset(
-                {
-                    "node": node.split(self.hierarchical_model.separator_)[-1],
-                    "predicted_class": local_classifier.predict(X),
-                    "predict_proba": predict_proba,
-                    "classes": classes,
-                    "shap_values": shap_val_local,
-                }
-            )
-            datasets.append(local_dataset)
+        else:
+            for node in traversed_nodes:
+                local_classifier = self.hierarchical_model.hierarchy_.nodes[node][
+                    "classifier"
+                ]
+
+                # Create a SHAP explainer for the local classifier
+                local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
+
+                # Calculate SHAP values for the given sample X
+                shap_values = np.array(
+                    local_explainer.shap_values(X, check_additivity=False)
+                )
+                if len(shap_values.shape) < 3:
+                    shap_values = shap_values.reshape(
+                        1, shap_values.shape[0], shap_values.shape[1]
+                    )
+
+                predict_proba = xr.DataArray(
+                    local_classifier.predict_proba(X)[0],
+                    dims=["class"],
+                    coords={
+                        "class": local_classifier.classes_,
+                    },
+                )
+                classes = xr.DataArray(
+                    local_classifier.classes_,
+                    dims=["class"],
+                    coords={"class": local_classifier.classes_},
+                )
+
+                shap_val_local = xr.DataArray(
+                    shap_values,
+                    dims=["class", "sample", "feature"],
+                )
+
+                local_dataset = xr.Dataset(
+                    {
+                        "node": node.split(self.hierarchical_model.separator_)[-1],
+                        "predicted_class": local_classifier.predict(X),
+                        "predict_proba": predict_proba,
+                        "classes": classes,
+                        "shap_values": shap_val_local,
+                    }
+                )
+                datasets.append(local_dataset)
         return datasets
