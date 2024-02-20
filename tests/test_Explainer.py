@@ -1,5 +1,4 @@
 import numpy as np
-import xarray
 import pytest
 from sklearn.ensemble import RandomForestClassifier
 from hiclass import (
