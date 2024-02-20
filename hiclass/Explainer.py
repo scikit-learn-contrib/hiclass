@@ -159,18 +159,20 @@ class Explainer:
         elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
             traversals = []
             for x in samples:
-                current_level = 0  # Start at the root level
                 traversal_order = []
-               for current_level in range(len(self.hierarchical_model.local_classifiers_)):
-                    # Get the classifier for the current level
-                    classifier = self.hierarchical_model.local_classifiers_[current_level]
+                for current_level in range(
+                    len(self.hierarchical_model.local_classifiers_)
+                ):
+                    classifier = self.hierarchical_model.local_classifiers_[
+                        current_level
+                    ]
                     predicted_class = classifier.predict(x.reshape(1, -1))[0]
 
                     if traversal_order:
                         node = (
-                                str(traversal_order[-1]) +
-                                self.hierarchical_model.separator_ +
-                                str(predicted_class)
+                            str(traversal_order[-1])
+                            + self.hierarchical_model.separator_
+                            + str(predicted_class)
                         )
                     else:
                         node = str(predicted_class)
@@ -198,9 +200,13 @@ class Explainer:
                 local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
 
                 # Calculate SHAP values for the given sample X
-                shap_values = np.array(local_explainer.shap_values(X, check_additivity=False))
+                shap_values = np.array(
+                    local_explainer.shap_values(X, check_additivity=False)
+                )
                 if len(shap_values.shape) < 3:
-                    shap_values = shap_values.reshape(1, shap_values.shape[0], shap_values.shape[1])
+                    shap_values = shap_values.reshape(
+                        1, shap_values.shape[0], shap_values.shape[1]
+                    )
 
                 predict_proba = xr.DataArray(
                     local_classifier.predict_proba(X)[0],
@@ -235,7 +241,9 @@ class Explainer:
                     ]
 
                     # Create a SHAP explainer for the local classifier
-                    local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
+                    local_explainer = deepcopy(self.explainer)(
+                        local_classifier, self.data
+                    )
 
                     # Calculate SHAP values for the given sample X
                     shap_values = np.array(
