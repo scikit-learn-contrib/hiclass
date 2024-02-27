@@ -83,7 +83,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         calibration_method : {"ivap", "cvap", "platt", "isotonic"}, str, default=None
             If set, use the desired method to calibrate probabilities returned by predict_proba().
         return_all_probabilities : bool, default=False
-            If True, return probabilities from all levels. Otherwise, return only probabilities from the last level.
+            If True, return probabilities for all levels. Otherwise, return only probabilities for the last level.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -296,10 +296,14 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         if isinstance(self.binary_policy, str):
             self.logger_.info(f"Initializing {self.binary_policy} binary policy")
             try:
-                if calibration:
+                if calibration and self.calibration_method != "cvap":
                     binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
                         self.binary_policy.lower()
                     ](self.hierarchy_, self.X_cal, self.y_cal, None)
+                elif calibration and self.calibration_method == "cvap":
+                    binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
+                        self.binary_policy.lower()
+                    ](self.hierarchy_, self.X_cross_val, self.y_cross_val, None)
                 else:
                     binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
                         self.binary_policy.lower()
@@ -356,8 +360,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
     @staticmethod
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
-        self.logger_.info("policy: " + str(self.binary_policy_))
-        self.logger_.info("node: " + str(node))
         X, y, sample_weight = self.binary_policy_.get_binary_examples(node)
         self.logger_.info("fitting model " + "node: " + str(node) + " " + str(X.shape) + " : " + str(y.shape) + " unique labels: " + str(len(np.unique(y))))
         unique_y = np.unique(y)
@@ -379,14 +381,19 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             calibrator = self.hierarchy_.nodes[node]["calibrator"]
         except KeyError:
             self.logger_.info("no calibrator for " + "node: " + str(node))
-        X, y, sample_weight = self.cal_binary_policy_.get_binary_examples(node)
+            return None
+        X, y, _ = self.cal_binary_policy_.get_binary_examples(node)
         self.logger_.info("fitting calibrator " + "node: " + str(node) + " " + str(X.shape) + " : " + str(y.shape))
-        if len(y) == 0:
+        if len(y) == 0 or len(np.unique(y)) < 2:
             self.logger_.info(f"No calibration samples to fit calibrator for node: {str(node)}")
+            self.hierarchy_.nodes[node].pop('calibrator', None)
             return None
         calibrator.fit(X, y)
         return calibrator
 
     def _clean_up(self):
         super()._clean_up()
-        del self.binary_policy_
+        if hasattr(self, 'binary_policy_'):
+            del self.binary_policy_
+        if hasattr(self, 'cal_binary_policy_'):
+            del self.cal_binary_policy_

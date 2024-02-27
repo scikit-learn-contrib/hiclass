@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.exceptions import NotFittedError
+from sklearn.model_selection import StratifiedKFold
 from hiclass._calibration.BinaryCalibrator import _BinaryCalibrator
 from scipy.stats import gmean
 
@@ -188,21 +189,19 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
         unique_labels = np.unique(y)
         assert len(unique_labels) == 2
 
-        # split training set X into self.n_folds folds
-        splits_x = np.array_split(X, self.n_folds, axis=0)
-        splits_y = np.array_split(y, self.n_folds, axis=0)
-
-        # create random permutation
-        perm = np.random.default_rng().permutation(self.n_folds)
-        splits_x = [splits_x[i] for i in perm]
-        splits_y = [splits_y[i] for i in perm]
+        splits_x, splits_y = create_n_splits(X, y, self.n_folds)
         self.ivaps = []
 
         for i in range(self.n_folds):
-            X_train = np.concatenate(splits_x[:i] + splits_x[i + 1:], axis=0)
-            y_train = np.concatenate(splits_y[:i] + splits_y[i + 1:], axis=0)
-            X_cal = splits_x[i]
-            y_cal = splits_y[i]
+            X_train, X_cal = splits_x[i][0], splits_x[i][1]
+            y_train, y_cal = splits_y[i][0], splits_y[i][1]
+
+            if len(np.unique(y_train)) < 2 or len(np.unique(y_cal)) < 2:
+                print("skip cv split due to lack of positive samples!")
+                continue
+
+            elements, _, counts = np.unique(y_train, return_index=True, return_counts=True)
+            print(f"y_train : {np.unique(elements)} : {np.unique(counts)}")
 
             # train underlying model with x_train and y_train
             model = self.estimator_type()
@@ -215,6 +214,7 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
             calibrator = _InductiveVennAbersCalibrator()
             calibrator.fit(y_cal, calibration_scores[:, 1])
             self.ivaps.append(calibrator)
+
         self.fitted = True
 
         return self
@@ -226,9 +226,44 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
         for calibrator in self.ivaps:
             res.append(calibrator.predict_intervall(scores))
 
+        if len(res) == 0:
+            return np.zeros_like(scores, dtype=np.float32)
+        
         res = np.array(res)
         p0 = res[:, :, 0]
         p1 = res[:, :, 1]
 
         p1_gm = gmean(p1)
         return p1_gm / (gmean(1 - p0) + p1_gm)
+
+def split_csr_matrix(matrix, n_folds):
+    n_rows = matrix.shape[0]
+    rows_per_fold = n_rows // n_folds
+    remainder = n_rows % n_folds
+
+    folds = []
+    start_idx = 0
+    for i in range(n_folds):
+        # Determine the number of rows for this chunk
+        # Add an extra row to some chunks to account for the remainder
+        extra_row = 1 if i < remainder else 0
+        end_idx = start_idx + rows_per_fold + extra_row
+        
+        # Slice the matrix to create the chunk
+        fold = matrix[start_idx:end_idx]
+        folds.append(fold)
+        
+        # Update the start index for the next chunk
+        start_idx = end_idx
+
+    return folds
+
+def create_n_splits(X, y, n_folds):
+    splitter = StratifiedKFold(n_splits=n_folds)
+    splits_x = []
+    splits_y = []
+    for train_index, cal_index in splitter.split(X, y):
+        splits_x.append((X[train_index], X[cal_index]))
+        splits_y.append((y[train_index], y[cal_index]))
+    
+    return splits_x, splits_y

@@ -62,6 +62,7 @@ class _Calibrator(BaseEstimator):
         else:
             self.label_encoder = LabelEncoder()
             encoded_y = self.label_encoder.fit_transform(y)
+            print(f"after encoding: {np.unique(encoded_y)}")
             calibrator = self._create_calibrator(self.method, self.method_params)
             calibrator.fit(encoded_y, calibration_scores[:, 1], X)
             self.calibrators.append(calibrator)

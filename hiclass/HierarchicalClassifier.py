@@ -4,6 +4,7 @@ import logging
 
 import networkx as nx
 import numpy as np
+import scipy
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
@@ -133,7 +134,8 @@ class HierarchicalClassifier(abc.ABC):
         self._fit_digraph()
 
         # Delete unnecessary variables
-        self._clean_up()
+        if not self.calibration_method == "cvap":
+            self._clean_up()
 
     def _pre_fit(self, X, y, sample_weight):
         # Check that X and y have correct shape
@@ -218,13 +220,26 @@ class HierarchicalClassifier(abc.ABC):
             X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
         else:
             X = np.array(X)
+        
+        if self.calibration_method == "cvap":
+            # combine train and calibration dataset for cross validation
+            if isinstance(self.X_, scipy.sparse._csr.csr_matrix):
+                self.X_cross_val = scipy.sparse.vstack([self.X_, X])
+                self.logger_.info(f"CV Dataset X: {str(type(self.X_cross_val))} {str(self.X_cross_val.shape)}")
+            else:
+                self.X_cross_val = np.hstack([self.X_, X])
+                self.logger_.info(f"CV Dataset X: {str(type(self.X_cross_val))} {str(self.X_cross_val.shape)}")
+            self.y_cross_val = np.vstack([self.y_, y])
+            self.y_cross_val = make_leveled(self.y_cross_val)
+            self.y_cross_val = self._disambiguate(self.y_cross_val)
+            self.y_cross_val = self._convert_1d_y_to_2d(self.y_cross_val)
+        else:
+            self.X_cal = X
+            self.y_cal = y
 
-        self.X_cal = X
-        self.y_cal = y
-
-        self.y_cal = make_leveled(self.y_cal)
-        self.y_cal = self._disambiguate(self.y_cal)
-        self.y_cal = self._convert_1d_y_to_2d(self.y_cal)
+            self.y_cal = make_leveled(self.y_cal)
+            self.y_cal = self._disambiguate(self.y_cal)
+            self.y_cal = self._convert_1d_y_to_2d(self.y_cal)
 
         self.cal_binary_policy_ = self._initialize_binary_policy(calibration=True)
         self.logger_.info("Calibrating")
@@ -232,6 +247,8 @@ class HierarchicalClassifier(abc.ABC):
         # Create a calibrator for each local classifier
         self._initialize_local_calibrators()
         self._calibrate_digraph()
+
+        self._clean_up()
         return self
 
     def _predict_ood():
@@ -405,9 +422,15 @@ class HierarchicalClassifier(abc.ABC):
 
     def _fit_node_calibrator(self, nodes, local_mode: bool = False, use_joblib: bool = False):
         # TODO: add support for multithreading
-        calibrators = [self._fit_calibrator(self, node) for node in nodes]
+        #calibrators = [self._fit_calibrator(self, node) for node in nodes]
+        calibrators = []
+        for idx, node in enumerate(nodes):
+            self.logger_.info(f"calibrating node {idx+1}/{len(nodes)}")
+            calibrators.append(self._fit_calibrator(self, node))
+
         for calibrator, node in zip(calibrators, nodes):
-            self.hierarchy_.nodes[node]["calibrator"] = calibrator
+            if calibrator:
+                self.hierarchy_.nodes[node]["calibrator"] = calibrator
 
     @staticmethod
     def _fit_classifier(self, node):
@@ -419,7 +442,17 @@ class HierarchicalClassifier(abc.ABC):
 
     def _clean_up(self):
         self.logger_.info("Cleaning up variables that can take a lot of disk space")
-        del self.X_
-        del self.y_
-        if self.sample_weight_ is not None:
+        if hasattr(self, 'X_'):
+            del self.X_
+        if hasattr(self, 'y_'):
+            del self.y_
+        if hasattr(self, 'sample_weight') and self.sample_weight_ is not None:
             del self.sample_weight_
+        if hasattr(self, 'X_cal'):
+            del self.X_cal
+        if hasattr(self, 'y_cal'):
+            del self.y_cal
+        if hasattr(self, 'y_cross_val'):
+            del self.y_cross_val
+        if hasattr(self, 'X_cross_val'):
+            del self.X_cross_val
