@@ -5,6 +5,8 @@ import logging
 
 import networkx as nx
 import numpy as np
+import sklearn
+
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
@@ -349,3 +351,12 @@ class HierarchicalClassifier(abc.ABC):
         del self.y_
         if self.sample_weight_ is not None:
             del self.sample_weight_
+
+    def _change_local_classifier(self, classifier):
+        if not isinstance(classifier, sklearn.base.BaseEstimator):
+            raise TypeError(
+                "Unsupported Classifier: Classifier should be of type sklearn.base.BaseEstimator"
+            )
+
+        self.local_classifier = classifier
+        self.local_classifier_ = classifier
