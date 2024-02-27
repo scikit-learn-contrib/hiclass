@@ -1,6 +1,7 @@
 """Helper functions to compute hierarchical evaluation metrics."""
 import numpy as np
 from sklearn.utils import check_array
+from sklearn.preprocessing import LabelEncoder
 
 from hiclass.HierarchicalClassifier import make_leveled
 
@@ -247,3 +248,12 @@ def _compute_macro(y_true: np.ndarray, y_pred: np.ndarray, _micro_function):
         sample_score = _micro_function(np.array([ground_truth]), np.array([prediction]))
         overall_sum = overall_sum + sample_score
     return overall_sum / len(y_true)
+
+
+def _multiclass_brier_score(y_true, y_prob):
+    '''
+    Assumes that y_true is ordered
+    '''
+    label_encoder = LabelEncoder()
+    y_true = label_encoder.fit_transform(y_true)
+    return (1/y_prob.shape[0]) * np.sum(np.sum(np.square(y_prob - np.eye(y_prob.shape[1])[y_true]), axis=1))

@@ -1,8 +1,10 @@
 import numpy as np
 import pytest
 from pytest import approx
+import math
+from numpy.testing import assert_array_almost_equal, assert_array_equal
 
-from hiclass.metrics import precision, recall, f1
+from hiclass.metrics import precision, recall, f1, _multiclass_brier_score
 
 
 # TODO: add tests for 3D dataframe (not sure if it's possible to have 3D dataframes)
@@ -334,3 +336,30 @@ def test_empty_levels_2d_list_2():
     y_pred = [["1"], ["2", "3"], ["4", "5", "6"]]
     assert 1 == f1(y_true, y_pred)
     assert 1 == f1(y_true, y_true)
+
+
+@pytest.fixture
+def uncertainty_data():
+    prob = np.array([[0.88, 0.06, 0.06],
+                     [0.22, 0.48, 0.30],
+                     [0.33, 0.33, 0.34],
+                     [0.49, 0.40, 0.11],
+                     [0.23, 0.03, 0.74],
+                     [0.21, 0.67, 0.12],
+                     [0.34, 0.34, 0.32],
+                     [0.02, 0.77, 0.21],
+                     [0.44, 0.42, 0.14],
+                     [0.85, 0.13, 0.02]])
+
+    assert_array_equal(np.sum(prob, axis=1), np.ones(len(prob)))
+
+    y_pred = np.array([0, 1, 2, 0, 2, 1, 0, 1, 0, 0])
+    y_true = np.array([0, 2, 0, 0, 2, 1, 1, 1, 0, 0])
+
+    return prob, y_pred, y_true
+
+
+def test_local_brier_score(uncertainty_data):
+    prob, _, y_true = uncertainty_data
+    brier_score = _multiclass_brier_score(y_true, prob)
+    assert math.isclose(brier_score, 0.34852)
