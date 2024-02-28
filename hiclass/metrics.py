@@ -250,7 +250,7 @@ def _compute_macro(y_true: np.ndarray, y_pred: np.ndarray, _micro_function):
     return overall_sum / len(y_true)
 
 
-def _multiclass_brier_score(y_true, y_prob):
+def _multiclass_brier_score(y_true: np.ndarray, y_prob: np.ndarray):
     '''
     Assumes that y_true is ordered
     '''

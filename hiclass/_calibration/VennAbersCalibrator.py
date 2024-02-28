@@ -188,32 +188,38 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
     def fit(self, y, scores, X):
         unique_labels = np.unique(y)
         assert len(unique_labels) == 2
-
-        splits_x, splits_y = create_n_splits(X, y, self.n_folds)
         self.ivaps = []
 
-        for i in range(self.n_folds):
-            X_train, X_cal = splits_x[i][0], splits_x[i][1]
-            y_train, y_cal = splits_y[i][0], splits_y[i][1]
+        try:
+            splits_x, splits_y = create_n_splits(X, y, self.n_folds)
+        except ValueError:
+            splits_x, splits_y = [], []
 
-            if len(np.unique(y_train)) < 2 or len(np.unique(y_cal)) < 2:
-                print("skip cv split due to lack of positive samples!")
-                continue
-
-            elements, _, counts = np.unique(y_train, return_index=True, return_counts=True)
-            print(f"y_train : {np.unique(elements)} : {np.unique(counts)}")
-
-            # train underlying model with x_train and y_train
-            model = self.estimator_type()
-            model.set_params(**self.estimator_params)
-            model.fit(X_train, y_train)
-
-            # calibrate IVAP with left out dataset
-            calibration_scores = model.predict_proba(X_cal)
-
+        if len(splits_x) == 0 or any([(len(np.unique(y_train)) < 2 or len(np.unique(y_cal)) < 2) for y_train, y_cal in splits_y]):
+            print("skip cv split due to lack of positive samples!")
             calibrator = _InductiveVennAbersCalibrator()
-            calibrator.fit(y_cal, calibration_scores[:, 1])
+            calibrator.fit(y, scores)
             self.ivaps.append(calibrator)
+
+        else:
+            for i in range(self.n_folds):
+                X_train, X_cal = splits_x[i][0], splits_x[i][1]
+                y_train, y_cal = splits_y[i][0], splits_y[i][1]
+
+                elements, _, counts = np.unique(y_train, return_index=True, return_counts=True)
+                print(f"y_train : {np.unique(elements)} : {np.unique(counts)}")
+
+                # train underlying model with x_train and y_train
+                model = self.estimator_type()
+                model.set_params(**self.estimator_params)
+                model.fit(X_train, y_train)
+
+                # calibrate IVAP with left out dataset
+                calibration_scores = model.predict_proba(X_cal)
+
+                calibrator = _InductiveVennAbersCalibrator()
+                calibrator.fit(y_cal, calibration_scores[:, 1])
+                self.ivaps.append(calibrator)
 
         self.fitted = True
 
@@ -225,9 +231,6 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
         res = []
         for calibrator in self.ivaps:
             res.append(calibrator.predict_intervall(scores))
-
-        if len(res) == 0:
-            return np.zeros_like(scores, dtype=np.float32)
         
         res = np.array(res)
         p0 = res[:, :, 0]
