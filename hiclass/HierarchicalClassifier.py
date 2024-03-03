@@ -155,6 +155,9 @@ class HierarchicalClassifier(abc.ABC):
             self.sample_weight_ = None
 
         self.y_ = make_leveled(self.y_)
+        # Avoids creating more columns in prediction if edges are a->b and b->c,
+        # which would generate the prediction a->b->c
+        self.y_ = self._disambiguate(self.y_)
 
         if self.y_.ndim > 1:
             self.max_level_dimensions_ = np.array([len(np.unique(self.y_[:, level])) for level in range(self.y_.shape[1])])
@@ -170,7 +173,7 @@ class HierarchicalClassifier(abc.ABC):
 
         # Avoids creating more columns in prediction if edges are a->b and b->c,
         # which would generate the prediction a->b->c
-        self.y_ = self._disambiguate(self.y_)
+        #self.y_ = self._disambiguate(self.y_)
 
         # Create DAG from self.y_ and store to self.hierarchy_
         self._create_digraph()
@@ -416,7 +419,11 @@ class HierarchicalClassifier(abc.ABC):
                 )
 
         else:
-            classifiers = [self._fit_classifier(self, node) for node in nodes]
+            classifiers = []
+            for idx, node in enumerate(nodes):
+                self.logger_.info(f"fitting node {idx+1}/{len(nodes)}")
+                classifiers.append(self._fit_classifier(self, node))
+            #classifiers = [self._fit_classifier(self, node) for node in nodes]
         for classifier, node in zip(classifiers, nodes):
             self.hierarchy_.nodes[node]["classifier"] = classifier
 

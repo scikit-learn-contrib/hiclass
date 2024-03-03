@@ -191,9 +191,14 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
         self.ivaps = []
 
         try:
-            splits_x, splits_y = create_n_splits(X, y, self.n_folds)
+            splitter = StratifiedKFold(n_splits=self.n_folds)
+            splits_x = []
+            splits_y = []
+            for train_index, cal_index in splitter.split(X, y):
+                splits_x.append((X[train_index], X[cal_index]))
+                splits_y.append((y[train_index], y[cal_index]))
         except ValueError:
-            splits_x, splits_y = [], []
+                splits_x, splits_y = [], []
 
         if len(splits_x) == 0 or any([(len(np.unique(y_train)) < 2 or len(np.unique(y_cal)) < 2) for y_train, y_cal in splits_y]):
             print("skip cv split due to lack of positive samples!")
@@ -238,35 +243,3 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
 
         p1_gm = gmean(p1)
         return p1_gm / (gmean(1 - p0) + p1_gm)
-
-def split_csr_matrix(matrix, n_folds):
-    n_rows = matrix.shape[0]
-    rows_per_fold = n_rows // n_folds
-    remainder = n_rows % n_folds
-
-    folds = []
-    start_idx = 0
-    for i in range(n_folds):
-        # Determine the number of rows for this chunk
-        # Add an extra row to some chunks to account for the remainder
-        extra_row = 1 if i < remainder else 0
-        end_idx = start_idx + rows_per_fold + extra_row
-        
-        # Slice the matrix to create the chunk
-        fold = matrix[start_idx:end_idx]
-        folds.append(fold)
-        
-        # Update the start index for the next chunk
-        start_idx = end_idx
-
-    return folds
-
-def create_n_splits(X, y, n_folds):
-    splitter = StratifiedKFold(n_splits=n_folds)
-    splits_x = []
-    splits_y = []
-    for train_index, cal_index in splitter.split(X, y):
-        splits_x.append((X[train_index], X[cal_index]))
-        splits_y.append((y[train_index], y[cal_index]))
-    
-    return splits_x, splits_y

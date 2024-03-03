@@ -264,15 +264,14 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             if subset_x.shape[0] > 0:
                 local_probabilities = np.zeros((subset_x.shape[0], len(successors)))
                 for i, successor in enumerate(successors):
-                    successor_name = str(successor).split(self.separator_)[-1]
-                    self.logger_.info(f"Predicting probabilities for node '{successor_name}'")
+                    self.logger_.info(f"Predicting probabilities for node '{str(successor)}'")
                     classifier = self.hierarchy_.nodes[successor]["classifier"]
                     # use classifier as a fallback if no calibrator is available
                     calibrator = self.hierarchy_.nodes[successor].get("calibrator", classifier)
                     positive_index = np.where(calibrator.classes_ == 1)[0]
                     proba = calibrator.predict_proba(subset_x)[:, positive_index][:, 0]
                     local_probabilities[:, i] = proba
-                    class_index = self.class_to_index_mapping_[level][successor_name]
+                    class_index = self.class_to_index_mapping_[level][str(successor)]
                     level_probability_list[-1][mask, class_index] = proba
 
                 highest_local_probability = np.argmax(local_probabilities, axis=1)

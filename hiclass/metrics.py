@@ -1,9 +1,11 @@
 """Helper functions to compute hierarchical evaluation metrics."""
 import numpy as np
 from sklearn.utils import check_array
+from sklearn.metrics import log_loss
 from sklearn.preprocessing import LabelEncoder
 
 from hiclass.HierarchicalClassifier import make_leveled
+from hiclass import HierarchicalClassifier
 
 
 def _validate_input(y_true, y_pred):
@@ -250,10 +252,32 @@ def _compute_macro(y_true: np.ndarray, y_pred: np.ndarray, _micro_function):
     return overall_sum / len(y_true)
 
 
-def _multiclass_brier_score(y_true: np.ndarray, y_prob: np.ndarray):
-    '''
-    Assumes that y_true is ordered
-    '''
+def _multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, level: int):
+    y_true, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level)
     label_encoder = LabelEncoder()
-    y_true = label_encoder.fit_transform(y_true)
-    return (1/y_prob.shape[0]) * np.sum(np.sum(np.square(y_prob - np.eye(y_prob.shape[1])[y_true]), axis=1))
+    label_encoder.fit(labels)
+    y_true_encoded = label_encoder.transform(y_true)
+    return (1/y_prob.shape[0]) * np.sum(np.sum(np.square(y_prob - np.eye(y_prob.shape[1])[y_true_encoded]), axis=1))
+
+
+def _log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, level: int):
+    y_true, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level)
+    return log_loss(y_true, y_prob, labels=labels)
+
+def _prepare_data(classifier, y_true, y_prob, level):
+    classifier_classes = np.array(classifier.classes_[level]).astype("str")
+    y_true = make_leveled(y_true)
+    y_true = classifier._disambiguate(y_true)
+    y_true = np.array(list(map(lambda x: x[level], y_true)))
+    unique_labels = np.unique(y_true).astype("str")
+    # add labels not seen in the training process
+    new_labels = np.sort(np.union1d(unique_labels, classifier_classes))
+
+    # add empty columns to y_prob
+    new_y_prob = np.zeros((y_prob[level].shape[0], len(new_labels)), dtype=np.float32)
+    for idx, label in enumerate(new_labels):
+        if label in classifier_classes:
+            old_idx = np.where(classifier_classes == label)[0][0]
+            new_y_prob[:, idx] = y_prob[level][:, old_idx]
+    
+    return y_true, new_labels, new_y_prob
