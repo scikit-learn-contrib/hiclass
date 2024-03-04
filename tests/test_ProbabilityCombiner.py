@@ -6,7 +6,7 @@ from numpy.testing import assert_array_almost_equal, assert_array_equal
 import math
 
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
-from hiclass.probability_combiner import MultiplyCombiner
+from hiclass.probability_combiner import MultiplyCombiner, ArithmeticMeanCombiner
 
 
 @pytest.fixture
@@ -45,7 +45,6 @@ def one_sample_probs_with_hierarchy():
     return hierarchy, probs, classes_
 
 def test_multiply_combiner(one_sample_probs_with_hierarchy):
-
     hierarchy, probs, classes = one_sample_probs_with_hierarchy
     obj = HierarchicalClassifier()
     classifier = Mock(spec=obj)
@@ -71,3 +70,23 @@ def test_multiply_combiner(one_sample_probs_with_hierarchy):
     
     assert math.isclose(combined_probs[2][0][-1], 8e-5, abs_tol=1e-4)
     assert math.isclose(combined_probs[2][0][-1], probs[0][0][-1] * probs[1][0][-1] * probs[2][0][-1], abs_tol=1e-4)
+
+def test_arithmetic_mean_combiner(one_sample_probs_with_hierarchy):
+    hierarchy, probs, classes = one_sample_probs_with_hierarchy
+    obj = HierarchicalClassifier()
+    classifier = Mock(spec=obj)
+    classifier._disambiguate = obj._disambiguate
+    classifier.classes_ = classes
+    classifier.max_levels_ = len(classes)
+    classifier.class_to_index_mapping_ = [{classifier.classes_[level][index]: index for index in range(len(classifier.classes_[level]))} for level in range(classifier.max_levels_)]
+    classifier.hierarchy_ = hierarchy
+
+    combiner = ArithmeticMeanCombiner(classifier=classifier)
+    combined_probs = combiner.combine(probs)
+
+    # check combined probability of first node for both levels
+    assert math.isclose(combined_probs[1][0][0], 0.245, abs_tol=1e-4)
+    assert math.isclose(combined_probs[1][0][0], (probs[0][0][0] + probs[1][0][0]) / 2, abs_tol=1e-4)
+
+    assert math.isclose(combined_probs[2][0][0], 0.1733, abs_tol=1e-4)
+    assert math.isclose(combined_probs[2][0][0], (probs[0][0][0] + probs[1][0][0] + probs[2][0][0]) / 3, abs_tol=1e-4)
