@@ -211,9 +211,6 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
                 X_train, X_cal = splits_x[i][0], splits_x[i][1]
                 y_train, y_cal = splits_y[i][0], splits_y[i][1]
 
-                elements, _, counts = np.unique(y_train, return_index=True, return_counts=True)
-                print(f"y_train : {np.unique(elements)} : {np.unique(counts)}")
-
                 # train underlying model with x_train and y_train
                 model = self.estimator_type()
                 model.set_params(**self.estimator_params)

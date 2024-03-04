@@ -421,7 +421,7 @@ class HierarchicalClassifier(abc.ABC):
         else:
             classifiers = []
             for idx, node in enumerate(nodes):
-                self.logger_.info(f"fitting node {idx+1}/{len(nodes)}")
+                self.logger_.info(f"fitting node {idx+1}/{len(nodes)}: {str(node)}")
                 classifiers.append(self._fit_classifier(self, node))
             #classifiers = [self._fit_classifier(self, node) for node in nodes]
         for classifier, node in zip(classifiers, nodes):
@@ -432,7 +432,7 @@ class HierarchicalClassifier(abc.ABC):
         #calibrators = [self._fit_calibrator(self, node) for node in nodes]
         calibrators = []
         for idx, node in enumerate(nodes):
-            self.logger_.info(f"calibrating node {idx+1}/{len(nodes)}")
+            self.logger_.info(f"calibrating node {idx+1}/{len(nodes)}: {str(node)}")
             calibrators.append(self._fit_calibrator(self, node))
 
         for calibrator, node in zip(calibrators, nodes):
