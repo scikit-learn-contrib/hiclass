@@ -92,6 +92,13 @@ def test_arithmetic_mean_combiner(one_sample_probs_with_hierarchy):
     assert math.isclose(combined_probs[2][0][0], 0.1733, abs_tol=1e-4)
     assert math.isclose(combined_probs[2][0][0], (probs[0][0][0] + probs[1][0][0] + probs[2][0][0]) / 3, abs_tol=1e-4)
 
+    # check combined probability of last node for both levels
+    assert math.isclose(combined_probs[1][0][-1], 0.12, abs_tol=1e-4)
+    assert math.isclose(combined_probs[1][0][-1], (probs[0][0][-1] + probs[1][0][-1]) / 2, abs_tol=1e-4)
+    
+    assert math.isclose(combined_probs[2][0][-1], 0.0833, abs_tol=1e-4)
+    assert math.isclose(combined_probs[2][0][-1], (probs[0][0][-1] + probs[1][0][-1] + probs[2][0][-1]) / 3, abs_tol=1e-4)
+
 def test_geometric_mean_combiner(one_sample_probs_with_hierarchy):
     hierarchy, probs, classes = one_sample_probs_with_hierarchy
     obj = HierarchicalClassifier()
@@ -112,3 +119,9 @@ def test_geometric_mean_combiner(one_sample_probs_with_hierarchy):
     assert math.isclose(combined_probs[2][0][0], 0.1195, abs_tol=1e-4)
     assert math.isclose(combined_probs[2][0][0], gmean([probs[0][0][0], probs[1][0][0], probs[2][0][0]]), abs_tol=1e-4)
 
+    # check combined probability of last node for both levels
+    assert math.isclose(combined_probs[1][0][-1], 0.0894, abs_tol=1e-4)
+    assert math.isclose(combined_probs[1][0][-1], gmean([probs[0][0][-1], probs[1][0][-1]]), abs_tol=1e-4)
+    
+    assert math.isclose(combined_probs[2][0][-1], 0.0430, abs_tol=1e-4)
+    assert math.isclose(combined_probs[2][0][-1], gmean([probs[0][0][-1], probs[1][0][-1], probs[2][0][-1]]), abs_tol=1e-4)
