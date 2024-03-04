@@ -4,9 +4,10 @@ from unittest.mock import Mock
 import networkx as nx
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 import math
+from scipy.stats import gmean
 
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
-from hiclass.probability_combiner import MultiplyCombiner, ArithmeticMeanCombiner
+from hiclass.probability_combiner import MultiplyCombiner, ArithmeticMeanCombiner, GeometricMeanCombiner
 
 
 @pytest.fixture
@@ -90,3 +91,24 @@ def test_arithmetic_mean_combiner(one_sample_probs_with_hierarchy):
 
     assert math.isclose(combined_probs[2][0][0], 0.1733, abs_tol=1e-4)
     assert math.isclose(combined_probs[2][0][0], (probs[0][0][0] + probs[1][0][0] + probs[2][0][0]) / 3, abs_tol=1e-4)
+
+def test_geometric_mean_combiner(one_sample_probs_with_hierarchy):
+    hierarchy, probs, classes = one_sample_probs_with_hierarchy
+    obj = HierarchicalClassifier()
+    classifier = Mock(spec=obj)
+    classifier._disambiguate = obj._disambiguate
+    classifier.classes_ = classes
+    classifier.max_levels_ = len(classes)
+    classifier.class_to_index_mapping_ = [{classifier.classes_[level][index]: index for index in range(len(classifier.classes_[level]))} for level in range(classifier.max_levels_)]
+    classifier.hierarchy_ = hierarchy
+
+    combiner = GeometricMeanCombiner(classifier=classifier)
+    combined_probs = combiner.combine(probs)
+
+    # check combined probability of first node for both levels
+    assert math.isclose(combined_probs[1][0][0], 0.2387, abs_tol=1e-4)
+    assert math.isclose(combined_probs[1][0][0], gmean([probs[0][0][0], probs[1][0][0]]), abs_tol=1e-4)
+
+    assert math.isclose(combined_probs[2][0][0], 0.1195, abs_tol=1e-4)
+    assert math.isclose(combined_probs[2][0][0], gmean([probs[0][0][0], probs[1][0][0], probs[2][0][0]]), abs_tol=1e-4)
+
