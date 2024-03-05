@@ -4,10 +4,18 @@ from pytest import approx
 import math
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 from unittest.mock import Mock
-import networkx as nx
 
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
-from hiclass.metrics import precision, recall, f1, _multiclass_brier_score, _log_loss
+from hiclass.metrics import (
+    precision, 
+    recall, 
+    f1, 
+    _multiclass_brier_score, 
+    _log_loss,
+    _expected_calibration_error,
+    _statistical_calibration_error,
+    _adaptive_calibration_error
+)
 
 
 # TODO: add tests for 3D dataframe (not sure if it's possible to have 3D dataframes)
@@ -356,7 +364,7 @@ def uncertainty_data():
 
     assert_array_equal(np.sum(prob[0], axis=1), np.ones(len(prob[0])))
 
-    y_pred = np.array([0, 1, 2, 0, 2, 1, 0, 1, 0, 0])
+    y_pred = np.array([[0], [1], [2], [0], [2], [1], [0], [1], [0], [0]])
     y_true = np.array([[0], [2], [0], [0], [2], [1], [1], [1], [0], [0]])
 
     return prob, y_pred, y_true
@@ -367,6 +375,7 @@ def test_local_brier_score(uncertainty_data):
     classifier = Mock(spec=obj)
     classifier._disambiguate = obj._disambiguate
     classifier.classes_ = [[0, 1, 2]]
+
     brier_score = _multiclass_brier_score(classifier, y_true, prob, level=0)
     assert math.isclose(brier_score, 0.34852, abs_tol=1e-4)
 
@@ -376,6 +385,36 @@ def test_local_log_loss(uncertainty_data):
     classifier = Mock(spec=obj)
     classifier._disambiguate = obj._disambiguate
     classifier.classes_ = [[0, 1, 2]]
+
     log_loss = _log_loss(classifier, y_true, prob, level=0)
     assert math.isclose(log_loss, 0.61790, abs_tol=1e-4)
 
+def test_expected_calibration_error(uncertainty_data):
+    prob, y_pred, y_true = uncertainty_data
+    obj = HierarchicalClassifier()
+    classifier = Mock(spec=obj)
+    classifier._disambiguate = obj._disambiguate
+    classifier.classes_ = [[0, 1, 2]]
+
+    ece = _expected_calibration_error(classifier, y_true, prob, y_pred, level=0, n_bins=3)
+    assert math.isclose(ece, 0.118, abs_tol=1e-4)
+
+def test_statistical_calibration_error(uncertainty_data):
+    prob, y_pred, y_true = uncertainty_data
+    obj = HierarchicalClassifier()
+    classifier = Mock(spec=obj)
+    classifier._disambiguate = obj._disambiguate
+    classifier.classes_ = [[0, 1, 2]]
+
+    sce = _statistical_calibration_error(classifier, y_true, prob, y_pred, level=0, n_bins=3)
+    assert math.isclose(sce, 0.3889, abs_tol=1e-3)
+
+def test_adaptive_calibration_error(uncertainty_data):
+    prob, y_pred, y_true = uncertainty_data
+    obj = HierarchicalClassifier()
+    classifier = Mock(spec=obj)
+    classifier._disambiguate = obj._disambiguate
+    classifier.classes_ = [[0, 1, 2]]
+
+    ace = _adaptive_calibration_error(classifier, y_true, prob, y_pred, level=0, n_ranges=3)
+    assert math.isclose(ace, 0.44, abs_tol=1e-3)
