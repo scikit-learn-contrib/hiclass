@@ -1,4 +1,5 @@
 """Constant classifier if there is only one class in the training set."""
+
 import numpy as np
 
 

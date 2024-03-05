@@ -66,7 +66,7 @@ Y_train = [
 ]
 
 # Use random forest classifiers for every node
-# And exclusive siblings policy to select training examples for binary classifiers.
+# And inclusive policy to select training examples for binary classifiers.
 rf = RandomForestClassifier()
 classifier = LocalClassifierPerNode(local_classifier=rf, binary_policy="inclusive")
 

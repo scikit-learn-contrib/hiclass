@@ -24,3 +24,5 @@ pre-commit = "2.20.0"
 
 [extras]
 ray = "*"
+shap = "*"
+xarray = "*"

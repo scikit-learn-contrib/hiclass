@@ -1,4 +1,5 @@
 """setup file for the project."""
+
 # code gratefully take from https://github.com/navdeep-G/setup.py
 
 # Note: To use the 'upload' functionality of this file, you must:
@@ -30,7 +31,7 @@ REQUIRED = ["networkx", "numpy", "scikit-learn", "scipy"]
 
 # What packages are optional?
 # 'fancy feature': ['django'],}
-EXTRAS = {"ray": ["ray>=1.11.0"]}
+EXTRAS = {"ray": ["ray>=1.11.0"], "xai": ["shap", "xarray"]}
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
