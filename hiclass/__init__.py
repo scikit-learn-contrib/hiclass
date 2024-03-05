@@ -13,5 +13,5 @@ __all__ = [
     "LocalClassifierPerNode",
     "LocalClassifierPerParentNode",
     "LocalClassifierPerLevel",
-    "Pileline",
+    "Pipeline",
 ]
