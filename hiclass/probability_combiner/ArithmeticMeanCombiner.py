@@ -6,7 +6,6 @@ class ArithmeticMeanCombiner(ProbabilityCombiner):
         res = [proba[0]]
         sums = [proba[0]]
         for level in range(1, self.classifier.max_levels_):
-            print(level)
             level_probs = np.zeros_like(proba[level])
             level_sum = np.zeros_like(proba[level])
             for node in self.classifier.classes_[level]:

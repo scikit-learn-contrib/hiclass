@@ -171,10 +171,6 @@ class HierarchicalClassifier(abc.ABC):
         # Create and configure logger
         self._create_logger()
 
-        # Avoids creating more columns in prediction if edges are a->b and b->c,
-        # which would generate the prediction a->b->c
-        #self.y_ = self._disambiguate(self.y_)
-
         # Create DAG from self.y_ and store to self.hierarchy_
         self._create_digraph()
 
@@ -402,43 +398,62 @@ class HierarchicalClassifier(abc.ABC):
     def _fit_node_classifier(
         self, nodes, local_mode: bool = False, use_joblib: bool = False
     ):
+        def logging_wrapper(func, idx, node, node_length):
+            self.logger_.info(f"fitting node {idx+1}/{node_length}: {str(node)}")
+            return func(self, node)
+        
         if self.n_jobs > 1:
             if _has_ray and not use_joblib:
-                ray.init(
-                    num_cpus=self.n_jobs,
-                    local_mode=local_mode,
-                    ignore_reinit_error=True,
-                )
+                if not ray.is_initialized:
+                    ray.init(
+                        num_cpus=self.n_jobs,
+                        local_mode=local_mode,
+                        ignore_reinit_error=True,
+                    )
                 lcppn = ray.put(self)
-                _parallel_fit = ray.remote(self._fit_classifier)
+                _parallel_fit = ray.remote(self._fit_classifier) # TODO: use logging wrapper
                 results = [_parallel_fit.remote(lcppn, node) for node in nodes]
                 classifiers = ray.get(results)
             else:
                 classifiers = Parallel(n_jobs=self.n_jobs)(
-                    delayed(self._fit_classifier)(self, node) for node in nodes
+                    delayed(logging_wrapper)(self._fit_classifier, idx, node, len(nodes)) for idx, node in enumerate(nodes)
                 )
 
         else:
-            classifiers = []
-            for idx, node in enumerate(nodes):
-                self.logger_.info(f"fitting node {idx+1}/{len(nodes)}: {str(node)}")
-                classifiers.append(self._fit_classifier(self, node))
-            #classifiers = [self._fit_classifier(self, node) for node in nodes]
+            classifiers = [logging_wrapper(self._fit_classifier, idx, node, len(nodes)) for idx, node in enumerate(nodes)]
+
         for classifier, node in zip(classifiers, nodes):
             self.hierarchy_.nodes[node]["classifier"] = classifier
 
     def _fit_node_calibrator(self, nodes, local_mode: bool = False, use_joblib: bool = False):
-        # TODO: add support for multithreading
-        #calibrators = [self._fit_calibrator(self, node) for node in nodes]
-        calibrators = []
-        for idx, node in enumerate(nodes):
-            self.logger_.info(f"calibrating node {idx+1}/{len(nodes)}: {str(node)}")
-            calibrators.append(self._fit_calibrator(self, node))
+        def logging_wrapper(func, idx, node, node_length):
+            self.logger_.info(f"calibrating node {idx+1}/{node_length}: {str(node)}")
+            return func(self, node)
+
+        if self.n_jobs > 1:
+            if _has_ray and not use_joblib:
+                if not ray.is_initialized:
+                    ray.init(
+                        num_cpus=self.n_jobs,
+                        local_mode=local_mode,
+                        ignore_reinit_error=True,
+                    )
+                lcppn = ray.put(self)
+                _parallel_fit = ray.remote(self._fit_calibrator)
+                results = [_parallel_fit.remote(lcppn, node) for idx, node in enumerate(nodes)] # TODO: use logging wrapper
+                calibrators = ray.get(results)
+                ray.shutdown()
+            else:
+                calibrators = Parallel(n_jobs=self.n_jobs)(
+                    delayed(logging_wrapper)(self._fit_calibrator, idx, node, len(nodes)) for idx, node in enumerate(nodes)
+                )
+
+        else:
+            calibrators = [logging_wrapper(self._fit_calibrator, idx, node, len(nodes)) for idx, node in enumerate(nodes)]
 
         for calibrator, node in zip(calibrators, nodes):
-            if calibrator:
-                self.hierarchy_.nodes[node]["calibrator"] = calibrator
-
+            self.hierarchy_.nodes[node]["calibrator"] = calibrator
+        
     @staticmethod
     def _fit_classifier(self, node):
         raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")

@@ -367,7 +367,6 @@ def test_local_brier_score(uncertainty_data):
     classifier = Mock(spec=obj)
     classifier._disambiguate = obj._disambiguate
     classifier.classes_ = [[0, 1, 2]]
-    classifier.hierarchy_ = nx.DiGraph()
     brier_score = _multiclass_brier_score(classifier, y_true, prob, level=0)
     assert math.isclose(brier_score, 0.34852, abs_tol=1e-4)
 

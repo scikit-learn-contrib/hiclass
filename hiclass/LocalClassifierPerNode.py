@@ -267,7 +267,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                     self.logger_.info(f"Predicting probabilities for node '{str(successor)}'")
                     classifier = self.hierarchy_.nodes[successor]["classifier"]
                     # use classifier as a fallback if no calibrator is available
-                    calibrator = self.hierarchy_.nodes[successor].get("calibrator", classifier)
+                    calibrator = self.hierarchy_.nodes[successor].get("calibrator", classifier) or classifier
                     positive_index = np.where(calibrator.classes_ == 1)[0]
                     proba = calibrator.predict_proba(subset_x)[:, positive_index][:, 0]
                     local_probabilities[:, i] = proba
@@ -360,7 +360,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
         X, y, sample_weight = self.binary_policy_.get_binary_examples(node)
-        #self.logger_.info("fitting model " + "node: " + str(node) + " " + str(X.shape) + " : " + str(y.shape) + " unique labels: " + str(len(np.unique(y))))
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
             self.logger_.info("adding constant classifier")
@@ -382,10 +381,9 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             self.logger_.info("no calibrator for " + "node: " + str(node))
             return None
         X, y, _ = self.cal_binary_policy_.get_binary_examples(node)
-        #self.logger_.info("fitting calibrator " + "node: " + str(node) + " " + str(X.shape) + " : " + str(y.shape))
         if len(y) == 0 or len(np.unique(y)) < 2:
             self.logger_.info(f"No calibration samples to fit calibrator for node: {str(node)}")
-            self.hierarchy_.nodes[node].pop('calibrator', None)
+            #self.hierarchy_.nodes[node].pop('calibrator', None)
             return None
         calibrator.fit(X, y)
         return calibrator
