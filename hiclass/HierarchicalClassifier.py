@@ -232,7 +232,7 @@ class HierarchicalClassifier(abc.ABC):
             self.y_cross_val = np.vstack([self.y_, y])
             self.y_cross_val = make_leveled(self.y_cross_val)
             self.y_cross_val = self._disambiguate(self.y_cross_val)
-            self.y_cross_val = self._convert_1d_y_to_2d(self.y_cross_val)
+            self.y_cross_val = self._convert_1d_y_to_2d(self.y_cross_val) # TODO: rename to y_cal?
         else:
             self.X_cal = X
             self.y_cal = y
@@ -241,7 +241,6 @@ class HierarchicalClassifier(abc.ABC):
             self.y_cal = self._disambiguate(self.y_cal)
             self.y_cal = self._convert_1d_y_to_2d(self.y_cal)
 
-        self.cal_binary_policy_ = self._initialize_binary_policy(calibration=True)
         self.logger_.info("Calibrating")
 
         # Create a calibrator for each local classifier
@@ -379,9 +378,8 @@ class HierarchicalClassifier(abc.ABC):
         else:
             self.local_classifier_ = self.local_classifier
 
-        @abc.abstractmethod
-        def _initialize_local_calibrators(self):
-            raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
+    def _initialize_local_calibrators(self):
+        self.logger_.info("Initializing local calibrators")
 
     def _convert_to_1d(self, y):
         # Convert predictions to 1D if there is only 1 column

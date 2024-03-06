@@ -46,7 +46,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         n_jobs: int = 1,
         bert: bool = False,
         calibration_method: str = None,
-        return_all_probabilities: bool = False,
+        return_all_probabilities: bool = False
     ):
         """
         Initialize a local classifier per node.
@@ -333,6 +333,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         nx.set_node_attributes(self.hierarchy_, local_classifiers)
 
     def _initialize_local_calibrators(self):
+        super()._initialize_local_calibrators()
         local_calibrators = {}
         for node in self.hierarchy_.nodes:
             # Skip only root node
@@ -352,6 +353,8 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         self._fit_node_classifier(nodes, local_mode, use_joblib)
 
     def _calibrate_digraph(self, local_mode: bool = False, use_joblib: bool = False):
+        self.logger_.info("Fitting local calibrators")
+        self.cal_binary_policy_ = self._initialize_binary_policy(calibration=True)
         nodes = list(self.hierarchy_.nodes)
         # Remove root because it does not need to be fitted
         nodes.remove(self.root_)

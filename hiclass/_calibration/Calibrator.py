@@ -48,7 +48,8 @@ class _Calibrator(BaseEstimator):
         if self.multiclass:
             # binarize multiclass labels
             label_binarizer = LabelBinarizer(sparse_output=False)
-            binary_labels = label_binarizer.fit_transform(y).T
+            label_binarizer.fit(self.estimator.classes_)
+            binary_labels = label_binarizer.transform(y).T
 
             # split scores into k one vs rest splits
             score_splits = [calibration_scores[:, i] for i in range(calibration_scores.shape[1])]
