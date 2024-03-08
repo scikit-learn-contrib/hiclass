@@ -19,6 +19,7 @@ pip install pytest-flake8==1.1.1
 pip install pydocstyle==6.1.1
 pip install pytest-pydocstyle==2.3.0
 pip install pytest-cov==3.0.0
+pip install pyfakefs==5.3.5
 pip install black==22.10.0
 pip install pre-commit==2.20.0
 pip install -e .
