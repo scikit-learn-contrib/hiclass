@@ -31,7 +31,22 @@ REQUIRED = ["networkx", "numpy", "scikit-learn"]
 
 # What packages are optional?
 # 'fancy feature': ['django'],}
-EXTRAS = {"ray": ["ray>=1.11.0"], "xai": ["shap", "xarray"]}
+EXTRAS = {
+    "ray": ["ray>=1.11.0"],
+    "xai": ["shap", "xarray"],
+    "dev": [
+        "flake8==4.0.1",
+        "pytest==7.1.2",
+        "pytest-flake8==1.1.1",
+        "pydocstyle==6.1.1",
+        "pytest-pydocstyle==2.3.0",
+        "pytest-cov==3.0.0",
+        "pyfakefs==5.3.5",
+        "black==24.2.0",
+        "pre-commit==2.20.0",
+        "ray",
+    ],
+}
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
