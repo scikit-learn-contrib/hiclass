@@ -370,3 +370,6 @@ class HierarchicalClassifier(abc.ABC):
             filename = f"{self.tmp_dir}/{md5}.sav"
             with open(filename, "wb") as file:
                 pickle.dump((name, classifier), file)
+                self.logger_.info(
+                    f"Stored trained model for local classifier {str(name).split(self.separator_)[-1]} in file {filename}"
+                )

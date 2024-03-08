@@ -259,7 +259,11 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             filename = f"{self.tmp_dir}/{md5}.sav"
             if exists(filename):
                 (_, classifier) = pickle.load(open(filename, "rb"))
+                self.logger_.info(
+                    f"Loaded trained model for local classifier {level} from file {filename}"
+                )
                 return classifier
+        self.logger_.info(f"Training local classifier {level}")
         X, y, sample_weight = self._remove_empty_leaves(
             separator, self.X_, self.y_[:, level], self.sample_weight_
         )
