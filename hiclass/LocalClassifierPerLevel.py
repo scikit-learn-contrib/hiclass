@@ -3,6 +3,7 @@ Local classifier per level approach.
 
 Numeric and string output labels are both handled.
 """
+
 import hashlib
 import pickle
 from copy import deepcopy
