@@ -254,7 +254,9 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                     f"Loaded trained model for local classifier {node.split(self.separator_)[-1]} from file {filename}"
                 )
                 return classifier
-        self.logger_.info(f"Training local classifier {node}")
+        self.logger_.info(
+            f"Training local classifier {node.split(self.separator_)[-1]}"
+        )
         X, y, sample_weight = self.binary_policy_.get_binary_examples(node)
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:

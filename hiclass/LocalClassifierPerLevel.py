@@ -263,7 +263,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                     f"Loaded trained model for local classifier {level} from file {filename}"
                 )
                 return classifier
-        self.logger_.info(f"Training local classifier {level}")
+        self.logger_.info(
+            f"Training local classifier {level.split(self.separator_)[-1]}"
+        )
         X, y, sample_weight = self._remove_empty_leaves(
             separator, self.X_, self.y_[:, level], self.sample_weight_
         )

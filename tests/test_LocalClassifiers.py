@@ -127,7 +127,7 @@ def test_predict_multiple_dim_input(classifier):
 
 @pytest.mark.parametrize("classifier", classifiers)
 def test_tmp_dir(classifier):
-    clf = classifier(tmp_dir=".")
+    clf = classifier(tmp_dir=".", verbose=5)
     with Patcher() as patcher:
         x = np.array([[1, 2], [3, 4]])
         y = np.array([["a", "b"], ["c", "d"]])
@@ -143,3 +143,4 @@ def test_tmp_dir(classifier):
         assert expected_name == name
         check_is_fitted(classifier)
         clf.fit(x, y)
+        assert 1 == 0
