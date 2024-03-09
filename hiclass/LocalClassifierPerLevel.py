@@ -115,6 +115,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         """
         # Execute common methods necessary before fitting
         super()._pre_fit(X, y, sample_weight)
+        self.local_calibrators_ = None
 
         # Fit local classifiers in DAG
         super().fit(X, y)
@@ -192,7 +193,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         # Predict first level
         classifier = self.local_classifiers_[0]
-        calibrator = self.local_calibrators_[0]
+        calibrator = self.local_calibrators_[0] if self.local_calibrators_ else None
 
         # use classifier as a fallback if no calibrator is available
         calibrator = calibrator or classifier
