@@ -275,13 +275,19 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
     def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local classifiers")
+
+        def logging_wrapper(func, level, separator, max_level):
+            self.logger_.info(f"fitting level {level+1}/{max_level}")
+            return func(self, level, separator)
+
         if self.n_jobs > 1:
             if _has_ray and not use_joblib:
-                ray.init(
-                    num_cpus=self.n_jobs,
-                    local_mode=local_mode,
-                    ignore_reinit_error=True,
-                )
+                if not ray.is_initialized:
+                    ray.init(
+                        num_cpus=self.n_jobs,
+                        local_mode=local_mode,
+                        ignore_reinit_error=True,
+                    )
                 lcpl = ray.put(self)
                 _parallel_fit = ray.remote(self._fit_classifier)
                 results = [
@@ -291,12 +297,12 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                 classifiers = ray.get(results)
             else:
                 classifiers = Parallel(n_jobs=self.n_jobs)(
-                    delayed(self._fit_classifier)(self, level, self.separator_)
+                    delayed(logging_wrapper)(self._fit_classifier, level, self.separator_, len(self.local_classifiers_))
                     for level in range(len(self.local_classifiers_))
                 )
         else:
             classifiers = [
-                self._fit_classifier(self, level, self.separator_)
+                logging_wrapper(self._fit_classifier, level, self.separator_, len(self.local_classifiers_))
                 for level in range(len(self.local_classifiers_))
             ]
         for level, classifier in enumerate(classifiers):
@@ -304,14 +310,37 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     
     def _calibrate_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local calibrators")
+
+        def logging_wrapper(func, level, separator, max_level):
+            self.logger_.info(f"calibrating level {level+1}/{max_level}")
+            return func(self, level, separator)
+
         if self.n_jobs > 1:
-            # TODO
-            pass
+            if _has_ray and not use_joblib:
+                if not ray.is_initialized:
+                    ray.init(
+                        num_cpus=self.n_jobs,
+                        local_mode=local_mode,
+                        ignore_reinit_error=True,
+                    )
+                lcpl = ray.put(self)
+                _parallel_fit = ray.remote(self._fit_calibrator)
+                results = [
+                    _parallel_fit.remote(lcpl, level, self.separator_)
+                    for level in range(len(self.local_calibrators_))
+                ]
+                calibrators = ray.get(results)
+                
+            else:
+                calibrators = Parallel(n_jobs=self.n_jobs)(
+                    delayed(logging_wrapper)(self._fit_calibrator, level, self.separator_, len(self.local_calibrators_)) for level in range(len(self.local_calibrators_))
+                )  
         else:
             calibrators = [
-                self._fit_calibrator(self, level, self.separator_)
+                logging_wrapper(self._fit_calibrator, level, self.separator_, len(self.local_calibrators_))
                 for level in range(len(self.local_calibrators_))
             ]
+        
         for level, calibrator in enumerate(calibrators):
             self.local_calibrators_[level] = calibrator
         
