@@ -259,7 +259,8 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 mask = [True] * X.shape[0]
                 subset_x = X[mask]
             else:
-                mask = np.isin(y, predecessor).any(axis=1)
+                #mask = np.isin(y, predecessor).any(axis=1)
+                mask = np.isin(y, self.classes_[level-1]).any(axis=1)
                 subset_x = X[mask]
 
             if subset_x.shape[0] > 0:

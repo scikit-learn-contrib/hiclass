@@ -204,7 +204,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
                 cur_level_probabilities = np.zeros((X.shape[0], level_dimension))
 
                 for predecessor in predecessors:
-                    mask = np.isin(y[:, level - 1], predecessor)
+                    #mask = np.isin(y[:, level - 1], predecessor)
+                    mask = np.isin(y[:, level - 1], self.classes_[level-1])
                     predecessor_x = X[mask]
                     if predecessor_x.shape[0] > 0:
                         successors = list(self.hierarchy_.successors(predecessor))
@@ -223,6 +224,13 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
                                 cur_level_probabilities[mask, class_index] = proba[:, proba_index]
 
                 level_probability_list.append(cur_level_probabilities)
+        
+        # normalize probabilities
+        
+        for level_probabilities in level_probability_list:
+            level_probabilities /= level_probabilities.sum(axis=1, keepdims=True)
+        
+
         return level_probability_list
         
     def _predict_remaining_levels(self, X, y):

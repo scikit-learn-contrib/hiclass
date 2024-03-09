@@ -13,6 +13,7 @@ from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
+from hiclass._calibration.Calibrator import _Calibrator
 
 try:
     import ray
@@ -50,6 +51,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         n_jobs: int = 1,
         bert: bool = False,
         calibration_method: str = None,
+        return_all_probabilities: bool = False
     ):
         """
         Initialize a local classifier per level.
@@ -75,6 +77,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             If True, skip scikit-learn's checks and sample_weight passing for BERT.
         calibration_method : {"ivap", "cvap", "platt", "isotonic"}, str, default=None
             If set, use the desired method to calibrate probabilities returned by predict_proba().
+        return_all_probabilities : bool, default=False
+            If True, return probabilities for all levels. Otherwise, return only probabilities for the last level.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -86,6 +90,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             bert=bert,
             calibration_method=calibration_method,
         )
+        self.return_all_probabilities = return_all_probabilities
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -167,6 +172,49 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         self._remove_separator(y)
 
         return y
+    
+    def predict_proba(self, X):
+        # Check if fit has been called
+        check_is_fitted(self)
+
+        if not self.bert:
+            X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
+        else:
+            X = np.array(X)
+
+        if not self.calibration_method:
+            self.logger_.info("It is not recommended to use predict_proba() without calibration")
+
+        # Initialize array that holds predictions
+        y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
+
+        self.logger_.info("Predicting Probability")
+
+        # Predict first level
+        classifier = self.local_classifiers_[0]
+        calibrator = self.local_calibrators_[0]
+
+        # use classifier as a fallback if no calibrator is available
+        calibrator = calibrator or classifier
+        proba = calibrator.predict_proba(X)
+        y[:, 0] = calibrator.classes_[np.argmax(proba, axis=1)]
+
+        level_probability_list = [proba] + self._predict_proba_remaining_levels(X, y)
+
+        return level_probability_list if self.return_all_probabilities else level_probability_list[-1]
+
+    def _predict_proba_remaining_levels(self, X, y):
+        level_probability_list = []
+        for level in range(1, y.shape[1]):
+            classifier = self.local_classifiers_[level]
+            calibrator = self.local_calibrators_[level]
+            # use classifier as a fallback if no calibrator is available
+            calibrator = calibrator or classifier
+            probabilities = calibrator.predict_proba(X)
+            level_probability_list.append(probabilities)
+            # TODO: test with empty nodes, etc.
+        return level_probability_list
+
 
     def _predict_remaining_levels(self, X, y):
         for level in range(1, y.shape[1]):
@@ -217,6 +265,12 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             deepcopy(self.local_classifier_) for _ in range(self.y_.shape[1])
         ]
         self.masks_ = [None for _ in range(self.y_.shape[1])]
+    
+    def _initialize_local_calibrators(self):
+        super()._initialize_local_calibrators()
+        self.local_calibrators_ = [
+                _Calibrator(estimator=local_classifier, method=self.calibration_method) for local_classifier in self.local_classifiers_
+        ]
 
     def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local classifiers")
@@ -246,6 +300,20 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             ]
         for level, classifier in enumerate(classifiers):
             self.local_classifiers_[level] = classifier
+    
+    def _calibrate_digraph(self, local_mode: bool = False, use_joblib: bool = False):
+        self.logger_.info("Fitting local calibrators")
+        if self.n_jobs > 1:
+            # TODO
+            pass
+        else:
+            calibrators = [
+                self._fit_calibrator(self, level, self.separator_)
+                for level in range(len(self.local_calibrators_))
+            ]
+        for level, calibrator in enumerate(calibrators):
+            self.local_calibrators_[level] = calibrator
+        
 
     @staticmethod
     def _fit_classifier(self, level, separator):
@@ -266,6 +334,24 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         else:
             classifier.fit(X, y)
         return classifier
+
+    @staticmethod
+    def _fit_calibrator(self, level, separator):
+        try:
+            calibrator = self.local_calibrators_[level]
+        except:
+            self.logger_.info("no calibrator for " + "level: " + str(level))
+            return None
+        
+        X, y, _ = self._remove_empty_leaves(
+            separator, self.X_cal, self.y_cal[:, level], None
+        )
+        if len(y) == 0 or len(np.unique(y)) < 2:
+            self.logger_.info(f"No calibration samples to fit calibrator for level: {str(level)}")
+            return None
+
+        calibrator.fit(X, y)
+        return calibrator
 
     @staticmethod
     def _remove_empty_leaves(separator, X, y, sample_weight):
