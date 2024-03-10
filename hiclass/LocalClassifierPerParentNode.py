@@ -223,7 +223,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
                     f"Loaded trained model for local classifier {node.split(self.separator_)[-1]} from file {filename}"
                 )
                 return classifier
-        self.logger_.info(f"Training local classifier {node.split(self.separator_)[-1]}")
+        self.logger_.info(f"Training local classifier {str(node).split(self.separator_)[-1]}")
         # get children examples
         X, y, sample_weight = self._get_successors(node)
         unique_y = np.unique(y)
