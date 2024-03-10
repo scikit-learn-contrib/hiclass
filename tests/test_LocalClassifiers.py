@@ -142,6 +142,4 @@ def test_tmp_dir(classifier):
         (name, classifier) = pickle.load(open(filename, "rb"))
         assert expected_name == name
         check_is_fitted(classifier)
-        patcher.fs.remove("0cc175b9c0f1b6a831c399e269772661.sav")
-        patcher.fs.create_file("0cc175b9c0f1b6a831c399e269772661.sav")
         clf.fit(x, y)

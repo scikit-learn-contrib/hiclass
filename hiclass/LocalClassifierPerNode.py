@@ -255,7 +255,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                         f"Loaded trained model for local classifier {node.split(self.separator_)[-1]} from file {filename}"
                     )
                     return classifier
-                except:
+                except pickle.UnpicklingError:
                     self.logger_.warning(f"Could not load model from file {filename}")
         self.logger_.info(
             f"Training local classifier {str(node).split(self.separator_)[-1]}"

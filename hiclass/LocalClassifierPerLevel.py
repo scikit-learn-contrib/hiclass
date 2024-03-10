@@ -264,7 +264,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                         f"Loaded trained model for local classifier {level} from file {filename}"
                     )
                     return classifier
-                except:
+                except pickle.UnpicklingError:
                     self.logger_.warning(f"Could not load model from file {filename}")
         self.logger_.info(f"Training local classifier {level}")
         X, y, sample_weight = self._remove_empty_leaves(
