@@ -208,7 +208,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         level_probability_list = []
         for level in range(1, y.shape[1]):
             classifier = self.local_classifiers_[level]
-            calibrator = self.local_calibrators_[level]
+            calibrator = self.local_calibrators_[level] if self.local_calibrators_ else None
             # use classifier as a fallback if no calibrator is available
             calibrator = calibrator or classifier
             probabilities = calibrator.predict_proba(X)
