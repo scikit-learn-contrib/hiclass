@@ -42,7 +42,7 @@ class Explainer:
 
     def __init__(
         self,
-        hierarchical_model: HierarchicalClassifier,
+        hierarchical_model: HierarchicalClassifier.HierarchicalClassifier,
         data: None,
         n_jobs: int = 1,
         algorithm: str = "auto",
@@ -63,6 +63,32 @@ class Explainer:
             The algorithm to use for SHAP explainer. Possible values are 'linear', 'tree', 'auto', 'permutation'. or 'partition'
         mode : str, default=""
             The mode of the SHAP explainer. Can be 'tree', 'gradient', 'deep', 'linear', or '' for default SHAP explainer.
+
+        Examples
+        --------
+        >>> from sklearn.ensemble import RandomForestClassifier
+        >>> import numpy as np
+        >>> from hiclass import LocalClassifierPerParentNode, Explainer
+        >>> rfc = RandomForestClassifier()
+        >>> lcppn = LocalClassifierPerParentNode(local_classifier=rfc, replace_classifiers=False)
+        >>> x_train = np.array([[1, 3], [2, 5]])
+        >>> y_train = np.array([[1, 2], [3, 4]])
+        >>> x_test = np.array([[4, 6]])
+        >>> lcppn.fit(x_train, y_train)
+        >>> explainer = Explainer(lcppn, data=x_train, mode="tree")
+        >>> explanations = explainer.explain(x_test)
+        <xarray.Dataset>
+        Dimensions:          (class: 3, sample: 1, level: 2, feature: 2)
+        Coordinates:
+          * class            (class) <U1 '1' '3' '4'
+          * level            (level) int64 0 1
+        Dimensions without coordinates: sample, feature
+        Data variables:
+            node             (sample, level) <U13 'hiclass::root' '3'
+            predicted_class  (sample, level) <U24 '3' '3::HiClass::Separator::4'
+            predict_proba    (sample, level, class) float64 0.22 0.78 nan nan nan 1.0
+            classes          (sample, level, class) object '1' '3' nan nan nan '4'
+            shap_values      (level, class, sample, feature) float64 -0.1 -0.13 ... 0.0
         """
         self.hierarchical_model = hierarchical_model
         self.algorithm = algorithm
