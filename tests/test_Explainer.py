@@ -129,7 +129,6 @@ def test_traversal_path_lcpn(data, request):
     lcpn.fit(x_train, y_train)
     explainer = Explainer(lcpn, data=x_train, mode="tree")
     traversals = explainer._get_traversed_nodes(x_test)
-    print(traversals)
     preds = lcpn.predict(x_test)
     assert len(preds) == len(traversals)
     for i in range(len(x_test)):
@@ -148,7 +147,6 @@ def test_traversal_path_lcpl(data, request):
     lcpl.fit(x_train, y_train)
     explainer = Explainer(lcpl, data=x_train, mode="tree")
     traversals = explainer._get_traversed_nodes(x_test)
-    print(traversals)
     preds = lcpl.predict(x_test)
     assert len(preds) == len(traversals)
     for i in range(len(x_test)):
@@ -171,11 +169,11 @@ def test_explainer_tree_lcpl(data, request):
     explanations = explainer.explain(x_test)
     assert explanations is not None
     y_preds = lcpl.predict(x_test)
-    print(y_preds)
     for i in range(len(x_test)):
         y_pred = y_preds[i]
         explanation = explanations[i]
-        assert (
-            explanation[-1]["predicted_class"].data[0].split(lcpl.separator_)[-1]
-            == y_pred[-1]
-        )
+        for j in range(len(y_pred)):
+            assert (
+                explanation[j]["predicted_class"].data[0].split(lcpl.separator_)[-1]
+                == y_pred[j]
+            )
