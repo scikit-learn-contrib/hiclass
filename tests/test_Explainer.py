@@ -4,10 +4,8 @@ from sklearn.ensemble import RandomForestClassifier
 from hiclass import (
     LocalClassifierPerParentNode,
     LocalClassifierPerNode,
-    LocalClassifierPerLevel,
     Explainer,
 )
-import xarray
 
 try:
     import shap
@@ -15,6 +13,13 @@ except ImportError:
     shap_installed = False
 else:
     shap_installed = True
+
+try:
+    import xarray
+except ImportError:
+    xarray_installed = False
+else:
+    xarray_installed = True
 
 
 @pytest.fixture
@@ -46,6 +51,7 @@ def explainer_data_no_root():
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize(
     "data",
     [
@@ -75,6 +81,7 @@ def test_explainer_tree_lcpn(data, request):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 def test_explainer_tree_lcppn(data, request):
     rfc = RandomForestClassifier()
@@ -102,6 +109,7 @@ def test_explainer_tree_lcppn(data, request):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 def test_traversal_path_lcpn(data, request):
     x_train, x_test, y_train = request.getfixturevalue(data)
@@ -124,6 +132,7 @@ def test_traversal_path_lcpn(data, request):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 def test_traversal_path_lcppn(data, request):
     x_train, x_test, y_train = request.getfixturevalue(data)
