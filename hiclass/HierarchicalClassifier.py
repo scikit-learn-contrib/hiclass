@@ -12,6 +12,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import _check_sample_weight
 from sklearn.utils.validation import check_array, check_is_fitted
 
+from hiclass.probability_combiner import (
+    GeometricMeanCombiner,
+    ArithmeticMeanCombiner,
+    MultiplyCombiner
+)
+
 try:
     import ray
 except ImportError:
@@ -460,6 +466,14 @@ class HierarchicalClassifier(abc.ABC):
     @staticmethod
     def _fit_calibrator(self, node):
         raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
+    
+    def _create_probability_combiner(self, name):
+        if name == 'geometric':
+            return GeometricMeanCombiner(self)
+        elif name == 'arithmetic':
+            return ArithmeticMeanCombiner(self)
+        elif name == 'multiply':
+            return MultiplyCombiner(self)
 
     def _clean_up(self):
         self.logger_.info("Cleaning up variables that can take a lot of disk space")
@@ -477,3 +491,16 @@ class HierarchicalClassifier(abc.ABC):
             del self.y_cross_val
         if hasattr(self, 'X_cross_val'):
             del self.X_cross_val
+    
+    def _reorder_local_probabilities(self, probabilities, local_labels, level):
+        n_samples, n_labels = probabilities.shape[0], self.max_level_dimensions_[level]
+        sorted_probabilities = np.zeros(shape=(n_samples, n_labels))
+
+        for idx, label in enumerate(local_labels):
+            new_idx = self.class_to_index_mapping_[level][label]
+            sorted_probabilities[:, new_idx] = probabilities[:, idx]
+        
+        return sorted_probabilities
+
+
+

@@ -7,3 +7,9 @@ __all__ = [
     "ArithmeticMeanCombiner",
     "GeometricMeanCombiner",
 ]
+
+init_strings = [
+    "multiply",
+    "geometric",
+    "arithmetic",
+]

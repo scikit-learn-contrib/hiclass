@@ -15,6 +15,7 @@ from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
 from hiclass._calibration.Calibrator import _Calibrator
 
+from hiclass.probability_combiner import init_strings as probability_combiner_init_strings
 
 class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
     """
@@ -44,7 +45,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         n_jobs: int = 1,
         bert: bool = False,
         calibration_method: str = None,
-        return_all_probabilities: bool = False
+        return_all_probabilities: bool = False,
+        probability_combiner: str = "geometric"
     ):
         """
         Initialize a local classifier per parent node.
@@ -72,6 +74,12 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             If set, use the desired method to calibrate probabilities returned by predict_proba().
         return_all_probabilities : bool, default=False
             If True, return probabilities for all levels. Otherwise, return only probabilities for the last level.
+        probability_combiner: {"geometric", "arithmetic", "multiply"}, str, default="geometric"
+            Specify the rule for combining probabilities over multiple levels:
+
+            - `geometric`: Each levels probabilities are calculated by taking the geometric mean of itself and its predecessors;
+            - `arithmetic`: Each levels probabilities are calculated by taking the arithmetic mean of itself and its predecessors;
+            - `multiply`: Each levels probabilities are calculated by multiplying itself with its predecessors.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -84,6 +92,10 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             calibration_method=calibration_method,
         )
         self.return_all_probabilities = return_all_probabilities
+        self.probability_combiner = probability_combiner
+
+        if self.probability_combiner and self.probability_combiner not in probability_combiner_init_strings:
+            raise ValueError(f"probability_combiner must be one of {', '.join(probability_combiner_init_strings)} or None.")
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -192,44 +204,50 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
         y[:, 0] = calibrator.classes_[np.argmax(proba, axis=1)]
         level_probability_list = [proba] + self._predict_proba_remaining_levels(X, y)
-
+    
+        # combine probabilities
+        if self.probability_combiner:
+            probability_combiner_ = self._create_probability_combiner(self.probability_combiner)
+            self.logger_.info(f"Combining probabilities using {type(probability_combiner_).__name__}")
+            level_probability_list = probability_combiner_.combine(level_probability_list)
+        
         return level_probability_list if self.return_all_probabilities else level_probability_list[-1]
 
     def _predict_proba_remaining_levels(self, X, y):
         level_probability_list = []
         for level in range(1, y.shape[1]):
-                predecessors = set(y[:, level - 1])
-                predecessors.discard("")
-                level_dimension = self.max_level_dimensions_[level]
-                cur_level_probabilities = np.zeros((X.shape[0], level_dimension))
+            predecessors = set(y[:, level - 1])
+            predecessors.discard("")
+            level_dimension = self.max_level_dimensions_[level]
+            cur_level_probabilities = np.zeros((X.shape[0], level_dimension))
 
-                for predecessor in predecessors:
-                    #mask = np.isin(y[:, level - 1], predecessor)
-                    mask = np.isin(y[:, level - 1], self.classes_[level-1])
-                    predecessor_x = X[mask]
-                    if predecessor_x.shape[0] > 0:
-                        successors = list(self.hierarchy_.successors(predecessor))
-                        if len(successors) > 0:
-                            classifier = self.hierarchy_.nodes[predecessor]["classifier"]
-                            # use classifier as a fallback if no calibrator is available
-                            calibrator = self.hierarchy_.nodes[predecessor].get("calibrator", classifier) or classifier
+            for predecessor in predecessors:
+                #mask = np.isin(y[:, level - 1], predecessor)
+                mask = np.isin(y[:, level - 1], self.classes_[level-1])
+                predecessor_x = X[mask]
+                if predecessor_x.shape[0] > 0:
+                    successors = list(self.hierarchy_.successors(predecessor))
+                    if len(successors) > 0:
+                        classifier = self.hierarchy_.nodes[predecessor]["classifier"]
+                        # use classifier as a fallback if no calibrator is available
+                        calibrator = self.hierarchy_.nodes[predecessor].get("calibrator", classifier) or classifier
 
-                            proba = calibrator.predict_proba(predecessor_x)
-                            y[mask, level] = calibrator.classes_[np.argmax(proba, axis=1)]
+                        proba = calibrator.predict_proba(predecessor_x)
+                        y[mask, level] = calibrator.classes_[np.argmax(proba, axis=1)]
 
-                            for successor in successors:
-                                class_index = self.class_to_index_mapping_[level][str(successor)]
+                        for successor in successors:
+                            class_index = self.class_to_index_mapping_[level][str(successor)]
 
-                                proba_index = np.where(calibrator.classes_ == successor)[0][0]
-                                cur_level_probabilities[mask, class_index] = proba[:, proba_index]
+                            proba_index = np.where(calibrator.classes_ == successor)[0][0]
+                            cur_level_probabilities[mask, class_index] = proba[:, proba_index]
 
-                level_probability_list.append(cur_level_probabilities)
+            level_probability_list.append(cur_level_probabilities)
         
         # normalize probabilities
-        
-        for level_probabilities in level_probability_list:
-            level_probabilities /= level_probabilities.sum(axis=1, keepdims=True)
-        
+        level_probability_list = [
+            np.nan_to_num(level_probabilities / level_probabilities.sum(axis=1, keepdims=True)) 
+                for level_probabilities in level_probability_list
+        ]
 
         return level_probability_list
         
