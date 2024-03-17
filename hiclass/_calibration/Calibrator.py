@@ -47,7 +47,7 @@ class _Calibrator(BaseEstimator):
 
         if self.multiclass:
             # binarize multiclass labels
-            label_binarizer = LabelBinarizer(sparse_output=False)
+            label_binarizer = LabelBinarizer()
             label_binarizer.fit(self.estimator.classes_)
             binary_labels = label_binarizer.transform(y).T
 

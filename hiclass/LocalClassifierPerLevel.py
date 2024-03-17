@@ -400,8 +400,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             return None
 
         calibrator.fit(X, y)
-        print("calibrator classes:")
-        print(calibrator.classes_)
         return calibrator
 
     @staticmethod
