@@ -2,7 +2,7 @@
 
 import numpy as np
 from sklearn.utils import check_array
-from sklearn.metrics import log_loss
+from sklearn.metrics import log_loss as sk_log_loss
 from sklearn.preprocessing import LabelEncoder
 
 from hiclass.HierarchicalClassifier import make_leveled
@@ -277,6 +277,44 @@ def _prepare_data(classifier, y_true, y_prob, level, y_pred=None):
     
     return y_true, y_pred, new_labels, new_y_prob
 
+def _aggregate_scores(scores, agg):
+        if agg == 'average':
+            return np.mean(scores)
+        if agg == 'sum':
+            return np.sum(scores)
+        if agg == None or agg == 'None':
+            return scores
+
+def multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, agg='average'):
+    scores = []
+    for level in range(make_leveled(y_true).shape[1]):
+        scores.append(_multiclass_brier_score(classifier, y_true, y_prob, level))
+    return _aggregate_scores(scores, agg)
+
+def log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, agg='average'):
+    scores = []
+    for level in range(make_leveled(y_true).shape[1]):
+        scores.append(_log_loss(classifier, y_true, y_prob, level))
+    return _aggregate_scores(scores, agg)
+
+def expected_calibration_error(classifier: HierarchicalClassifier, y_true, y_prob, y_pred, n_bins=10, agg='average'):
+    scores = []
+    for level in range(make_leveled(y_true).shape[1]):
+        scores.append(_expected_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins))
+    return _aggregate_scores(scores, agg)
+
+def statistical_calibration_error(classifier, y_true, y_prob, y_pred, n_bins=10, agg='average'):
+    scores = []
+    for level in range(make_leveled(y_true).shape[1]):
+        scores.append(_statistical_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins=n_bins))
+    return _aggregate_scores(scores, agg)
+
+def adaptive_calibration_error(classifier, y_true, y_prob, y_pred, n_ranges=3, agg='average'):
+    scores = []
+    for level in range(make_leveled(y_true).shape[1]):
+        scores.append(_adaptive_calibration_error(classifier, y_true, y_prob, y_pred, level, n_ranges=n_ranges))
+    return _aggregate_scores(scores, agg)
+
 def _multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, level: int):
     y_true, _, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level)
     label_encoder = LabelEncoder()
@@ -286,7 +324,7 @@ def _multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarr
 
 def _log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, level: int):
     y_true, _, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level)
-    return log_loss(y_true, y_prob, labels=labels)
+    return sk_log_loss(y_true, y_prob, labels=labels)
 
 def _expected_calibration_error(classifier: HierarchicalClassifier, y_true, y_prob, y_pred, level, n_bins=10):
     y_true, y_pred, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level, y_pred)
