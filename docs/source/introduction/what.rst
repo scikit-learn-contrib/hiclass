@@ -7,3 +7,5 @@ Implemented models include the local classifiers per node, per parent node and p
 HiClass is released under the simplified `BSD 3-Clause license <https://opensource.org/licenses/BSD-3-Clause>`_.
 
 For the source code, please take a look at the repository on `Github <https://github.com/scikit-learn-contrib/hiclass>`_.
+
+Testing automatic building the documentation
