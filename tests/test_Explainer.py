@@ -200,6 +200,6 @@ def test_explainers(data, request, classifier, mode):
         "gradient": shap.GradientExplainer,
         "deep": shap.DeepExplainer,
         "tree": shap.TreeExplainer,
-        "": shap.Explainer
+        "": shap.Explainer,
     }
     assert explainer.explainer == mode_mapping[mode]
