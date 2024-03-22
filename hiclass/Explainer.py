@@ -26,17 +26,6 @@ else:
     shap_installed = True
 
 
-def _check_imports():
-    if not shap_installed:
-        raise ImportError(
-            "Shap is not installed. Please install it using `pip install shap` first."
-        )
-    elif not xarray_installed:
-        raise ImportError(
-            "xarray is not installed. Please install it using `pip install xarray` first."
-        )
-
-
 class Explainer:
     """Explainer class for returning shap values for each of the three hierarchical classifiers."""
 
@@ -93,23 +82,20 @@ class Explainer:
         self.hierarchical_model = hierarchical_model
         self.algorithm = algorithm
         self.mode = mode
-        self.data = data
+        self.data = np.array(data)
         self.n_jobs = n_jobs
-
-        # Check if imports are already installed
-        _check_imports()
 
         # Check if hierarchical model is fitted
         check_is_fitted(self.hierarchical_model)
 
-        if mode == "tree":
-            self.explainer = shap.TreeExplainer
+        if mode == "linear":
+            self.explainer = shap.LinearExplainer
         elif mode == "gradient":
             self.explainer = shap.GradientExplainer
         elif mode == "deep":
             self.explainer = shap.DeepExplainer
-        elif mode == "linear":
-            self.explainer = shap.LinearExplainer
+        elif mode == "tree":
+            self.explainer = shap.TreeExplainer
         else:
             self.explainer = shap.Explainer
 
@@ -216,9 +202,6 @@ class Explainer:
                 traversals.append(traversal_order)
             return traversals
 
-        elif isinstance(self.hierarchical_model, LocalClassifierPerLevel):
-            raise NotImplementedError("To be implemented.")
-
     def _calculate_shap_values(self, X):
         """
         Return an xarray.Dataset object for a single sample provided. This dataset is aligned on the `level` attribute.
@@ -253,7 +236,7 @@ class Explainer:
 
             if len(shap_values.shape) < 3:
                 shap_values = shap_values.reshape(
-                    1, shap_values.shape[0], shap_values.shape[1]
+                    shap_values.shape[0], shap_values.shape[1], 1
                 )
 
             if isinstance(self.hierarchical_model, LocalClassifierPerNode):
@@ -277,12 +260,14 @@ class Explainer:
 
             shap_val_local = xr.DataArray(
                 shap_values,
-                dims=["class", "sample", "feature"],
+                dims=["sample", "feature", "class"],
                 coords={"class": simplified_labels},
             )
 
+            prediction_probability = local_classifier.predict_proba(X)[0]
+
             predict_proba = xr.DataArray(
-                local_classifier.predict_proba(X)[0],
+                prediction_probability,
                 dims=["class"],
                 coords={
                     "class": simplified_labels,

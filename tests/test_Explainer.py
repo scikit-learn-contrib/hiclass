@@ -4,6 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from hiclass import (
     LocalClassifierPerParentNode,
     LocalClassifierPerNode,
+    LocalClassifierPerLevel,
     Explainer,
 )
 
@@ -152,3 +153,53 @@ def test_traversal_path_lcppn(data, request):
                 continue
             label = traversals[i][j].split(lcppn.separator_)[-1]
             assert label == preds[i][j - 1]
+
+
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
+@pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
+@pytest.mark.parametrize("classifier", [LocalClassifierPerNode])
+def test_explain_with_xr(data, request, classifier):
+    x_train, x_test, y_train = request.getfixturevalue(data)
+    rfc = RandomForestClassifier()
+    clf = classifier(local_classifier=rfc, replace_classifiers=False)
+
+    clf.fit(x_train, y_train)
+    explainer = Explainer(clf, data=x_train, mode="tree")
+    explanations = explainer._explain_with_xr(x_test)
+
+    # Assert if explainer returns an xarray.Dataset object
+    assert isinstance(explanations, xarray.Dataset)
+
+
+@pytest.mark.parametrize("classifier", [LocalClassifierPerNode])
+def test_imports(classifier):
+    x_train = [[76, 12, 49], [88, 63, 31], [5, 42, 24], [17, 90, 55]]
+    y_train = [["a", "b", "d"], ["a", "b", "e"], ["a", "c", "f"], ["a", "c", "g"]]
+
+    rfc = RandomForestClassifier()
+    clf = classifier(local_classifier=rfc, replace_classifiers=False)
+    clf.fit(x_train, y_train)
+
+    explainer = Explainer(clf, data=x_train, mode="tree")
+    assert isinstance(explainer.data, np.ndarray)
+
+
+@pytest.mark.parametrize("classifier", [LocalClassifierPerNode])
+@pytest.mark.parametrize("data", ["explainer_data"])
+@pytest.mark.parametrize("mode", ["linear", "gradient", "deep", "tree", ""])
+def test_explainers(data, request, classifier, mode):
+    x_train, x_test, y_train = request.getfixturevalue(data)
+    rfc = RandomForestClassifier()
+    clf = classifier(local_classifier=rfc, replace_classifiers=False)
+
+    clf.fit(x_train, y_train)
+    explainer = Explainer(clf, data=x_train, mode=mode)
+    mode_mapping = {
+        "linear": shap.LinearExplainer,
+        "gradient": shap.GradientExplainer,
+        "deep": shap.DeepExplainer,
+        "tree": shap.TreeExplainer,
+        "": shap.Explainer
+    }
+    assert explainer.explainer == mode_mapping[mode]
