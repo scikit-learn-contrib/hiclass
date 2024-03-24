@@ -214,7 +214,7 @@ class Explainer:
 
             if len(shap_values.shape) < 3:
                 shap_values = shap_values.reshape(
-                    shap_values.shape[0], shap_values.shape[1], 1
+                    1, shap_values.shape[0], shap_values.shape[1]
                 )
 
             if isinstance(self.hierarchical_model, LocalClassifierPerNode):
@@ -238,7 +238,7 @@ class Explainer:
 
             shap_val_local = xr.DataArray(
                 shap_values,
-                dims=["sample", "feature", "class"],
+                dims=["class", "sample", "feature"],
                 coords={"class": simplified_labels},
             )
 
