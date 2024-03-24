@@ -11,6 +11,7 @@ from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 
 from hiclass import LocalClassifierPerNode
+
 from hiclass.BinaryPolicy import ExclusivePolicy
 
 

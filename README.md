@@ -199,6 +199,38 @@ pipeline.fit(X_train, Y_train)
 predictions = pipeline.predict(X_test)
 ```
 
+## Explaining Hierarchical Classifiers
+Hierarchical classifiers can provide additional insights when combined with explainability methods such as SHAP values. Below is a simple example to demonstrate how to calculate hierarchical SHAP values:
+```python
+from hiclass import LocalClassifierPerParentNode, Explainer
+from sklearn.ensemble import RandomForestClassifier
+import numpy as np
+
+# Define data
+X_train = np.array([[1], [2], [3], [4]])
+X_test = np.array([[4], [3], [2], [1]])
+Y_train = np.array([
+    ['Animal', 'Mammal', 'Sheep'],
+    ['Animal', 'Mammal', 'Cow'],
+    ['Animal', 'Reptile', 'Snake'],
+    ['Animal', 'Reptile', 'Lizard'],
+])
+
+# Use random forest classifiers for every node
+rf = RandomForestClassifier()
+classifier = LocalClassifierPerParentNode(local_classifier=rf, replace_classifiers=False)
+
+# Train local classifier per node
+classifier.fit(X_train, Y_train)
+
+# Predict
+predictions = classifier.predict(X_test)
+
+# Explain
+explainer = Explainer(classifier, data=X_train, mode="tree")
+explanations = explainer.explain(X_test)
+```
+
 ## Step-by-step walk-through
 
 A step-by-step walk-through is available on our documentation hosted on [Read the Docs](https://hiclass.readthedocs.io/en/latest/index.html).
