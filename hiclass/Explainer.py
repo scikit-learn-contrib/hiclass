@@ -162,26 +162,33 @@ class Explainer:
         """
         # Helper function to return traversed nodes
         if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
-            traversals = []
-            start_node = self.hierarchical_model.root_
-            for x in samples:
-                current = start_node
-                traversal_order = []
-                while self.hierarchical_model.hierarchy_.neighbors(current):
-                    if (
-                        "classifier"
-                        not in self.hierarchical_model.hierarchy_.nodes[current]
-                    ):
-                        break  # Break if reached leaf node
-                    traversal_order.append(current)
-                    # Get the next node to be traversed
-                    successor = (
-                        self.hierarchical_model.hierarchy_.nodes[current]["classifier"]
-                        .predict(x.reshape(1, -1))
-                        .flatten()[0]
-                    )
-                    current = successor
-                traversals.append(traversal_order)
+            # Initialize array with shape (#samples, #levels)
+            traversals = np.empty(
+                (samples.shape[0], self.hierarchical_model.max_levels_),
+                dtype=self.hierarchical_model.dtype_,
+            )
+
+            # Initialize first element as root node
+            traversals[:, 0] = self.hierarchical_model.root_
+
+            # For subsequent nodes, calculate mask and find predictions
+            for level in range(1, traversals.shape[1]):
+                predecessors = set(traversals[:, level - 1])
+                predecessors.discard("")
+                for predecessor in predecessors:
+                    mask = np.isin(traversals[:, level - 1], predecessor)
+                    predecessor_x = samples[mask]
+                    if predecessor_x.shape[0] > 0:
+                        successors = list(
+                            self.hierarchical_model.hierarchy_.successors(predecessor)
+                        )
+                        if len(successors) > 0:
+                            classifier = self.hierarchical_model.hierarchy_.nodes[
+                                predecessor
+                            ]["classifier"]
+                            traversals[mask, level] = classifier.predict(
+                                predecessor_x
+                            ).flatten()
             return traversals
 
     def _calculate_shap_values(self, X):
