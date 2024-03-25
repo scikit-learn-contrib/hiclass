@@ -161,22 +161,26 @@ class Explainer:
             A list of all traversed nodes.
         """
         # Helper function to return traversed nodes
-        if isinstance(self.hierarchical_model, LocalClassifierPerNode):
+        if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
             traversals = []
-            predictions = self.hierarchical_model.predict(samples)
-            for pred in predictions:
+            start_node = self.hierarchical_model.root_
+            for x in samples:
+                current = start_node
                 traversal_order = []
-                for i in range(len(pred)):
-                    if i == 0:
-                        traversal_order.append(pred[i])
-                    else:
-                        node = (
-                            str(traversal_order[i - 1])
-                            + self.hierarchical_model.separator_
-                            + str(pred[i])
-                        )
-                        if node in self.hierarchical_model.hierarchy_.nodes:
-                            traversal_order.append(node)
+                while self.hierarchical_model.hierarchy_.neighbors(current):
+                    if (
+                        "classifier"
+                        not in self.hierarchical_model.hierarchy_.nodes[current]
+                    ):
+                        break  # Break if reached leaf node
+                    traversal_order.append(current)
+                    # Get the next node to be traversed
+                    successor = (
+                        self.hierarchical_model.hierarchy_.nodes[current]["classifier"]
+                        .predict(x.reshape(1, -1))
+                        .flatten()[0]
+                    )
+                    current = successor
                 traversals.append(traversal_order)
             return traversals
 

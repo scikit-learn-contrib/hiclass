@@ -4,12 +4,12 @@
 Explaining Local Classifier Per Node
 =========================================
 
-A minimalist example showing how to use HiClass Explainer to obtain SHAP values of LCPN model.
+A minimalist example showing how to use HiClass Explainer to obtain SHAP values of LCPPN model.
 A detailed summary of the Explainer class has been given at Algorithms Overview Section for :ref:`Hierarchical Explainability`.
 """
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from hiclass import LocalClassifierPerNode, Explainer
+from hiclass import LocalClassifierPerParentNode, Explainer
 
 # Define data
 X_train = np.array(
@@ -32,7 +32,9 @@ Y_train = np.array(
 
 # Use random forest classifiers for every node
 rfc = RandomForestClassifier()
-classifier = LocalClassifierPerNode(local_classifier=rfc, replace_classifiers=False)
+classifier = LocalClassifierPerParentNode(
+    local_classifier=rfc, replace_classifiers=False
+)
 
 # Train local classifier per node
 classifier.fit(X_train, Y_train)
