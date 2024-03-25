@@ -7,11 +7,9 @@ from numpy.testing import assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
 from hiclass import LocalClassifierPerLevel
-from hiclass.Explainer import Explainer
 
 
 @parametrize_with_checks([LocalClassifierPerLevel()])

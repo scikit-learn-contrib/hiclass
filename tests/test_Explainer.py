@@ -2,9 +2,7 @@ import numpy as np
 import pytest
 from sklearn.ensemble import RandomForestClassifier
 from hiclass import (
-    LocalClassifierPerParentNode,
     LocalClassifierPerNode,
-    LocalClassifierPerLevel,
     Explainer,
 )
 
@@ -15,19 +13,16 @@ except ImportError:
 else:
     shap_installed = True
 
-classifiers = [
-    LocalClassifierPerLevel,
-    LocalClassifierPerParentNode,
-    LocalClassifierPerNode,
-]
-
-
-# TODO : Parametrize tests for remaining classifiers
+try:
+    import xarray
+except ImportError:
+    xarray_installed = False
+else:
+    xarray_installed = True
 
 
 @pytest.fixture
 def explainer_data():
-    np.random.seed(42)
     x_train = np.random.randn(4, 3)
     y_train = np.array(
         [["a", "b", "d"], ["a", "b", "e"], ["a", "c", "f"], ["a", "c", "g"]]
@@ -55,48 +50,103 @@ def explainer_data_no_root():
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
-@pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
-def test_explainer_tree(data, request):
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
+@pytest.mark.parametrize(
+    "data",
+    [
+        "explainer_data",
+    ],
+)
+def test_explainer_tree_lcpn(data, request):
     rfc = RandomForestClassifier()
-    lcppn = LocalClassifierPerParentNode(
-        local_classifier=rfc, replace_classifiers=False
-    )
+    lcpn = LocalClassifierPerNode(local_classifier=rfc, replace_classifiers=False)
 
     x_train, x_test, y_train = request.getfixturevalue(data)
 
-    lcppn.fit(x_train, y_train)
+    lcpn.fit(x_train, y_train)
 
-    explainer = Explainer(lcppn, data=x_train, mode="tree")
+    explainer = Explainer(lcpn, data=x_train, mode="tree")
     explanations = explainer.explain(x_test)
-    assert explanations is not None
-    y_preds = lcppn.predict(x_test)
+
+    # Assert if explainer returns an xarray.Dataset object
+    assert isinstance(explanations, xarray.Dataset)
+    y_preds = lcpn.predict(x_test)
+
+    # Assert if predictions made are consistent with the explanation object
     for i in range(len(x_test)):
         y_pred = y_preds[i]
-        explanation = explanations[i]
         for j in range(len(y_pred)):
-            assert (
-                explanation[j]["predicted_class"].data[0].split(lcppn.separator_)[-1]
-                == y_pred[j]
-            )
+            assert str(explanations["node"][i].data[j]) == y_pred[j]
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
-def test_traversal_path(data, request):
+def test_traversal_path_lcpn(data, request):
     x_train, x_test, y_train = request.getfixturevalue(data)
     rfc = RandomForestClassifier()
-    lcppn = LocalClassifierPerParentNode(
-        local_classifier=rfc, replace_classifiers=False
-    )
+    lcpn = LocalClassifierPerNode(local_classifier=rfc, replace_classifiers=False)
 
-    lcppn.fit(x_train, y_train)
-    explainer = Explainer(lcppn, data=x_train, mode="tree")
+    lcpn.fit(x_train, y_train)
+    explainer = Explainer(lcpn, data=x_train, mode="tree")
     traversals = explainer._get_traversed_nodes(x_test)
-    preds = lcppn.predict(x_test)
+    preds = lcpn.predict(x_test)
+
+    # Assert if predictions and traversals are of same length
     assert len(preds) == len(traversals)
+
+    # Assert if traversal path in predictions is same as the computed traversal path
     for i in range(len(x_test)):
         for j in range(len(traversals[i])):
-            if traversals[i][j] == lcppn.root_:
-                continue
-            label = traversals[i][j].split("::HiClass::Separator::")[-1]
-            assert label == preds[i][j - 1]
+            label = traversals[i][j].split(lcpn.separator_)[-1]
+            assert label == preds[i][j]
+
+
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
+@pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
+@pytest.mark.parametrize("classifier", [LocalClassifierPerNode])
+def test_explain_with_xr(data, request, classifier):
+    x_train, x_test, y_train = request.getfixturevalue(data)
+    rfc = RandomForestClassifier()
+    clf = classifier(local_classifier=rfc, replace_classifiers=False)
+
+    clf.fit(x_train, y_train)
+    explainer = Explainer(clf, data=x_train, mode="tree")
+    explanations = explainer._explain_with_xr(x_test)
+
+    # Assert if explainer returns an xarray.Dataset object
+    assert isinstance(explanations, xarray.Dataset)
+
+
+@pytest.mark.parametrize("classifier", [LocalClassifierPerNode])
+def test_imports(classifier):
+    x_train = [[76, 12, 49], [88, 63, 31], [5, 42, 24], [17, 90, 55]]
+    y_train = [["a", "b", "d"], ["a", "b", "e"], ["a", "c", "f"], ["a", "c", "g"]]
+
+    rfc = RandomForestClassifier()
+    clf = classifier(local_classifier=rfc, replace_classifiers=False)
+    clf.fit(x_train, y_train)
+
+    explainer = Explainer(clf, data=x_train, mode="tree")
+    assert isinstance(explainer.data, np.ndarray)
+
+
+@pytest.mark.parametrize("classifier", [LocalClassifierPerNode])
+@pytest.mark.parametrize("data", ["explainer_data"])
+@pytest.mark.parametrize("mode", ["linear", "gradient", "deep", "tree", ""])
+def test_explainers(data, request, classifier, mode):
+    x_train, x_test, y_train = request.getfixturevalue(data)
+    rfc = RandomForestClassifier()
+    clf = classifier(local_classifier=rfc, replace_classifiers=False)
+
+    clf.fit(x_train, y_train)
+    explainer = Explainer(clf, data=x_train, mode=mode)
+    mode_mapping = {
+        "linear": shap.LinearExplainer,
+        "gradient": shap.GradientExplainer,
+        "deep": shap.DeepExplainer,
+        "tree": shap.TreeExplainer,
+        "": shap.Explainer,
+    }
+    assert explainer.explainer == mode_mapping[mode]

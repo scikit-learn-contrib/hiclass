@@ -4,7 +4,10 @@ Local classifier per parent node approach.
 Numeric and string output labels are both handled.
 """
 
+import hashlib
+import pickle
 from copy import deepcopy
+from os.path import exists
 
 import networkx as nx
 import numpy as np
@@ -42,6 +45,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         replace_classifiers: bool = True,
         n_jobs: int = 1,
         bert: bool = False,
+        tmp_dir: str = None,
     ):
         """
         Initialize a local classifier per parent node.
@@ -65,6 +69,9 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
         bert : bool, default=False
             If True, skip scikit-learn's checks and sample_weight passing for BERT.
+        tmp_dir : str, default=None
+            Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
+            it will skip the pre-trained local classifier found in the temporary directory.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -74,6 +81,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             n_jobs=n_jobs,
             classifier_abbreviation="LCPPN",
             bert=bert,
+            tmp_dir=tmp_dir,
         )
 
     def fit(self, X, y, sample_weight=None):
@@ -206,6 +214,16 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
     @staticmethod
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
+        if self.tmp_dir:
+            md5 = hashlib.md5(node.encode("utf-8")).hexdigest()
+            filename = f"{self.tmp_dir}/{md5}.sav"
+            if exists(filename):
+                (_, classifier) = pickle.load(open(filename, "rb"))
+                self.logger_.info(
+                    f"Loaded trained model for local classifier {node.split(self.separator_)[-1]} from file {filename}"
+                )
+                return classifier
+        self.logger_.info(f"Training local classifier {node}")
         # get children examples
         X, y, sample_weight = self._get_successors(node)
         unique_y = np.unique(y)
@@ -218,6 +236,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
                 classifier.fit(X, y)
         else:
             classifier.fit(X, y)
+        self._save_tmp(node, classifier)
         return classifier
 
     def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
