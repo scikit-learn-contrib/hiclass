@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-=========================================
+============================================
 Explaining Local Classifier Per Parent Node
-=========================================
+============================================
 
 A minimalist example showing how to use HiClass Explainer to obtain SHAP values of LCPPN model.
 A detailed summary of the Explainer class has been given at Algorithms Overview Section for :ref:`Hierarchical Explainability`.
