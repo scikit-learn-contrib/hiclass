@@ -10,4 +10,4 @@ ray==1.13.0
 numpy
 git+https://github.com/charles9n/bert-sklearn.git@master
 shap==0.44.1
-xarray
+xarray==2023.1.0
