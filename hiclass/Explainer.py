@@ -243,7 +243,11 @@ class Explainer:
                     label.split(self.hierarchical_model.separator_)[-1]
                     for label in local_classifier.classes_
                 ]
-                predicted_class = local_classifier.predict(X).flatten()[0]
+                predicted_class = (
+                    local_classifier.predict(X)
+                    .flatten()[0]
+                    .split(self.hierarchical_model.separator_)[-1]
+                )
 
             classes = xr.DataArray(
                 simplified_labels,

@@ -72,7 +72,6 @@ def test_explainer_tree_lcppn(data, request):
     for i in range(len(x_test)):
         y_pred = y_preds[i]
         explanation = explanations["predicted_class"][i]
-        print(explanation)
         for j in range(len(y_pred)):
             assert explanation.data[j].split(lcppn.separator_)[-1] == y_pred[j]
 
