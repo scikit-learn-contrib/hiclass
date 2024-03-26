@@ -34,6 +34,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - **[Hierarchical metrics](https://hiclass.readthedocs.io/en/latest/api/utilities.html#hierarchical-metrics):** HiClass supports the computation of hierarchical precision, recall and f-score, which are more appropriate for hierarchical data than traditional metrics.
 - **[Compatible with pickle](https://hiclass.readthedocs.io/en/latest/auto_examples/plot_model_persistence.html):** Easily store trained models on disk for future use.
 - **[BERT sklearn](https://hiclass.readthedocs.io/en/latest/auto_examples/plot_bert.html):** Compatible with the library [BERT sklearn](https://github.com/charles9n/bert-sklearn).
+- **[Hierarchical Explanability]():**  HiClass allows explaining hierarchical models using the [SHAP](https://github.com/shap/shap) package.
 
 **Any feature missing on this list?** Search our [issue tracker](https://github.com/scikit-learn-contrib/hiclass/issues) to see if someone has already requested it and add a comment to it explaining your use-case. Otherwise, please open a new issue describing the requested feature and possible use-case scenario. We prioritize our roadmap based on user feedback, so we would love to hear from you.
 
@@ -113,7 +114,7 @@ pip install hiclass"[<extra_name>]"
 Replace <extra_name> with one of the following options:
 
 - ray: Installs the ray package, which is required for parallel processing support.
-- xai: Installs the shap and xarray packages, which are required for explaining Hiclass predictions.
+- xai: Installs the shap and xarray packages, which are required for explaining Hiclass' predictions.
 
 ### Option 2: Conda
 
@@ -200,36 +201,7 @@ predictions = pipeline.predict(X_test)
 ```
 
 ## Explaining Hierarchical Classifiers
-Hierarchical classifiers can provide additional insights when combined with explainability methods such as SHAP values. Below is a simple example to demonstrate how to calculate hierarchical SHAP values:
-```python
-from hiclass import LocalClassifierPerParentNode, Explainer
-from sklearn.ensemble import RandomForestClassifier
-import numpy as np
-
-# Define data
-X_train = np.array([[1], [2], [3], [4]])
-X_test = np.array([[4], [3], [2], [1]])
-Y_train = np.array([
-    ['Animal', 'Mammal', 'Sheep'],
-    ['Animal', 'Mammal', 'Cow'],
-    ['Animal', 'Reptile', 'Snake'],
-    ['Animal', 'Reptile', 'Lizard'],
-])
-
-# Use random forest classifiers for every node
-rf = RandomForestClassifier()
-classifier = LocalClassifierPerParentNode(local_classifier=rf, replace_classifiers=False)
-
-# Train local classifier per node
-classifier.fit(X_train, Y_train)
-
-# Predict
-predictions = classifier.predict(X_test)
-
-# Explain
-explainer = Explainer(classifier, data=X_train, mode="tree")
-explanations = explainer.explain(X_test)
-```
+Hierarchical classifiers can provide additional insights when combined with explainability methods. HiClass allows explaining hierarchical models using SHAP values. Different hierarchical models yield different insights. More information on explaining [Local classifier per parent node](https://colab.research.google.com/drive/1rVlYuRU_uO1jw5sD6qo2HoCpCz6E6z5J?usp=sharing), [Local classifier per node](), and [Local classifier per level]() is available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/algorithms/explainer.html).
 
 ## Step-by-step walk-through
 
