@@ -74,10 +74,10 @@ class Explainer:
         Dimensions without coordinates: sample, feature
         Data variables:
             node             (sample, level) <U13 'hiclass::root' '3'
-            predicted_class  (sample, level) <U24 '3' '3::HiClass::Separator::4'
-            predict_proba    (sample, level, class) float64 0.22 0.78 nan nan nan 1.0
+            predicted_class  (sample, level) <U1 '3' '4'
+            predict_proba    (sample, level, class) float64 0.29 0.71 nan nan nan 1.0
             classes          (sample, level, class) object '1' '3' nan nan nan '4'
-            shap_values      (level, class, sample, feature) float64 -0.1 -0.13 ... 0.0
+            shap_values      (level, class, sample, feature) float64 -0.135 ... 0.0
         """
         self.hierarchical_model = hierarchical_model
         self.algorithm = algorithm
@@ -146,9 +146,9 @@ class Explainer:
         dataset = xr.concat(explanations, dim="sample")
         return dataset
 
-    def _get_traversed_nodes(self, samples):
+    def _get_traversed_nodes_lcppn(self, samples):
         """
-        Return a list of all traversed nodes as per the provided HiClass model.
+        Return a list of all traversed nodes as per the provided LocalClassifierPerParentNode model.
 
         Parameters
         ----------
@@ -158,38 +158,36 @@ class Explainer:
         Returns
         -------
         traversals : list
-            A list of all traversed nodes.
+            A list of all traversed nodes as per LocalClassifierPerParentNode (LCPPN) strategy.
         """
-        # Helper function to return traversed nodes
-        if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
-            # Initialize array with shape (#samples, #levels)
-            traversals = np.empty(
-                (samples.shape[0], self.hierarchical_model.max_levels_),
-                dtype=self.hierarchical_model.dtype_,
-            )
+        # Initialize array with shape (#samples, #levels)
+        traversals = np.empty(
+            (samples.shape[0], self.hierarchical_model.max_levels_),
+            dtype=self.hierarchical_model.dtype_,
+        )
 
-            # Initialize first element as root node
-            traversals[:, 0] = self.hierarchical_model.root_
+        # Initialize first element as root node
+        traversals[:, 0] = self.hierarchical_model.root_
 
-            # For subsequent nodes, calculate mask and find predictions
-            for level in range(1, traversals.shape[1]):
-                predecessors = set(traversals[:, level - 1])
-                predecessors.discard("")
-                for predecessor in predecessors:
-                    mask = np.isin(traversals[:, level - 1], predecessor)
-                    predecessor_x = samples[mask]
-                    if predecessor_x.shape[0] > 0:
-                        successors = list(
-                            self.hierarchical_model.hierarchy_.successors(predecessor)
-                        )
-                        if len(successors) > 0:
-                            classifier = self.hierarchical_model.hierarchy_.nodes[
-                                predecessor
-                            ]["classifier"]
-                            traversals[mask, level] = classifier.predict(
-                                predecessor_x
-                            ).flatten()
-            return traversals
+        # For subsequent nodes, calculate mask and find predictions
+        for level in range(1, traversals.shape[1]):
+            predecessors = set(traversals[:, level - 1])
+            predecessors.discard("")
+            for predecessor in predecessors:
+                mask = np.isin(traversals[:, level - 1], predecessor)
+                predecessor_x = samples[mask]
+                if predecessor_x.shape[0] > 0:
+                    successors = list(
+                        self.hierarchical_model.hierarchy_.successors(predecessor)
+                    )
+                    if len(successors) > 0:
+                        classifier = self.hierarchical_model.hierarchy_.nodes[
+                            predecessor
+                        ]["classifier"]
+                        traversals[mask, level] = classifier.predict(
+                            predecessor_x
+                        ).flatten()
+        return traversals
 
     def _calculate_shap_values(self, X):
         """
@@ -205,7 +203,9 @@ class Explainer:
         explanation : xarray.Dataset
             A single explanation for the prediction of given sample.
         """
-        traversed_nodes = self._get_traversed_nodes(X)[0]
+        traversed_nodes = []
+        if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
+            traversed_nodes = self._get_traversed_nodes_lcppn(X)[0]
         datasets = []
         level = 0
         for node in traversed_nodes:

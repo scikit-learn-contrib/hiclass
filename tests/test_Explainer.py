@@ -87,7 +87,7 @@ def test_traversal_path_lcppn(data, request):
 
     lcppn.fit(x_train, y_train)
     explainer = Explainer(lcppn, data=x_train, mode="tree")
-    traversals = explainer._get_traversed_nodes(x_test)
+    traversals = explainer._get_traversed_nodes_lcppn(x_test)
     preds = lcppn.predict(x_test)
     assert len(preds) == len(traversals)
     for i in range(len(x_test)):
