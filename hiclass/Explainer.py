@@ -88,6 +88,12 @@ class Explainer:
         # Check if hierarchical model is fitted
         check_is_fitted(self.hierarchical_model)
 
+        # Check if shap installef
+        if not shap_installed:
+            raise ImportError(
+                "The 'shap' library is required but not installed. Please install it using 'pip install shap'."
+            )
+
         if mode == "linear":
             self.explainer = shap.LinearExplainer
         elif mode == "gradient":
