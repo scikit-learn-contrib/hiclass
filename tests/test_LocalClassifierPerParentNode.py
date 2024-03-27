@@ -10,7 +10,6 @@ from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
-
 from hiclass import LocalClassifierPerParentNode
 
 

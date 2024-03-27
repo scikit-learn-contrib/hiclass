@@ -9,3 +9,5 @@ pandas==1.4.2
 ray==1.13.0
 numpy
 git+https://github.com/charles9n/bert-sklearn.git@master
+shap==0.44.1
+xarray==2023.1.0
