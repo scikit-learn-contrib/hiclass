@@ -15,7 +15,7 @@ import pandas as pd
 import shap
 
 # Download training data
-url = "https://gist.githubusercontent.com/ashishpatel16/9306f8ed3ed101e7ddcb519776bcbd80/raw/3f225c3f80dd8cbb1b6252f6c372a054ec968705/platypus_diseases.csv"
+url = "https://gist.githubusercontent.com/ashishpatel16/9306f8ed3ed101e7ddcb519776bcbd80/raw/1152c0b9613c2bda144a38fc4f74b5fe12255f4d/platypus_diseases.csv"
 path = "platypus_diseases.csv"
 response = requests.get(url)
 with open(path, "wb") as file:
