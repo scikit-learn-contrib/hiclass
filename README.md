@@ -16,6 +16,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - [Who is using HiClass?](#who-is-using-hiclass)
 - [Install](#install)
 - [Quick start](#quick-start)
+- [Explaining Hierarchical Classifiers](#explaining-hierarchical-classifiers)
 - [Step-by-step walk-through](#step-by-step-walk-through)
 - [API documentation](#api-documentation)
 - [FAQ](#faq)
@@ -34,7 +35,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - **[Hierarchical metrics](https://hiclass.readthedocs.io/en/latest/api/utilities.html#hierarchical-metrics):** HiClass supports the computation of hierarchical precision, recall and f-score, which are more appropriate for hierarchical data than traditional metrics.
 - **[Compatible with pickle](https://hiclass.readthedocs.io/en/latest/auto_examples/plot_model_persistence.html):** Easily store trained models on disk for future use.
 - **[BERT sklearn](https://hiclass.readthedocs.io/en/latest/auto_examples/plot_bert.html):** Compatible with the library [BERT sklearn](https://github.com/charles9n/bert-sklearn).
-- **[Hierarchical Explanability]():**  HiClass allows explaining hierarchical models using the [SHAP](https://github.com/shap/shap) package.
+- **[Hierarchical Explanability](https://hiclass.readthedocs.io/en/latest/algorithms/explainer.html):**  HiClass allows explaining hierarchical models using the [SHAP](https://github.com/shap/shap) package.
 
 **Any feature missing on this list?** Search our [issue tracker](https://github.com/scikit-learn-contrib/hiclass/issues) to see if someone has already requested it and add a comment to it explaining your use-case. Otherwise, please open a new issue describing the requested feature and possible use-case scenario. We prioritize our roadmap based on user feedback, so we would love to hear from you.
 
