@@ -87,6 +87,7 @@ def test_explainer_tree_lcpl(data, request):
         for j in range(len(y_pred)):
             assert str(explanations["node"][i].data[j]) == y_pred[j]
 
+
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
 @pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
@@ -102,6 +103,7 @@ def test_explain_with_xr(data, request, classifier):
 
     # Assert if explainer returns an xarray.Dataset object
     assert isinstance(explanations, xarray.Dataset)
+
 
 @pytest.mark.parametrize("classifier", [LocalClassifierPerLevel])
 @pytest.mark.parametrize("data", ["explainer_data"])

@@ -30,12 +30,12 @@ class Explainer:
     """Explainer class for returning shap values for each of the three hierarchical classifiers."""
 
     def __init__(
-            self,
-            hierarchical_model: HierarchicalClassifier.HierarchicalClassifier,
-            data=None,
-            n_jobs: int =1,
-            algorithm="auto",
-            mode=""
+        self,
+        hierarchical_model: HierarchicalClassifier.HierarchicalClassifier,
+        data=None,
+        n_jobs: int = 1,
+        algorithm="auto",
+        mode="",
     ):
         """
         Initialize the SHAP explainer for a hierarchical model.
@@ -117,9 +117,9 @@ class Explainer:
         check_array(X)
 
         if (
-                isinstance(self.hierarchical_model, LocalClassifierPerParentNode)
-                or isinstance(self.hierarchical_model, LocalClassifierPerLevel)
-                or isinstance(self.hierarchical_model, LocalClassifierPerNode)
+            isinstance(self.hierarchical_model, LocalClassifierPerParentNode)
+            or isinstance(self.hierarchical_model, LocalClassifierPerLevel)
+            or isinstance(self.hierarchical_model, LocalClassifierPerNode)
         ):
             return self._explain_with_xr(X)
         else:
@@ -188,7 +188,7 @@ class Explainer:
         """
         traversed_nodes = self._get_traversed_nodes(X)[0]
         datasets = []
-        #level = 0
+        # level = 0
         for node in traversed_nodes:
             # Define the level of the node in hierarchy
             level = len(node.split(self.hierarchical_model.separator_)) - 1
@@ -210,8 +210,7 @@ class Explainer:
                 )
 
             simplified_labels = [
-                f"{current_node}_{label}"
-                for label in local_classifier.classes_
+                f"{current_node}_{label}" for label in local_classifier.classes_
             ]
             predicted_class = current_node
 
@@ -224,7 +223,7 @@ class Explainer:
             shap_val_local = xr.DataArray(
                 shap_values,
                 dims=["class", "sample", "feature"],
-                coords={"class": simplified_labels}
+                coords={"class": simplified_labels},
             )
 
             prediction_probability = local_classifier.predict_proba(X)[0]
@@ -247,7 +246,7 @@ class Explainer:
                     "level": level,
                 }
             )
-            #level = level + 1
+            # level = level + 1
             datasets.append(local_dataset)
         sample_explanation = xr.concat(datasets, dim="level")
         return sample_explanation
