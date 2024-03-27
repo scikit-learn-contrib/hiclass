@@ -1,13 +1,14 @@
 """Explainer API for explaining predictions using shapley values."""
 
 from copy import deepcopy
-
+from joblib import Parallel, delayed
 import numpy as np
-
+from sklearn.utils.validation import check_array, check_is_fitted
 from hiclass import (
     LocalClassifierPerParentNode,
     LocalClassifierPerNode,
     LocalClassifierPerLevel,
+    HierarchicalClassifier,
 )
 
 try:
@@ -23,17 +24,6 @@ except ImportError:
     shap_installed = False
 else:
     shap_installed = True
-
-
-def _check_imports():
-    if not shap_installed:
-        raise ImportError(
-            "Shap is not installed. Please install it using `pip install shap` first."
-        )
-    elif not xarray_installed:
-        raise ImportError(
-            "xarray is not installed. Please install it using `pip install xarray` first."
-        )
 
 
 class Explainer:
