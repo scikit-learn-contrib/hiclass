@@ -105,6 +105,7 @@ def test_explain_with_xr(data, request, classifier):
     assert isinstance(explanations, xarray.Dataset)
 
 
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
 @pytest.mark.parametrize("classifier", [LocalClassifierPerLevel])
 @pytest.mark.parametrize("data", ["explainer_data"])
 @pytest.mark.parametrize("mode", ["linear", "gradient", "deep", "tree", ""])
