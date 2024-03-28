@@ -210,7 +210,8 @@ class Explainer:
                 )
 
             simplified_labels = [
-                f"{current_node}_{label}" for label in local_classifier.classes_
+                label.split(self.hierarchical_model.separator_)[-1]
+                for label in local_classifier.classes_
             ]
             predicted_class = current_node
 
