@@ -88,3 +88,23 @@ F-score
 ^^^^^^^
 
 .. autofunction:: metrics.f1
+
+..................................
+
+
+Datasets
+----------
+
+Platypus diseases dataset
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: datasets.load_platypus
+
+..................................
+
+Hierarchical text classification dataset
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: datasets.load_hierarchical_text_classification
+
+..................................
