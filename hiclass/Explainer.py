@@ -191,11 +191,11 @@ class Explainer:
         for node in traversed_nodes:
             # Define the level of the node in hierarchy
             level = len(node.split(self.hierarchical_model.separator_)) - 1
+
             local_classifier = self.hierarchical_model.local_classifiers_[level]
 
             # Create a SHAP explainer for the local classifier
             local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
-
             current_node = node.split(self.hierarchical_model.separator_)[-1]
 
             # Calculate SHAP values for the given sample X
@@ -215,30 +215,30 @@ class Explainer:
             predicted_class = current_node
 
             classes = xr.DataArray(
-                local_classifier.classes_,
+                simplified_labels,
                 dims=["class"],
                 coords={"class": simplified_labels},
             )
 
             shap_val_local = xr.DataArray(
                 shap_values,
-                dims=["class", "sample", "feature"],
-                coords={"class": simplified_labels},
+                dims=["class_", "sample", "feature"],
+                coords={"class_": simplified_labels},
             )
 
             prediction_probability = local_classifier.predict_proba(X)[0]
 
             predict_proba = xr.DataArray(
                 prediction_probability,
-                dims=["class"],
+                dims=["class_"],
                 coords={
-                    "class": simplified_labels,
+                    "class_": simplified_labels,
                 },
             )
 
             local_dataset = xr.Dataset(
                 {
-                    "node": node.split(self.hierarchical_model.separator_)[-1],
+                    "node": current_node,
                     "predicted_class": predicted_class,
                     "predict_proba": predict_proba,
                     "classes": classes,
