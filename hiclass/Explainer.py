@@ -32,10 +32,10 @@ class Explainer:
     def __init__(
         self,
         hierarchical_model: HierarchicalClassifier.HierarchicalClassifier,
-        data=None,
+        data: None,
         n_jobs: int = 1,
-        algorithm="auto",
-        mode="",
+        algorithm: str = "auto",
+        mode: str = "",
     ):
         """
         Initialize the SHAP explainer for a hierarchical model.
@@ -57,9 +57,9 @@ class Explainer:
         --------
         >>> from sklearn.ensemble import RandomForestClassifier
         >>> import numpy as np
-        >>> from hiclass import LocalClassifierPerParentNode, Explainer
+        >>> from hiclass import LocalClassifierPerLevel, Explainer
         >>> rfc = RandomForestClassifier()
-        >>> lcppn = LocalClassifierPerParentNode(local_classifier=rfc, replace_classifiers=False)
+        >>> lcpl = LocalClassifierPerLevel(local_classifier=rfc, replace_classifiers=False)
         >>> x_train = np.array([[1, 3], [2, 5]])
         >>> y_train = np.array([[1, 2], [3, 4]])
         >>> x_test = np.array([[4, 6]])
@@ -67,17 +67,17 @@ class Explainer:
         >>> explainer = Explainer(lcppn, data=x_train, mode="tree")
         >>> explanations = explainer.explain(x_test)
         <xarray.Dataset>
-        Dimensions:          (class: 3, sample: 1, level: 2, feature: 2)
+        Dimensions:          (class: 4, sample: 1, level: 2, feature: 2)
         Coordinates:
-          * class            (class) <U1 '1' '3' '4'
+          * class            (class) <U1 '1' '2' '3' '4'
           * level            (level) int64 0 1
         Dimensions without coordinates: sample, feature
         Data variables:
-            node             (sample, level) <U13 'hiclass::root' '3'
-            predicted_class  (sample, level) <U24 '3' '3::HiClass::Separator::4'
-            predict_proba    (sample, level, class) float64 0.22 0.78 nan nan nan 1.0
-            classes          (sample, level, class) object '1' '3' nan nan nan '4'
-            shap_values      (level, class, sample, feature) float64 -0.1 -0.13 ... 0.0
+            node             (sample, level) <U1 '3' '4'
+            predicted_class  (sample, level) <U1 '3' '4'
+            predict_proba    (sample, level, class) float64 0.33 nan 0.67 ... nan 0.79
+            classes          (sample, level, class) object '1' ... '3::HiClass::Separ...
+            shap_values      (level, class, sample, feature) float64 -0.125 ... 0.145
         """
         self.hierarchical_model = hierarchical_model
         self.algorithm = algorithm
@@ -188,7 +188,6 @@ class Explainer:
         """
         traversed_nodes = self._get_traversed_nodes(X)[0]
         datasets = []
-        # level = 0
         for node in traversed_nodes:
             # Define the level of the node in hierarchy
             level = len(node.split(self.hierarchical_model.separator_)) - 1
@@ -247,7 +246,6 @@ class Explainer:
                     "level": level,
                 }
             )
-            # level = level + 1
             datasets.append(local_dataset)
         sample_explanation = xr.concat(datasets, dim="level")
         return sample_explanation
