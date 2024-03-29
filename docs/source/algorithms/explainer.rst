@@ -18,7 +18,6 @@ Integrating explainability methods into Hierarchical classifiers can yield promi
 ++++++++++++++++++++++++++
 Dataset overview
 ++++++++++++++++++++++++++
-
 For the remainder of this section, we will utilize a synthetically generated dataset representing platypus diseases. This tabular dataset is created to visualize and test the essence of explainability using SHAP on hierarchical models. The diagram below illustrates the hierarchical structure of the dataset. With nine symptoms as features—fever, diarrhea, stomach pain, skin rash, cough, sniffles, shortness of breath, headache, and body size—the objective is to predict the disease based on these feature values.
 
 .. figure:: ../algorithms/platypus_diseases_hierarchy.svg
@@ -30,7 +29,6 @@ For the remainder of this section, we will utilize a synthetically generated dat
 ++++++++++++++++++++++++++
 Background
 ++++++++++++++++++++++++++
-
 This section introduces two main concepts: hierarchical classification and SHAP values. Hierarchical classification leverages the hierarchical structure of data, breaking down the classification task into manageable sub-tasks using models organized in a tree or DAG structure.
 
 SHAP values, adapted from game theory, show the impact of features on model predictions, thus aiding model interpretation. The SHAP library offers practical implementation of these methods, supporting various machine learning algorithms for explanation generation.
@@ -41,7 +39,6 @@ To demonstrate how SHAP values provide insights into model prediction, consider 
 
    test_sample = np.array([[35.5,  0. ,  1. ,  1. ,  3. ,  3. ,  0. ,  2. , 37.5]])
    sample_target = np.array([['Respiratory', 'Cold', '']])
-
 
 We can calculate SHAP values using the SHAP python package and visualize them. SHAP values tell us how much each symptom "contributes" to the model's decision about which disease a platypus might have. The following diagram illustrates how SHAP values can be visualized using the :literal:`shap.force_plot`.
 
@@ -68,7 +65,6 @@ The Explainer class takes a fitted HiClass model, training data, and some named 
 .. code-block:: python
 
     explainer = Explainer(fitted_hiclass_model, data=training_data)
-
 
 The Explainer returns an :literal:`xarray.Dataset` object which allows users to intuitively access, filter, slice, and plot SHAP values. This Explanation object can also be used interactively within the Jupyter notebook environment. The Explanation object along with its respective attributes are depicted in the following UML diagram.
 
@@ -133,4 +129,3 @@ To achieve this, we can use xarray's :literal:`.sel()` method:
     x = explanations.sel(mask).shap_values
 
 More advanced usage and capabilities can be found at the `Xarray.Dataset <https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html>`_ documentation.
-

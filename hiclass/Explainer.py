@@ -251,8 +251,11 @@ class Explainer:
         datasets = []
         level = 0
         for node in traversed_nodes:
-            # Skip if classifier is not found, can happen in case of imbalanced hierarchies
-            if "classifier" not in self.hierarchical_model.hierarchy_.nodes[node]:
+            # Skip if node is empty or classifier is not found, can happen in case of imbalanced hierarchies
+            if (
+                node == ""
+                or "classifier" not in self.hierarchical_model.hierarchy_.nodes[node]
+            ):
                 continue
 
             local_classifier = self.hierarchical_model.hierarchy_.nodes[node][

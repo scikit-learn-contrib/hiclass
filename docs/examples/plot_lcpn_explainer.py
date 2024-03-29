@@ -6,29 +6,16 @@ Explaining Local Classifier Per Node
 
 A minimalist example showing how to use HiClass Explainer to obtain SHAP values of LCPN model.
 A detailed summary of the Explainer class has been given at Algorithms Overview Section for :ref:`Hierarchical Explainability`.
+SHAP values are calculated based on a synthetic platypus diseases dataset that can be downloaded `here <https://gist.githubusercontent.com/ashishpatel16/9306f8ed3ed101e7ddcb519776bcbd80/raw/3f225c3f80dd8cbb1b6252f6c372a054ec968705/platypus_diseases.csv>`_.
 """
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from hiclass import LocalClassifierPerNode, Explainer
+from hiclass.datasets import load_platypus
+import shap
 
-# Define data
-X_train = np.array(
-    [
-        [40.7, 1.0, 1.0, 2.0, 5.0, 2.0, 1.0, 5.0, 34.3],
-        [39.2, 0.0, 2.0, 4.0, 1.0, 3.0, 1.0, 2.0, 34.1],
-        [40.6, 0.0, 3.0, 1.0, 4.0, 5.0, 0.0, 6.0, 27.7],
-        [36.5, 0.0, 3.0, 1.0, 2.0, 2.0, 0.0, 2.0, 39.9],
-    ]
-)
-X_test = np.array([[35.5, 0.0, 1.0, 1.0, 3.0, 3.0, 0.0, 2.0, 37.5]])
-Y_train = np.array(
-    [
-        ["Gastrointestinal", "Norovirus", ""],
-        ["Respiratory", "Covid", ""],
-        ["Allergy", "External", "Bee Allergy"],
-        ["Respiratory", "Cold", ""],
-    ]
-)
+# Load train and test splits
+X_train, X_test, Y_train, Y_test = load_platypus()
 
 # Use random forest classifiers for every node
 rfc = RandomForestClassifier()
@@ -41,3 +28,19 @@ classifier.fit(X_train, Y_train)
 explainer = Explainer(classifier, data=X_train, mode="tree")
 explanations = explainer.explain(X_test)
 print(explanations)
+
+# Filter samples which only predicted "Respiratory" at first level
+respiratory_idx = classifier.predict(X_test)[:, 0] == "Respiratory"
+
+# Specify additional filters to obtain only level 0
+shap_filter = {"level": 0, "class": "Respiratory_1", "sample": respiratory_idx}
+
+# Use .sel() method to apply the filter and obtain filtered results
+shap_val_respiratory = explanations.sel(shap_filter)
+
+# Plot feature importance on test set
+shap.plots.violin(
+    shap_val_respiratory.shap_values,
+    feature_names=X_train.columns.values,
+    plot_size=(13, 8),
+)
