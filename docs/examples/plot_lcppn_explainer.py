@@ -10,25 +10,11 @@ SHAP values are calculated based on a synthetic platypus diseases dataset that c
 """
 from sklearn.ensemble import RandomForestClassifier
 from hiclass import LocalClassifierPerParentNode, Explainer
-import requests
-import pandas as pd
 import shap
+from hiclass.datasets import load_platypus
 
-# Download training data
-url = "https://gist.githubusercontent.com/ashishpatel16/9306f8ed3ed101e7ddcb519776bcbd80/raw/1152c0b9613c2bda144a38fc4f74b5fe12255f4d/platypus_diseases.csv"
-path = "platypus_diseases.csv"
-response = requests.get(url)
-with open(path, "wb") as file:
-    file.write(response.content)
-
-# Load training data into pandas dataframe
-training_data = pd.read_csv(path).fillna(" ")
-
-# Define data
-X_train = training_data.drop(["label"], axis=1)
-X_test = X_train[:100]  # Use first 100 samples as test set
-Y_train = training_data["label"]
-Y_train = [eval(my) for my in Y_train]
+# Load train and test splits
+X_train, X_test, Y_train, Y_test = load_platypus()
 
 # Use random forest classifiers for every node
 rfc = RandomForestClassifier()

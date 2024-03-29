@@ -17,25 +17,15 @@ is performed on a mock dataset from Kaggle [2]_.
 """
 import sys
 from os import cpu_count
-
-import pandas as pd
-import requests
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
 from hiclass import LocalClassifierPerParentNode
+from hiclass.datasets import load_hierarchical_text_classification
 
-
-# Download training data
-url = "https://zenodo.org/record/6657410/files/train_40k.csv?download=1"
-path = "train_40k.csv"
-response = requests.get(url)
-with open(path, "wb") as file:
-    file.write(response.content)
-
-# Load training data into pandas dataframe
-training_data = pd.read_csv(path).fillna(" ")
+# Load train and test splits
+X_train, X_test, Y_train, Y_test = load_hierarchical_text_classification()
 
 # We will use logistic regression classifiers for every parent node
 lr = LogisticRegression(max_iter=1000)
@@ -50,10 +40,6 @@ pipeline = Pipeline(
         ),
     ]
 )
-
-# Select training data
-X_train = training_data["Title"]
-Y_train = training_data[["Cat1", "Cat2", "Cat3"]]
 
 # Fixes bug AttributeError: '_LoggingTee' object has no attribute 'fileno'
 # This only happens when building the documentation
