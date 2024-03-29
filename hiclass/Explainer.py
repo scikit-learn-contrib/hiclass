@@ -49,7 +49,7 @@ class Explainer:
         n_jobs : int, default=1
             The number of jobs to run in parallel.
         algorithm : str, default="auto"
-            The algorithm to use for SHAP explainer. Possible values are 'linear', 'tree', 'auto', 'permutation'. or 'partition'
+            The algorithm to use for SHAP explainer. Possible values are 'linear', 'tree', 'auto', 'permutation', or 'partition'
         mode : str, default=""
             The mode of the SHAP explainer. Can be 'tree', 'gradient', 'deep', 'linear', or '' for default SHAP explainer.
 
@@ -74,10 +74,10 @@ class Explainer:
         Dimensions without coordinates: sample, feature
         Data variables:
             node             (sample, level) <U13 'hiclass::root' '3'
-            predicted_class  (sample, level) <U24 '3' '3::HiClass::Separator::4'
-            predict_proba    (sample, level, class) float64 0.22 0.78 nan nan nan 1.0
+            predicted_class  (sample, level) <U1 '3' '4'
+            predict_proba    (sample, level, class) float64 0.29 0.71 nan nan nan 1.0
             classes          (sample, level, class) object '1' '3' nan nan nan '4'
-            shap_values      (level, class, sample, feature) float64 -0.1 -0.13 ... 0.0
+            shap_values      (level, class, sample, feature) float64 -0.135 ... 0.0
         """
         self.hierarchical_model = hierarchical_model
         self.algorithm = algorithm
@@ -146,9 +146,9 @@ class Explainer:
         dataset = xr.concat(explanations, dim="sample")
         return dataset
 
-    def _get_traversed_nodes(self, samples):
+    def _get_traversed_nodes_lcppn(self, samples):
         """
-        Return a list of all traversed nodes as per the provided HiClass model.
+        Return a list of all traversed nodes as per the provided LocalClassifierPerParentNode model.
 
         Parameters
         ----------
@@ -158,27 +158,76 @@ class Explainer:
         Returns
         -------
         traversals : list
-            A list of all traversed nodes.
+            A list of all traversed nodes as per LocalClassifierPerParentNode (LCPPN) strategy.
         """
-        # Helper function to return traversed nodes
-        if isinstance(self.hierarchical_model, LocalClassifierPerNode):
-            traversals = []
-            predictions = self.hierarchical_model.predict(samples)
-            for pred in predictions:
-                traversal_order = []
-                for i in range(len(pred)):
-                    if i == 0:
-                        traversal_order.append(pred[i])
-                    else:
-                        node = (
-                            str(traversal_order[i - 1])
-                            + self.hierarchical_model.separator_
-                            + str(pred[i])
-                        )
-                        if node in self.hierarchical_model.hierarchy_.nodes:
-                            traversal_order.append(node)
-                traversals.append(traversal_order)
-            return traversals
+        # Initialize array with shape (#samples, #levels)
+        traversals = np.empty(
+            (samples.shape[0], self.hierarchical_model.max_levels_),
+            dtype=self.hierarchical_model.dtype_,
+        )
+
+        # Initialize first element as root node
+        traversals[:, 0] = self.hierarchical_model.root_
+
+        # For subsequent nodes, calculate mask and find predictions
+        for level in range(1, traversals.shape[1]):
+            predecessors = set(traversals[:, level - 1])
+            predecessors.discard("")
+            for predecessor in predecessors:
+                mask = np.isin(traversals[:, level - 1], predecessor)
+                predecessor_x = samples[mask]
+                if predecessor_x.shape[0] > 0:
+                    successors = list(
+                        self.hierarchical_model.hierarchy_.successors(predecessor)
+                    )
+                    if len(successors) > 0:
+                        classifier = self.hierarchical_model.hierarchy_.nodes[
+                            predecessor
+                        ]["classifier"]
+                        traversals[mask, level] = classifier.predict(
+                            predecessor_x
+                        ).flatten()
+        return traversals
+
+    def _get_traversed_nodes_lcpn(self, samples):
+        """
+        Return a list of all traversed nodes as per the provided LocalClassifierPerNode model.
+
+        Parameters
+        ----------
+        samples : array-like
+            Sample data for which to generate traversed nodes.
+
+        Returns
+        -------
+        traversals : list
+            A list of all traversed nodes as per LocalClassifierPerNode (LCPN) strategy.
+        """
+        traversals = np.empty(
+            (samples.shape[0], self.hierarchical_model.max_levels_),
+            dtype=self.hierarchical_model.dtype_,
+        )
+
+        predictions = self.hierarchical_model.predict(samples)
+
+        traversals[:, 0] = predictions[:, 0]
+        separator = np.full(
+            (samples.shape[0], 3),
+            self.hierarchical_model.separator_,
+            dtype=self.hierarchical_model.dtype_,
+        )
+
+        for level in range(1, traversals.shape[1]):
+            traversals[:, level] = np.core.defchararray.add(
+                traversals[:, level - 1],
+                np.core.defchararray.add(separator[:, 0], predictions[:, level]),
+            )
+
+        # For inconsistent hierarchies, levels with empty nodes should be ignored
+        mask = predictions == ""
+        traversals[mask] = ""
+
+        return traversals
 
     def _calculate_shap_values(self, X):
         """
@@ -194,10 +243,18 @@ class Explainer:
         explanation : xarray.Dataset
             A single explanation for the prediction of given sample.
         """
-        traversed_nodes = self._get_traversed_nodes(X)[0]
+        traversed_nodes = []
+        if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
+            traversed_nodes = self._get_traversed_nodes_lcppn(X)[0]
+        elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
+            traversed_nodes = self._get_traversed_nodes_lcpn(X)[0]
         datasets = []
         level = 0
         for node in traversed_nodes:
+            # Skip if classifier is not found, can happen in case of imbalanced hierarchies
+            if "classifier" not in self.hierarchical_model.hierarchy_.nodes[node]:
+                continue
+
             local_classifier = self.hierarchical_model.hierarchy_.nodes[node][
                 "classifier"
             ]
@@ -228,7 +285,11 @@ class Explainer:
                     label.split(self.hierarchical_model.separator_)[-1]
                     for label in local_classifier.classes_
                 ]
-                predicted_class = local_classifier.predict(X).flatten()[0]
+                predicted_class = (
+                    local_classifier.predict(X)
+                    .flatten()[0]
+                    .split(self.hierarchical_model.separator_)[-1]
+                )
 
             classes = xr.DataArray(
                 simplified_labels,
