@@ -26,7 +26,7 @@ classifier = LocalClassifierPerParentNode(
 classifier.fit(X_train, Y_train)
 
 # Define Explainer
-explainer = Explainer(classifier, data=X_train, mode="tree")
+explainer = Explainer(classifier, data=X_train.values, mode="tree")
 explanations = explainer.explain(X_test.values)
 print(explanations)
 

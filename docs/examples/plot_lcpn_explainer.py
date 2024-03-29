@@ -25,8 +25,8 @@ classifier = LocalClassifierPerNode(local_classifier=rfc, replace_classifiers=Fa
 classifier.fit(X_train, Y_train)
 
 # Define Explainer
-explainer = Explainer(classifier, data=X_train, mode="tree")
-explanations = explainer.explain(X_test)
+explainer = Explainer(classifier, data=X_train.values, mode="tree")
+explanations = explainer.explain(X_test.values)
 print(explanations)
 
 # Filter samples which only predicted "Respiratory" at first level
