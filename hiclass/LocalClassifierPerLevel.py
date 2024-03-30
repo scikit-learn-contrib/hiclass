@@ -393,12 +393,11 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             return None
         
         X, y, _ = self._remove_empty_leaves(
-            separator, self.X_cal, self.y_cal[:, level], None
+            separator, self.X_cal, self.y_cal[:, level], None #X_cross_val, y_cross_val
         )
         if len(y) == 0 or len(np.unique(y)) < 2:
             self.logger_.info(f"No calibration samples to fit calibrator for level: {str(level)}")
             return None
-
         calibrator.fit(X, y)
         return calibrator
 

@@ -309,7 +309,7 @@ def statistical_calibration_error(classifier, y_true, y_prob, y_pred, n_bins=10,
         scores.append(_statistical_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins=n_bins))
     return _aggregate_scores(scores, agg)
 
-def adaptive_calibration_error(classifier, y_true, y_prob, y_pred, n_ranges=3, agg='average'):
+def adaptive_calibration_error(classifier, y_true, y_prob, y_pred, n_ranges=10, agg='average'):
     scores = []
     for level in range(make_leveled(y_true).shape[1]):
         scores.append(_adaptive_calibration_error(classifier, y_true, y_prob, y_pred, level, n_ranges=n_ranges))

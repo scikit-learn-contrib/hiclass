@@ -228,17 +228,34 @@ class HierarchicalClassifier(abc.ABC):
             X = np.array(X)
         
         if self.calibration_method == "cvap":
+            '''
             # combine train and calibration dataset for cross validation
             if isinstance(self.X_, scipy.sparse._csr.csr_matrix):
+                self.logger_.info(f"Sparse Calibration size: {X.shape} train size: {self.X_.shape}")
                 self.X_cross_val = scipy.sparse.vstack([self.X_, X])
                 self.logger_.info(f"CV Dataset X: {str(type(self.X_cross_val))} {str(self.X_cross_val.shape)}")
             else:
-                self.X_cross_val = np.hstack([self.X_, X])
+                self.logger_.info(f"Not sparse Calibration size: {X.shape} train size: {self.X_.shape}")
+                self.X_cross_val = np.vstack([self.X_, X])
                 self.logger_.info(f"CV Dataset X: {str(type(self.X_cross_val))} {str(self.X_cross_val.shape)}")
             self.y_cross_val = np.vstack([self.y_, y])
             self.y_cross_val = make_leveled(self.y_cross_val)
             self.y_cross_val = self._disambiguate(self.y_cross_val)
             self.y_cross_val = self._convert_1d_y_to_2d(self.y_cross_val) # TODO: rename to y_cal?
+            '''
+            # combine train and calibration dataset for cross validation
+            if isinstance(self.X_, scipy.sparse._csr.csr_matrix):
+                self.logger_.info(f"Sparse Calibration size: {X.shape} train size: {self.X_.shape}")
+                self.X_cal = scipy.sparse.vstack([self.X_, X])
+                self.logger_.info(f"CV Dataset X: {str(type(self.X_cal))} {str(self.X_cal.shape)}")
+            else:
+                self.logger_.info(f"Not sparse Calibration size: {X.shape} train size: {self.X_.shape}")
+                self.X_cal = np.vstack([self.X_, X])
+                self.logger_.info(f"CV Dataset X: {str(type(self.X_cal))} {str(self.X_cal.shape)}")
+            self.y_cal = np.vstack([self.y_, y])
+            self.y_cal = make_leveled(self.y_cal)
+            self.y_cal = self._disambiguate(self.y_cal)
+            self.y_cal = self._convert_1d_y_to_2d(self.y_cal) # TODO: rename to y_cal?
         else:
             self.X_cal = X
             self.y_cal = y
@@ -487,10 +504,10 @@ class HierarchicalClassifier(abc.ABC):
             del self.X_cal
         if hasattr(self, 'y_cal'):
             del self.y_cal
-        if hasattr(self, 'y_cross_val'):
-            del self.y_cross_val
-        if hasattr(self, 'X_cross_val'):
-            del self.X_cross_val
+        #if hasattr(self, 'y_cross_val'):
+        #    del self.y_cross_val
+        #if hasattr(self, 'X_cross_val'):
+        #    del self.X_cross_val
     
     def _reorder_local_probabilities(self, probabilities, local_labels, level):
         n_samples, n_labels = probabilities.shape[0], self.max_level_dimensions_[level]

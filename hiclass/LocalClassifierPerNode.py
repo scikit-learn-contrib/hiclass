@@ -318,14 +318,14 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         if isinstance(self.binary_policy, str):
             self.logger_.info(f"Initializing {self.binary_policy} binary policy")
             try:
-                if calibration and self.calibration_method != "cvap":
+                if calibration: # and self.calibration_method != "cvap":
                     binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
                         self.binary_policy.lower()
                     ](self.hierarchy_, self.X_cal, self.y_cal, None)
-                elif calibration and self.calibration_method == "cvap":
-                    binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
-                        self.binary_policy.lower()
-                    ](self.hierarchy_, self.X_cross_val, self.y_cross_val, None)
+                #elif calibration and self.calibration_method == "cvap":
+                #    binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
+                #        self.binary_policy.lower()
+                #    ](self.hierarchy_, self.X_cross_val, self.y_cross_val, None)
                 else:
                     binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
                         self.binary_policy.lower()
