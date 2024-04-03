@@ -272,8 +272,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 mask = [True] * X.shape[0]
                 subset_x = X[mask]
             else:
-                #mask = np.isin(y, predecessor).any(axis=1)
-                mask = np.isin(y, self.classes_[level-1]).any(axis=1)
+                mask = np.isin(y, self.global_classes_[level-1]).any(axis=1)
                 subset_x = X[mask]
 
             if subset_x.shape[0] > 0:
@@ -286,7 +285,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                     positive_index = np.where(calibrator.classes_ == 1)[0]
                     proba = calibrator.predict_proba(subset_x)[:, positive_index][:, 0]
                     local_probabilities[:, i] = proba
-                    class_index = self.class_to_index_mapping_[level][str(successor)]
+                    class_index = self.global_class_to_index_mapping_[level][str(successor)]
                     level_probability_list[-1][mask, class_index] = proba
 
                 highest_local_probability = np.argmax(local_probabilities, axis=1)
@@ -305,8 +304,11 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             np.nan_to_num(level_probabilities / level_probabilities.sum(axis=1, keepdims=True)) 
                 for level_probabilities in level_probability_list
         ]
+
+        # combine probabilities horizontally
+        self.classes_, self.class_to_index_mapping_, level_probability_list = self._combine_and_reorder(level_probability_list)
         
-        # combine probabilities
+        # combine probabilities vertically
         if self.probability_combiner:
             probability_combiner_ = self._create_probability_combiner(self.probability_combiner)
             self.logger_.info(f"Combining probabilities using {type(probability_combiner_).__name__}")
@@ -314,18 +316,15 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         return level_probability_list if self.return_all_probabilities else level_probability_list[-1]
 
+
     def _initialize_binary_policy(self, calibration=False):
         if isinstance(self.binary_policy, str):
             self.logger_.info(f"Initializing {self.binary_policy} binary policy")
             try:
-                if calibration: # and self.calibration_method != "cvap":
+                if calibration:
                     binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
                         self.binary_policy.lower()
                     ](self.hierarchy_, self.X_cal, self.y_cal, None)
-                #elif calibration and self.calibration_method == "cvap":
-                #    binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
-                #        self.binary_policy.lower()
-                #    ](self.hierarchy_, self.X_cross_val, self.y_cross_val, None)
                 else:
                     binary_policy_ = BinaryPolicy.IMPLEMENTED_POLICIES[
                         self.binary_policy.lower()

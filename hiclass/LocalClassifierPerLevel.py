@@ -214,6 +214,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         y[:, 0] = calibrator.classes_[np.argmax(proba, axis=1)]
 
         level_probability_list = [proba] + self._predict_proba_remaining_levels(X, y)
+        self.classes_, self.class_to_index_mapping_, level_probability_list = self._combine_and_reorder(level_probability_list)
+
         # combine probabilities
         if self.probability_combiner:
             probability_combiner_ = self._create_probability_combiner(self.probability_combiner)
@@ -288,6 +290,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     
     def _initialize_local_calibrators(self):
         super()._initialize_local_calibrators()
+        #train_length = self.X_.shape[0]
+        #cal_length = self.X_cal.shape[0]
         self.local_calibrators_ = [
                 _Calibrator(estimator=local_classifier, method=self.calibration_method) for local_classifier in self.local_classifiers_
         ]

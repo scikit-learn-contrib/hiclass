@@ -3,6 +3,8 @@ from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import StratifiedKFold
 from hiclass._calibration.BinaryCalibrator import _BinaryCalibrator
 from scipy.stats import gmean
+from hiclass._calibration.calibration_utils import _one_vs_rest_split
+from collections import defaultdict
 
 
 class _InductiveVennAbersCalibrator(_BinaryCalibrator):
@@ -184,10 +186,14 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
         self.n_folds = n_folds
         self.estimator_type = type(estimator)
         self.estimator_params = estimator.get_params()
+        self.estimator = estimator
+        self.multiclass = False
+        self.use_estimator_fallback = False
+        self.used_cv = True
 
     def fit(self, y, scores, X):
         unique_labels = np.unique(y)
-        assert len(unique_labels) == 2
+        assert len(unique_labels) >= 2
         self.ivaps = []
 
         try:
@@ -200,13 +206,29 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
         except ValueError:
                 splits_x, splits_y = [], []
 
+        # don't use cross validation
         if len(splits_x) == 0 or any([(len(np.unique(y_train)) < 2 or len(np.unique(y_cal)) < 2) for y_train, y_cal in splits_y]):
+            self.used_cv = False
             print("skip cv split due to lack of positive samples!")
-            calibrator = _InductiveVennAbersCalibrator()
-            calibrator.fit(y, scores)
-            self.ivaps.append(calibrator)
+
+            if len(unique_labels) > 2:
+                # use one vs rest
+                score_splits, label_splits = _one_vs_rest_split(y, scores, self.estimator) # TODO use only original calibration samples
+                for i in range(len(score_splits)):
+                    # create a calibrator for each split
+                    calibrator = _InductiveVennAbersCalibrator()
+                    calibrator.fit(label_splits[i], score_splits[i])
+                    self.ivaps.append(calibrator)
+            elif len(unique_labels) == 2 and scores.ndim == 1:
+                calibrator = _InductiveVennAbersCalibrator()
+                calibrator.fit(y, scores) # TODO use only original calibration samples
+                self.ivaps.append(calibrator)
+            else:
+                print("no fitted ivaps!")
+                self.use_estimator_fallback = True
 
         else:
+            self.ovr_ivaps = defaultdict(list)
             for i in range(self.n_folds):
                 X_train, X_cal = splits_x[i][0], splits_x[i][1]
                 y_train, y_cal = splits_y[i][0], splits_y[i][1]
@@ -218,10 +240,25 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
 
                 # calibrate IVAP with left out dataset
                 calibration_scores = model.predict_proba(X_cal)
+                
+                if calibration_scores.shape[1] > 2:
+                    self.multiclass = True
+                    # one vs rest calibration
+                    score_splits, label_splits = _one_vs_rest_split(y_cal, calibration_scores, model)
+                    for idx in range(len(score_splits)):
+                        # create a calibrator for each split
+                        calibrator = _InductiveVennAbersCalibrator()
+                        calibrator.fit(label_splits[idx], score_splits[idx])
+                        self.ovr_ivaps[idx].append(calibrator)
 
-                calibrator = _InductiveVennAbersCalibrator()
-                calibrator.fit(y_cal, calibration_scores[:, 1])
-                self.ivaps.append(calibrator)
+                elif calibration_scores.shape[1] == 2 and len(np.unique(y_cal)) == 2:
+                    calibrator = _InductiveVennAbersCalibrator()
+                    calibrator.fit(y_cal, calibration_scores[:, 1])
+                    self.ivaps.append(calibrator)
+
+            if len(self.ivaps) == 0 and len(self.ovr_ivaps) == 0:
+                print("no fitted ivaps!")
+                self.use_estimator_fallback = True
 
         self.fitted = True
 
@@ -230,13 +267,63 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
     def predict_proba(self, scores):
         if not self.fitted:
             raise NotFittedError(f"This {self.name} calibrator is not fitted yet. Call 'fit' with appropriate arguments before using this calibrator.")
-        res = []
-        for calibrator in self.ivaps:
-            res.append(calibrator.predict_intervall(scores))
-        
-        res = np.array(res)
-        p0 = res[:, :, 0]
-        p1 = res[:, :, 1]
 
-        p1_gm = gmean(p1)
-        return p1_gm / (gmean(1 - p0) + p1_gm)
+        if self.use_estimator_fallback:
+            return scores
+
+        if self.multiclass:
+
+            score_splits = [scores[:, i] for i in range(scores.shape[1])]
+            probabilities = np.zeros((scores.shape[0], scores.shape[1]))
+
+            if self.used_cv:
+
+                #score_splits = [scores[:, i] for i in range(scores.shape[1])]
+                #probabilities = np.zeros((scores.shape[0], scores.shape[1]))
+
+                for idx, scores in enumerate(score_splits):
+                    res = []
+
+                    if not self.ovr_ivaps[idx]:
+                        continue
+
+                    for calibrator in self.ovr_ivaps[idx]:
+                        res.append(calibrator.predict_intervall(scores))
+                    
+                    res = np.array(res)
+                    
+                    p0 = res[:, :, 0]
+                    p1 = res[:, :, 1]
+
+                    p1_gm = gmean(p1)
+                    probabilities[:, idx] = p1_gm / (gmean(1 - p0) + p1_gm)
+                
+                # normalize
+                #probabilities /= probabilities.sum(axis=1, keepdims=True)
+                #return probabilities
+            
+            else:
+                #score_splits = [scores[:, i] for i in range(scores.shape[1])]
+                #probabilities = np.zeros((scores.shape[0], scores.shape[1]))
+                for idx, scores in enumerate(score_splits):
+                    probabilities[:, idx] = self.ivaps[idx].predict_proba(scores)
+                
+                # normalize
+                #probabilities /= probabilities.sum(axis=1, keepdims=True)
+                #return probabilities
+                    
+            # normalize       
+            probabilities /= probabilities.sum(axis=1, keepdims=True)
+            return probabilities
+
+        else:
+            res = []
+            for calibrator in self.ivaps:
+                res.append(calibrator.predict_intervall(scores))
+            
+            res = np.array(res)
+            p0 = res[:, :, 0]
+            p1 = res[:, :, 1]
+
+            p1_gm = gmean(p1)
+            return p1_gm / (gmean(1 - p0) + p1_gm)

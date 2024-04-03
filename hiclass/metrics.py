@@ -258,11 +258,13 @@ def _prepare_data(classifier, y_true, y_prob, level, y_pred=None):
     y_true = make_leveled(y_true)
     y_true = classifier._disambiguate(y_true)
     y_true = np.array(list(map(lambda x: x[level], y_true)))
+    y_true = np.array([label.split(classifier.separator_)[level] for label in y_true])
 
     if y_pred is not None:
         y_pred = make_leveled(y_pred)
         y_pred = classifier._disambiguate(y_pred)
         y_pred = np.array(list(map(lambda x: x[level], y_pred)))
+        y_pred = np.array([label.split(classifier.separator_)[level] for label in y_pred])
 
     unique_labels = np.unique(y_true).astype("str")
     # add labels not seen in the training process

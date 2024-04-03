@@ -168,12 +168,12 @@ class HierarchicalClassifier(abc.ABC):
 
         if self.y_.ndim > 1:
             self.max_level_dimensions_ = np.array([len(np.unique(self.y_[:, level])) for level in range(self.y_.shape[1])])
-            self.classes_ = [np.unique(self.y_[:, level]).astype("str") for level in range(self.y_.shape[1])]
-            self.class_to_index_mapping_ = [{self.classes_[level][index]: index for index in range(len(self.classes_[level]))} for level in range(self.y_.shape[1])]
+            self.global_classes_ = [np.unique(self.y_[:, level]).astype("str") for level in range(self.y_.shape[1])]
+            self.global_class_to_index_mapping_ = [{self.global_classes_[level][index]: index for index in range(len(self.global_classes_[level]))} for level in range(self.y_.shape[1])]
         else:
             self.max_level_dimensions_ = np.array([len(np.unique(self.y_))])
-            self.classes_ = [np.unique(self.y_).astype("str")]
-            self.class_to_index_mapping_ = [{self.classes_[0][index] : index for index in range(len(self.classes_[0]))}]
+            self.global_classes_ = [np.unique(self.y_).astype("str")]
+            self.global_class_to_index_mapping_ = [{self.global_classes_[0][index] : index for index in range(len(self.global_classes_[0]))}]
 
         # Create and configure logger
         self._create_logger()
@@ -228,21 +228,6 @@ class HierarchicalClassifier(abc.ABC):
             X = np.array(X)
         
         if self.calibration_method == "cvap":
-            '''
-            # combine train and calibration dataset for cross validation
-            if isinstance(self.X_, scipy.sparse._csr.csr_matrix):
-                self.logger_.info(f"Sparse Calibration size: {X.shape} train size: {self.X_.shape}")
-                self.X_cross_val = scipy.sparse.vstack([self.X_, X])
-                self.logger_.info(f"CV Dataset X: {str(type(self.X_cross_val))} {str(self.X_cross_val.shape)}")
-            else:
-                self.logger_.info(f"Not sparse Calibration size: {X.shape} train size: {self.X_.shape}")
-                self.X_cross_val = np.vstack([self.X_, X])
-                self.logger_.info(f"CV Dataset X: {str(type(self.X_cross_val))} {str(self.X_cross_val.shape)}")
-            self.y_cross_val = np.vstack([self.y_, y])
-            self.y_cross_val = make_leveled(self.y_cross_val)
-            self.y_cross_val = self._disambiguate(self.y_cross_val)
-            self.y_cross_val = self._convert_1d_y_to_2d(self.y_cross_val) # TODO: rename to y_cal?
-            '''
             # combine train and calibration dataset for cross validation
             if isinstance(self.X_, scipy.sparse._csr.csr_matrix):
                 self.logger_.info(f"Sparse Calibration size: {X.shape} train size: {self.X_.shape}")
@@ -255,7 +240,7 @@ class HierarchicalClassifier(abc.ABC):
             self.y_cal = np.vstack([self.y_, y])
             self.y_cal = make_leveled(self.y_cal)
             self.y_cal = self._disambiguate(self.y_cal)
-            self.y_cal = self._convert_1d_y_to_2d(self.y_cal) # TODO: rename to y_cal?
+            self.y_cal = self._convert_1d_y_to_2d(self.y_cal)
         else:
             self.X_cal = X
             self.y_cal = y
@@ -504,20 +489,48 @@ class HierarchicalClassifier(abc.ABC):
             del self.X_cal
         if hasattr(self, 'y_cal'):
             del self.y_cal
-        #if hasattr(self, 'y_cross_val'):
-        #    del self.y_cross_val
-        #if hasattr(self, 'X_cross_val'):
-        #    del self.X_cross_val
     
     def _reorder_local_probabilities(self, probabilities, local_labels, level):
         n_samples, n_labels = probabilities.shape[0], self.max_level_dimensions_[level]
         sorted_probabilities = np.zeros(shape=(n_samples, n_labels))
 
         for idx, label in enumerate(local_labels):
-            new_idx = self.class_to_index_mapping_[level][label]
+            #local_label = label.split(self.separator_)[level]
+            new_idx = self.global_class_to_index_mapping_[level][label]
             sorted_probabilities[:, new_idx] = probabilities[:, idx]
         
         return sorted_probabilities
+
+    def _combine_and_reorder(self, proba):
+        res = [proba[0]]
+        classes_ = [self.global_classes_[0]]
+        for level in range(1, len(proba)):
+            # get local labels
+            local_labels = np.sort(np.unique([label.split(self.separator_)[level] for label in self.global_classes_[level]]))
+
+            oldToNew = {}
+            for label in self.global_classes_[level]:
+                # local label
+                local_label = label.split(self.separator_)[level]
+
+                # old index
+                # old_index = self.global_class_to_index_mapping_[level][label]
+                new_index = np.where(local_labels == local_label)[0][0]
+
+                oldToNew[label] = local_label, new_index
+
+            res_proba = np.zeros(shape=(proba[level].shape[0], len(local_labels)))
+
+            for old_label in self.global_classes_[level]:
+                old_idx = self.global_class_to_index_mapping_[level][old_label]
+                _, new_idx = oldToNew[old_label]
+                res_proba[:, new_idx] += proba[level][:, old_idx]
+
+            res.append(res_proba)
+            classes_.append(local_labels)
+            class_to_index_mapping_ = [{local_labels[index]: index for index in range(len(local_labels))} for local_labels in classes_]
+            
+        return classes_, class_to_index_mapping_, res
 
 
 
