@@ -20,4 +20,4 @@ class MultiplyCombiner(ProbabilityCombiner):
                 level_probs[:, index] = predecessors_combined_prob * proba[level][:, index]
 
             res.append(level_probs)
-        return self._normalize(res)
+        return self._normalize(res) if self.normalize else res

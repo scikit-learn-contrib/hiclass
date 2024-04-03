@@ -25,4 +25,4 @@ class ArithmeticMeanCombiner(ProbabilityCombiner):
 
             res.append(level_probs)
             sums.append(level_sum)
-        return self._normalize(res)
+        return self._normalize(res) if self.normalize else res

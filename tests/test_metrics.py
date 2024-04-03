@@ -375,7 +375,8 @@ def test_local_brier_score(uncertainty_data):
     classifier = Mock(spec=obj)
     classifier._disambiguate = obj._disambiguate
     classifier.classes_ = [[0, 1, 2]]
-
+    classifier.separator_ = "::HiClass::Separator::"
+    
     brier_score = _multiclass_brier_score(classifier, y_true, prob, level=0)
     assert math.isclose(brier_score, 0.34852, abs_tol=1e-4)
 
@@ -385,6 +386,7 @@ def test_local_log_loss(uncertainty_data):
     classifier = Mock(spec=obj)
     classifier._disambiguate = obj._disambiguate
     classifier.classes_ = [[0, 1, 2]]
+    classifier.separator_ = "::HiClass::Separator::"
 
     log_loss = _log_loss(classifier, y_true, prob, level=0)
     assert math.isclose(log_loss, 0.61790, abs_tol=1e-4)
@@ -395,6 +397,7 @@ def test_expected_calibration_error(uncertainty_data):
     classifier = Mock(spec=obj)
     classifier._disambiguate = obj._disambiguate
     classifier.classes_ = [[0, 1, 2]]
+    classifier.separator_ = "::HiClass::Separator::"
 
     ece = _expected_calibration_error(classifier, y_true, prob, y_pred, level=0, n_bins=3)
     assert math.isclose(ece, 0.118, abs_tol=1e-4)
@@ -405,6 +408,7 @@ def test_statistical_calibration_error(uncertainty_data):
     classifier = Mock(spec=obj)
     classifier._disambiguate = obj._disambiguate
     classifier.classes_ = [[0, 1, 2]]
+    classifier.separator_ = "::HiClass::Separator::"
 
     sce = _statistical_calibration_error(classifier, y_true, prob, y_pred, level=0, n_bins=3)
     assert math.isclose(sce, 0.3889, abs_tol=1e-3)
@@ -415,6 +419,7 @@ def test_adaptive_calibration_error(uncertainty_data):
     classifier = Mock(spec=obj)
     classifier._disambiguate = obj._disambiguate
     classifier.classes_ = [[0, 1, 2]]
+    classifier.separator_ = "::HiClass::Separator::"
 
     ace = _adaptive_calibration_error(classifier, y_true, prob, y_pred, level=0, n_ranges=3)
     assert math.isclose(ace, 0.44, abs_tol=1e-3)

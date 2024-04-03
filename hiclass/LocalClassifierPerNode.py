@@ -306,7 +306,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         ]
 
         # combine probabilities horizontally
-        self.classes_, self.class_to_index_mapping_, level_probability_list = self._combine_and_reorder(level_probability_list)
+        level_probability_list = self._combine_and_reorder(level_probability_list)
         
         # combine probabilities vertically
         if self.probability_combiner:

@@ -205,7 +205,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         y[:, 0] = calibrator.classes_[np.argmax(proba, axis=1)]
         level_probability_list = [proba] + self._predict_proba_remaining_levels(X, y)
     
-        self.classes_, self.class_to_index_mapping_, level_probability_list = self._combine_and_reorder(level_probability_list)
+        level_probability_list = self._combine_and_reorder(level_probability_list)
 
         # combine probabilities
         if self.probability_combiner:

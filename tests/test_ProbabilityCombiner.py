@@ -6,35 +6,51 @@ from numpy.testing import assert_array_almost_equal, assert_array_equal
 import math
 from scipy.stats import gmean
 
+from hiclass.HierarchicalClassifier import make_leveled
+
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
 from hiclass.probability_combiner import MultiplyCombiner, ArithmeticMeanCombiner, GeometricMeanCombiner
 
+
+def _disambiguate(y, separator):
+    if y.ndim == 2:
+        new_y = []
+        for i in range(y.shape[0]):
+            row = [str(y[i, 0])]
+            for j in range(1, y.shape[1]):
+                parent = str(row[-1])
+                child = str(y[i, j])
+                row.append(parent + separator + child)
+            new_y.append(np.asarray(row, dtype=np.str_))
+        return np.array(new_y)
+    return y
 
 @pytest.fixture
 def one_sample_probs_with_hierarchy():
     hierarchy = nx.DiGraph()
     root_node = "hiclass::root"
     hierarchy.add_node(root_node)
-    classes_ = [[], [], []]
+    separator = "::HiClass::Separator::"
+    y_ = []
 
     for i in range(3):
         # first level
-        first_level_node = f'level_0_node_{i}'
-        classes_[0].append(first_level_node)
+        first_level_node = f'node_{i}'
         hierarchy.add_node(first_level_node)
         hierarchy.add_edge(root_node, first_level_node)
         for j in range(3):
             # second level
-            second_level_node = f'level_1_node_{i}:{j}'
-            classes_[1].append(second_level_node)
-            hierarchy.add_node(second_level_node)
-            hierarchy.add_edge(first_level_node, second_level_node)
+            second_level_node = f'node_{i}:{j}'
+            second_level_label = _disambiguate(np.array([[first_level_node, second_level_node]]), separator)[0][1]
+            hierarchy.add_node(second_level_label)
+            hierarchy.add_edge(first_level_node, second_level_label)
             for k in range(2):
                 # third level
-                third_level_node = f'level_2_node_{i}:{j}:{k}'
-                classes_[2].append(third_level_node)
-                hierarchy.add_node(third_level_node)
-                hierarchy.add_edge(second_level_node, third_level_node)
+                third_level_node = f'node_{i}:{j}:{k}'
+                third_level_label = _disambiguate(np.array([[first_level_node, second_level_node, third_level_node]]), separator)[0][2]
+                y_.append([first_level_node, second_level_node, third_level_node])
+                hierarchy.add_node(third_level_label)
+                hierarchy.add_edge(second_level_label, third_level_label)
 
     probs = [
         np.array([[0.3, 0.5, 0.2]]), # level 0
@@ -43,19 +59,34 @@ def one_sample_probs_with_hierarchy():
     ]
     assert all([np.sum(probs[level], axis=1) == 1 for level in range(3)])
 
-    return hierarchy, probs, classes_
+    y_ = np.array(y_)
+    y_ = make_leveled(y_)
+    y_ = _disambiguate(y_, separator)
+
+    global_classes_ = [np.unique(y_[:, level]).astype("str") for level in range(y_.shape[1])]
+
+    classes_ = [global_classes_[0]]
+    for level in range(1, len(y_[1])):
+        classes_.append(np.sort(np.unique([label.split(separator)[level] for label in global_classes_[level]])))
+
+    class_to_index_mapping_ = [{local_labels[index]: index for index in range(len(local_labels))} for local_labels in classes_]
+
+    return hierarchy, probs, global_classes_, classes_, class_to_index_mapping_
 
 def test_multiply_combiner(one_sample_probs_with_hierarchy):
-    hierarchy, probs, classes = one_sample_probs_with_hierarchy
+    hierarchy, probs, global_classes, classes_, class_to_index_mapping_ = one_sample_probs_with_hierarchy
     obj = HierarchicalClassifier()
     classifier = Mock(spec=obj)
     classifier._disambiguate = obj._disambiguate
-    classifier.classes_ = classes
-    classifier.max_levels_ = len(classes)
-    classifier.class_to_index_mapping_ = [{classifier.classes_[level][index]: index for index in range(len(classifier.classes_[level]))} for level in range(classifier.max_levels_)]
+    classifier.global_classes_ = global_classes
+    classifier.max_levels_ = len(global_classes)
+    classifier.classes_ = classes_
+    classifier.class_to_index_mapping_ = class_to_index_mapping_
+    
     classifier.hierarchy_ = hierarchy
+    classifier.separator_ = "::HiClass::Separator::"
 
-    combiner = MultiplyCombiner(classifier=classifier)
+    combiner = MultiplyCombiner(classifier=classifier, normalize=False)
     combined_probs = combiner.combine(probs)
 
     # check combined probability of first node for both levels
@@ -73,16 +104,19 @@ def test_multiply_combiner(one_sample_probs_with_hierarchy):
     assert math.isclose(combined_probs[2][0][-1], probs[0][0][-1] * probs[1][0][-1] * probs[2][0][-1], abs_tol=1e-4)
 
 def test_arithmetic_mean_combiner(one_sample_probs_with_hierarchy):
-    hierarchy, probs, classes = one_sample_probs_with_hierarchy
+    hierarchy, probs, global_classes, classes_, class_to_index_mapping_ = one_sample_probs_with_hierarchy
     obj = HierarchicalClassifier()
     classifier = Mock(spec=obj)
     classifier._disambiguate = obj._disambiguate
-    classifier.classes_ = classes
-    classifier.max_levels_ = len(classes)
-    classifier.class_to_index_mapping_ = [{classifier.classes_[level][index]: index for index in range(len(classifier.classes_[level]))} for level in range(classifier.max_levels_)]
+    
+    classifier.global_classes_ = global_classes
+    classifier.max_levels_ = len(global_classes)
+    classifier.classes_ = classes_
+    classifier.class_to_index_mapping_ = class_to_index_mapping_
     classifier.hierarchy_ = hierarchy
+    classifier.separator_ = "::HiClass::Separator::"
 
-    combiner = ArithmeticMeanCombiner(classifier=classifier)
+    combiner = ArithmeticMeanCombiner(classifier=classifier, normalize=False)
     combined_probs = combiner.combine(probs)
 
     # check combined probability of first node for both levels
@@ -100,16 +134,19 @@ def test_arithmetic_mean_combiner(one_sample_probs_with_hierarchy):
     assert math.isclose(combined_probs[2][0][-1], (probs[0][0][-1] + probs[1][0][-1] + probs[2][0][-1]) / 3, abs_tol=1e-4)
 
 def test_geometric_mean_combiner(one_sample_probs_with_hierarchy):
-    hierarchy, probs, classes = one_sample_probs_with_hierarchy
+    hierarchy, probs, global_classes, classes_, class_to_index_mapping_ = one_sample_probs_with_hierarchy
     obj = HierarchicalClassifier()
     classifier = Mock(spec=obj)
     classifier._disambiguate = obj._disambiguate
-    classifier.classes_ = classes
-    classifier.max_levels_ = len(classes)
-    classifier.class_to_index_mapping_ = [{classifier.classes_[level][index]: index for index in range(len(classifier.classes_[level]))} for level in range(classifier.max_levels_)]
+    classifier.separator_ = "::HiClass::Separator::"
+    classifier.global_classes_ = global_classes
+    classifier.classes_ = classes_
+
+    classifier.max_levels_ = len(global_classes)
+    classifier.class_to_index_mapping_ = class_to_index_mapping_
     classifier.hierarchy_ = hierarchy
 
-    combiner = GeometricMeanCombiner(classifier=classifier)
+    combiner = GeometricMeanCombiner(classifier=classifier, normalize=False)
     combined_probs = combiner.combine(probs)
 
     # check combined probability of first node for both levels

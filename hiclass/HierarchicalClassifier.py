@@ -175,6 +175,12 @@ class HierarchicalClassifier(abc.ABC):
             self.global_classes_ = [np.unique(self.y_).astype("str")]
             self.global_class_to_index_mapping_ = [{self.global_classes_[0][index] : index for index in range(len(self.global_classes_[0]))}]
 
+        classes_ = [self.global_classes_[0]]
+        for level in range(1, len(self.max_level_dimensions_)):
+            classes_.append(np.sort(np.unique([label.split(self.separator_)[level] for label in self.global_classes_[level]])))
+        self.classes_ = classes_
+        self.class_to_index_mapping_ = [{local_labels[index]: index for index in range(len(local_labels))} for local_labels in classes_]
+
         # Create and configure logger
         self._create_logger()
 
@@ -503,34 +509,14 @@ class HierarchicalClassifier(abc.ABC):
 
     def _combine_and_reorder(self, proba):
         res = [proba[0]]
-        classes_ = [self.global_classes_[0]]
-        for level in range(1, len(proba)):
-            # get local labels
-            local_labels = np.sort(np.unique([label.split(self.separator_)[level] for label in self.global_classes_[level]]))
-
-            oldToNew = {}
-            for label in self.global_classes_[level]:
-                # local label
-                local_label = label.split(self.separator_)[level]
-
-                # old index
-                # old_index = self.global_class_to_index_mapping_[level][label]
-                new_index = np.where(local_labels == local_label)[0][0]
-
-                oldToNew[label] = local_label, new_index
-
-            res_proba = np.zeros(shape=(proba[level].shape[0], len(local_labels)))
+        for level in range(1, self.max_levels_):
+            res_proba = np.zeros(shape=(proba[level].shape[0], len(self.classes_[level])))
 
             for old_label in self.global_classes_[level]:
                 old_idx = self.global_class_to_index_mapping_[level][old_label]
-                _, new_idx = oldToNew[old_label]
+                local_label = old_label.split(self.separator_)[level]
+                new_idx = self.class_to_index_mapping_[level][local_label]
                 res_proba[:, new_idx] += proba[level][:, old_idx]
 
-            res.append(res_proba)
-            classes_.append(local_labels)
-            class_to_index_mapping_ = [{local_labels[index]: index for index in range(len(local_labels))} for local_labels in classes_]
-            
-        return classes_, class_to_index_mapping_, res
-
-
-
+            res.append(res_proba) 
+        return res

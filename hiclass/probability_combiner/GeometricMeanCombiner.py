@@ -25,4 +25,4 @@ class GeometricMeanCombiner(ProbabilityCombiner):
             
             log_sum.append(level_log_sum)
             res.append(level_probs)
-        return self._normalize(res)
+        return self._normalize(res) if self.normalize else res
