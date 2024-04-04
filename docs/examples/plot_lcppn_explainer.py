@@ -34,7 +34,7 @@ print(explanations)
 respiratory_idx = classifier.predict(X_test)[:, 0] == "Respiratory"
 
 # Specify additional filters to obtain only level 0
-shap_filter = {"level": 0, "class": "Respiratory", "sample": respiratory_idx}
+shap_filter = {"level": 0, "class_": "Respiratory", "sample": respiratory_idx}
 
 # Use .sel() method to apply the filter and obtain filtered results
 shap_val_respiratory = explanations.sel(shap_filter)
