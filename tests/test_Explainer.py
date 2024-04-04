@@ -59,7 +59,7 @@ def test_traversal_path_lcpl(data, request):
 
     lcpl.fit(x_train, y_train)
     explainer = Explainer(lcpl, data=x_train, mode="tree")
-    traversals = explainer._get_traversed_nodes(x_test)
+    traversals = explainer._get_traversed_nodes_lcpl(x_test)
     preds = lcpl.predict(x_test)
     assert len(preds) == len(traversals)
     for i in range(len(x_test)):

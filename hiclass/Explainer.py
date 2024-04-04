@@ -57,9 +57,9 @@ class Explainer:
         --------
         >>> from sklearn.ensemble import RandomForestClassifier
         >>> import numpy as np
-        >>> from hiclass import LocalClassifierPerLevel, Explainer
+        >>> from hiclass import LocalClassifierPerParentNode, Explainer
         >>> rfc = RandomForestClassifier()
-        >>> lcpl = LocalClassifierPerLevel(local_classifier=rfc, replace_classifiers=False)
+        >>> lcppn = LocalClassifierPerParentNode(local_classifier=rfc, replace_classifiers=False)
         >>> x_train = np.array([[1, 3], [2, 5]])
         >>> y_train = np.array([[1, 2], [3, 4]])
         >>> x_test = np.array([[4, 6]])
@@ -67,17 +67,17 @@ class Explainer:
         >>> explainer = Explainer(lcppn, data=x_train, mode="tree")
         >>> explanations = explainer.explain(x_test)
         <xarray.Dataset>
-        Dimensions:          (class: 4, sample: 1, level: 2, feature: 2)
+        Dimensions:          (class: 3, sample: 1, level: 2, feature: 2)
         Coordinates:
-          * class            (class) <U1 '1' '2' '3' '4'
+          * class            (class) <U1 '1' '3' '4'
           * level            (level) int64 0 1
         Dimensions without coordinates: sample, feature
         Data variables:
-            node             (sample, level) <U1 '3' '4'
+            node             (sample, level) <U13 'hiclass::root' '3'
             predicted_class  (sample, level) <U1 '3' '4'
-            predict_proba    (sample, level, class) float64 0.33 nan 0.67 ... nan 0.79
-            classes          (sample, level, class) object '1' ... '3::HiClass::Separ...
-            shap_values      (level, class, sample, feature) float64 -0.125 ... 0.145
+            predict_proba    (sample, level, class) float64 0.29 0.71 nan nan nan 1.0
+            classes          (sample, level, class) object '1' '3' nan nan nan '4'
+            shap_values      (level, class, sample, feature) float64 -0.135 ... 0.0
         """
         self.hierarchical_model = hierarchical_model
         self.algorithm = algorithm
@@ -146,31 +146,29 @@ class Explainer:
         dataset = xr.concat(explanations, dim="sample")
         return dataset
 
-    def _get_traversed_nodes(self, samples):
+    def _get_traversed_nodes_lcpl(self, samples):
         """
-        Return a list of all traversed nodes as per the provided HiClass model.
+        Return a list of all traversed nodes as per the provided LocalClassifierPerLevel model.
 
         Parameters
         ----------
         samples : array-like
-        Sample data for which to generate traversed nodes.
+            Sample data for which to generate traversed nodes.
 
         Returns
         -------
         traversals : list
-        A list of all traversed nodes.
+            A list of all traversed nodes as per LocalClassifierPerLevel (LCPL) strategy.
         """
-        # Helper function to return traversed nodes
-        if isinstance(self.hierarchical_model, LocalClassifierPerLevel):
-            traversals = []
-            predictions = self.hierarchical_model.predict(samples)
-            for pred in predictions:
-                traversal_order = []
-                for i in range(1, len(pred) + 1):
-                    node = self.hierarchical_model.separator_.join(pred[:i])
-                    traversal_order.append(node)
-                traversals.append(traversal_order)
-            return traversals
+        traversals = []
+        predictions = self.hierarchical_model.predict(samples)
+        for pred in predictions:
+            traversal_order = []
+            for i in range(1, len(pred) + 1):
+                node = self.hierarchical_model.separator_.join(pred[:i])
+                traversal_order.append(node)
+            traversals.append(traversal_order)
+        return traversals
 
     def _calculate_shap_values(self, X):
         """
@@ -186,16 +184,22 @@ class Explainer:
         explanation : xarray.Dataset
             A single explanation for the prediction of given sample.
         """
-        traversed_nodes = self._get_traversed_nodes(X)[0]
+        traversed_nodes = []
+        if isinstance(self.hierarchical_model, LocalClassifierPerLevel):
+            traversed_nodes = self._get_traversed_nodes_lcpl(X)[0]
         datasets = []
+        level = 0
         for node in traversed_nodes:
-            # Define the level of the node in hierarchy
-            level = len(node.split(self.hierarchical_model.separator_)) - 1
-
-            local_classifier = self.hierarchical_model.local_classifiers_[level]
+            if isinstance(self.hierarchical_model, LocalClassifierPerLevel):
+                local_classifier = self.hierarchical_model.local_classifiers_[level]
+            else:
+                local_classifier = self.hierarchical_model.hierarchy_.nodes[node][
+                    "classifier"
+                ]
 
             # Create a SHAP explainer for the local classifier
             local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
+
             current_node = node.split(self.hierarchical_model.separator_)[-1]
 
             # Calculate SHAP values for the given sample X
@@ -208,16 +212,33 @@ class Explainer:
                     1, shap_values.shape[0], shap_values.shape[1]
                 )
 
-            simplified_labels = [
-                label.split(self.hierarchical_model.separator_)[-1]
-                for label in local_classifier.classes_
-            ]
-            predicted_class = current_node
+            if isinstance(self.hierarchical_model, LocalClassifierPerNode):
+                simplified_labels = [
+                    f"{current_node}_{int(label)}"
+                    for label in local_classifier.classes_
+                ]
+                predicted_class = current_node
+            elif isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
+                simplified_labels = [
+                    label.split(self.hierarchical_model.separator_)[-1]
+                    for label in local_classifier.classes_
+                ]
+                predicted_class = (
+                    local_classifier.predict(X)
+                    .flatten()[0]
+                    .split(self.hierarchical_model.separator_)[-1]
+                )
+            else:
+                simplified_labels = [
+                    label.split(self.hierarchical_model.separator_)[-1]
+                    for label in local_classifier.classes_
+                ]
+                predicted_class = current_node
 
             classes = xr.DataArray(
                 simplified_labels,
-                dims=["class"],
-                coords={"class": simplified_labels},
+                dims=["class_"],
+                coords={"class_": simplified_labels},
             )
 
             shap_val_local = xr.DataArray(
@@ -246,6 +267,7 @@ class Explainer:
                     "level": level,
                 }
             )
+            level += 1
             datasets.append(local_dataset)
         sample_explanation = xr.concat(datasets, dim="level")
         return sample_explanation
