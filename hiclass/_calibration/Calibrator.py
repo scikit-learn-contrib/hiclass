@@ -16,7 +16,7 @@ class _Calibrator(BaseEstimator):
         assert callable(getattr(estimator, 'predict_proba', None))
         self.estimator = estimator
         self.method_params = method_params
-        self.classes_ = self.estimator.classes_
+        #self.classes_ = self.estimator.classes_
         self.multiclass = False
         self.multiclass_support = (method in self._multiclass_methods)
         if method not in self.available_methods:
@@ -42,6 +42,7 @@ class _Calibrator(BaseEstimator):
         self : object
             Calibrated estimator.
         """
+        self.classes_ = self.estimator.classes_
         calibration_scores = self.estimator.predict_proba(X)
 
         if calibration_scores.shape[1] > 2:
@@ -73,6 +74,7 @@ class _Calibrator(BaseEstimator):
             calibrator = self._create_calibrator(self.method, self.method_params)
             calibrator.fit(encoded_y, calibration_scores[:, 1], X)
             self.calibrators.append(calibrator)
+        self._is_fitted = True
         return self
     
 
@@ -110,3 +112,9 @@ class _Calibrator(BaseEstimator):
             return _PlattScaling()
         elif name == "isotonic":
             return _IsotonicRegression(params)
+
+    def __sklearn_is_fitted__(self):
+        """
+        Check fitted status and return a Boolean value.
+        """
+        return hasattr(self, "_is_fitted") and self._is_fitted

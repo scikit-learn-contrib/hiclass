@@ -1,17 +1,17 @@
 import numpy as np
-from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import StratifiedKFold
 from hiclass._calibration.BinaryCalibrator import _BinaryCalibrator
 from scipy.stats import gmean
 from hiclass._calibration.calibration_utils import _one_vs_rest_split
 from collections import defaultdict
+from sklearn.utils.validation import check_is_fitted
 
 
 class _InductiveVennAbersCalibrator(_BinaryCalibrator):
     name = "InductiveVennAbersCalibrator"
 
     def __init__(self):
-        self.fitted = False
+        self._is_fitted = False
 
     def fit(self, y, scores, X=None):
         positive_label = 1
@@ -154,13 +154,12 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
         self.F1 = compute_f1(f1_stack, csd_1)
         self.F0 = compute_f0(f0_stack, csd_0)
         self.unique_elements = unique_elements
-        self.fitted = True
+        self._is_fitted = True
 
         return self
 
     def predict_proba(self, scores, X=None):
-        if not self.fitted:
-            raise NotFittedError(f"This {self.name} calibrator is not fitted yet. Call 'fit' with appropriate arguments before using this calibrator.")
+        check_is_fitted(self)
         lower = np.searchsorted(self.unique_elements, scores, side="left")
         upper = np.searchsorted(self.unique_elements[:-1], scores, side="right") + 1
 
@@ -182,7 +181,7 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
     name = "CrossVennAbersCalibrator"
 
     def __init__(self, estimator, n_folds=5) -> None:
-        self.fitted = False
+        self._is_fitted = False
         self.n_folds = n_folds
         self.estimator_type = type(estimator)
         self.estimator_params = estimator.get_params()
@@ -260,13 +259,12 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
                 print("no fitted ivaps!")
                 self.use_estimator_fallback = True
 
-        self.fitted = True
+        self._is_fitted = True
 
         return self
 
     def predict_proba(self, scores):
-        if not self.fitted:
-            raise NotFittedError(f"This {self.name} calibrator is not fitted yet. Call 'fit' with appropriate arguments before using this calibrator.")
+        check_is_fitted(self)
 
         if self.use_estimator_fallback:
             return scores
