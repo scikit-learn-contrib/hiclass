@@ -218,9 +218,9 @@ class Explainer:
         )
 
         for level in range(1, traversals.shape[1]):
-            traversals[:, level] = np.core.defchararray.add(
+            traversals[:, level] = np.char.add(
                 traversals[:, level - 1],
-                np.core.defchararray.add(separator[:, 0], predictions[:, level]),
+                np.char.add(separator[:, 0], predictions[:, level]),
             )
 
         # For inconsistent hierarchies, levels with empty nodes should be ignored
