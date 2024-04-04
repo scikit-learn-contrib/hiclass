@@ -243,18 +243,15 @@ class HierarchicalClassifier(abc.ABC):
                 self.logger_.info(f"Not sparse Calibration size: {X.shape} train size: {self.X_.shape}")
                 self.X_cal = np.vstack([self.X_, X])
                 self.logger_.info(f"CV Dataset X: {str(type(self.X_cal))} {str(self.X_cal.shape)}")
+            
+            y = make_leveled(y)
+            y = self._disambiguate(y)
+            y = self._convert_1d_y_to_2d(y)
             self.y_cal = np.vstack([self.y_, y])
-            self.y_cal = make_leveled(self.y_cal)
-            self.y_cal = self._disambiguate(self.y_cal)
-            self.y_cal = self._convert_1d_y_to_2d(self.y_cal)
         else:
             self.X_cal = X
             self.y_cal = y
-
-            self.y_cal = make_leveled(self.y_cal)
-            self.y_cal = self._disambiguate(self.y_cal)
-            self.y_cal = self._convert_1d_y_to_2d(self.y_cal)
-
+            
         self.logger_.info("Calibrating")
 
         # Create a calibrator for each local classifier
