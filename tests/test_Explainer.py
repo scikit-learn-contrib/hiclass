@@ -23,7 +23,6 @@ else:
 
 @pytest.fixture
 def explainer_data():
-    np.random.seed(42)
     x_train = np.random.randn(4, 3)
     y_train = np.array(
         [["a", "b", "d"], ["a", "b", "e"], ["a", "c", "f"], ["a", "c", "g"]]
