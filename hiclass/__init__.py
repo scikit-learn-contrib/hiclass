@@ -22,4 +22,5 @@ __all__ = [
     "Explainer",
     "MultiLabelLocalClassifierPerNode",
     "MultiLabelLocalClassifierPerParentNode",
+    "datasets",
 ]
