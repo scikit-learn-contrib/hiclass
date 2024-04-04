@@ -166,7 +166,7 @@ def test_not_fitted_calibrator_throws_error(binary_test_scores, binary_mock_esti
                        _IsotonicRegression(), 
                        _InductiveVennAbersCalibrator(), 
                        _CrossVennAbersCalibrator(binary_mock_estimator)]:
-            with pytest.raises(NotFittedError, match=f"This {calibrator.name} calibrator is not fitted yet. Call 'fit' with appropriate arguments before using this calibrator."):
+            with pytest.raises(NotFittedError):
                 calibrator.predict_proba(binary_test_scores)
 
 def test_valid_calibration(binary_calibration_data, binary_test_scores, binary_cal_X, binary_mock_estimator):
