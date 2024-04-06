@@ -250,6 +250,9 @@ class HierarchicalClassifier(abc.ABC):
             self.y_cal = np.vstack([self.y_, y])
         else:
             self.X_cal = X
+            y = make_leveled(y)
+            y = self._disambiguate(y)
+            y = self._convert_1d_y_to_2d(y)
             self.y_cal = y
             
         self.logger_.info("Calibrating")

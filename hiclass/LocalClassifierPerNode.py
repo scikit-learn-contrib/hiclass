@@ -179,7 +179,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         # Initialize array that holds predictions
         y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
-
         # TODO: Add threshold to stop prediction halfway if need be
 
         bfs = nx.bfs_successors(self.hierarchy_, source=self.root_)
@@ -197,6 +196,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 probabilities = np.zeros((subset_x.shape[0], len(successors)))
                 for i, successor in enumerate(successors):
                     successor_name = str(successor).split(self.separator_)[-1]
+                    #self
                     self.logger_.info(f"Predicting for node '{successor_name}'")
                     # TODO: use calibrator if using calibration to predict class
                     classifier = self.hierarchy_.nodes[successor]["classifier"]
@@ -213,7 +213,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 )
                 prediction = np.array(prediction)
                 y[mask, level] = prediction
-
+                
         y = self._convert_to_1d(y)
 
         self._remove_separator(y)

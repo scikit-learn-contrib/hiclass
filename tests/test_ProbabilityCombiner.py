@@ -162,3 +162,29 @@ def test_geometric_mean_combiner(one_sample_probs_with_hierarchy):
     
     assert math.isclose(combined_probs[2][0][-1], 0.0430, abs_tol=1e-4)
     assert math.isclose(combined_probs[2][0][-1], gmean([probs[0][0][-1], probs[1][0][-1], probs[2][0][-1]]), abs_tol=1e-4)
+
+def test_mean_combiner_with_normalization(one_sample_probs_with_hierarchy):
+    hierarchy, probs, global_classes, classes_, class_to_index_mapping_ = one_sample_probs_with_hierarchy
+    obj = HierarchicalClassifier()
+    classifier = Mock(spec=obj)
+    classifier._disambiguate = obj._disambiguate
+    classifier.separator_ = "::HiClass::Separator::"
+    classifier.global_classes_ = global_classes
+    classifier.classes_ = classes_
+
+    classifier.max_levels_ = len(global_classes)
+    classifier.class_to_index_mapping_ = class_to_index_mapping_
+    classifier.hierarchy_ = hierarchy
+
+    combiners = [MultiplyCombiner(classifier), ArithmeticMeanCombiner(classifier), GeometricMeanCombiner(classifier)]
+
+    for combiner in combiners:
+        combined_probs = combiner.combine(probs)
+
+        assert len(combined_probs) == 3
+        assert combined_probs[0].shape == (1, 3)
+        assert combined_probs[1].shape == (1, 9)
+        assert combined_probs[2].shape == (1, 18)
+        assert_array_almost_equal(np.sum(combined_probs[0], axis=1), np.ones(len(combined_probs[0])), decimal=10)
+        assert_array_almost_equal(np.sum(combined_probs[1], axis=1), np.ones(len(combined_probs[1])), decimal=10)
+        assert_array_almost_equal(np.sum(combined_probs[2], axis=1), np.ones(len(combined_probs[2])), decimal=10)

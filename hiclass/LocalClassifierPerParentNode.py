@@ -302,6 +302,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         for row in masked_labels:
             if node == self.root_:
                 y.append(row[0])
+                self.logger_.info(y)
             else:
                 y.append(row[np.where(row == node)[0][0] + 1])
         y = np.array(y)

@@ -252,3 +252,21 @@ def test_fit_calibrate_predict_proba():
     assert proba[1].shape == (2, 2)
     assert_array_almost_equal(np.sum(proba[0], axis=1), np.ones(len(proba[0])), decimal=10)
     assert_array_almost_equal(np.sum(proba[1], axis=1), np.ones(len(proba[1])), decimal=10)
+
+def test_fit_calibrate_predict_predict_proba_bert():
+    classifier = LocalClassifierPerLevel(
+        local_classifier=LogisticRegression(), 
+        return_all_probabilities=True,
+        calibration_method="ivap",
+        probability_combiner="geometric" 
+    )
+
+    classifier.logger_ = logging.getLogger("HC")
+    classifier.bert = True
+    x = [[0, 1], [2, 3]]
+    y = [["a", "b"], ["c", "d"]]
+    sample_weight = None
+    classifier.fit(x, y, sample_weight)
+    classifier.calibrate(x, y)
+    classifier.predict(x)
+    classifier.predict_proba(x)
