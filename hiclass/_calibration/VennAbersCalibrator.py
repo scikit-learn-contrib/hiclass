@@ -247,15 +247,10 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
             return scores
 
         if self.multiclass:
-
             score_splits = [scores[:, i] for i in range(scores.shape[1])]
             probabilities = np.zeros((scores.shape[0], scores.shape[1]))
 
             if self.used_cv:
-
-                #score_splits = [scores[:, i] for i in range(scores.shape[1])]
-                #probabilities = np.zeros((scores.shape[0], scores.shape[1]))
-
                 for idx, scores in enumerate(score_splits):
                     res = []
 
@@ -272,20 +267,10 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
 
                     p1_gm = gmean(p1)
                     probabilities[:, idx] = p1_gm / (gmean(1 - p0) + p1_gm)
-                
-                # normalize
-                #probabilities /= probabilities.sum(axis=1, keepdims=True)
-                #return probabilities
-            
+
             else:
-                #score_splits = [scores[:, i] for i in range(scores.shape[1])]
-                #probabilities = np.zeros((scores.shape[0], scores.shape[1]))
                 for idx, scores in enumerate(score_splits):
                     probabilities[:, idx] = self.ivaps[idx].predict_proba(scores)
-                
-                # normalize
-                #probabilities /= probabilities.sum(axis=1, keepdims=True)
-                #return probabilities
                     
             # normalize       
             probabilities /= probabilities.sum(axis=1, keepdims=True)

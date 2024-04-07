@@ -125,7 +125,7 @@ class HierarchicalClassifier(abc.ABC):
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
             The training input samples. Internally, its dtype will be converted
             to ``dtype=np.float32``. If a sparse matrix is provided, it will be
-            converted into a sparse ``csc_matrix``.
+            converted into a sparse ``csr_matrix``.
         y : array-like of shape (n_samples, n_levels)
             The target values, i.e., hierarchical class labels for classification.
         sample_weight : array-like of shape (n_samples,), default=None
@@ -212,7 +212,7 @@ class HierarchicalClassifier(abc.ABC):
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
             The calibration input samples. Internally, its dtype will be converted
             to ``dtype=np.float32``. If a sparse matrix is provided, it will be
-            converted into a sparse ``csc_matrix``.
+            converted into a sparse ``csr_matrix``.
         y : array-like of shape (n_samples, n_levels)
             The target values, i.e., hierarchical class labels for classification.
 
@@ -236,13 +236,9 @@ class HierarchicalClassifier(abc.ABC):
         if self.calibration_method == "cvap":
             # combine train and calibration dataset for cross validation
             if isinstance(self.X_, scipy.sparse._csr.csr_matrix):
-                self.logger_.info(f"Sparse Calibration size: {X.shape} train size: {self.X_.shape}")
                 self.X_cal = scipy.sparse.vstack([self.X_, X])
-                self.logger_.info(f"CV Dataset X: {str(type(self.X_cal))} {str(self.X_cal.shape)}")
             else:
-                self.logger_.info(f"Not sparse Calibration size: {X.shape} train size: {self.X_.shape}")
                 self.X_cal = np.vstack([self.X_, X])
-                self.logger_.info(f"CV Dataset X: {str(type(self.X_cal))} {str(self.X_cal.shape)}")
             
             y = make_leveled(y)
             y = self._disambiguate(y)
@@ -495,17 +491,6 @@ class HierarchicalClassifier(abc.ABC):
             del self.X_cal
         if hasattr(self, 'y_cal'):
             del self.y_cal
-    
-    def _reorder_local_probabilities(self, probabilities, local_labels, level):
-        n_samples, n_labels = probabilities.shape[0], self.max_level_dimensions_[level]
-        sorted_probabilities = np.zeros(shape=(n_samples, n_labels))
-
-        for idx, label in enumerate(local_labels):
-            #local_label = label.split(self.separator_)[level]
-            new_idx = self.global_class_to_index_mapping_[level][label]
-            sorted_probabilities[:, new_idx] = probabilities[:, idx]
-        
-        return sorted_probabilities
 
     def _combine_and_reorder(self, proba):
         res = [proba[0]]

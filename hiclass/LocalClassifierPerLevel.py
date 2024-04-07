@@ -114,7 +114,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
             The training input samples. Internally, its dtype will be converted
             to ``dtype=np.float32``. If a sparse matrix is provided, it will be
-            converted into a sparse ``csc_matrix``.
+            converted into a sparse ``csr_matrix``.
         y : array-like of shape (n_samples, n_levels)
             The target values, i.e., hierarchical class labels for classification.
         sample_weight : array-like of shape (n_samples,), default=None
@@ -232,8 +232,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             # use classifier as a fallback if no calibrator is available
             calibrator = calibrator or classifier
             probabilities = calibrator.predict_proba(X)
-            # sort probabilities
-            #probabilities = self._reorder_local_probabilities(probabilities, calibrator.classes_, level)
             level_probability_list.append(probabilities)
         return level_probability_list
 
@@ -290,8 +288,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     
     def _initialize_local_calibrators(self):
         super()._initialize_local_calibrators()
-        #train_length = self.X_.shape[0]
-        #cal_length = self.X_cal.shape[0]
         self.local_calibrators_ = [
                 _Calibrator(estimator=local_classifier, method=self.calibration_method) for local_classifier in self.local_classifiers_
         ]
@@ -397,7 +393,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             return None
         
         X, y, _ = self._remove_empty_leaves(
-            separator, self.X_cal, self.y_cal[:, level], None #X_cross_val, y_cross_val
+            separator, self.X_cal, self.y_cal[:, level], None
         )
         if len(y) == 0 or len(np.unique(y)) < 2:
             self.logger_.info(f"No calibration samples to fit calibrator for level: {str(level)}")

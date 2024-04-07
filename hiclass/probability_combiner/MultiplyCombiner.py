@@ -5,6 +5,10 @@ from collections import defaultdict
 
 class MultiplyCombiner(ProbabilityCombiner):
     def combine(self, proba):
+        '''Combine probabilities of each level with probabilities of previous levels.
+        
+        Multiply node probabilities with the probabilities of its predecessors.
+        '''
         res = [proba[0]]
         for level in range(1, self.classifier.max_levels_):
             level_probs = np.zeros_like(proba[level])

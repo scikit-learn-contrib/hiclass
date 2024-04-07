@@ -121,7 +121,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
             The training input samples. Internally, its dtype will be converted
             to ``dtype=np.float32``. If a sparse matrix is provided, it will be
-            converted into a sparse ``csc_matrix``.
+            converted into a sparse ``csr_matrix``.
         y : array-like of shape (n_samples, n_levels)
             The target values, i.e., hierarchical class labels for classification.
         sample_weight : array-like of shape (n_samples,), default=None
@@ -198,7 +198,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                     successor_name = str(successor).split(self.separator_)[-1]
                     #self
                     self.logger_.info(f"Predicting for node '{successor_name}'")
-                    # TODO: use calibrator if using calibration to predict class
                     classifier = self.hierarchy_.nodes[successor]["classifier"]
                     positive_index = np.where(classifier.classes_ == 1)[0]
                     probabilities[:, i] = classifier.predict_proba(subset_x)[
@@ -408,7 +407,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         X, y, _ = self.cal_binary_policy_.get_binary_examples(node)
         if len(y) == 0 or len(np.unique(y)) < 2:
             self.logger_.info(f"No calibration samples to fit calibrator for node: {str(node)}")
-            #self.hierarchy_.nodes[node].pop('calibrator', None)
             return None
         calibrator.fit(X, y)
         return calibrator

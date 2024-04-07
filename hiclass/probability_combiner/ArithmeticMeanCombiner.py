@@ -5,6 +5,10 @@ from collections import defaultdict
 
 class ArithmeticMeanCombiner(ProbabilityCombiner):
     def combine(self, proba):
+        '''Combine probabilities of each level with probabilities of previous levels.
+        
+        Calculate the arithmetic mean of node probabilities and the probabilities of its predecessors.
+        '''
         res = [proba[0]]
         sums = [proba[0]]
         for level in range(1, self.classifier.max_levels_):

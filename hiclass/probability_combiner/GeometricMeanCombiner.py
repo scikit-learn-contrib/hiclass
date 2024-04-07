@@ -5,6 +5,10 @@ from collections import defaultdict
 
 class GeometricMeanCombiner(ProbabilityCombiner):
     def combine(self, proba):
+        '''Combine probabilities of each level with probabilities of previous levels.
+        
+        Calculate the geometric mean of node probabilities and the probabilities of its predecessors.
+        '''
         res = [proba[0]]
         log_sum = [np.log(proba[0])]
         for level in range(1, self.classifier.max_levels_):
