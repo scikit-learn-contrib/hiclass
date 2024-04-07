@@ -123,8 +123,8 @@ def test_inductive_venn_abers_calibrator(binary_calibration_data, binary_test_sc
     intervalls = calibrator.predict_intervall(test_scores[:, 1])
     proba = calibrator.predict_proba(test_scores[:, 1])
 
-    assert_array_almost_equal(calibrator.F1, np.array([0, 0.33333333, 0.375, 0.375, 0.4, 0.5, 0.5, 0.66666666, 0.66666666, 1.0, 1.0]))
-    assert_array_almost_equal(calibrator.F0, np.array([0, 0, 0.2, 0.2, 0.2, 0.25, 0.25, 0.33333333, 0.33333333, 0.5, 0.66666666]))
+    assert_array_almost_equal(calibrator._F1, np.array([0, 0.33333333, 0.375, 0.375, 0.4, 0.5, 0.5, 0.66666666, 0.66666666, 1.0, 1.0]))
+    assert_array_almost_equal(calibrator._F0, np.array([0, 0, 0.2, 0.2, 0.2, 0.25, 0.25, 0.33333333, 0.33333333, 0.5, 0.66666666]))
     assert_array_almost_equal(intervalls, np.array([[0.66666666, 1.0], [0.25, 0.66666666], [0, 0.33333333], [0.66666666, 1.0], [0, 0.33333333], [0.25, 0.5], [0,0.33333333]]))
     assert_array_almost_equal(proba, np.array([0.74999999, 0.47058823, 0.24999999, 0.74999999, 0.24999999, 0.4, 0.24999999]))
 

@@ -6,12 +6,11 @@ from hiclass._calibration.calibration_utils import _one_vs_rest_split
 from collections import defaultdict
 from sklearn.utils.validation import check_is_fitted
 
-
 class _InductiveVennAbersCalibrator(_BinaryCalibrator):
     name = "InductiveVennAbersCalibrator"
 
-    def __init__(self):
-        self._is_fitted = False
+    def __init__(self) -> None:
+        super().__init__()
 
     def fit(self, y, scores, X=None):
         positive_label = 1
@@ -20,162 +19,140 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
 
         y = np.where(y == positive_label, 1, 0)
         y = y.reshape(-1)  # make sure it's a 1D array
-        # sort all scores s1, ..., sk in increasing order
 
+        # sort all scores s1, ..., sk in increasing order
         order_idx = np.lexsort([y, scores])
         ordered_calibration_scores, ordered_calibration_labels = scores[order_idx], y[order_idx]
-        # remove duplicates
         unique_elements, unique_idx, unique_element_counts = np.unique(ordered_calibration_scores, return_index=True, return_counts=True)
         ordered_unique_calibration_scores, _ = ordered_calibration_scores[unique_idx], ordered_calibration_labels[unique_idx]
 
         self.k_distinct = len(unique_idx)
 
-        def compute_csd(un_el, un_el_counts, ocs, ocl, oucs):
+        ### compute csd
+        # Count the frequencies of each s'j
+        w = dict(zip(unique_elements, unique_element_counts))
+        y = np.zeros(self.k_distinct)
+        csd_1 = np.zeros((self.k_distinct + 1, 2))
 
-            # Count the frequencies of each s'j
-            w = dict(zip(un_el, un_el_counts))
+        for j in range(self.k_distinct):
+            s_j = ordered_unique_calibration_scores[j]
+            matching_idx = np.where(ordered_calibration_scores == s_j)
+            matching_labels = ordered_calibration_labels[matching_idx]
+            y[j] = np.sum(matching_labels) / w[unique_elements[j]]
+        
+        csd_1[1:, 0] = np.cumsum(unique_element_counts)
+        csd_1[1:, 1] = np.cumsum(y * unique_element_counts)
 
-            y = np.zeros(self.k_distinct)
-            csd = np.zeros((self.k_distinct + 1, 2))
+        csd_0 = csd_1.copy()
+        csd_0 = np.append(csd_0, [np.array([csd_0[-1][0] + 1, csd_0[-1][1] + 0])], axis=0)
+        csd_1 = np.insert(csd_1, 0, [np.array([(-1, -1)])], axis=0)
 
-            for j in range(self.k_distinct):
-                s_j = oucs[j]
-                matching_idx = np.where(ocs == s_j)
-                matching_labels = ocl[matching_idx]
-                y[j] = np.sum(matching_labels) / w[un_el[j]]
+        f1_stack = self._initialize_f1_corners(csd_1)
+        f0_stack = self._initialize_f0_corners(csd_0)
 
-            csd[1:, 0] = np.cumsum(un_el_counts)
-            csd[1:, 1] = np.cumsum(y * un_el_counts)
+        self._F1 = self._compute_f1(f1_stack, csd_1)
+        self._F0 = self._compute_f0(f0_stack, csd_0)
+        self._unique_elements = unique_elements
+        self._is_fitted = True
 
-            return list(csd)
-
-        def slope(top, next_to_top):
-            return (next_to_top[1] - top[1]) / (next_to_top[0] - top[0])
-
-        def at_or_above(p, cur_slope, top, next_to_top):
-            intersection_point = (p[0], top[1] + cur_slope * (p[0] - top[0]))
-            return p[1] >= intersection_point[1]
-
-        def non_left_angle_turn(next_to_top, top, p_i):
-            next_to_top = np.array(next_to_top)
-            top = np.array(top)
-            p_i = np.array(p_i)
-            res = np.cross((top - next_to_top), (p_i - top))
-            return res <= 0
-
-        def non_right_angle_turn(next_to_top, top, p_i):
-            next_to_top = np.array(next_to_top)
-            top = np.array(top)
-            p_i = np.array(p_i)
-            res = np.cross((top - next_to_top), (p_i - top))
-            return res >= 0
-
-        def initialize_f1_corners(csd):
+        return self
+    
+    def _non_left_angle_turn(self, next_to_top, top, p_i):
+        res = np.cross((top - next_to_top), (p_i - top))
+        return res <= 0
+    
+    def _non_right_angle_turn(self, next_to_top, top, p_i):
+        res = np.cross((top - next_to_top), (p_i - top))
+        return res >= 0
+    
+    def _initialize_f1_corners(self, csd):
             stack = []
             # append P_{-1} and P_0
             stack.append(csd[0])
             stack.append(csd[1])
 
             for i in range(2, len(csd)):
-                while len(stack) > 1 and non_left_angle_turn(next_to_top=stack[-2], top=stack[-1], p_i=csd[i]):
+                while len(stack) > 1 and self._non_left_angle_turn(next_to_top=stack[-2], top=stack[-1], p_i=csd[i]):
                     stack.pop()
                 stack.append(csd[i])
 
             return stack
-
-        def initialize_f0_corners(csd):
+    
+    def _initialize_f0_corners(self, csd):
             stack = []
             # append p_{k'+1}, p_{k'}
             stack.append(csd[-1])
             stack.append(csd[-2])
 
             for i in range(len(csd) - 3, -1, -1):
-                while len(stack) > 1 and non_right_angle_turn(next_to_top=stack[-2], top=stack[-1], p_i=csd[i]):
+                while len(stack) > 1 and self._non_right_angle_turn(next_to_top=stack[-2], top=stack[-1], p_i=csd[i]):
                     stack.pop()
                 stack.append(csd[i])
             return stack
 
-        point_addition = lambda p1, p2: tuple((p1[0] + p2[0], p1[1] + p2[1]))
-        point_subtraction = lambda p1, p2: tuple((p1[0] - p2[0], p1[1] - p2[1]))
+    def _slope(self, top, next_to_top):
+        return (next_to_top[1] - top[1]) / (next_to_top[0] - top[0])
 
-        def compute_f1(prev_stack, csd):
-            F1 = np.zeros(self.k_distinct + 1)
-            stack = []
-            while prev_stack:
-                stack.append(prev_stack.pop())
+    def _at_or_above(self, p, cur_slope, top):
+        intersection_point = (p[0], top[1] + cur_slope * (p[0] - top[0]))
+        return p[1] >= intersection_point[1]
 
-            for i in range(2, self.k_distinct + 2):
-                F1[i - 1] = slope(top=stack[-1], next_to_top=stack[-2])
-                # p_{i-1}
-                csd[i - 1] = point_subtraction(point_addition(csd[i - 2], csd[i]), csd[i - 1])
-                p_temp = csd[i - 1]
+    def _compute_f1(self, prev_stack, csd):
+        F1 = np.zeros(self.k_distinct + 1)
+        stack = []
+        while prev_stack:
+            stack.append(prev_stack.pop())
 
-                if at_or_above(p_temp, F1[i - 1], top=stack[-1], next_to_top=stack[-2]):
-                    continue
+        for i in range(2, self.k_distinct + 2):
+            F1[i - 1] = self._slope(top=stack[-1], next_to_top=stack[-2])
+            # p_{i-1}
+            csd[i - 1] = (csd[i - 2] + csd[i]) - csd[i - 1]
+            p_temp = csd[i - 1]
 
+            if self._at_or_above(p_temp, F1[i - 1], top=stack[-1]):
+                continue
+
+            stack.pop()
+            while len(stack) > 1 and self._non_left_angle_turn(p_temp, stack[-1], stack[-2]):
                 stack.pop()
-                while len(stack) > 1 and non_left_angle_turn(p_temp, stack[-1], stack[-2]):
-                    stack.pop()
-                stack.append(p_temp)
-            return F1
+            stack.append(p_temp)
+        return F1
 
-        def compute_f0(prev_stack, csd):
-            F0 = np.zeros(self.k_distinct + 1)
-            stack = []
-            while prev_stack:
-                stack.append(prev_stack.pop())
+    def _compute_f0(self, prev_stack, csd):
+        F0 = np.zeros(self.k_distinct + 1)
+        stack = []
+        while prev_stack:
+            stack.append(prev_stack.pop())
 
-            for i in range(self.k_distinct, 0, -1):
-                F0[i] = slope(top=stack[-1], next_to_top=stack[-2])
-                csd[i] = point_subtraction(point_addition(csd[i - 1], csd[i + 1]), csd[i])
+        for i in range(self.k_distinct, 0, -1):
+            F0[i] = self._slope(top=stack[-1], next_to_top=stack[-2])
+            csd[i] = (csd[i - 1] + csd[i + 1]) - csd[i]
 
-                if at_or_above(csd[i], F0[i], top=stack[-1], next_to_top=stack[-2]):
-                    continue
+            if self._at_or_above(csd[i], F0[i], top=stack[-1]):
+                continue
+            stack.pop()
+            while len(stack) > 1 and self._non_right_angle_turn(csd[i], stack[-1], stack[-2]):
                 stack.pop()
-                while len(stack) > 1 and non_right_angle_turn(csd[i], stack[-1], stack[-2]):
-                    stack.pop()
-                stack.append(csd[i])
-            return F0
-
-        csd_1 = compute_csd(
-            unique_elements,
-            unique_element_counts,
-            ordered_calibration_scores,
-            ordered_calibration_labels,
-            ordered_unique_calibration_scores
-        )
-        csd_0 = csd_1.copy()
-        csd_0.append((csd_0[-1][0] + 1, csd_0[-1][1] + 0))
-        csd_1.insert(0, (-1, -1))
-
-        f1_stack = initialize_f1_corners(csd_1)
-        f0_stack = initialize_f0_corners(csd_0)
-
-        self.F1 = compute_f1(f1_stack, csd_1)
-        self.F0 = compute_f0(f0_stack, csd_0)
-        self.unique_elements = unique_elements
-        self._is_fitted = True
-
-        return self
-
+            stack.append(csd[i])
+        return F0
+    
     def predict_proba(self, scores, X=None):
         check_is_fitted(self)
-        lower = np.searchsorted(self.unique_elements, scores, side="left")
-        upper = np.searchsorted(self.unique_elements[:-1], scores, side="right") + 1
+        lower = np.searchsorted(self._unique_elements, scores, side="left")
+        upper = np.searchsorted(self._unique_elements[:-1], scores, side="right") + 1
 
-        p0 = self.F0[lower]
-        p1 = self.F1[upper]
+        p0 = self._F0[lower]
+        p1 = self._F1[upper]
 
         return p1 / (1 - p0 + p1)
 
     def predict_intervall(self, scores):
-        lower = np.searchsorted(self.unique_elements, scores, side="left")
-        upper = np.searchsorted(self.unique_elements[:-1], scores, side="right") + 1
-        p0 = self.F0[lower]
-        p1 = self.F1[upper]
+        lower = np.searchsorted(self._unique_elements, scores, side="left")
+        upper = np.searchsorted(self._unique_elements[:-1], scores, side="right") + 1
+        p0 = self._F0[lower]
+        p1 = self._F1[upper]
 
         return np.array(list(zip(p0, p1)))
-
 
 class _CrossVennAbersCalibrator(_BinaryCalibrator):
     name = "CrossVennAbersCalibrator"
