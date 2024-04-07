@@ -4,7 +4,10 @@ Local classifier per node approach.
 Numeric and string output labels are both handled.
 """
 
+import hashlib
+import pickle
 from copy import deepcopy
+from os.path import exists
 
 import networkx as nx
 import numpy as np
@@ -49,7 +52,8 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         bert: bool = False,
         calibration_method: str = None,
         return_all_probabilities: bool = False,
-        probability_combiner: str = "geometric"
+        probability_combiner: str = "geometric",
+        tmp_dir: str = None,
     ):
         """
         Initialize a local classifier per node.
@@ -94,6 +98,9 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             - `geometric`: Each levels probabilities are calculated by taking the geometric mean of itself and its predecessors;
             - `arithmetic`: Each levels probabilities are calculated by taking the arithmetic mean of itself and its predecessors;
             - `multiply`: Each levels probabilities are calculated by multiplying itself with its predecessors.
+        tmp_dir : str, default=None
+            Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
+            it will skip the pre-trained local classifier found in the temporary directory.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -104,6 +111,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             classifier_abbreviation="LCPN",
             bert=bert,
             calibration_method=calibration_method,
+            tmp_dir=tmp_dir,
         )
         self.binary_policy = binary_policy
         self.return_all_probabilities = return_all_probabilities
@@ -383,6 +391,16 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
     @staticmethod
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
+        if self.tmp_dir:
+            md5 = hashlib.md5(node.encode("utf-8")).hexdigest()
+            filename = f"{self.tmp_dir}/{md5}.sav"
+            if exists(filename):
+                (_, classifier) = pickle.load(open(filename, "rb"))
+                self.logger_.info(
+                    f"Loaded trained model for local classifier {node.split(self.separator_)[-1]} from file {filename}"
+                )
+                return classifier
+        self.logger_.info(f"Training local classifier {node}")
         X, y, sample_weight = self.binary_policy_.get_binary_examples(node)
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
@@ -395,6 +413,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 classifier.fit(X, y)
         else:
             classifier.fit(X, y)
+        self._save_tmp(node, classifier)
         return classifier
 
     @staticmethod

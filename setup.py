@@ -23,15 +23,32 @@ URL_GITHUB = "https://github.com/scikit-learn-contrib/hiclass"
 URL_ISSUES = "https://github.com/scikit-learn-contrib/hiclass/issues"
 EMAIL = "fabio.malchermiranda@hpi.de, Niklas.Koehnecke@student.hpi.uni-potsdam.de"
 AUTHOR = "Fabio Malcher Miranda, Niklas Koehnecke"
-REQUIRES_PYTHON = ">=3.7,<3.12"
+REQUIRES_PYTHON = ">=3.8,<3.12"
 KEYWORDS = ["hierarchical classification"]
 DACS_SOFTWARE = "https://gitlab.com/dacs-hpi"
 # What packages are required for this module to be executed?
-REQUIRED = ["networkx", "numpy", "scikit-learn", "scipy"]
+REQUIRED = ["networkx", "numpy", "scikit-learn", "scipy==1.11.4"]
 
 # What packages are optional?
 # 'fancy feature': ['django'],}
-EXTRAS = {"ray": ["ray>=1.11.0"], "xai": ["shap", "xarray"]}
+EXTRAS = {
+    "ray": ["ray>=1.11.0"],
+    "xai": ["shap==0.44.1", "xarray==2023.1.0"],
+    "dev": [
+        "flake8==4.0.1",
+        "pytest==7.1.2",
+        "pytest-flake8==1.1.1",
+        "pydocstyle==6.1.1",
+        "pytest-pydocstyle==2.3.0",
+        "pytest-cov==3.0.0",
+        "pyfakefs==5.3.5",
+        "black==24.2.0",
+        "pre-commit==2.20.0",
+        "ray",
+        "shap==0.44.1",
+        "xarray==2023.1.0",
+    ],
+}
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -140,7 +157,6 @@ setup(
         "Operating System :: Unix",
         "Operating System :: MacOS",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",

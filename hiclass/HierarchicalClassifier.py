@@ -1,7 +1,9 @@
 """Shared code for all classifiers."""
 
 import abc
+import hashlib
 import logging
+import pickle
 
 import networkx as nx
 import numpy as np
@@ -77,6 +79,7 @@ class HierarchicalClassifier(abc.ABC):
         bert: bool = False,
         classifier_abbreviation: str = "",
         calibration_method: str = None,
+        tmp_dir: str = None,
     ):
         """
         Initialize a local hierarchical classifier.
@@ -104,6 +107,9 @@ class HierarchicalClassifier(abc.ABC):
             The abbreviation of the local hierarchical classifier to be displayed during logging.
         calibration_method : {"ivap", "cvap", "platt", "isotonic"}, str, default=None
             If set, use the desired method to calibrate probabilities returned by predict_proba().
+        tmp_dir : str, default=None
+            Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
+            it will skip the pre-trained local classifier found in the temporary directory.
         """
         self.local_classifier = local_classifier
         self.verbose = verbose
@@ -113,6 +119,7 @@ class HierarchicalClassifier(abc.ABC):
         self.bert = bert
         self.classifier_abbreviation = classifier_abbreviation
         self.calibration_method = calibration_method
+        self.tmp_dir = tmp_dir
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -465,7 +472,9 @@ class HierarchicalClassifier(abc.ABC):
         
     @staticmethod
     def _fit_classifier(self, node):
-        raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
+        raise NotImplementedError(
+            "Method should be implemented in the LCPN, LCPPN or LCPL"
+        )
 
     @staticmethod
     def _fit_calibrator(self, node):
@@ -505,3 +514,18 @@ class HierarchicalClassifier(abc.ABC):
 
             res.append(res_proba) 
         return res
+
+    def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
+        raise NotImplementedError(
+            "Method should be implemented in the LCPN, LCPPN or LCPL"
+        )
+
+    def _save_tmp(self, name, classifier):
+        if self.tmp_dir:
+            md5 = hashlib.md5(str(name).encode("utf-8")).hexdigest()
+            filename = f"{self.tmp_dir}/{md5}.sav"
+            with open(filename, "wb") as file:
+                pickle.dump((name, classifier), file)
+                self.logger_.info(
+                    f"Stored trained model for local classifier {str(name).split(self.separator_)[-1]} in file {filename}"
+                )

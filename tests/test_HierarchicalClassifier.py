@@ -216,6 +216,11 @@ def test_fit_classifier():
         HierarchicalClassifier._fit_classifier(None, None)
 
 
+def test_fit_digraph():
+    with pytest.raises(NotImplementedError):
+        HierarchicalClassifier._fit_digraph(None, None)
+
+
 def test_pre_fit_bert():
     classifier = HierarchicalClassifier()
     classifier.logger_ = logging.getLogger("HC")

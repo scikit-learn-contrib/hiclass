@@ -7,7 +7,7 @@ name = "pypi"
 networkx = "*"
 numpy = "*"
 scikit-learn = "*"
-scipy = "*"
+scipy = "1.11.4"
 
 [dev-packages]
 pytest = "7.1.2"
@@ -21,8 +21,11 @@ sphinx = "4.1.1"
 sphinx-rtd-theme = "0.5.2"
 black = "22.10.0"
 pre-commit = "2.20.0"
+pyfakefs = "*"
+shap = "0.44.1"
+xarray = "*"
 
 [extras]
 ray = "*"
-shap = "*"
+shap = "0.44.1"
 xarray = "*"

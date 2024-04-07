@@ -13,6 +13,7 @@ from hiclass._calibration.Calibrator import _Calibrator
 from hiclass.HierarchicalClassifier import make_leveled
 
 from hiclass import LocalClassifierPerNode
+
 from hiclass.BinaryPolicy import ExclusivePolicy
 
 

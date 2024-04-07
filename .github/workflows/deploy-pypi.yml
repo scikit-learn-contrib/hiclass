@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
     - uses: actions/checkout@v2
@@ -23,15 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8==4.0.1
-        python -m pip install pytest==7.1.2
-        python -m pip install pytest-flake8==1.1.1
-        python -m pip install pydocstyle==6.1.1
-        python -m pip install pytest-pydocstyle==2.3.0
-        python -m pip install pytest-cov==3.0.0
-        python -m pip install ray
-        python -m pip install 'importlib-metadata<4.3'
-        python -m pip install .
+        python -m pip install -e ".[dev]"
     - name: Test with pytest
       run: |
         pytest -v --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html
