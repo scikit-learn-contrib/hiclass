@@ -8,6 +8,7 @@ from sklearn.exceptions import NotFittedError
 from hiclass._calibration.VennAbersCalibrator import _InductiveVennAbersCalibrator, _CrossVennAbersCalibrator
 from hiclass._calibration.PlattScaling import _PlattScaling
 from hiclass._calibration.IsotonicRegression import _IsotonicRegression
+from hiclass._calibration.BetaCalibrator import _BetaCalibrator
 from hiclass._calibration.Calibrator import _Calibrator
 
 @pytest.fixture
@@ -157,13 +158,23 @@ def test_isotonic_regression(binary_calibration_data, binary_test_scores):
     assert proba.shape == (len(binary_test_scores),)
     assert_array_almost_equal(proba, np.array([1.0, 0.33333333, 0.0, 1.0, 0.0, 0.33333333, 0.0]))
 
+def test_beta_calibration(binary_calibration_data, binary_test_scores):
+    cal_scores, cal_labels = binary_calibration_data
+    calibrator = _BetaCalibrator()
+    calibrator.fit(cal_labels, cal_scores[:, 1])
+    proba = calibrator.predict_proba(binary_test_scores[:, 1])
+
+    assert proba.shape == (len(binary_test_scores),)
+    assert_array_almost_equal(proba, np.array([0.526125, 0.423743, 0.363907, 0.785855, 0.323201, 0.417089, 0.0]))
+
 def test_illegal_calibration_method_raises_error(binary_mock_estimator):
     with pytest.raises(ValueError, match="abc is not a valid calibration method."):
         _Calibrator(binary_mock_estimator, method="abc")
 
 def test_not_fitted_calibrator_throws_error(binary_test_scores, binary_mock_estimator):
     for calibrator in [_PlattScaling(), 
-                       _IsotonicRegression(), 
+                       _IsotonicRegression(),
+                       _BetaCalibrator(),
                        _InductiveVennAbersCalibrator(), 
                        _CrossVennAbersCalibrator(binary_mock_estimator)]:
             with pytest.raises(NotFittedError):

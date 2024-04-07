@@ -88,7 +88,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
         bert : bool, default=False
             If True, skip scikit-learn's checks and sample_weight passing for BERT.
-        calibration_method : {"ivap", "cvap", "platt", "isotonic"}, str, default=None
+        calibration_method : {"ivap", "cvap", "platt", "isotonic", "beta"}, str, default=None
             If set, use the desired method to calibrate probabilities returned by predict_proba().
         return_all_probabilities : bool, default=False
             If True, return probabilities for all levels. Otherwise, return only probabilities for the last level.

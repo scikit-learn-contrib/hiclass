@@ -5,11 +5,12 @@ from sklearn.preprocessing import LabelEncoder
 from hiclass._calibration.VennAbersCalibrator import _InductiveVennAbersCalibrator, _CrossVennAbersCalibrator
 from hiclass._calibration.IsotonicRegression import _IsotonicRegression
 from hiclass._calibration.PlattScaling import _PlattScaling
+from hiclass._calibration.BetaCalibrator import _BetaCalibrator
 from hiclass._calibration.calibration_utils import _one_vs_rest_split
 
 
 class _Calibrator(BaseEstimator):
-    available_methods = ["ivap", "cvap", "sigmoid", "isotonic"]
+    available_methods = ["ivap", "cvap", "sigmoid", "isotonic", "beta"]
     _multiclass_methods = ["cvap"]
 
     def __init__(self, estimator, method="ivap", **method_params) -> None:
@@ -112,6 +113,8 @@ class _Calibrator(BaseEstimator):
             return _PlattScaling()
         elif name == "isotonic":
             return _IsotonicRegression(params)
+        elif name == "beta":
+            return _BetaCalibrator()
 
     def __sklearn_is_fitted__(self):
         """

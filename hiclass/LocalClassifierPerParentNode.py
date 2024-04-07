@@ -74,7 +74,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
         bert : bool, default=False
             If True, skip scikit-learn's checks and sample_weight passing for BERT.
-        calibration_method : {"ivap", "cvap", "platt", "isotonic"}, str, default=None
+        calibration_method : {"ivap", "cvap", "platt", "isotonic", "beta"}, str, default=None
             If set, use the desired method to calibrate probabilities returned by predict_proba().
         return_all_probabilities : bool, default=False
             If True, return probabilities for all levels. Otherwise, return only probabilities for the last level.
@@ -310,7 +310,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         for row in masked_labels:
             if node == self.root_:
                 y.append(row[0])
-                self.logger_.info(y)
             else:
                 y.append(row[np.where(row == node)[0][0] + 1])
         y = np.array(y)
