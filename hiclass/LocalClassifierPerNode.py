@@ -118,7 +118,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         self.probability_combiner = probability_combiner
 
         if self.probability_combiner and self.probability_combiner not in probability_combiner_init_strings:
-                raise ValueError(f"probability_combiner must be one of {', '.join(probability_combiner_init_strings)} or None.")
+            raise ValueError(f"probability_combiner must be one of {', '.join(probability_combiner_init_strings)} or None.")
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -204,7 +204,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 probabilities = np.zeros((subset_x.shape[0], len(successors)))
                 for i, successor in enumerate(successors):
                     successor_name = str(successor).split(self.separator_)[-1]
-                    #self
                     self.logger_.info(f"Predicting for node '{successor_name}'")
                     classifier = self.hierarchy_.nodes[successor]["classifier"]
                     positive_index = np.where(classifier.classes_ == 1)[0]
@@ -220,7 +219,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 )
                 prediction = np.array(prediction)
                 y[mask, level] = prediction
-                
+
         y = self._convert_to_1d(y)
 
         self._remove_separator(y)
@@ -279,7 +278,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 mask = [True] * X.shape[0]
                 subset_x = X[mask]
             else:
-                mask = np.isin(y, self.global_classes_[level-1]).any(axis=1)
+                mask = np.isin(y, self.global_classes_[level - 1]).any(axis=1)
                 subset_x = X[mask]
 
             if subset_x.shape[0] > 0:
@@ -308,13 +307,13 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         # normalize probabilities
         level_probability_list = [
-            np.nan_to_num(level_probabilities / level_probabilities.sum(axis=1, keepdims=True)) 
-                for level_probabilities in level_probability_list
+            np.nan_to_num(level_probabilities / level_probabilities.sum(axis=1, keepdims=True))
+            for level_probabilities in level_probability_list
         ]
 
         # combine probabilities horizontally
         level_probability_list = self._combine_and_reorder(level_probability_list)
-        
+
         # combine probabilities vertically
         if self.probability_combiner:
             probability_combiner_ = self._create_probability_combiner(self.probability_combiner)
@@ -322,7 +321,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             level_probability_list = probability_combiner_.combine(level_probability_list)
 
         return level_probability_list if self.return_all_probabilities else level_probability_list[-1]
-
 
     def _initialize_binary_policy(self, calibration=False):
         if isinstance(self.binary_policy, str):

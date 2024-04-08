@@ -1,5 +1,6 @@
 from sklearn.pipeline import Pipeline as skPipeline
 
+
 class Pipeline(skPipeline):
     def __init__(self, steps, **kwargs):
         super().__init__(steps, **kwargs)

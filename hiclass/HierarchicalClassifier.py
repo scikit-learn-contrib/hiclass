@@ -239,14 +239,14 @@ class HierarchicalClassifier(abc.ABC):
             X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
         else:
             X = np.array(X)
-        
+
         if self.calibration_method == "cvap":
             # combine train and calibration dataset for cross validation
             if isinstance(self.X_, scipy.sparse._csr.csr_matrix):
                 self.X_cal = scipy.sparse.vstack([self.X_, X])
             else:
                 self.X_cal = np.vstack([self.X_, X])
-            
+
             y = make_leveled(y)
             y = self._disambiguate(y)
             y = self._convert_1d_y_to_2d(y)
@@ -257,7 +257,7 @@ class HierarchicalClassifier(abc.ABC):
             y = self._disambiguate(y)
             y = self._convert_1d_y_to_2d(y)
             self.y_cal = y
-            
+
         self.logger_.info("Calibrating")
 
         # Create a calibrator for each local classifier
@@ -417,7 +417,7 @@ class HierarchicalClassifier(abc.ABC):
         def logging_wrapper(func, idx, node, node_length):
             self.logger_.info(f"fitting node {idx+1}/{node_length}: {str(node)}")
             return func(self, node)
-        
+
         if self.n_jobs > 1:
             if _has_ray and not use_joblib:
                 if not ray.is_initialized:
@@ -427,7 +427,7 @@ class HierarchicalClassifier(abc.ABC):
                         ignore_reinit_error=True,
                     )
                 lcppn = ray.put(self)
-                _parallel_fit = ray.remote(self._fit_classifier) # TODO: use logging wrapper
+                _parallel_fit = ray.remote(self._fit_classifier)  # TODO: use logging wrapper
                 results = [_parallel_fit.remote(lcppn, node) for node in nodes]
                 classifiers = ray.get(results)
             else:
@@ -456,7 +456,7 @@ class HierarchicalClassifier(abc.ABC):
                     )
                 lcppn = ray.put(self)
                 _parallel_fit = ray.remote(self._fit_calibrator)
-                results = [_parallel_fit.remote(lcppn, node) for idx, node in enumerate(nodes)] # TODO: use logging wrapper
+                results = [_parallel_fit.remote(lcppn, node) for idx, node in enumerate(nodes)]  # TODO: use logging wrapper
                 calibrators = ray.get(results)
                 ray.shutdown()
             else:
@@ -469,7 +469,7 @@ class HierarchicalClassifier(abc.ABC):
 
         for calibrator, node in zip(calibrators, nodes):
             self.hierarchy_.nodes[node]["calibrator"] = calibrator
-        
+
     @staticmethod
     def _fit_classifier(self, node):
         raise NotImplementedError(
@@ -479,7 +479,7 @@ class HierarchicalClassifier(abc.ABC):
     @staticmethod
     def _fit_calibrator(self, node):
         raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
-    
+
     def _create_probability_combiner(self, name):
         if name == 'geometric':
             return GeometricMeanCombiner(self)
@@ -512,7 +512,7 @@ class HierarchicalClassifier(abc.ABC):
                 new_idx = self.class_to_index_mapping_[level][local_label]
                 res_proba[:, new_idx] += proba[level][:, old_idx]
 
-            res.append(res_proba) 
+            res.append(res_proba)
         return res
 
     def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):

@@ -276,16 +276,18 @@ def _prepare_data(classifier, y_true, y_prob, level, y_pred=None):
         if label in classifier_classes:
             old_idx = np.where(classifier_classes == label)[0][0]
             new_y_prob[:, idx] = y_prob[level][:, old_idx]
-    
+
     return y_true, y_pred, new_labels, new_y_prob
 
+
 def _aggregate_scores(scores, agg):
-        if agg == 'average':
-            return np.mean(scores)
-        if agg == 'sum':
-            return np.sum(scores)
-        if agg == None or agg == 'None':
-            return scores
+    if agg == 'average':
+        return np.mean(scores)
+    if agg == 'sum':
+        return np.sum(scores)
+    if agg is None or agg == 'None':
+        return scores
+
 
 def multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, agg='average'):
     scores = []
@@ -293,11 +295,13 @@ def multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarra
         scores.append(_multiclass_brier_score(classifier, y_true, y_prob, level))
     return _aggregate_scores(scores, agg)
 
+
 def log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, agg='average'):
     scores = []
     for level in range(make_leveled(y_true).shape[1]):
         scores.append(_log_loss(classifier, y_true, y_prob, level))
     return _aggregate_scores(scores, agg)
+
 
 def expected_calibration_error(classifier: HierarchicalClassifier, y_true, y_prob, y_pred, n_bins=10, agg='average'):
     scores = []
@@ -305,11 +309,13 @@ def expected_calibration_error(classifier: HierarchicalClassifier, y_true, y_pro
         scores.append(_expected_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins))
     return _aggregate_scores(scores, agg)
 
+
 def statistical_calibration_error(classifier, y_true, y_prob, y_pred, n_bins=10, agg='average'):
     scores = []
     for level in range(make_leveled(y_true).shape[1]):
         scores.append(_statistical_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins=n_bins))
     return _aggregate_scores(scores, agg)
+
 
 def adaptive_calibration_error(classifier, y_true, y_prob, y_pred, n_ranges=10, agg='average'):
     scores = []
@@ -317,16 +323,19 @@ def adaptive_calibration_error(classifier, y_true, y_prob, y_pred, n_ranges=10, 
         scores.append(_adaptive_calibration_error(classifier, y_true, y_prob, y_pred, level, n_ranges=n_ranges))
     return _aggregate_scores(scores, agg)
 
+
 def _multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, level: int):
     y_true, _, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level)
     label_encoder = LabelEncoder()
     label_encoder.fit(labels)
     y_true_encoded = label_encoder.transform(y_true)
-    return (1/y_prob.shape[0]) * np.sum(np.sum(np.square(y_prob - np.eye(y_prob.shape[1])[y_true_encoded]), axis=1))
+    return (1 / y_prob.shape[0]) * np.sum(np.sum(np.square(y_prob - np.eye(y_prob.shape[1])[y_true_encoded]), axis=1))
+
 
 def _log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, level: int):
     y_true, _, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level)
     return sk_log_loss(y_true, y_prob, labels=labels)
+
 
 def _expected_calibration_error(classifier: HierarchicalClassifier, y_true, y_prob, y_pred, level, n_bins=10):
     y_true, y_pred, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level, y_pred)
@@ -337,19 +346,19 @@ def _expected_calibration_error(classifier: HierarchicalClassifier, y_true, y_pr
 
     y_true_encoded = label_encoder.transform(y_true)
     y_pred_encoded = label_encoder.transform(y_pred)
-    
+
     y_prob = np.max(y_prob, axis=1)
     stacked = np.column_stack([y_prob, y_pred_encoded, y_true_encoded])
 
     # calculate equally sized bins
-    _, bin_edges = np.histogram(stacked, bins=n_bins, range=(0,1))
+    _, bin_edges = np.histogram(stacked, bins=n_bins, range=(0, 1))
     bin_indices = np.digitize(stacked, bin_edges)[:, 0]
 
     # add bin index to each data point
     data = np.column_stack([stacked, bin_indices])
 
     # create bin mask
-    masks = (data[:, -1, None] == range(1, n_bins+1)).T
+    masks = (data[:, -1, None] == range(1, n_bins + 1)).T
 
     # create actual bins
     bins = [data[masks[i]] for i in range(n_bins)]
@@ -363,6 +372,7 @@ def _expected_calibration_error(classifier: HierarchicalClassifier, y_true, y_pr
         conf[i] = 1 / (bins[i].shape[0]) * np.sum(bins[i][:, 0]) if bins[i].shape[0] != 0 else 0
         ece += (bins[i].shape[0] / n) * abs(acc[i] - conf[i]) if bins[i].shape[0] != 0 else 0
     return ece
+
 
 def _statistical_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins=10):
     y_true, y_pred, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level, y_pred)
@@ -383,15 +393,15 @@ def _statistical_calibration_error(classifier, y_true, y_prob, y_pred, level, n_
         stacked = np.column_stack([class_scores, y_pred_encoded, y_true_encoded])
 
         # create bins
-        _, bin_edges = np.histogram(stacked, bins=n_bins, range=(0,1))
+        _, bin_edges = np.histogram(stacked, bins=n_bins, range=(0, 1))
         bin_indices = np.digitize(stacked, bin_edges)[:, 0]
 
         # add bin index to each data point
         data = np.column_stack([stacked, bin_indices])
 
         # create bin mask
-        masks = (data[:, -1, None] == range(1, n_bins+1)).T
-        
+        masks = (data[:, -1, None] == range(1, n_bins + 1)).T
+
         # create actual bins
         bins = [data[masks[i]] for i in range(n_bins)]
 
@@ -403,10 +413,11 @@ def _statistical_calibration_error(classifier, y_true, y_prob, y_pred, level, n_
             acc[i] = 1 / (bins[i].shape[0]) * np.sum((bins[i][:, 1] == bins[i][:, 2])) if bins[i].shape[0] != 0 else 0
             conf[i] = 1 / (bins[i].shape[0]) * np.sum(bins[i][:, 0]) if bins[i].shape[0] != 0 else 0
             error += (bins[i].shape[0] / n_samples) * abs(acc[i] - conf[i]) if bins[i].shape[0] != 0 else 0
-        
+
         class_error[k] = error
-            
+
     return np.mean(class_error)
+
 
 def _adaptive_calibration_error(classifier, y_true, y_prob, y_pred, level, n_ranges=10):
     y_true, y_pred, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level, y_pred)
@@ -428,15 +439,15 @@ def _adaptive_calibration_error(classifier, y_true, y_prob, y_pred, level, n_ran
         class_scores, ordered_y_pred_labels, ordered_y_true = class_scores[idx], y_pred_encoded[idx], y_true_encoded[idx]
         stacked = np.column_stack([np.array(range(len(class_scores))), class_scores, ordered_y_pred_labels, ordered_y_true])
 
-        bin_edges = np.floor(np.linspace(0, len(class_scores), n_ranges+1, endpoint=True)).astype(int)
-        _, bin_edges = np.histogram(stacked, bins=bin_edges, range=(0,len(class_scores)))
+        bin_edges = np.floor(np.linspace(0, len(class_scores), n_ranges + 1, endpoint=True)).astype(int)
+        _, bin_edges = np.histogram(stacked, bins=bin_edges, range=(0, len(class_scores)))
         bin_indices = np.digitize(stacked, bin_edges)[:, 0]
 
         # add bin index to each data point
         data = np.column_stack([stacked, bin_indices])
 
         # create bin mask
-        masks = (data[:, -1, None] == range(1, n_ranges+1)).T
+        masks = (data[:, -1, None] == range(1, n_ranges + 1)).T
 
         # create actual bins
         bins = [data[masks[i]] for i in range(n_ranges)]
@@ -449,7 +460,7 @@ def _adaptive_calibration_error(classifier, y_true, y_prob, y_pred, level, n_ran
             acc[i] = 1 / (bins[i].shape[0]) * np.sum((bins[i][:, 2] == bins[i][:, 3])) if bins[i].shape[0] != 0 else 0
             conf[i] = 1 / (bins[i].shape[0]) * np.sum(bins[i][:, 1]) if bins[i].shape[0] != 0 else 0
             error += abs(acc[i] - conf[i]) if bins[i].shape[0] != 0 else 0
-        
+
         class_error[k] = error
 
-    return (1/(n_classes*n_ranges)) * np.sum(class_error)
+    return (1 / (n_classes * n_ranges)) * np.sum(class_error)

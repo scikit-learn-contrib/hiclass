@@ -194,7 +194,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         self._remove_separator(y)
 
         return y
-    
+
     def predict_proba(self, X):
         # Check if fit has been called
         check_is_fitted(self)
@@ -242,7 +242,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             probabilities = calibrator.predict_proba(X)
             level_probability_list.append(probabilities)
         return level_probability_list
-
 
     def _predict_remaining_levels(self, X, y):
         for level in range(1, y.shape[1]):
@@ -293,11 +292,11 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             deepcopy(self.local_classifier_) for _ in range(self.y_.shape[1])
         ]
         self.masks_ = [None for _ in range(self.y_.shape[1])]
-    
+
     def _initialize_local_calibrators(self):
         super()._initialize_local_calibrators()
         self.local_calibrators_ = [
-                _Calibrator(estimator=local_classifier, method=self.calibration_method) for local_classifier in self.local_classifiers_
+            _Calibrator(estimator=local_classifier, method=self.calibration_method) for local_classifier in self.local_classifiers_
         ]
 
     def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
@@ -334,7 +333,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             ]
         for level, classifier in enumerate(classifiers):
             self.local_classifiers_[level] = classifier
-    
+
     def _calibrate_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local calibrators")
 
@@ -357,20 +356,19 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
                     for level in range(len(self.local_calibrators_))
                 ]
                 calibrators = ray.get(results)
-                
+
             else:
                 calibrators = Parallel(n_jobs=self.n_jobs)(
                     delayed(logging_wrapper)(self._fit_calibrator, level, self.separator_, len(self.local_calibrators_)) for level in range(len(self.local_calibrators_))
-                )  
+                )
         else:
             calibrators = [
                 logging_wrapper(self._fit_calibrator, level, self.separator_, len(self.local_calibrators_))
                 for level in range(len(self.local_calibrators_))
             ]
-        
+
         for level, calibrator in enumerate(calibrators):
             self.local_calibrators_[level] = calibrator
-        
 
     @staticmethod
     def _fit_classifier(self, level, separator):
@@ -406,10 +404,10 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     def _fit_calibrator(self, level, separator):
         try:
             calibrator = self.local_calibrators_[level]
-        except:
+        except IndexError:
             self.logger_.info("no calibrator for " + "level: " + str(level))
             return None
-        
+
         X, y, _ = self._remove_empty_leaves(
             separator, self.X_cal, self.y_cal[:, level], None
         )

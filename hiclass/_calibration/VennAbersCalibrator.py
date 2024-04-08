@@ -6,6 +6,7 @@ from hiclass._calibration.calibration_utils import _one_vs_rest_split
 from collections import defaultdict
 from sklearn.utils.validation import check_is_fitted
 
+
 class _InductiveVennAbersCalibrator(_BinaryCalibrator):
     name = "InductiveVennAbersCalibrator"
 
@@ -39,7 +40,7 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
             matching_idx = np.where(ordered_calibration_scores == s_j)
             matching_labels = ordered_calibration_labels[matching_idx]
             y[j] = np.sum(matching_labels) / w[unique_elements[j]]
-        
+
         csd_1[1:, 0] = np.cumsum(unique_element_counts)
         csd_1[1:, 1] = np.cumsum(y * unique_element_counts)
 
@@ -56,39 +57,39 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
         self._is_fitted = True
 
         return self
-    
+
     def _non_left_angle_turn(self, next_to_top, top, p_i):
         res = np.cross((top - next_to_top), (p_i - top))
         return res <= 0
-    
+
     def _non_right_angle_turn(self, next_to_top, top, p_i):
         res = np.cross((top - next_to_top), (p_i - top))
         return res >= 0
-    
+
     def _initialize_f1_corners(self, csd):
-            stack = []
-            # append P_{-1} and P_0
-            stack.append(csd[0])
-            stack.append(csd[1])
+        stack = []
+        # append P_{-1} and P_0
+        stack.append(csd[0])
+        stack.append(csd[1])
 
-            for i in range(2, len(csd)):
-                while len(stack) > 1 and self._non_left_angle_turn(next_to_top=stack[-2], top=stack[-1], p_i=csd[i]):
-                    stack.pop()
-                stack.append(csd[i])
+        for i in range(2, len(csd)):
+            while len(stack) > 1 and self._non_left_angle_turn(next_to_top=stack[-2], top=stack[-1], p_i=csd[i]):
+                stack.pop()
+            stack.append(csd[i])
 
-            return stack
-    
+        return stack
+
     def _initialize_f0_corners(self, csd):
-            stack = []
-            # append p_{k'+1}, p_{k'}
-            stack.append(csd[-1])
-            stack.append(csd[-2])
+        stack = []
+        # append p_{k'+1}, p_{k'}
+        stack.append(csd[-1])
+        stack.append(csd[-2])
 
-            for i in range(len(csd) - 3, -1, -1):
-                while len(stack) > 1 and self._non_right_angle_turn(next_to_top=stack[-2], top=stack[-1], p_i=csd[i]):
-                    stack.pop()
-                stack.append(csd[i])
-            return stack
+        for i in range(len(csd) - 3, -1, -1):
+            while len(stack) > 1 and self._non_right_angle_turn(next_to_top=stack[-2], top=stack[-1], p_i=csd[i]):
+                stack.pop()
+            stack.append(csd[i])
+        return stack
 
     def _slope(self, top, next_to_top):
         return (next_to_top[1] - top[1]) / (next_to_top[0] - top[0])
@@ -135,7 +136,7 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
                 stack.pop()
             stack.append(csd[i])
         return F0
-    
+
     def predict_proba(self, scores, X=None):
         check_is_fitted(self)
         lower = np.searchsorted(self._unique_elements, scores, side="left")
@@ -153,6 +154,7 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
         p1 = self._F1[upper]
 
         return np.array(list(zip(p0, p1)))
+
 
 class _CrossVennAbersCalibrator(_BinaryCalibrator):
     name = "CrossVennAbersCalibrator"
@@ -180,7 +182,7 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
                 splits_x.append((X[train_index], X[cal_index]))
                 splits_y.append((y[train_index], y[cal_index]))
         except ValueError:
-                splits_x, splits_y = [], []
+            splits_x, splits_y = [], []
 
         # don't use cross validation
         if len(splits_x) == 0 or any([(len(np.unique(y_train)) < 2 or len(np.unique(y_cal)) < 2) for y_train, y_cal in splits_y]):
@@ -189,7 +191,7 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
 
             if len(unique_labels) > 2:
                 # use one vs rest
-                score_splits, label_splits = _one_vs_rest_split(y, scores, self.estimator) # TODO use only original calibration samples
+                score_splits, label_splits = _one_vs_rest_split(y, scores, self.estimator)  # TODO use only original calibration samples
                 for i in range(len(score_splits)):
                     # create a calibrator for each split
                     calibrator = _InductiveVennAbersCalibrator()
@@ -197,7 +199,7 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
                     self.ivaps.append(calibrator)
             elif len(unique_labels) == 2 and scores.ndim == 1:
                 calibrator = _InductiveVennAbersCalibrator()
-                calibrator.fit(y, scores) # TODO use only original calibration samples
+                calibrator.fit(y, scores)  # TODO use only original calibration samples
                 self.ivaps.append(calibrator)
             else:
                 print("no fitted ivaps!")
@@ -216,7 +218,7 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
 
                 # calibrate IVAP with left out dataset
                 calibration_scores = model.predict_proba(X_cal)
-                
+
                 if calibration_scores.shape[1] > 2:
                     self.multiclass = True
                     # one vs rest calibration
@@ -259,9 +261,9 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
 
                     for calibrator in self.ovr_ivaps[idx]:
                         res.append(calibrator.predict_intervall(scores))
-                    
+
                     res = np.array(res)
-                    
+
                     p0 = res[:, :, 0]
                     p1 = res[:, :, 1]
 
@@ -271,8 +273,8 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
             else:
                 for idx, scores in enumerate(score_splits):
                     probabilities[:, idx] = self.ivaps[idx].predict_proba(scores)
-                    
-            # normalize       
+
+            # normalize
             probabilities /= probabilities.sum(axis=1, keepdims=True)
             return probabilities
 
@@ -280,7 +282,7 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
             res = []
             for calibrator in self.ivaps:
                 res.append(calibrator.predict_intervall(scores))
-            
+
             res = np.array(res)
             p0 = res[:, :, 0]
             p1 = res[:, :, 1]

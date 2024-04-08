@@ -17,13 +17,12 @@ class _Calibrator(BaseEstimator):
         assert callable(getattr(estimator, 'predict_proba', None))
         self.estimator = estimator
         self.method_params = method_params
-        #self.classes_ = self.estimator.classes_
+        # self.classes_ = self.estimator.classes_
         self.multiclass = False
         self.multiclass_support = (method in self._multiclass_methods)
         if method not in self.available_methods:
             raise ValueError(f"{method} is not a valid calibration method.")
         self.method = method
-    
 
     def fit(self, X, y):
         """
@@ -77,7 +76,6 @@ class _Calibrator(BaseEstimator):
             self.calibrators.append(calibrator)
         self._is_fitted = True
         return self
-    
 
     def predict_proba(self, X):
         test_scores = self.estimator.predict_proba(X)

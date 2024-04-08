@@ -20,6 +20,7 @@ from hiclass._calibration.Calibrator import _Calibrator
 
 from hiclass.probability_combiner import init_strings as probability_combiner_init_strings
 
+
 class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
     """
     Assign local classifiers to each parent node of the graph.
@@ -185,7 +186,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         self._remove_separator(y)
 
         return y
-    
+
     def predict_proba(self, X):
         # Check if fit has been called
         check_is_fitted(self)
@@ -198,7 +199,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
         if not self.calibration_method:
             self.logger_.info("It is not recommended to use predict_proba() without calibration")
-        
+
         self.logger_.info("Predicting Probability")
 
         # Initialize array that holds predictions
@@ -212,7 +213,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
         y[:, 0] = calibrator.classes_[np.argmax(proba, axis=1)]
         level_probability_list = [proba] + self._predict_proba_remaining_levels(X, y)
-    
+
         level_probability_list = self._combine_and_reorder(level_probability_list)
 
         # combine probabilities
@@ -220,7 +221,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             probability_combiner_ = self._create_probability_combiner(self.probability_combiner)
             self.logger_.info(f"Combining probabilities using {type(probability_combiner_).__name__}")
             level_probability_list = probability_combiner_.combine(level_probability_list)
-        
+
         return level_probability_list if self.return_all_probabilities else level_probability_list[-1]
 
     def _predict_proba_remaining_levels(self, X, y):
@@ -232,7 +233,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             cur_level_probabilities = np.zeros((X.shape[0], level_dimension))
 
             for predecessor in predecessors:
-                mask = np.isin(y[:, level - 1], self.global_classes_[level-1])
+                mask = np.isin(y[:, level - 1], self.global_classes_[level - 1])
                 predecessor_x = X[mask]
                 if predecessor_x.shape[0] > 0:
                     successors = list(self.hierarchy_.successors(predecessor))
@@ -251,15 +252,15 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
                             cur_level_probabilities[mask, class_index] = proba[:, proba_index]
 
             level_probability_list.append(cur_level_probabilities)
-        
+
         # normalize probabilities
         level_probability_list = [
-            np.nan_to_num(level_probabilities / level_probabilities.sum(axis=1, keepdims=True)) 
-                for level_probabilities in level_probability_list
+            np.nan_to_num(level_probabilities / level_probabilities.sum(axis=1, keepdims=True))
+            for level_probabilities in level_probability_list
         ]
 
         return level_probability_list
-        
+
     def _predict_remaining_levels(self, X, y):
         for level in range(1, y.shape[1]):
             predecessors = set(y[:, level - 1])
@@ -359,12 +360,12 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             return None
         calibrator.fit(X, y)
         return calibrator
-        
+
     def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local classifiers")
         nodes = self._get_parents()
         self._fit_node_classifier(nodes, local_mode, use_joblib)
-    
+
     def _calibrate_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         self.logger_.info("Fitting local calibrators")
         nodes = self._get_parents()

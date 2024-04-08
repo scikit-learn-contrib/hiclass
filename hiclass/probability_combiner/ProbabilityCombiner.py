@@ -4,6 +4,7 @@ from typing import List
 from collections import defaultdict
 from networkx.exception import NetworkXError
 
+
 class ProbabilityCombiner(abc.ABC):
 
     def __init__(self, classifier, normalize=True) -> None:
@@ -13,13 +14,13 @@ class ProbabilityCombiner(abc.ABC):
     @abc.abstractmethod
     def combine(self, proba: List[np.ndarray]) -> List[np.ndarray]:
         ...
-    
+
     def _normalize(self, proba):
         return [
-            np.nan_to_num(level_probabilities / level_probabilities.sum(axis=1, keepdims=True)) 
-                for level_probabilities in proba
+            np.nan_to_num(level_probabilities / level_probabilities.sum(axis=1, keepdims=True))
+            for level_probabilities in proba
         ]
-    
+
     def _find_predecessors(self, level):
         predecessors = defaultdict(list)
         for node in self.classifier.global_classes_[level]:
