@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-============================================
-Explaining Local Classifier Per Parent Node
-============================================
+=========================================
+Explaining Local Classifier Per Node
+=========================================
 
-A minimalist example showing how to use HiClass Explainer to obtain SHAP values of LCPPN model.
+A minimalist example showing how to use HiClass Explainer to obtain SHAP values of LCPN model.
 A detailed summary of the Explainer class has been given at Algorithms Overview Section for :ref:`Hierarchical Explainability`.
 SHAP values are calculated based on a synthetic platypus diseases dataset that can be downloaded `here <https://gist.githubusercontent.com/ashishpatel16/9306f8ed3ed101e7ddcb519776bcbd80/raw/3f225c3f80dd8cbb1b6252f6c372a054ec968705/platypus_diseases.csv>`_.
 """
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from hiclass import LocalClassifierPerParentNode, Explainer
-import shap
+from hiclass import LocalClassifierPerNode, Explainer
 from hiclass.datasets import load_platypus
+import shap
 
 # Load train and test splits
 X_train, X_test, Y_train, Y_test = load_platypus()
 
 # Use random forest classifiers for every node
 rfc = RandomForestClassifier()
-classifier = LocalClassifierPerParentNode(
-    local_classifier=rfc, replace_classifiers=False
-)
+classifier = LocalClassifierPerNode(local_classifier=rfc, replace_classifiers=False)
 
-# Train local classifier per parent node
+# Train local classifier per node
 classifier.fit(X_train, Y_train)
 
 # Define Explainer
@@ -34,7 +33,7 @@ print(explanations)
 respiratory_idx = classifier.predict(X_test)[:, 0] == "Respiratory"
 
 # Specify additional filters to obtain only level 0
-shap_filter = {"level": 0, "class": "Respiratory", "sample": respiratory_idx}
+shap_filter = {"level": 0, "class": "Respiratory_1", "sample": respiratory_idx}
 
 # Use .sel() method to apply the filter and obtain filtered results
 shap_val_respiratory = explanations.sel(shap_filter)
