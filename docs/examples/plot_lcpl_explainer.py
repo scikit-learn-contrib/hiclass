@@ -45,10 +45,10 @@ explanations = explainer.explain(x_test)
 print("Explanations are", explanations)
 
 
-'''
+"""
 Explanations can be easily filtered with .sel() method
 Let's consider level 1 of the LCPL hierarchy
-'''
+"""
 
 # Define a level
 level = 1
