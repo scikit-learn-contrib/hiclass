@@ -188,6 +188,24 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         return y
 
     def predict_proba(self, X):
+        """
+        Predict class probabilities for the given data.
+
+        Hierarchical labels are returned.
+        If return_all_probabilities=True: Returns the probabilities for each level.
+        Else: Returns the probabilities for the lowest level.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            The input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csr_matrix``.
+        Returns
+        -------
+        T : ndarray of shape (n_samples,n_classes) or List[ndarray(n_samples,n_classes)]
+            The predicted probabilities of the lowest levels or of all levels.
+        """
         # Check if fit has been called
         check_is_fitted(self)
 

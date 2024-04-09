@@ -12,7 +12,5 @@ class _BinaryCalibrator(abc.ABC):
         ...
 
     def __sklearn_is_fitted__(self):
-        """
-        Check fitted status and return a Boolean value.
-        """
+        """Check fitted status and return a Boolean value."""
         return hasattr(self, "_is_fitted") and self._is_fitted

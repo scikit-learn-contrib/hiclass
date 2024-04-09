@@ -1,13 +1,16 @@
+"""Defines the MultiplyCombiner."""
 import numpy as np
 from hiclass.probability_combiner.ProbabilityCombiner import ProbabilityCombiner
 
 
 class MultiplyCombiner(ProbabilityCombiner):
+    """Combine probabilities of multiple levels by multiplication."""
+
     def combine(self, proba):
-        '''Combine probabilities of each level with probabilities of previous levels.
+        """Combine probabilities of each level with probabilities of previous levels.
 
         Multiply node probabilities with the probabilities of its predecessors.
-        '''
+        """
         res = [proba[0]]
         for level in range(1, self.classifier.max_levels_):
             level_probs = np.zeros_like(proba[level])

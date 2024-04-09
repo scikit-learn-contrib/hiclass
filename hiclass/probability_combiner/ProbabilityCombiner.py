@@ -1,3 +1,4 @@
+"""Abstract class defining the structure of a probability combiner."""
 import abc
 import numpy as np
 from typing import List
@@ -6,13 +7,16 @@ from networkx.exception import NetworkXError
 
 
 class ProbabilityCombiner(abc.ABC):
+    """Abstract class defining the structure of a probability combiner."""
 
     def __init__(self, classifier, normalize=True) -> None:
+        """Initialize probability combiner object."""
         self.classifier = classifier
         self.normalize = normalize
 
     @abc.abstractmethod
     def combine(self, proba: List[np.ndarray]) -> List[np.ndarray]:
+        """Combine probabilities over multiple levels."""
         ...
 
     def _normalize(self, proba):
