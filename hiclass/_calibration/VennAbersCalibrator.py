@@ -5,6 +5,7 @@ from scipy.stats import gmean
 from hiclass._calibration.calibration_utils import _one_vs_rest_split
 from collections import defaultdict
 from sklearn.utils.validation import check_is_fitted
+from sklearn.base import BaseEstimator
 
 
 class _InductiveVennAbersCalibrator(_BinaryCalibrator):
@@ -13,7 +14,7 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
     def __init__(self) -> None:
         super().__init__()
 
-    def fit(self, y, scores, X=None):
+    def fit(self, y: np.ndarray, scores: np.ndarray, X: np.ndarray = None):
         positive_label = 1
         unique_labels = np.unique(y)
         assert len(unique_labels) <= 2
@@ -137,7 +138,7 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
             stack.append(csd[i])
         return F0
 
-    def predict_proba(self, scores, X=None):
+    def predict_proba(self, scores: np.ndarray, X: np.ndarray = None):
         check_is_fitted(self)
         lower = np.searchsorted(self._unique_elements, scores, side="left")
         upper = np.searchsorted(self._unique_elements[:-1], scores, side="right") + 1
@@ -147,7 +148,7 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
 
         return p1 / (1 - p0 + p1)
 
-    def predict_intervall(self, scores):
+    def predict_intervall(self, scores: np.ndarray):
         lower = np.searchsorted(self._unique_elements, scores, side="left")
         upper = np.searchsorted(self._unique_elements[:-1], scores, side="right") + 1
         p0 = self._F0[lower]
@@ -159,7 +160,7 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
 class _CrossVennAbersCalibrator(_BinaryCalibrator):
     name = "CrossVennAbersCalibrator"
 
-    def __init__(self, estimator, n_folds=5) -> None:
+    def __init__(self, estimator: BaseEstimator, n_folds: int = 5) -> None:
         self._is_fitted = False
         self.n_folds = n_folds
         self.estimator_type = type(estimator)
@@ -169,7 +170,7 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
         self.use_estimator_fallback = False
         self.used_cv = True
 
-    def fit(self, y, scores, X):
+    def fit(self, y: np.ndarray, scores: np.ndarray, X: np.ndarray):
         unique_labels = np.unique(y)
         assert len(unique_labels) >= 2
         self.ivaps = []
@@ -242,7 +243,7 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
 
         return self
 
-    def predict_proba(self, scores):
+    def predict_proba(self, scores: np.ndarray):
         check_is_fitted(self)
 
         if self.use_estimator_fallback:

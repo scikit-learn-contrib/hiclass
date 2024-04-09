@@ -283,7 +283,7 @@ def _prepare_data(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob
 _calibration_aggregations = ["average", "sum", "None"]
 
 
-def _aggregate_scores(scores, agg):
+def _aggregate_scores(scores: np.ndarray, agg: str):
     if agg == 'average':
         return np.mean(scores)
     if agg == 'sum':
@@ -292,7 +292,7 @@ def _aggregate_scores(scores, agg):
         return scores
 
 
-def _validate_args(agg, y_prob, level):
+def _validate_args(agg: str, y_prob: np.ndarray, level: int):
     if agg and agg not in _calibration_aggregations:
         raise ValueError(f"{agg} is not a valid aggregation function.")
     if isinstance(y_prob, list) and len(y_prob) == 0:
@@ -304,7 +304,7 @@ def _validate_args(agg, y_prob, level):
     return y_prob
 
 
-def multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], agg='average', level=None):
+def multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], agg: str = 'average', level: int = None):
     """Compute the brier score for two or more classes.
 
     Parameters
@@ -337,7 +337,7 @@ def multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarra
     return _multiclass_brier_score(classifier, y_true, y_prob, level)
 
 
-def log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], agg='average', level=None):
+def log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], agg: str = 'average', level: int = None):
     """Compute the log loss of predicted probabilities.
 
     Parameters
@@ -370,7 +370,7 @@ def log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Uni
     return _multiclass_brier_score(classifier, y_true, y_prob, level)
 
 
-def expected_calibration_error(classifier: HierarchicalClassifier, y_true, y_prob: Union[np.ndarray | List], y_pred, n_bins=10, agg='average', level=None):
+def expected_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], y_pred: np.ndarray, n_bins: int = 10, agg: str = 'average', level: int = None):
     """Compute the expected calibration error.
 
     Parameters
@@ -407,7 +407,7 @@ def expected_calibration_error(classifier: HierarchicalClassifier, y_true, y_pro
     return _expected_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins)
 
 
-def static_calibration_error(classifier, y_true, y_prob: Union[np.ndarray | List], y_pred, n_bins=10, agg='average', level=None):
+def static_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], y_pred: np.ndarray, n_bins: int = 10, agg: str = 'average', level: int = None):
     """Compute the static calibration error.
 
     Parameters
@@ -444,7 +444,7 @@ def static_calibration_error(classifier, y_true, y_prob: Union[np.ndarray | List
     return _static_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins=n_bins)
 
 
-def adaptive_calibration_error(classifier, y_true, y_prob: Union[np.ndarray | List], y_pred, n_ranges=10, agg='average', level=None):
+def adaptive_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], y_pred: np.ndarray, n_ranges: int = 10, agg: str = 'average', level: int = None):
     """Compute the adaptive calibration error.
 
     Parameters
@@ -494,7 +494,7 @@ def _log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np
     return sk_log_loss(y_true, y_prob, labels=labels)
 
 
-def _expected_calibration_error(classifier: HierarchicalClassifier, y_true, y_prob, y_pred, level, n_bins=10):
+def _expected_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, y_pred: np.ndarray, level: int, n_bins: int = 10):
     y_true, y_pred, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level, y_pred)
 
     n = len(y_true)
@@ -531,7 +531,7 @@ def _expected_calibration_error(classifier: HierarchicalClassifier, y_true, y_pr
     return ece
 
 
-def _static_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins=10):
+def _static_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, y_pred: np.ndarray, level: int, n_bins: int = 10):
     y_true, y_pred, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level, y_pred)
 
     n_samples, n_classes = y_prob.shape
@@ -576,7 +576,7 @@ def _static_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins=
     return np.mean(class_error)
 
 
-def _adaptive_calibration_error(classifier, y_true, y_prob, y_pred, level, n_ranges=10):
+def _adaptive_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, y_pred: np.ndarray, level: int, n_ranges: int = 10):
     y_true, y_pred, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level, y_pred)
 
     _, n_classes = y_prob.shape

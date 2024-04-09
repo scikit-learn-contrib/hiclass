@@ -13,7 +13,7 @@ class _Calibrator(BaseEstimator):
     available_methods = ["ivap", "cvap", "sigmoid", "isotonic", "beta"]
     _multiclass_methods = ["cvap"]
 
-    def __init__(self, estimator, method="ivap", **method_params) -> None:
+    def __init__(self, estimator: BaseEstimator, method: str = "ivap", **method_params) -> None:
         assert callable(getattr(estimator, 'predict_proba', None))
         self.estimator = estimator
         self.method_params = method_params
@@ -24,7 +24,7 @@ class _Calibrator(BaseEstimator):
             raise ValueError(f"{method} is not a valid calibration method.")
         self.method = method
 
-    def fit(self, X, y):
+    def fit(self, X: np.ndarray, y: np.ndarray):
         """
         Fit a calibrator.
 
@@ -77,7 +77,7 @@ class _Calibrator(BaseEstimator):
         self._is_fitted = True
         return self
 
-    def predict_proba(self, X):
+    def predict_proba(self, X: np.ndarray):
         test_scores = self.estimator.predict_proba(X)
 
         if self.multiclass:
@@ -102,7 +102,7 @@ class _Calibrator(BaseEstimator):
 
         return probabilities
 
-    def _create_calibrator(self, name, params):
+    def _create_calibrator(self, name: str, params):
         if name == "ivap":
             return _InductiveVennAbersCalibrator(**params)
         elif name == "cvap":

@@ -1,12 +1,13 @@
 """Defines the ArithmeticMeanCombiner."""
 import numpy as np
 from hiclass.probability_combiner.ProbabilityCombiner import ProbabilityCombiner
+from typing import List
 
 
 class ArithmeticMeanCombiner(ProbabilityCombiner):
     """Combine probabilities of multiple levels by taking their arithmetic mean."""
 
-    def combine(self, proba):
+    def combine(self, proba: List[np.ndarray]):
         """Combine probabilities of each level with probabilities of previous levels.
 
         Calculate the arithmetic mean of node probabilities and the probabilities of its predecessors.

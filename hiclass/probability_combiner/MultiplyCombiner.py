@@ -1,12 +1,13 @@
 """Defines the MultiplyCombiner."""
 import numpy as np
 from hiclass.probability_combiner.ProbabilityCombiner import ProbabilityCombiner
+from typing import List
 
 
 class MultiplyCombiner(ProbabilityCombiner):
     """Combine probabilities of multiple levels by multiplication."""
 
-    def combine(self, proba):
+    def combine(self, proba: List[np.ndarray]):
         """Combine probabilities of each level with probabilities of previous levels.
 
         Multiply node probabilities with the probabilities of its predecessors.

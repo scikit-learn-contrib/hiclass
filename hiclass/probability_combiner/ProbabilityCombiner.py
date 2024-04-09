@@ -4,12 +4,13 @@ import numpy as np
 from typing import List
 from collections import defaultdict
 from networkx.exception import NetworkXError
+from hiclass import HierarchicalClassifier
 
 
 class ProbabilityCombiner(abc.ABC):
     """Abstract class defining the structure of a probability combiner."""
 
-    def __init__(self, classifier, normalize=True) -> None:
+    def __init__(self, classifier: HierarchicalClassifier, normalize: bool = True) -> None:
         """Initialize probability combiner object."""
         self.classifier = classifier
         self.normalize = normalize
@@ -19,13 +20,13 @@ class ProbabilityCombiner(abc.ABC):
         """Combine probabilities over multiple levels."""
         ...
 
-    def _normalize(self, proba):
+    def _normalize(self, proba: List[np.ndarray]):
         return [
             np.nan_to_num(level_probabilities / level_probabilities.sum(axis=1, keepdims=True))
             for level_probabilities in proba
         ]
 
-    def _find_predecessors(self, level):
+    def _find_predecessors(self, level: int):
         predecessors = defaultdict(list)
         for node in self.classifier.global_classes_[level]:
             try:

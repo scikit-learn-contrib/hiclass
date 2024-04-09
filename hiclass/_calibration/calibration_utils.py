@@ -1,7 +1,9 @@
 from sklearn.preprocessing import LabelBinarizer
+from sklearn.base import BaseEstimator
+import numpy as np
 
 
-def _one_vs_rest_split(y, scores, estimator):
+def _one_vs_rest_split(y: np.ndarray, scores: np.ndarray, estimator: BaseEstimator):
     # binarize multiclass labels
     label_binarizer = LabelBinarizer()
     label_binarizer.fit(estimator.classes_)

@@ -11,7 +11,7 @@ class _BetaCalibrator(_BinaryCalibrator):
         super().__init__()
         self.skip_calibration = False
 
-    def fit(self, y, scores, X=None):
+    def fit(self, y: np.ndarray, scores: np.ndarray, X: np.ndarray = None):
         unique_labels = len(np.unique(y))
         if unique_labels < 2:
             self.skip_calibration = True
@@ -30,7 +30,7 @@ class _BetaCalibrator(_BinaryCalibrator):
         self._is_fitted = True
         return self
 
-    def predict_proba(self, scores, X=None):
+    def predict_proba(self, scores: np.ndarray, X: np.ndarray = None):
         check_is_fitted(self)
         if self.skip_calibration:
             return scores
