@@ -5,7 +5,7 @@ Explaining Local Classifier Per Level
 =========================================
 
 A minimalist example showing how to use HiClass Explainer to obtain SHAP values of LCPL model.
-A detailed summary of the Explainer class has been given at Algorithms Overview Section for :ref:`Hierarchical Explainability.
+A detailed summary of the Explainer class has been given at Algorithms Overview Section for :ref:`Hierarchical Explainability`.
 SHAP values are calculated based on a synthetic platypus diseases dataset that can be downloaded here.
 """
 import matplotlib.pyplot as plt
