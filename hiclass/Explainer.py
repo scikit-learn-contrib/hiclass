@@ -189,6 +189,46 @@ class Explainer:
                         ).flatten()
         return traversals
 
+    def _get_traversed_nodes_lcpn(self, samples):
+        """
+        Return a list of all traversed nodes as per the provided LocalClassifierPerNode model.
+
+        Parameters
+        ----------
+        samples : array-like
+            Sample data for which to generate traversed nodes.
+
+        Returns
+        -------
+        traversals : list
+            A list of all traversed nodes as per LocalClassifierPerNode (LCPN) strategy.
+        """
+        traversals = np.empty(
+            (samples.shape[0], self.hierarchical_model.max_levels_),
+            dtype=self.hierarchical_model.dtype_,
+        )
+
+        predictions = self.hierarchical_model.predict(samples)
+
+        traversals[:, 0] = predictions[:, 0]
+        separator = np.full(
+            (samples.shape[0], 3),
+            self.hierarchical_model.separator_,
+            dtype=self.hierarchical_model.dtype_,
+        )
+
+        for level in range(1, traversals.shape[1]):
+            traversals[:, level] = np.char.add(
+                traversals[:, level - 1],
+                np.char.add(separator[:, 0], predictions[:, level]),
+            )
+
+        # For inconsistent hierarchies, levels with empty nodes should be ignored
+        mask = predictions == ""
+        traversals[mask] = ""
+
+        return traversals
+
     def _get_traversed_nodes_lcpl(self, samples):
         """
         Return a list of all traversed nodes as per the provided LocalClassifierPerLevel model.
