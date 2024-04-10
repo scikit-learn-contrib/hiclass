@@ -232,6 +232,8 @@ class Explainer:
             traversed_nodes = self._get_traversed_nodes_lcpl(X)[0]
         elif isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
             traversed_nodes = self._get_traversed_nodes_lcppn(X)[0]
+        elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
+            traversed_nodes = self._get_traversed_nodes_lcpn(X)[0]
         datasets = []
         level = 0
         for node in traversed_nodes:

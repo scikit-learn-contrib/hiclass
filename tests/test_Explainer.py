@@ -78,6 +78,31 @@ def test_explainer_tree_lcppn(data, request):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
+@pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
+def test_explainer_tree_lcpn(data, request):
+    rfc = RandomForestClassifier()
+    lcpn = LocalClassifierPerNode(local_classifier=rfc, replace_classifiers=False)
+
+    x_train, x_test, y_train = request.getfixturevalue(data)
+
+    lcpn.fit(x_train, y_train)
+
+    explainer = Explainer(lcpn, data=x_train, mode="tree")
+    explanations = explainer.explain(x_test)
+
+    # Assert if explainer returns an xarray.Dataset object
+    assert isinstance(explanations, xarray.Dataset)
+    y_preds = lcpn.predict(x_test)
+
+    # Assert if predictions made are consistent with the explanation object
+    for i in range(len(x_test)):
+        y_pred = y_preds[i]
+        for j in range(len(y_pred)):
+            assert str(explanations["node"][i].data[j]) == y_pred[j]
+
+
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 def test_explainer_tree_lcpl(data, request):
     rfc = RandomForestClassifier()
