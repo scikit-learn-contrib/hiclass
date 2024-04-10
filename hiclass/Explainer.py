@@ -287,23 +287,23 @@ class Explainer:
 
             classes = xr.DataArray(
                 simplified_labels,
-                dims=["class_"],
-                coords={"class_": simplified_labels},
+                dims=["class"],
+                coords={"class": simplified_labels},
             )
 
             shap_val_local = xr.DataArray(
                 shap_values,
-                dims=["class_", "sample", "feature"],
-                coords={"class_": simplified_labels},
+                dims=["class", "sample", "feature"],
+                coords={"class": simplified_labels},
             )
 
             prediction_probability = local_classifier.predict_proba(X)[0]
 
             predict_proba = xr.DataArray(
                 prediction_probability,
-                dims=["class_"],
+                dims=["class"],
                 coords={
-                    "class_": simplified_labels,
+                    "class": simplified_labels,
                 },
             )
 

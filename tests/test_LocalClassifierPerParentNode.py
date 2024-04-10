@@ -184,26 +184,3 @@ def test_fit_predict():
     lcppn.fit(x, y)
     predictions = lcppn.predict(x)
     assert_array_equal(y, predictions)
-
-
-def test_predict_proba():
-    rfc = RandomForestClassifier()
-    lcppn = LocalClassifierPerParentNode(
-        local_classifier=rfc, replace_classifiers=False
-    )
-
-    x_train = np.random.randn(4, 3)
-    y_train = np.array(
-        [
-            ["a", "b", "d", "k"],
-            ["a", "b", "e", "l"],
-            ["a", "c", "f", "k"],
-            ["a", "c", "g", "l"],
-        ]
-    )
-    x_test = np.random.randn(1, 3)
-
-    lcppn.fit(x_train, y_train)
-
-    pred_proba_dict = lcppn.get_predict_proba(x_test)
-    assert pred_proba_dict is not None

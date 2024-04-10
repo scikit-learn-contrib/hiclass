@@ -5,7 +5,7 @@ Explaining Local Classifier Per Level
 =========================================
 
 A minimalist example showing how to use HiClass Explainer to obtain SHAP values of LCPL model.
-A detailed summary of the Explainer class has been given at Algorithms Overview Section for :ref:`Hierarchical Explainability`.
+A detailed summary of the Explainer class has been given at Algorithms Overview Section for :ref:`Hierarchical Explainability.
 SHAP values are calculated based on a synthetic platypus diseases dataset that can be downloaded here.
 """
 from sklearn.ensemble import RandomForestClassifier
@@ -31,7 +31,7 @@ print(explanations)
 # Example of filtering for levels and classes using the .sel() method
 # Here we select explanations for "Respiratory" at the first level
 respiratory_idx = classifier.predict(X_test)[:, 0] == "Respiratory"
-shap_filter = {"level": 0, "class_": "Respiratory", "sample": respiratory_idx}
+shap_filter = {"level": 0, "class": "Respiratory", "sample": respiratory_idx}
 shap_val_respiratory = explanations.sel(**shap_filter)
 
 # Plot feature importance for the "Respiratory" class
