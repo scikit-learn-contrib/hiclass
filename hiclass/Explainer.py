@@ -49,7 +49,7 @@ class Explainer:
         n_jobs : int, default=1
             The number of jobs to run in parallel.
         algorithm : str, default="auto"
-            The algorithm to use for SHAP explainer. Possible values are 'linear', 'tree', 'auto', 'permutation'. or 'partition'
+            The algorithm to use for SHAP explainer. Possible values are 'linear', 'tree', 'auto', 'permutation', or 'partition'
         mode : str, default=""
             The mode of the SHAP explainer. Can be 'tree', 'gradient', 'deep', 'linear', or '' for default SHAP explainer.
 
