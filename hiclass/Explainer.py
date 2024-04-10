@@ -247,8 +247,9 @@ class Explainer:
         predictions = self.hierarchical_model.predict(samples)
         for pred in predictions:
             traversal_order = []
-            for i in range(1, len(pred) + 1):
-                node = self.hierarchical_model.separator_.join(pred[:i])
+            filtered_pred = [p for p in pred if p.strip()]
+            for i in range(1, len(filtered_pred) + 1):
+                node = self.hierarchical_model.separator_.join(filtered_pred[:i])
                 traversal_order.append(node)
             traversals.append(traversal_order)
         return traversals
@@ -277,10 +278,9 @@ class Explainer:
         datasets = []
         level = 0
         for node in traversed_nodes:
-            if (
-                node == ""
-                or "classifier" not in self.hierarchical_model.hierarchy_.nodes[node]
-                and not isinstance(self.hierarchical_model, LocalClassifierPerLevel)
+            if node == "" or (
+                ("classifier" not in self.hierarchical_model.hierarchy_.nodes[node])
+                and (not isinstance(self.hierarchical_model, LocalClassifierPerLevel))
             ):
                 continue
 
