@@ -277,10 +277,12 @@ class Explainer:
         datasets = []
         level = 0
         for node in traversed_nodes:
-            if not isinstance(self.hierarchical_model, LocalClassifierPerLevel):
-                # Skip if classifier is not found, can happen in case of imbalanced hierarchies
-                if "classifier" not in self.hierarchical_model.hierarchy_.nodes[node]:
-                    continue
+            if (
+                node == ""
+                or "classifier" not in self.hierarchical_model.hierarchy_.nodes[node]
+                and not isinstance(self.hierarchical_model, LocalClassifierPerLevel)
+            ):
+                continue
 
             if isinstance(self.hierarchical_model, LocalClassifierPerLevel):
                 local_classifier = self.hierarchical_model.local_classifiers_[level]
