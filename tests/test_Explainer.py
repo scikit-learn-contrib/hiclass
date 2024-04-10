@@ -4,6 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from hiclass import (
     LocalClassifierPerLevel,
     LocalClassifierPerParentNode,
+    LocalClassifierPerNode,
     Explainer,
 )
 
