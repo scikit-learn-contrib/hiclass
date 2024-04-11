@@ -49,7 +49,9 @@ def digraph_with_unknown_policy():
 
 def test_initialize_unknown_binary_policy(digraph_with_unknown_policy):
     with pytest.raises(KeyError):
-        digraph_with_unknown_policy.binary_policy_ = digraph_with_unknown_policy._initialize_binary_policy()
+        digraph_with_unknown_policy.binary_policy_ = (
+            digraph_with_unknown_policy._initialize_binary_policy()
+        )
         digraph_with_unknown_policy._initialize_binary_policy()
 
 
@@ -69,7 +71,9 @@ def test_initialize_object_binary_policy(digraph_with_object_policy):
 
 @pytest.fixture
 def digraph_logistic_regression():
-    digraph = LocalClassifierPerNode(local_classifier=LogisticRegression(), calibration_method="ivap")
+    digraph = LocalClassifierPerNode(
+        local_classifier=LogisticRegression(), calibration_method="ivap"
+    )
     digraph.hierarchy_ = nx.DiGraph([("a", "b"), ("a", "c")])
     digraph.y_ = np.array([["a", "b"], ["a", "c"]])
     digraph.X_ = np.array([[1, 2], [3, 4]])
@@ -97,6 +101,7 @@ def test_initialize_local_classifiers(digraph_logistic_regression):
                     digraph_logistic_regression.hierarchy_.nodes[node]["classifier"],
                     LogisticRegression,
                 )
+
 
 def test_initialize_local_calibrators(digraph_logistic_regression):
     digraph_logistic_regression._initialize_local_classifiers()
@@ -135,6 +140,7 @@ def test_fit_digraph(digraph_logistic_regression):
             pytest.fail(repr(e))
     assert 1
 
+
 def test_calibrate_digraph(digraph_logistic_regression):
     classifiers = {
         "b": {"classifier": LogisticRegression()},
@@ -145,12 +151,20 @@ def test_calibrate_digraph(digraph_logistic_regression):
     digraph_logistic_regression._fit_digraph(local_mode=True)
 
     calibrators = {
-        "b": {"calibrator": _Calibrator(digraph_logistic_regression.hierarchy_.nodes["b"]["classifier"])},
-        "c": {"calibrator": _Calibrator(digraph_logistic_regression.hierarchy_.nodes["c"]["classifier"])}
+        "b": {
+            "calibrator": _Calibrator(
+                digraph_logistic_regression.hierarchy_.nodes["b"]["classifier"]
+            )
+        },
+        "c": {
+            "calibrator": _Calibrator(
+                digraph_logistic_regression.hierarchy_.nodes["c"]["classifier"]
+            )
+        },
     }
     nx.set_node_attributes(digraph_logistic_regression.hierarchy_, calibrators)
     digraph_logistic_regression._calibrate_digraph(local_mode=True)
-    
+
     with pytest.raises(KeyError):
         check_is_fitted(digraph_logistic_regression.hierarchy_.nodes["a"]["calibrator"])
     for node in ["b", "c"]:
@@ -182,6 +196,7 @@ def test_fit_digraph_joblib_multiprocessing(digraph_logistic_regression):
             pytest.fail(repr(e))
     assert 1
 
+
 def test_calibrate_digraph_joblib_multiprocessing(digraph_logistic_regression):
     classifiers = {
         "b": {"classifier": LogisticRegression()},
@@ -192,8 +207,16 @@ def test_calibrate_digraph_joblib_multiprocessing(digraph_logistic_regression):
     digraph_logistic_regression._fit_digraph(local_mode=True, use_joblib=True)
 
     calibrators = {
-        "b": {"calibrator": _Calibrator(digraph_logistic_regression.hierarchy_.nodes["b"]["classifier"])},
-        "c": {"calibrator": _Calibrator(digraph_logistic_regression.hierarchy_.nodes["c"]["classifier"])}
+        "b": {
+            "calibrator": _Calibrator(
+                digraph_logistic_regression.hierarchy_.nodes["b"]["classifier"]
+            )
+        },
+        "c": {
+            "calibrator": _Calibrator(
+                digraph_logistic_regression.hierarchy_.nodes["c"]["classifier"]
+            )
+        },
     }
     nx.set_node_attributes(digraph_logistic_regression.hierarchy_, calibrators)
     digraph_logistic_regression._calibrate_digraph(local_mode=True, use_joblib=True)
@@ -228,27 +251,26 @@ def fitted_logistic_regression():
         local_classifier=LogisticRegression(),
         return_all_probabilities=True,
         calibration_method="ivap",
-        probability_combiner="geometric")
-    
+        probability_combiner="geometric",
+    )
+
     digraph.separator_ = "::HiClass::Separator::"
-    #digraph.hierarchy_ = nx.DiGraph(
+    # digraph.hierarchy_ = nx.DiGraph(
     #    [("r", "1"), ("r", "2"), ("1", "1.1"), ("1", "1.2"), ("2", "2.1"), ("2", "2.2")]
-    #)
+    # )
 
     digraph.hierarchy_ = nx.DiGraph(
-        [("r", "1"), 
-         ("r", "2"), 
-         ("1", "1"+digraph.separator_+"1.1"),
-         ("1", "1"+digraph.separator_+"1.2"), 
-         ("2", "2"+digraph.separator_+"2.1"), 
-         ("2", "2"+digraph.separator_+"2.2")]
+        [
+            ("r", "1"),
+            ("r", "2"),
+            ("1", "1" + digraph.separator_ + "1.1"),
+            ("1", "1" + digraph.separator_ + "1.2"),
+            ("2", "2" + digraph.separator_ + "2.1"),
+            ("2", "2" + digraph.separator_ + "2.2"),
+        ]
     )
-    digraph.y_ = np.array([
-        ["1", "1.1"], 
-        ["1", "1.2"], 
-        ["2", "2.1"], 
-        ["2", "2.2"]])
-    
+    digraph.y_ = np.array([["1", "1.1"], ["1", "1.2"], ["2", "2.1"], ["2", "2.2"]])
+
     digraph.X_ = np.array([[1, 2], [3, 4], [5, 6], [7, 8]])
     digraph.logger_ = logging.getLogger("LCPN")
     digraph.max_levels_ = 2
@@ -257,25 +279,59 @@ def fitted_logistic_regression():
 
     # for predict_proba
     tmp_labels = digraph._disambiguate(make_leveled(digraph.y_))
-    #digraph.y_ = tmp_labels
-    digraph.max_level_dimensions_ = np.array([len(np.unique(tmp_labels[:, level])) for level in range(tmp_labels.shape[1])])
-    digraph.global_classes_ = [np.unique(tmp_labels[:, level]).astype("str") for level in range(tmp_labels.shape[1])]
-    digraph.global_class_to_index_mapping_ = [{digraph.global_classes_[level][index]: index for index in range(len(digraph.global_classes_[level]))} for level in range(tmp_labels.shape[1])]
+    # digraph.y_ = tmp_labels
+    digraph.max_level_dimensions_ = np.array(
+        [len(np.unique(tmp_labels[:, level])) for level in range(tmp_labels.shape[1])]
+    )
+    digraph.global_classes_ = [
+        np.unique(tmp_labels[:, level]).astype("str")
+        for level in range(tmp_labels.shape[1])
+    ]
+    digraph.global_class_to_index_mapping_ = [
+        {
+            digraph.global_classes_[level][index]: index
+            for index in range(len(digraph.global_classes_[level]))
+        }
+        for level in range(tmp_labels.shape[1])
+    ]
 
     classes_ = [digraph.global_classes_[0]]
     for level in range(1, digraph.max_levels_):
-        classes_.append(np.sort(np.unique([label.split(digraph.separator_)[level] for label in digraph.global_classes_[level]])))
+        classes_.append(
+            np.sort(
+                np.unique(
+                    [
+                        label.split(digraph.separator_)[level]
+                        for label in digraph.global_classes_[level]
+                    ]
+                )
+            )
+        )
     digraph.classes_ = classes_
-    digraph.class_to_index_mapping_ = [{local_labels[index]: index for index in range(len(local_labels))} for local_labels in classes_]
+    digraph.class_to_index_mapping_ = [
+        {local_labels[index]: index for index in range(len(local_labels))}
+        for local_labels in classes_
+    ]
 
-    classifiers = {key: {"classifier": LogisticRegression()} for key in np.hstack([digraph.global_classes_[0], digraph.global_classes_[1]])}
+    classifiers = {
+        key: {"classifier": LogisticRegression()}
+        for key in np.hstack([digraph.global_classes_[0], digraph.global_classes_[1]])
+    }
 
     classifiers["1"]["classifier"].fit(digraph.X_, [1, 1, 0, 0])
-    classifiers["1"+digraph.separator_+"1.1"]["classifier"].fit(digraph.X_, [1, 0, 0, 0])
-    classifiers["1"+digraph.separator_+"1.2"]["classifier"].fit(digraph.X_, [0, 1, 0, 0])
+    classifiers["1" + digraph.separator_ + "1.1"]["classifier"].fit(
+        digraph.X_, [1, 0, 0, 0]
+    )
+    classifiers["1" + digraph.separator_ + "1.2"]["classifier"].fit(
+        digraph.X_, [0, 1, 0, 0]
+    )
     classifiers["2"]["classifier"].fit(digraph.X_, [0, 0, 1, 1])
-    classifiers["2"+digraph.separator_+"2.1"]["classifier"].fit(digraph.X_, [0, 0, 1, 0])
-    classifiers["2"+digraph.separator_+"2.2"]["classifier"].fit(digraph.X_, [0, 0, 0, 1])
+    classifiers["2" + digraph.separator_ + "2.1"]["classifier"].fit(
+        digraph.X_, [0, 0, 1, 0]
+    )
+    classifiers["2" + digraph.separator_ + "2.2"]["classifier"].fit(
+        digraph.X_, [0, 0, 0, 1]
+    )
     nx.set_node_attributes(digraph.hierarchy_, classifiers)
     return digraph
 
@@ -293,21 +349,33 @@ def test_predict_sparse(fitted_logistic_regression):
     )
     assert_array_equal(ground_truth, prediction)
 
+
 def test_predict_proba(fitted_logistic_regression):
     proba = fitted_logistic_regression.predict_proba([[7, 8], [5, 6], [3, 4], [1, 2]])
     assert len(proba) == 2
     assert proba[0].shape == (4, 2)
     assert proba[1].shape == (4, 4)
-    assert_array_almost_equal(np.sum(proba[0], axis=1), np.ones(len(proba[0])), decimal=10)
-    assert_array_almost_equal(np.sum(proba[1], axis=1), np.ones(len(proba[1])), decimal=10)
+    assert_array_almost_equal(
+        np.sum(proba[0], axis=1), np.ones(len(proba[0])), decimal=10
+    )
+    assert_array_almost_equal(
+        np.sum(proba[1], axis=1), np.ones(len(proba[1])), decimal=10
+    )
+
 
 def test_predict_proba_sparse(fitted_logistic_regression):
-    proba = fitted_logistic_regression.predict_proba(csr_matrix([[7, 8], [5, 6], [3, 4], [1, 2]]))
+    proba = fitted_logistic_regression.predict_proba(
+        csr_matrix([[7, 8], [5, 6], [3, 4], [1, 2]])
+    )
     assert len(proba) == 2
     assert proba[0].shape == (4, 2)
     assert proba[1].shape == (4, 4)
-    assert_array_almost_equal(np.sum(proba[0], axis=1), np.ones(len(proba[0])), decimal=10)
-    assert_array_almost_equal(np.sum(proba[1], axis=1), np.ones(len(proba[1])), decimal=10)
+    assert_array_almost_equal(
+        np.sum(proba[0], axis=1), np.ones(len(proba[0])), decimal=10
+    )
+    assert_array_almost_equal(
+        np.sum(proba[1], axis=1), np.ones(len(proba[1])), decimal=10
+    )
 
 
 def test_fit_predict():
@@ -318,8 +386,13 @@ def test_fit_predict():
     predictions = lcpn.predict(x)
     assert_array_equal(y, predictions)
 
+
 def test_fit_calibrate_predict_proba():
-    lcpn = LocalClassifierPerNode(local_classifier=LogisticRegression(), calibration_method="ivap", return_all_probabilities=True)
+    lcpn = LocalClassifierPerNode(
+        local_classifier=LogisticRegression(),
+        calibration_method="ivap",
+        return_all_probabilities=True,
+    )
     x = np.array([[1, 2], [3, 4]])
     y = np.array([["a", "b"], ["b", "c"]])
     lcpn.fit(x, y)
@@ -331,15 +404,20 @@ def test_fit_calibrate_predict_proba():
     assert len(proba) == 2
     assert proba[0].shape == (2, 2)
     assert proba[1].shape == (2, 2)
-    assert_array_almost_equal(np.sum(proba[0], axis=1), np.ones(len(proba[0])), decimal=10)
-    assert_array_almost_equal(np.sum(proba[1], axis=1), np.ones(len(proba[1])), decimal=10)
+    assert_array_almost_equal(
+        np.sum(proba[0], axis=1), np.ones(len(proba[0])), decimal=10
+    )
+    assert_array_almost_equal(
+        np.sum(proba[1], axis=1), np.ones(len(proba[1])), decimal=10
+    )
+
 
 def test_fit_calibrate_predict_predict_proba_bert():
     classifier = LocalClassifierPerNode(
-        local_classifier=LogisticRegression(), 
+        local_classifier=LogisticRegression(),
         return_all_probabilities=True,
         calibration_method="ivap",
-        probability_combiner="geometric" 
+        probability_combiner="geometric",
     )
 
     classifier.logger_ = logging.getLogger("HC")
