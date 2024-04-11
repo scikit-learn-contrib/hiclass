@@ -17,7 +17,7 @@ from sklearn.utils.validation import check_array, check_is_fitted
 from hiclass.probability_combiner import (
     GeometricMeanCombiner,
     ArithmeticMeanCombiner,
-    MultiplyCombiner
+    MultiplyCombiner,
 )
 
 try:
@@ -174,19 +174,47 @@ class HierarchicalClassifier(abc.ABC):
         self.y_ = self._disambiguate(self.y_)
 
         if self.y_.ndim > 1:
-            self.max_level_dimensions_ = np.array([len(np.unique(self.y_[:, level])) for level in range(self.y_.shape[1])])
-            self.global_classes_ = [np.unique(self.y_[:, level]).astype("str") for level in range(self.y_.shape[1])]
-            self.global_class_to_index_mapping_ = [{self.global_classes_[level][index]: index for index in range(len(self.global_classes_[level]))} for level in range(self.y_.shape[1])]
+            self.max_level_dimensions_ = np.array(
+                [len(np.unique(self.y_[:, level])) for level in range(self.y_.shape[1])]
+            )
+            self.global_classes_ = [
+                np.unique(self.y_[:, level]).astype("str")
+                for level in range(self.y_.shape[1])
+            ]
+            self.global_class_to_index_mapping_ = [
+                {
+                    self.global_classes_[level][index]: index
+                    for index in range(len(self.global_classes_[level]))
+                }
+                for level in range(self.y_.shape[1])
+            ]
         else:
             self.max_level_dimensions_ = np.array([len(np.unique(self.y_))])
             self.global_classes_ = [np.unique(self.y_).astype("str")]
-            self.global_class_to_index_mapping_ = [{self.global_classes_[0][index] : index for index in range(len(self.global_classes_[0]))}]
+            self.global_class_to_index_mapping_ = [
+                {
+                    self.global_classes_[0][index]: index
+                    for index in range(len(self.global_classes_[0]))
+                }
+            ]
 
         classes_ = [self.global_classes_[0]]
         for level in range(1, len(self.max_level_dimensions_)):
-            classes_.append(np.sort(np.unique([label.split(self.separator_)[level] for label in self.global_classes_[level]])))
+            classes_.append(
+                np.sort(
+                    np.unique(
+                        [
+                            label.split(self.separator_)[level]
+                            for label in self.global_classes_[level]
+                        ]
+                    )
+                )
+            )
         self.classes_ = classes_
-        self.class_to_index_mapping_ = [{local_labels[index]: index for index in range(len(local_labels))} for local_labels in classes_]
+        self.class_to_index_mapping_ = [
+            {local_labels[index]: index for index in range(len(local_labels))}
+            for local_labels in classes_
+        ]
 
         # Create and configure logger
         self._create_logger()
@@ -427,21 +455,31 @@ class HierarchicalClassifier(abc.ABC):
                         ignore_reinit_error=True,
                     )
                 lcppn = ray.put(self)
-                _parallel_fit = ray.remote(self._fit_classifier)  # TODO: use logging wrapper
+                _parallel_fit = ray.remote(
+                    self._fit_classifier
+                )  # TODO: use logging wrapper
                 results = [_parallel_fit.remote(lcppn, node) for node in nodes]
                 classifiers = ray.get(results)
             else:
                 classifiers = Parallel(n_jobs=self.n_jobs)(
-                    delayed(logging_wrapper)(self._fit_classifier, idx, node, len(nodes)) for idx, node in enumerate(nodes)
+                    delayed(logging_wrapper)(
+                        self._fit_classifier, idx, node, len(nodes)
+                    )
+                    for idx, node in enumerate(nodes)
                 )
 
         else:
-            classifiers = [logging_wrapper(self._fit_classifier, idx, node, len(nodes)) for idx, node in enumerate(nodes)]
+            classifiers = [
+                logging_wrapper(self._fit_classifier, idx, node, len(nodes))
+                for idx, node in enumerate(nodes)
+            ]
 
         for classifier, node in zip(classifiers, nodes):
             self.hierarchy_.nodes[node]["classifier"] = classifier
 
-    def _fit_node_calibrator(self, nodes, local_mode: bool = False, use_joblib: bool = False):
+    def _fit_node_calibrator(
+        self, nodes, local_mode: bool = False, use_joblib: bool = False
+    ):
         def logging_wrapper(func, idx, node, node_length):
             self.logger_.info(f"calibrating node {idx+1}/{node_length}: {str(node)}")
             return func(self, node)
@@ -456,16 +494,24 @@ class HierarchicalClassifier(abc.ABC):
                     )
                 lcppn = ray.put(self)
                 _parallel_fit = ray.remote(self._fit_calibrator)
-                results = [_parallel_fit.remote(lcppn, node) for idx, node in enumerate(nodes)]  # TODO: use logging wrapper
+                results = [
+                    _parallel_fit.remote(lcppn, node) for idx, node in enumerate(nodes)
+                ]  # TODO: use logging wrapper
                 calibrators = ray.get(results)
                 ray.shutdown()
             else:
                 calibrators = Parallel(n_jobs=self.n_jobs)(
-                    delayed(logging_wrapper)(self._fit_calibrator, idx, node, len(nodes)) for idx, node in enumerate(nodes)
+                    delayed(logging_wrapper)(
+                        self._fit_calibrator, idx, node, len(nodes)
+                    )
+                    for idx, node in enumerate(nodes)
                 )
 
         else:
-            calibrators = [logging_wrapper(self._fit_calibrator, idx, node, len(nodes)) for idx, node in enumerate(nodes)]
+            calibrators = [
+                logging_wrapper(self._fit_calibrator, idx, node, len(nodes))
+                for idx, node in enumerate(nodes)
+            ]
 
         for calibrator, node in zip(calibrators, nodes):
             self.hierarchy_.nodes[node]["calibrator"] = calibrator
@@ -481,30 +527,32 @@ class HierarchicalClassifier(abc.ABC):
         raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
 
     def _create_probability_combiner(self, name):
-        if name == 'geometric':
+        if name == "geometric":
             return GeometricMeanCombiner(self)
-        elif name == 'arithmetic':
+        elif name == "arithmetic":
             return ArithmeticMeanCombiner(self)
-        elif name == 'multiply':
+        elif name == "multiply":
             return MultiplyCombiner(self)
 
     def _clean_up(self):
         self.logger_.info("Cleaning up variables that can take a lot of disk space")
-        if hasattr(self, 'X_'):
+        if hasattr(self, "X_"):
             del self.X_
-        if hasattr(self, 'y_'):
+        if hasattr(self, "y_"):
             del self.y_
-        if hasattr(self, 'sample_weight') and self.sample_weight_ is not None:
+        if hasattr(self, "sample_weight") and self.sample_weight_ is not None:
             del self.sample_weight_
-        if hasattr(self, 'X_cal'):
+        if hasattr(self, "X_cal"):
             del self.X_cal
-        if hasattr(self, 'y_cal'):
+        if hasattr(self, "y_cal"):
             del self.y_cal
 
     def _combine_and_reorder(self, proba):
         res = [proba[0]]
         for level in range(1, self.max_levels_):
-            res_proba = np.zeros(shape=(proba[level].shape[0], len(self.classes_[level])))
+            res_proba = np.zeros(
+                shape=(proba[level].shape[0], len(self.classes_[level]))
+            )
 
             for old_label in self.global_classes_[level]:
                 old_idx = self.global_class_to_index_mapping_[level][old_label]

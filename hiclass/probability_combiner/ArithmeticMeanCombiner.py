@@ -23,10 +23,21 @@ class ArithmeticMeanCombiner(ProbabilityCombiner):
             for node in predecessors.keys():
                 index = self.classifier.class_to_index_mapping_[level][node]
                 # find indices of all predecessors
-                predecessor_indices = [self.classifier.class_to_index_mapping_[level - 1][predecessor] for predecessor in predecessors[node]]
+                predecessor_indices = [
+                    self.classifier.class_to_index_mapping_[level - 1][predecessor]
+                    for predecessor in predecessors[node]
+                ]
                 # combine probabilities of all predecessors
-                predecessors_combined_prob = np.sum([sums[level - 1][:, pre_index] for pre_index in predecessor_indices], axis=0)
-                level_sum[:, index] += proba[level][:, index] + predecessors_combined_prob
+                predecessors_combined_prob = np.sum(
+                    [
+                        sums[level - 1][:, pre_index]
+                        for pre_index in predecessor_indices
+                    ],
+                    axis=0,
+                )
+                level_sum[:, index] += (
+                    proba[level][:, index] + predecessors_combined_prob
+                )
                 level_probs[:, index] = level_sum[:, index] / (level + 1)
 
             res.append(level_probs)

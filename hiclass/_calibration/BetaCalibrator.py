@@ -34,4 +34,11 @@ class _BetaCalibrator(_BinaryCalibrator):
         check_is_fitted(self)
         if self.skip_calibration:
             return scores
-        return 1 / (1 + 1 / (np.exp(self.c) * (np.power(scores, self.a) / np.power((1 - scores), self.b))))
+        return 1 / (
+            1
+            + 1
+            / (
+                np.exp(self.c)
+                * (np.power(scores, self.a) / np.power((1 - scores), self.b))
+            )
+        )

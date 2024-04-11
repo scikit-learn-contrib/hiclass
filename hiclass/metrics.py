@@ -254,7 +254,13 @@ def _compute_macro(y_true: np.ndarray, y_pred: np.ndarray, _micro_function):
     return overall_sum / len(y_true)
 
 
-def _prepare_data(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, level: int, y_pred: np.ndarray = None):
+def _prepare_data(
+    classifier: HierarchicalClassifier,
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    level: int,
+    y_pred: np.ndarray = None,
+):
     classifier_classes = np.array(classifier.classes_[level]).astype("str")
     y_true = make_leveled(y_true)
     y_true = classifier._disambiguate(y_true)
@@ -265,7 +271,9 @@ def _prepare_data(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob
         y_pred = make_leveled(y_pred)
         y_pred = classifier._disambiguate(y_pred)
         y_pred = np.array(list(map(lambda x: x[level], y_pred)))
-        y_pred = np.array([label.split(classifier.separator_)[level] for label in y_pred])
+        y_pred = np.array(
+            [label.split(classifier.separator_)[level] for label in y_pred]
+        )
 
     unique_labels = np.unique(y_true).astype("str")
     # add labels not seen in the training process
@@ -284,11 +292,11 @@ _calibration_aggregations = ["average", "sum", "None"]
 
 
 def _aggregate_scores(scores: np.ndarray, agg: str):
-    if agg == 'average':
+    if agg == "average":
         return np.mean(scores)
-    if agg == 'sum':
+    if agg == "sum":
         return np.sum(scores)
-    if agg is None or agg == 'None':
+    if agg is None or agg == "None":
         return scores
 
 
@@ -297,14 +305,24 @@ def _validate_args(agg: str, y_prob: np.ndarray, level: int):
         raise ValueError(f"{agg} is not a valid aggregation function.")
     if isinstance(y_prob, list) and len(y_prob) == 0:
         raise ValueError("y_prob is empty.")
-    if (isinstance(y_prob, list) and len(y_prob) == 1 or isinstance(y_prob, np.ndarray)) and level is None:
-        raise ValueError("If y_prob is not a list of probabilities the level must be specified.")
+    if (
+        isinstance(y_prob, list) and len(y_prob) == 1 or isinstance(y_prob, np.ndarray)
+    ) and level is None:
+        raise ValueError(
+            "If y_prob is not a list of probabilities the level must be specified."
+        )
     if isinstance(y_prob, list) and len(y_prob) == 1:
         return y_prob[0]
     return y_prob
 
 
-def multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], agg: str = 'average', level: int = None):
+def multiclass_brier_score(
+    classifier: HierarchicalClassifier,
+    y_true: np.ndarray,
+    y_prob: Union[np.ndarray | List],
+    agg: str = "average",
+    level: int = None,
+):
     """Compute the brier score for two or more classes.
 
     Parameters
@@ -332,12 +350,20 @@ def multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarra
     if isinstance(y_prob, list):
         scores = []
         for level in range(make_leveled(y_true).shape[1]):
-            scores.append(_multiclass_brier_score(classifier, y_true, y_prob[level], level))
+            scores.append(
+                _multiclass_brier_score(classifier, y_true, y_prob[level], level)
+            )
         return _aggregate_scores(scores, agg)
     return _multiclass_brier_score(classifier, y_true, y_prob, level)
 
 
-def log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], agg: str = 'average', level: int = None):
+def log_loss(
+    classifier: HierarchicalClassifier,
+    y_true: np.ndarray,
+    y_prob: Union[np.ndarray | List],
+    agg: str = "average",
+    level: int = None,
+):
     """Compute the log loss of predicted probabilities.
 
     Parameters
@@ -370,7 +396,15 @@ def log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Uni
     return _multiclass_brier_score(classifier, y_true, y_prob, level)
 
 
-def expected_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], y_pred: np.ndarray, n_bins: int = 10, agg: str = 'average', level: int = None):
+def expected_calibration_error(
+    classifier: HierarchicalClassifier,
+    y_true: np.ndarray,
+    y_prob: Union[np.ndarray | List],
+    y_pred: np.ndarray,
+    n_bins: int = 10,
+    agg: str = "average",
+    level: int = None,
+):
     """Compute the expected calibration error.
 
     Parameters
@@ -402,12 +436,26 @@ def expected_calibration_error(classifier: HierarchicalClassifier, y_true: np.nd
     if isinstance(y_prob, list):
         scores = []
         for level in range(make_leveled(y_true).shape[1]):
-            scores.append(_expected_calibration_error(classifier, y_true, y_prob[level], y_pred, level, n_bins))
+            scores.append(
+                _expected_calibration_error(
+                    classifier, y_true, y_prob[level], y_pred, level, n_bins
+                )
+            )
         return _aggregate_scores(scores, agg)
-    return _expected_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins)
+    return _expected_calibration_error(
+        classifier, y_true, y_prob, y_pred, level, n_bins
+    )
 
 
-def static_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], y_pred: np.ndarray, n_bins: int = 10, agg: str = 'average', level: int = None):
+def static_calibration_error(
+    classifier: HierarchicalClassifier,
+    y_true: np.ndarray,
+    y_prob: Union[np.ndarray | List],
+    y_pred: np.ndarray,
+    n_bins: int = 10,
+    agg: str = "average",
+    level: int = None,
+):
     """Compute the static calibration error.
 
     Parameters
@@ -439,12 +487,26 @@ def static_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndar
     if isinstance(y_prob, list):
         scores = []
         for level in range(make_leveled(y_true).shape[1]):
-            scores.append(_static_calibration_error(classifier, y_true, y_prob[level], y_pred, level, n_bins=n_bins))
+            scores.append(
+                _static_calibration_error(
+                    classifier, y_true, y_prob[level], y_pred, level, n_bins=n_bins
+                )
+            )
         return _aggregate_scores(scores, agg)
-    return _static_calibration_error(classifier, y_true, y_prob, y_pred, level, n_bins=n_bins)
+    return _static_calibration_error(
+        classifier, y_true, y_prob, y_pred, level, n_bins=n_bins
+    )
 
 
-def adaptive_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: Union[np.ndarray | List], y_pred: np.ndarray, n_ranges: int = 10, agg: str = 'average', level: int = None):
+def adaptive_calibration_error(
+    classifier: HierarchicalClassifier,
+    y_true: np.ndarray,
+    y_prob: Union[np.ndarray | List],
+    y_pred: np.ndarray,
+    n_ranges: int = 10,
+    agg: str = "average",
+    level: int = None,
+):
     """Compute the adaptive calibration error.
 
     Parameters
@@ -476,26 +538,53 @@ def adaptive_calibration_error(classifier: HierarchicalClassifier, y_true: np.nd
     if isinstance(y_prob, list):
         scores = []
         for level in range(make_leveled(y_true).shape[1]):
-            scores.append(_adaptive_calibration_error(classifier, y_true, y_prob[level], y_pred, level, n_ranges=n_ranges))
+            scores.append(
+                _adaptive_calibration_error(
+                    classifier, y_true, y_prob[level], y_pred, level, n_ranges=n_ranges
+                )
+            )
         return _aggregate_scores(scores, agg)
-    return _adaptive_calibration_error(classifier, y_true, y_prob, y_pred, level, n_ranges=n_ranges)
+    return _adaptive_calibration_error(
+        classifier, y_true, y_prob, y_pred, level, n_ranges=n_ranges
+    )
 
 
-def _multiclass_brier_score(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, level: int):
+def _multiclass_brier_score(
+    classifier: HierarchicalClassifier,
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    level: int,
+):
     y_true, _, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level)
     label_encoder = LabelEncoder()
     label_encoder.fit(labels)
     y_true_encoded = label_encoder.transform(y_true)
-    return (1 / y_prob.shape[0]) * np.sum(np.sum(np.square(y_prob - np.eye(y_prob.shape[1])[y_true_encoded]), axis=1))
+    return (1 / y_prob.shape[0]) * np.sum(
+        np.sum(np.square(y_prob - np.eye(y_prob.shape[1])[y_true_encoded]), axis=1)
+    )
 
 
-def _log_loss(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, level: int):
+def _log_loss(
+    classifier: HierarchicalClassifier,
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    level: int,
+):
     y_true, _, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level)
     return sk_log_loss(y_true, y_prob, labels=labels)
 
 
-def _expected_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, y_pred: np.ndarray, level: int, n_bins: int = 10):
-    y_true, y_pred, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level, y_pred)
+def _expected_calibration_error(
+    classifier: HierarchicalClassifier,
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    y_pred: np.ndarray,
+    level: int,
+    n_bins: int = 10,
+):
+    y_true, y_pred, labels, y_prob = _prepare_data(
+        classifier, y_true, y_prob, level, y_pred
+    )
 
     n = len(y_true)
     label_encoder = LabelEncoder()
@@ -525,14 +614,35 @@ def _expected_calibration_error(classifier: HierarchicalClassifier, y_true: np.n
     conf = np.zeros(n_bins)
     ece = 0
     for i in range(n_bins):
-        acc[i] = 1 / (bins[i].shape[0]) * np.sum((bins[i][:, 1] == bins[i][:, 2])) if bins[i].shape[0] != 0 else 0
-        conf[i] = 1 / (bins[i].shape[0]) * np.sum(bins[i][:, 0]) if bins[i].shape[0] != 0 else 0
-        ece += (bins[i].shape[0] / n) * abs(acc[i] - conf[i]) if bins[i].shape[0] != 0 else 0
+        acc[i] = (
+            1 / (bins[i].shape[0]) * np.sum((bins[i][:, 1] == bins[i][:, 2]))
+            if bins[i].shape[0] != 0
+            else 0
+        )
+        conf[i] = (
+            1 / (bins[i].shape[0]) * np.sum(bins[i][:, 0])
+            if bins[i].shape[0] != 0
+            else 0
+        )
+        ece += (
+            (bins[i].shape[0] / n) * abs(acc[i] - conf[i])
+            if bins[i].shape[0] != 0
+            else 0
+        )
     return ece
 
 
-def _static_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, y_pred: np.ndarray, level: int, n_bins: int = 10):
-    y_true, y_pred, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level, y_pred)
+def _static_calibration_error(
+    classifier: HierarchicalClassifier,
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    y_pred: np.ndarray,
+    level: int,
+    n_bins: int = 10,
+):
+    y_true, y_pred, labels, y_prob = _prepare_data(
+        classifier, y_true, y_prob, level, y_pred
+    )
 
     n_samples, n_classes = y_prob.shape
     assert n_classes > 2
@@ -567,17 +677,38 @@ def _static_calibration_error(classifier: HierarchicalClassifier, y_true: np.nda
         conf = np.zeros(n_bins)
         error = 0
         for i in range(n_bins):
-            acc[i] = 1 / (bins[i].shape[0]) * np.sum((bins[i][:, 1] == bins[i][:, 2])) if bins[i].shape[0] != 0 else 0
-            conf[i] = 1 / (bins[i].shape[0]) * np.sum(bins[i][:, 0]) if bins[i].shape[0] != 0 else 0
-            error += (bins[i].shape[0] / n_samples) * abs(acc[i] - conf[i]) if bins[i].shape[0] != 0 else 0
+            acc[i] = (
+                1 / (bins[i].shape[0]) * np.sum((bins[i][:, 1] == bins[i][:, 2]))
+                if bins[i].shape[0] != 0
+                else 0
+            )
+            conf[i] = (
+                1 / (bins[i].shape[0]) * np.sum(bins[i][:, 0])
+                if bins[i].shape[0] != 0
+                else 0
+            )
+            error += (
+                (bins[i].shape[0] / n_samples) * abs(acc[i] - conf[i])
+                if bins[i].shape[0] != 0
+                else 0
+            )
 
         class_error[k] = error
 
     return np.mean(class_error)
 
 
-def _adaptive_calibration_error(classifier: HierarchicalClassifier, y_true: np.ndarray, y_prob: np.ndarray, y_pred: np.ndarray, level: int, n_ranges: int = 10):
-    y_true, y_pred, labels, y_prob = _prepare_data(classifier, y_true, y_prob, level, y_pred)
+def _adaptive_calibration_error(
+    classifier: HierarchicalClassifier,
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    y_pred: np.ndarray,
+    level: int,
+    n_ranges: int = 10,
+):
+    y_true, y_pred, labels, y_prob = _prepare_data(
+        classifier, y_true, y_prob, level, y_pred
+    )
 
     _, n_classes = y_prob.shape
     label_encoder = LabelEncoder()
@@ -593,11 +724,26 @@ def _adaptive_calibration_error(classifier: HierarchicalClassifier, y_true: np.n
 
         # sort by score probability
         idx = np.argsort([class_scores])[0]
-        class_scores, ordered_y_pred_labels, ordered_y_true = class_scores[idx], y_pred_encoded[idx], y_true_encoded[idx]
-        stacked = np.column_stack([np.array(range(len(class_scores))), class_scores, ordered_y_pred_labels, ordered_y_true])
+        class_scores, ordered_y_pred_labels, ordered_y_true = (
+            class_scores[idx],
+            y_pred_encoded[idx],
+            y_true_encoded[idx],
+        )
+        stacked = np.column_stack(
+            [
+                np.array(range(len(class_scores))),
+                class_scores,
+                ordered_y_pred_labels,
+                ordered_y_true,
+            ]
+        )
 
-        bin_edges = np.floor(np.linspace(0, len(class_scores), n_ranges + 1, endpoint=True)).astype(int)
-        _, bin_edges = np.histogram(stacked, bins=bin_edges, range=(0, len(class_scores)))
+        bin_edges = np.floor(
+            np.linspace(0, len(class_scores), n_ranges + 1, endpoint=True)
+        ).astype(int)
+        _, bin_edges = np.histogram(
+            stacked, bins=bin_edges, range=(0, len(class_scores))
+        )
         bin_indices = np.digitize(stacked, bin_edges)[:, 0]
 
         # add bin index to each data point
@@ -614,8 +760,16 @@ def _adaptive_calibration_error(classifier: HierarchicalClassifier, y_true: np.n
         conf = np.zeros(n_ranges)
         error = 0
         for i in range(n_ranges):
-            acc[i] = 1 / (bins[i].shape[0]) * np.sum((bins[i][:, 2] == bins[i][:, 3])) if bins[i].shape[0] != 0 else 0
-            conf[i] = 1 / (bins[i].shape[0]) * np.sum(bins[i][:, 1]) if bins[i].shape[0] != 0 else 0
+            acc[i] = (
+                1 / (bins[i].shape[0]) * np.sum((bins[i][:, 2] == bins[i][:, 3]))
+                if bins[i].shape[0] != 0
+                else 0
+            )
+            conf[i] = (
+                1 / (bins[i].shape[0]) * np.sum(bins[i][:, 1])
+                if bins[i].shape[0] != 0
+                else 0
+            )
             error += abs(acc[i] - conf[i]) if bins[i].shape[0] != 0 else 0
 
         class_error[k] = error

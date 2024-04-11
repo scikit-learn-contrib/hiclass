@@ -2,7 +2,10 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.preprocessing import LabelEncoder
-from hiclass._calibration.VennAbersCalibrator import _InductiveVennAbersCalibrator, _CrossVennAbersCalibrator
+from hiclass._calibration.VennAbersCalibrator import (
+    _InductiveVennAbersCalibrator,
+    _CrossVennAbersCalibrator,
+)
 from hiclass._calibration.IsotonicRegression import _IsotonicRegression
 from hiclass._calibration.PlattScaling import _PlattScaling
 from hiclass._calibration.BetaCalibrator import _BetaCalibrator
@@ -13,13 +16,15 @@ class _Calibrator(BaseEstimator):
     available_methods = ["ivap", "cvap", "sigmoid", "isotonic", "beta"]
     _multiclass_methods = ["cvap"]
 
-    def __init__(self, estimator: BaseEstimator, method: str = "ivap", **method_params) -> None:
-        assert callable(getattr(estimator, 'predict_proba', None))
+    def __init__(
+        self, estimator: BaseEstimator, method: str = "ivap", **method_params
+    ) -> None:
+        assert callable(getattr(estimator, "predict_proba", None))
         self.estimator = estimator
         self.method_params = method_params
         # self.classes_ = self.estimator.classes_
         self.multiclass = False
-        self.multiclass_support = (method in self._multiclass_methods)
+        self.multiclass_support = method in self._multiclass_methods
         if method not in self.available_methods:
             raise ValueError(f"{method} is not a valid calibration method.")
         self.method = method
@@ -61,10 +66,14 @@ class _Calibrator(BaseEstimator):
 
             else:
                 # do one vs rest calibration
-                score_splits, label_splits = _one_vs_rest_split(y, calibration_scores, self.estimator)
+                score_splits, label_splits = _one_vs_rest_split(
+                    y, calibration_scores, self.estimator
+                )
                 for i in range(len(score_splits)):
                     # create a calibrator for each split
-                    calibrator = self._create_calibrator(self.method, self.method_params)
+                    calibrator = self._create_calibrator(
+                        self.method, self.method_params
+                    )
                     calibrator.fit(label_splits[i], score_splits[i], X)
                     self.calibrators.append(calibrator)
 

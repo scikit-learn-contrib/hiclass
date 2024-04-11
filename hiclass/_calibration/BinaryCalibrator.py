@@ -3,13 +3,16 @@ import numpy as np
 
 
 class _BinaryCalibrator(abc.ABC):
-
     @abc.abstractmethod
-    def fit(self, y: np.ndarray, scores: np.ndarray, X: np.ndarray = None):  # pragma: no cover
+    def fit(
+        self, y: np.ndarray, scores: np.ndarray, X: np.ndarray = None
+    ):  # pragma: no cover
         ...
 
     @abc.abstractmethod
-    def predict_proba(self, scores: np.ndarray, X: np.ndarray = None):  # pragma: no cover
+    def predict_proba(
+        self, scores: np.ndarray, X: np.ndarray = None
+    ):  # pragma: no cover
         ...
 
     def __sklearn_is_fitted__(self):
