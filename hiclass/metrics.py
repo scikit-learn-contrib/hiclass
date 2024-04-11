@@ -319,7 +319,7 @@ def _validate_args(agg: str, y_prob: np.ndarray, level: int):
 def multiclass_brier_score(
     classifier: HierarchicalClassifier,
     y_true: np.ndarray,
-    y_prob: Union[np.ndarray | List],
+    y_prob: Union[np.ndarray, List],
     agg: str = "average",
     level: int = None,
 ):
@@ -360,7 +360,7 @@ def multiclass_brier_score(
 def log_loss(
     classifier: HierarchicalClassifier,
     y_true: np.ndarray,
-    y_prob: Union[np.ndarray | List],
+    y_prob: Union[np.ndarray, List],
     agg: str = "average",
     level: int = None,
 ):
@@ -399,7 +399,7 @@ def log_loss(
 def expected_calibration_error(
     classifier: HierarchicalClassifier,
     y_true: np.ndarray,
-    y_prob: Union[np.ndarray | List],
+    y_prob: Union[np.ndarray, List],
     y_pred: np.ndarray,
     n_bins: int = 10,
     agg: str = "average",
@@ -450,7 +450,7 @@ def expected_calibration_error(
 def static_calibration_error(
     classifier: HierarchicalClassifier,
     y_true: np.ndarray,
-    y_prob: Union[np.ndarray | List],
+    y_prob: Union[np.ndarray, List],
     y_pred: np.ndarray,
     n_bins: int = 10,
     agg: str = "average",
@@ -501,7 +501,7 @@ def static_calibration_error(
 def adaptive_calibration_error(
     classifier: HierarchicalClassifier,
     y_true: np.ndarray,
-    y_prob: Union[np.ndarray | List],
+    y_prob: Union[np.ndarray, List],
     y_pred: np.ndarray,
     n_ranges: int = 10,
     agg: str = "average",
