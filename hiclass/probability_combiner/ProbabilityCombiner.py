@@ -1,4 +1,5 @@
 """Abstract class defining the structure of a probability combiner."""
+
 import abc
 import numpy as np
 from typing import List

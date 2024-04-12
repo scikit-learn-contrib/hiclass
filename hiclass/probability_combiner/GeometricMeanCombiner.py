@@ -1,4 +1,5 @@
 """Defines the GeometricMeanCombiner."""
+
 import numpy as np
 from hiclass.probability_combiner.ProbabilityCombiner import ProbabilityCombiner
 from typing import List

@@ -19,7 +19,7 @@ pytest-cov = "3.0.0"
 twine = "*"
 sphinx = "4.1.1"
 sphinx-rtd-theme = "0.5.2"
-black = "22.10.0"
+black = {version = "24.3.0", extras = ["colorama"]}
 pre-commit = "2.20.0"
 pyfakefs = "*"
 shap = "0.44.1"

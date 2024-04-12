@@ -82,11 +82,12 @@ def binary_cal_X():
 @pytest.fixture
 def binary_mock_estimator(binary_calibration_data, binary_test_scores):
     # return calibration scores or test scores depending on input size
-    side_effect = (
-        lambda X: binary_calibration_data[0]
-        if len(X) == len(binary_calibration_data[0])
-        else binary_test_scores
-    )
+    def side_effect(X):
+        return (
+            binary_calibration_data[0]
+            if len(X) == len(binary_calibration_data[0])
+            else binary_test_scores
+        )
 
     lr = LogisticRegression()
     binary_estimator = Mock(spec=lr)
@@ -140,11 +141,12 @@ def multiclass_test_scores():
 @pytest.fixture
 def multiclass_mock_estimator(multiclass_calibration_data, multiclass_test_scores):
     # return calibration scores or test scores depending on input size
-    side_effect = (
-        lambda X: multiclass_calibration_data[0]
-        if len(X) == len(multiclass_calibration_data[0])
-        else multiclass_test_scores
-    )
+    def side_effect(X):
+        return (
+            multiclass_calibration_data[0]
+            if len(X) == len(multiclass_calibration_data[0])
+            else multiclass_test_scores
+        )
 
     multiclass_estimator = Mock(spec=LogisticRegression)
     multiclass_estimator.predict_proba.side_effect = side_effect

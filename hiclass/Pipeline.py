@@ -1,4 +1,5 @@
 """Custom Pipeline class that supports the `calibrate` method."""
+
 from sklearn.pipeline import Pipeline as skPipeline
 
 
