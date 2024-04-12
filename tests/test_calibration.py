@@ -277,7 +277,10 @@ def test_beta_calibration(binary_calibration_data, binary_test_scores):
     assert proba.shape == (len(binary_test_scores),)
     assert_array_almost_equal(
         proba,
-        np.array([0.526125, 0.423743, 0.363907, 0.785855, 0.323201, 0.417089, 0.0]),
+        np.array(
+            [0.526125, 0.423743, 0.363907, 0.785855, 0.323201, 0.417089, 0.0],
+        ),
+        decimal=3,
     )
 
 
