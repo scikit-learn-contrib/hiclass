@@ -50,20 +50,10 @@ shap_values_covid = shap_val_covid.shap_values.values
 # SHAP values for 'Respiratory'
 shap_values_resp = shap_val_resp.shap_values.values
 
-# Covid summary plot
 shap.summary_plot(
-    shap_values_covid,
+    [shap_values_covid, shap_values_resp],
     features=X_test.iloc[covid_idx],
-    feature_names=feature_names,
+    feature_names=X_train.columns.values,
     plot_type="bar",
-    title="Mean Absolute SHAP Values for Covid",
-)
-
-# Respiratory summary plot
-shap.summary_plot(
-    shap_values_resp,
-    features=X_test.iloc[covid_idx],
-    feature_names=feature_names,
-    plot_type="bar",
-    title="Mean Absolute SHAP Values for Respiratory",
+    class_names=["Covid", "Respiratory"],
 )
