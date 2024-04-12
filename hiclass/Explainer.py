@@ -229,6 +229,31 @@ class Explainer:
 
         return traversals
 
+    def _get_traversed_nodes_lcpl(self, samples):
+        """
+        Return a list of all traversed nodes as per the provided LocalClassifierPerLevel model.
+
+        Parameters
+        ----------
+        samples : array-like
+            Sample data for which to generate traversed nodes.
+
+        Returns
+        -------
+        traversals : list
+            A list of all traversed nodes as per LocalClassifierPerLevel (LCPL) strategy.
+        """
+        traversals = []
+        predictions = self.hierarchical_model.predict(samples)
+        for pred in predictions:
+            traversal_order = []
+            filtered_pred = [p for p in pred if p.strip()]
+            for i in range(1, len(filtered_pred) + 1):
+                node = self.hierarchical_model.separator_.join(filtered_pred[:i])
+                traversal_order.append(node)
+            traversals.append(traversal_order)
+        return traversals
+
     def _calculate_shap_values(self, X):
         """
         Return an xarray.Dataset object for a single sample provided. This dataset is aligned on the `level` attribute.
@@ -244,23 +269,27 @@ class Explainer:
             A single explanation for the prediction of given sample.
         """
         traversed_nodes = []
-        if isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
+        if isinstance(self.hierarchical_model, LocalClassifierPerLevel):
+            traversed_nodes = self._get_traversed_nodes_lcpl(X)[0]
+        elif isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
             traversed_nodes = self._get_traversed_nodes_lcppn(X)[0]
         elif isinstance(self.hierarchical_model, LocalClassifierPerNode):
             traversed_nodes = self._get_traversed_nodes_lcpn(X)[0]
         datasets = []
         level = 0
         for node in traversed_nodes:
-            # Skip if node is empty or classifier is not found, can happen in case of imbalanced hierarchies
-            if (
-                node == ""
-                or "classifier" not in self.hierarchical_model.hierarchy_.nodes[node]
+            if node == "" or (
+                ("classifier" not in self.hierarchical_model.hierarchy_.nodes[node])
+                and (not isinstance(self.hierarchical_model, LocalClassifierPerLevel))
             ):
                 continue
 
-            local_classifier = self.hierarchical_model.hierarchy_.nodes[node][
-                "classifier"
-            ]
+            if isinstance(self.hierarchical_model, LocalClassifierPerLevel):
+                local_classifier = self.hierarchical_model.local_classifiers_[level]
+            else:
+                local_classifier = self.hierarchical_model.hierarchy_.nodes[node][
+                    "classifier"
+                ]
 
             # Create a SHAP explainer for the local classifier
             local_explainer = deepcopy(self.explainer)(local_classifier, self.data)
@@ -283,7 +312,7 @@ class Explainer:
                     for label in local_classifier.classes_
                 ]
                 predicted_class = current_node
-            else:
+            elif isinstance(self.hierarchical_model, LocalClassifierPerParentNode):
                 simplified_labels = [
                     label.split(self.hierarchical_model.separator_)[-1]
                     for label in local_classifier.classes_
@@ -293,6 +322,12 @@ class Explainer:
                     .flatten()[0]
                     .split(self.hierarchical_model.separator_)[-1]
                 )
+            else:
+                simplified_labels = [
+                    label.split(self.hierarchical_model.separator_)[-1]
+                    for label in local_classifier.classes_
+                ]
+                predicted_class = current_node
 
             classes = xr.DataArray(
                 simplified_labels,
@@ -326,7 +361,7 @@ class Explainer:
                     "level": level,
                 }
             )
-            level = level + 1
+            level += 1
             datasets.append(local_dataset)
         sample_explanation = xr.concat(datasets, dim="level")
         return sample_explanation
