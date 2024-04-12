@@ -6,10 +6,8 @@ Explaining Local Classifier Per Level
 
 A minimalist example showing how to use HiClass Explainer to obtain SHAP values of LCPL model.
 A detailed summary of the Explainer class has been given at Algorithms Overview Section for :ref:`Hierarchical Explainability`.
-SHAP values are calculated based on a synthetic platypus diseases dataset that can be downloaded here.
+SHAP values are calculated based on a synthetic platypus diseases dataset that can be downloaded `here <https://gist.githubusercontent.com/ashishpatel16/9306f8ed3ed101e7ddcb519776bcbd80/raw/3f225c3f80dd8cbb1b6252f6c372a054ec968705/platypus_diseases.csv>`_.
 """
-import matplotlib.pyplot as plt
-import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from hiclass import LocalClassifierPerLevel, Explainer
 import shap
@@ -46,31 +44,26 @@ shap_val_resp = explanations.sel(**shap_filter_resp)
 # Feature names for the X-axis
 feature_names = X_train.columns.values
 
-# Calculating the mean absolute SHAP values for each feature
-mean_abs_shap_covid = np.mean(np.abs(shap_val_covid["shap_values"]), axis=0)
-mean_abs_shap_resp = np.mean(np.abs(shap_val_resp["shap_values"]), axis=0)
+# SHAP values for 'Covid'
+shap_values_covid = shap_val_covid.shap_values.values
 
-# Creating the figure and axes
-fig, ax = plt.subplots(figsize=(10, 6))
+# SHAP values for 'Respiratory'
+shap_values_resp = shap_val_resp.shap_values.values
 
-# Setting up the positions for bars on the chart
-bar_width = 0.35
-index = np.arange(len(mean_abs_shap_covid))
+# Covid summary plot
+shap.summary_plot(
+    shap_values_covid,
+    features=X_test.iloc[covid_idx],
+    feature_names=feature_names,
+    plot_type="bar",
+    title="Mean Absolute SHAP Values for Covid",
+)
 
-# Plotting bars for 'Covid'
-bars1 = ax.bar(index, mean_abs_shap_covid, bar_width, label="Covid")
-
-# Plotting bars for 'Respiratory'
-bars2 = ax.bar(index + bar_width, mean_abs_shap_resp, bar_width, label="Respiratory")
-
-# Adding labels, title, and legend
-ax.set_xlabel("Features")
-ax.set_ylabel("Mean Absolute SHAP Value")
-ax.set_title("Mean Absolute SHAP Values for Covid vs Respiratory")
-ax.set_xticks(index + bar_width / 2)
-ax.set_xticklabels(feature_names, rotation=45, ha="right")
-ax.legend()
-
-# Display the plot
-plt.tight_layout()
-plt.show()
+# Respiratory summary plot
+shap.summary_plot(
+    shap_values_resp,
+    features=X_test.iloc[covid_idx],
+    feature_names=feature_names,
+    plot_type="bar",
+    title="Mean Absolute SHAP Values for Respiratory",
+)
