@@ -147,6 +147,28 @@ def test_traversal_path_lcppn(data, request):
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
+def test_traversal_path_lcpn(data, request):
+    x_train, x_test, y_train = request.getfixturevalue(data)
+    rfc = RandomForestClassifier()
+    lcpn = LocalClassifierPerNode(local_classifier=rfc, replace_classifiers=False)
+
+    lcpn.fit(x_train, y_train)
+    explainer = Explainer(lcpn, data=x_train, mode="tree")
+    traversals = explainer._get_traversed_nodes_lcpn(x_test)
+    preds = lcpn.predict(x_test)
+
+    # Assert if predictions and traversals are of same length
+    assert len(preds) == len(traversals)
+
+    # Assert if traversal path in predictions is same as the computed traversal path
+    for i in range(len(x_test)):
+        for j in range(len(traversals[i])):
+            label = traversals[i][j].split(lcpn.separator_)[-1]
+            assert label == preds[i][j]
+
+
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 def test_traversal_path_lcpl(data, request):
     x_train, x_test, y_train = request.getfixturevalue(data)
     rfc = RandomForestClassifier()
@@ -167,7 +189,8 @@ def test_traversal_path_lcpl(data, request):
 @pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 @pytest.mark.parametrize(
-    "classifier", [LocalClassifierPerLevel, LocalClassifierPerParentNode]
+    "classifier",
+    [LocalClassifierPerLevel, LocalClassifierPerParentNode, LocalClassifierPerNode],
 )
 def test_explain_with_xr(data, request, classifier):
     x_train, x_test, y_train = request.getfixturevalue(data)
@@ -183,7 +206,8 @@ def test_explain_with_xr(data, request, classifier):
 
 
 @pytest.mark.parametrize(
-    "classifier", [LocalClassifierPerParentNode, LocalClassifierPerLevel]
+    "classifier",
+    [LocalClassifierPerParentNode, LocalClassifierPerLevel, LocalClassifierPerNode],
 )
 def test_imports(classifier):
     x_train = [[76, 12, 49], [88, 63, 31], [5, 42, 24], [17, 90, 55]]
@@ -199,7 +223,8 @@ def test_imports(classifier):
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
 @pytest.mark.parametrize(
-    "classifier", [LocalClassifierPerLevel, LocalClassifierPerParentNode]
+    "classifier",
+    [LocalClassifierPerLevel, LocalClassifierPerParentNode, LocalClassifierPerNode],
 )
 @pytest.mark.parametrize("data", ["explainer_data"])
 @pytest.mark.parametrize("mode", ["linear", "gradient", "deep", "tree", ""])
