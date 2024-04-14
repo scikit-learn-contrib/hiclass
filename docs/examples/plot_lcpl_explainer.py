@@ -28,8 +28,7 @@ explainer = Explainer(classifier, data=X_train, mode="tree")
 explanations = explainer.explain(X_test.values)
 print(explanations)
 
-# Let's filter the Shapley values corresponding to the Covid (level 1)
-# and 'Respiratory' (level 0)
+# Since Covid is a kind of Respiratory diseases, let's filter explanations for these classes
 
 predictions = classifier.predict(X_test)
 covid_lvl = explainer.get_class_level("Covid")
