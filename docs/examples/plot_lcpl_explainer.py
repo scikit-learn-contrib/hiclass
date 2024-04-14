@@ -31,12 +31,17 @@ print(explanations)
 # Let's filter the Shapley values corresponding to the Covid (level 1)
 # and 'Respiratory' (level 0)
 
-covid_idx = classifier.predict(X_test)[:, 1] == "Covid"
+predictions = classifier.predict(X_test)
+covid_lvl = explainer.get_class_level("Covid")
+covid_idx = explainer.get_sample_indices(predictions, "Covid")
 
-shap_filter_covid = {"level": 1, "class": "Covid", "sample": covid_idx}
-shap_filter_resp = {"level": 0, "class": "Respiratory", "sample": covid_idx}
-shap_val_covid = explanations.sel(**shap_filter_covid)
-shap_val_resp = explanations.sel(**shap_filter_resp)
+
+shap_val_covid = explainer.combine_filters(
+    explanations, class_name="Covid", sample_indices=covid_idx
+)
+shap_val_resp = explainer.combine_filters(
+    explanations, class_name="Respiratory", sample_indices=covid_idx
+)
 
 
 # This code snippet demonstrates how to visually compare the mean absolute SHAP values for 'Covid' vs. 'Respiratory' diseases.
@@ -45,10 +50,10 @@ shap_val_resp = explanations.sel(**shap_filter_resp)
 feature_names = X_train.columns.values
 
 # SHAP values for 'Covid'
-shap_values_covid = shap_val_covid.shap_values.values
+shap_values_covid = shap_val_covid
 
 # SHAP values for 'Respiratory'
-shap_values_resp = shap_val_resp.shap_values.values
+shap_values_resp = shap_val_resp
 
 shap.summary_plot(
     [shap_values_covid, shap_values_resp],
