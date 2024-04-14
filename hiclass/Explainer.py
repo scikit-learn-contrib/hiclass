@@ -403,7 +403,7 @@ class Explainer:
         if level is not None:
             shap_filter["level"] = level
         else:
-            level = new_level(self.hierarchical_model, class_name)
+            level = self.get_class_level(class_name)
             shap_filter["level"] = level
         if sample_indices is not None:
             shap_filter["sample"] = sample_indices
@@ -417,6 +417,7 @@ class Explainer:
         """
         TODO: add docstring
         """
+        classifier = self.hierarchical_model
         for node in classifier.hierarchy_.nodes:
             if class_name in node:
                 node_classes = node.split(classifier.separator_)
@@ -426,5 +427,5 @@ class Explainer:
         """
         TODO: add docstring
         """
-        class_level = self.get_class_level(predictions, class_name)
+        class_level = self.get_class_level(class_name)
         return predictions[:, class_level] == class_name
