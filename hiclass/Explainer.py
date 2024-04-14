@@ -388,20 +388,39 @@ class Explainer:
 
     def filter_by_class(self, explanations, class_name, sample_indices=None):
         """
-        TODO: add docstring
-        """
-        shap_filter = dict()
-        shap_filter["class"] = class_name
-        level = self.get_class_level(class_name)
-        shap_filter["level"] = level
+        Filters SHAP values based on a specified class and optionally by sample indices.
 
+        This function filters the provided explanations data array to return SHAP values
+        for a specific class, determined both by its name and the level it appears in
+        the hierarchy, with an option to further filter by specific sample indices.
+
+        Parameters
+        ----------
+        explanations : xarray.DataArray
+            An array of explanations, where dimensions include 'class', 'level', and 'sample'.
+        class_name : str
+            The name of the class to filter the explanations by.
+        sample_indices : list of int, optional
+            A list of integer indices specifying which samples to include in the filter.
+            If None, no sample-based filtering is applied.
+
+        Returns
+        -------
+        numpy.ndarray
+            An array of SHAP values filtered according to the specified class and optionally
+            by the provided sample indices.
+
+        Example
+        -------
+        # Assuming `explanations` is an xarray.DataArray with the proper dimensions:
+        shap_values = filter_by_class(explanations, 'Dog', sample_indices=[0, 2, 5])
+        """
+        shap_filter = {"class": class_name, "level": self.get_class_level(class_name)}
         if sample_indices is not None:
             shap_filter["sample"] = sample_indices
 
         filtered_explanations = explanations.sel(**shap_filter)
-        filtered_shap_values = filtered_explanations.shap_values.values
-
-        return filtered_shap_values
+        return filtered_explanations.shap_values.values
 
     def get_class_level(self, class_name):
         """
@@ -421,7 +440,8 @@ class Explainer:
         for node in classifier.hierarchy_.nodes:
             if class_name in node:
                 node_classes = node.split(classifier.separator_)
-                return node_classes.index(class_name)
+                class_level = node_classes.index(class_name)
+                return class_level
 
     def get_sample_indices(self, predictions, class_name):
         """
