@@ -392,7 +392,7 @@ class Explainer:
         return filtered_explanations
 
     def combine_filters(
-            self, explanations, level=None, class_name=None, sample_indices=None
+        self, explanations, level=None, class_name=None, sample_indices=None
     ):
         """
         TOOD: add docstring
@@ -412,6 +412,3 @@ class Explainer:
         filtered_shap_values = filtered_explanations.shap_values.values
 
         return filtered_shap_values
-
-
-
