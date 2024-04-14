@@ -412,3 +412,12 @@ class Explainer:
         filtered_shap_values = filtered_explanations.shap_values.values
 
         return filtered_shap_values
+
+    def get_class_level(self, class_name):
+    """
+    TODO: add docstring
+    """
+    for node in classifier.hierarchy_.nodes:
+        if class_name in node:
+            node_classes = node.split(classifier.separator_)
+            return node_classes.index(class_name)
