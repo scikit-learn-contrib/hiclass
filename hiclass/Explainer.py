@@ -391,6 +391,27 @@ class Explainer:
         filtered_explanations = explanations.sel(**filter_by_class)
         return filtered_explanations
 
+    def combine_filters(
+            self, explanations, level=None, class_name=None, sample_indices=None
+    ):
+        """
+        TOOD: add docstring
+        """
+        shap_filter = dict()
+        if class_name is not None:
+            shap_filter["class"] = class_name
+        if level is not None:
+            shap_filter["level"] = level
+        else:
+            level = new_level(self.hierarchical_model, class_name)
+            shap_filter["level"] = level
+        if sample_indices is not None:
+            shap_filter["sample"] = sample_indices
+
+        filtered_explanations = explanations.sel(**shap_filter)
+        filtered_shap_values = filtered_explanations.shap_values.values
+
+        return filtered_shap_values
 
 
 
