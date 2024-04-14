@@ -414,10 +414,17 @@ class Explainer:
         return filtered_shap_values
 
     def get_class_level(self, class_name):
-    """
-    TODO: add docstring
-    """
-    for node in classifier.hierarchy_.nodes:
-        if class_name in node:
-            node_classes = node.split(classifier.separator_)
-            return node_classes.index(class_name)
+        """
+        TODO: add docstring
+        """
+        for node in classifier.hierarchy_.nodes:
+            if class_name in node:
+                node_classes = node.split(classifier.separator_)
+                return node_classes.index(class_name)
+
+    def get_sample_indices(self, predictions, class_name):
+        """
+        TODO: add docstring
+        """
+        class_level = self.get_class_level(predictions, class_name)
+        return predictions[:, class_level] == class_name
