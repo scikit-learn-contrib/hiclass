@@ -394,6 +394,8 @@ class Explainer:
         for a specific class, determined both by its name and the level it appears in
         the hierarchy, with an option to further filter by specific sample indices.
 
+        As long as class can belong to one level only, the function also provides filtration
+        by level which is computed based on the class location in the hierarchy.
         Parameters
         ----------
         explanations : xarray.DataArray
