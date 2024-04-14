@@ -35,10 +35,10 @@ covid_lvl = explainer.get_class_level("Covid")
 covid_idx = explainer.get_sample_indices(predictions, "Covid")
 
 
-shap_values_covid = explainer.combine_filters(
+shap_values_covid = explainer.filter_by_class(
     explanations, class_name="Covid", sample_indices=covid_idx
 )
-shap_values_resp = explainer.combine_filters(
+shap_values_resp = explainer.filter_by_class(
     explanations, class_name="Respiratory", sample_indices=covid_idx
 )
 
