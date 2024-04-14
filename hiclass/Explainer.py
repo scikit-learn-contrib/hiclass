@@ -365,3 +365,12 @@ class Explainer:
             datasets.append(local_dataset)
         sample_explanation = xr.concat(datasets, dim="level")
         return sample_explanation
+
+    def filter_by_level(self, explanations, level):
+        """
+        TODO
+        Returns Shapley_values filters by given level in the hierarchy
+        """
+        filter_by_level = {"level": level}
+        filtered_explanations = explanations.sel(**filter_by_level)
+        return filtered_explanations
