@@ -535,3 +535,49 @@ class Explainer:
         """
         class_level = self.get_class_level(class_name)
         return predictions[:, class_level] == class_name
+
+    def shap_multi_plot(self, class_names, features, pred_class, features_names=None):
+        """
+        Plot shap_values for multi-class case on a bar and return explanations.
+        "Lazy" function which does not require any additional actions from the user
+        apart from classifier fitting and explainer initialization.
+
+        Parameters
+        __________
+        class_names : list of str
+            A list of class names to calculate and visualize the Shapley values for
+        features: array-like
+            Matrix of feature values with shape (# features) or (# samples x # features).
+            Typically, this would be the test set features (X_test).
+        pred_class : int or str
+            The class label that the classifier's predictions must match for a sample to be
+            included in the subset of data used for SHAP value calculation. If not provided,
+            no filtering is applied, and all samples are considered.
+        features_names : list, optional
+            A list of feature names to include in the bar plot for the shap_values.
+
+        Returns
+        _______
+        explanations: xarray.Dataset
+            Whole explanations of data in features provided.
+        """
+        classifier = self.hierarchical_model
+        predictions = classifier.predict(features)
+        explanations = self.explain(features)
+
+        sample_idx = self.get_sample_indices(predictions, pred_class)
+        shap_array = []
+        for class_name in class_names:
+            shap_val = self.filter_by_class(
+                explanations, class_name=class_name, sample_indices=sample_idx
+            )
+            shap_array.append(shap_val)
+
+        shap.summary_plot(
+            shap_array,
+            features=features[sample_idx],
+            feature_names=features_names,
+            plot_type="bar",
+            class_names=class_names,
+        )
+        return explanations
