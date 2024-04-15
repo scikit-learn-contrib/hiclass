@@ -128,4 +128,23 @@ To achieve this, we can use xarray's :literal:`.sel()` method:
     mask = {'class': lcppn.predict(x_test).flatten()[:-1]}
     x = explanations.sel(mask).shap_values
 
+Also, we developed some helper functions built in the Explainer class as its methods to simplify standard explanation manipulation and filtering such as filtering explanations by level, or filtering explanations by class and returning its Shapley values. A basic example below is a continuation of the example from the beginning of this section:
+
+.. code-block:: python
+
+    predictions = lcppn.predict(x_test)
+    # Get the correcponding samples
+    covid_idx = explainer.get_sample_indices(predictions, 'Covid')
+
+    # Filter the shap values
+    shap_values_covid = explainer.filter_by_class(explanations, 'Covid', covid_idx)
+    print(shap_values_covid)
+
+    # Filter explanations by level
+    level = 1
+    explanations_level_1 = explainer.filter_by_level(explanations, level)
+    print(explanations_level_1)
+
+
+
 More advanced usage and capabilities can be found at the `Xarray.Dataset <https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html>`_ documentation.
