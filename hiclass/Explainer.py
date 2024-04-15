@@ -368,7 +368,7 @@ class Explainer:
 
     def filter_by_level(self, explanations, level):
         """
-        Returns the explanations filtered by the given level.
+        Return the explanations filtered by the given level.
 
         Parameters
         __________
@@ -415,7 +415,7 @@ class Explainer:
 
     def filter_by_class(self, explanations, class_name, sample_indices=None):
         """
-        Filters SHAP values based on a specified class and optionally by sample indices.
+        Filter SHAP values based on a specified class and optionally by sample indices.
 
         This function filters the provided explanations data array to return SHAP values
         for a specific class, determined both by its name and the level it appears in
@@ -454,7 +454,7 @@ class Explainer:
 
     def get_class_level(self, class_name):
         """
-        Returns level of the class in the hierarchy.
+        Return level of the class in the hierarchy.
 
         Parameters
         __________
@@ -477,7 +477,7 @@ class Explainer:
 
     def get_sample_indices(self, predictions, class_name):
         """
-        Returns indices of predictions corresponding to the certain class
+        Return indices of predictions corresponding to the certain class.
 
         Parameters
         __________
