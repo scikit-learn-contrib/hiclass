@@ -25,35 +25,14 @@ classifier.fit(X_train, Y_train)
 
 # Define Explainer
 explainer = Explainer(classifier, data=X_train, mode="tree")
-explanations = explainer.explain(X_test.values)
-print(explanations)
 
-# Predict
-predictions = classifier.predict(X_test)
+# Now, our task is to see how feature importance may vary from level to level
+# We are going to calculate shap_values for 'Respiratory', 'Covid' and plot what we calculated
+# This can be done with a single method .shap_multi_plot, which additionally returns calculated explanations
 
-# Since Covid is a kind of Respiratory diseases, let's filter explanations for these classes
-
-# Let's get sample indices where 'Covid' is predicted what can be done with .get_sample_indices() method
-sample_idx = explainer.get_sample_indices(predictions, "Covid")
-
-# Shapley values filtering by classes with .filter_by_class() method
-shap_values_covid = explainer.filter_by_class(
-    explanations, class_name="Covid", sample_indices=sample_idx
-)
-shap_values_resp = explainer.filter_by_class(
-    explanations, class_name="Respiratory", sample_indices=sample_idx
-)
-
-
-# This code snippet demonstrates how to visually compare the mean absolute SHAP values for 'Covid' vs. 'Respiratory' diseases.
-
-# Feature names for the X-axis
-feature_names = X_train.columns.values
-
-shap.summary_plot(
-    [shap_values_covid, shap_values_resp],
-    features=X_test.iloc[sample_idx],
-    feature_names=X_train.columns.values,
-    plot_type="bar",
+explanations = explainer.shap_multi_plot(
     class_names=["Covid", "Respiratory"],
+    features=X_test.values,
+    pred_class="Respiratory",
+    features_names=X_train.columns.values,
 )
