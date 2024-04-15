@@ -425,8 +425,8 @@ class Explainer:
         by level which is computed based on the class location in the hierarchy.
         Parameters
         ----------
-        explanations : xarray.DataArray
-            An array of explanations, where dimensions include 'class', 'level', and 'sample'.
+        explanations : xarray.Dataset
+            A dataset of explanations, where dimensions include 'class', 'level', and 'sample'.
         class_name : str or int
             The name of the class to filter the explanations by.
         sample_indices : list of boolean, optional
@@ -438,18 +438,54 @@ class Explainer:
         numpy.ndarray
             An array of SHAP values filtered according to the specified class and optionally
             by the provided sample indices.
+
+        Examples
+        ________
+        >>> from sklearn.ensemble import RandomForestClassifier
+        >>> import numpy as np
+        >>> from hiclass import LocalClassifierPerParentNode, Explainer
+        >>> rfc = RandomForestClassifier()
+        >>> lcppn = LocalClassifierPerParentNode(local_classifier=rfc, replace_classifiers=False)
+        >>> x_train = np.array([[1, 3], [2, 5]])
+        >>> y_train = np.array([[1, 2], [3, 4]])
+        >>> x_test = np.array([[4, 6]])
+        >>> lcppn.fit(x_train, y_train)
+        >>> predictions = lcppn.predict(x_test)
+        >>> explainer = Explainer(lcppn, data=x_train, mode="tree")
+        >>> explanations = explainer.explain(x_test)
+        >>> filtered_shap = explainer.filter_by_class(explanations, level=3)
+        >>> print(filtered_shap)
+        [['3' '4']]
+        [[0.1   0.105]]
         """
-        # Creating filter for the class
+        # Ensure that explanations are provided and have the expected structure
+        if not isinstance(explanations, xr.Dataset):
+            raise ValueError("Explanations should be an xarray.Dataset!")
+
+        # Converting class_name to the string format
         class_name = str(class_name)
+
+        # Define level
         level = self.get_class_level(str(class_name))
+
         # Handling with LocalClassifierPerNode case
         if isinstance(self.hierarchical_model, LocalClassifierPerNode):
-            class_name = str(class_name) + "_1"
+            class_name = f"{class_name}_1"
+
+        # Shap filter
         shap_filter = {"class": class_name, "level": level}
         if sample_indices is not None:
             shap_filter["sample"] = sample_indices
 
-        filtered_explanations = explanations.sel(**shap_filter)
+        # Select the SHAP values according to the filter and handle possible errors
+        try:
+            filtered_explanations = explanations.sel(**shap_filter)
+        except KeyError as e:
+            raise KeyError(
+                f"Class name {class_name} with level {level} not found."
+            ) from e
+
+        # Return the selected SHAP values as a NumPy array
         return filtered_explanations.shap_values.values
 
     def get_class_level(self, class_name):
@@ -465,9 +501,16 @@ class Explainer:
         _______
         class_level : int
             Level of the class in the hierarchy
+
+
         """
+        # Set the classifier
         classifier = self.hierarchical_model
+
+        # Converting class_name to the string formatn
         class_name = str(class_name)
+
+        # Iterating through the nodes of hierarchy
         for node in classifier.hierarchy_.nodes:
             if class_name in node.split(classifier.separator_):
                 node_classes = node.split(classifier.separator_)
