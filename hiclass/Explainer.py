@@ -465,6 +465,9 @@ class Explainer:
         # Converting class_name to the string format
         class_name = str(class_name)
 
+        if class_name == "":
+            raise ValueError("Empty class!")
+
         # Define level
         level = self.get_class_level(str(class_name))
 
@@ -511,9 +514,9 @@ class Explainer:
         class_name = str(class_name)
 
         # Iterating through the nodes of hierarchy
-        for node in classifier.hierarchy_.nodes:
-            if class_name in node.split(classifier.separator_):
-                node_classes = node.split(classifier.separator_)
+        for node_ in classifier.hierarchy_.nodes:
+            if class_name in node_.split(classifier.separator_):
+                node_classes = node_.split(classifier.separator_)
                 return node_classes.index(class_name)
 
         raise ValueError(f"Class '{class_name}' not found!")
@@ -559,13 +562,18 @@ class Explainer:
 
         Returns
         -------
-        explanations: xarray.Dataset
+        explanations: xarray.Dataset3
             Whole explanations of data in features provided.
         """
         classifier = self.hierarchical_model
         predictions = classifier.predict(features)
-        explanations = self.explain(features)
 
+        if pred_class is not None and not any(pred_class in row for row in predictions):
+            raise ValueError(
+                f"The specified class '{pred_class}' was not found in the predictions."
+            )
+
+        explanations = self.explain(features)
         sample_idx = self.get_sample_indices(predictions, pred_class)
         shap_array = []
         for class_name in class_names:

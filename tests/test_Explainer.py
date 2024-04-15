@@ -7,6 +7,8 @@ from hiclass import (
     LocalClassifierPerNode,
     Explainer,
 )
+from hiclass.datasets import load_platypus
+
 
 try:
     import shap
@@ -49,6 +51,17 @@ def explainer_data_no_root():
     )
     x_test = np.random.randn(5, 3)
     return x_train, x_test, y_train
+
+
+@pytest.fixture()
+def explainer_data_platypus():
+    X_train, X_test, Y_train, Y_test = load_platypus()
+    X_train = X_train.iloc[0:10].values
+    X_test = X_test.iloc[0:10].values
+    Y_train = Y_train.iloc[0:10].values
+    Y_test = Y_test.iloc[0:10].values
+
+    return X_train, X_test, Y_train
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
@@ -250,7 +263,9 @@ def test_explainers(data, request, classifier, mode):
     "classifier",
     [LocalClassifierPerLevel, LocalClassifierPerParentNode, LocalClassifierPerNode],
 )
-@pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
+@pytest.mark.parametrize(
+    "data", ["explainer_data", "explainer_data_no_root", "explainer_data_platypus"]
+)
 def test_filter_by_level(data, request, classifier):
     x_train, x_test, y_train = request.getfixturevalue(data)
     rfc = RandomForestClassifier()
@@ -270,9 +285,15 @@ def test_filter_by_level(data, request, classifier):
     "classifier",
     [LocalClassifierPerLevel, LocalClassifierPerParentNode, LocalClassifierPerNode],
 )
-@pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
+@pytest.mark.parametrize(
+    "data", ["explainer_data", "explainer_data_no_root", "explainer_data_platypus"]
+)
 def test_filter_by_class(data, request, classifier):
-    x_train, x_test, y_train = request.getfixturevalue(data)
+    (
+        x_train,
+        x_test,
+        y_train,
+    ) = request.getfixturevalue(data)
     rfc = RandomForestClassifier()
     clf = classifier(local_classifier=rfc, replace_classifiers=False)
 
@@ -284,5 +305,37 @@ def test_filter_by_class(data, request, classifier):
 
     for pred in predictions:
         for y in pred:
-            shap_y = explainer.filter_by_class(explanations, y)
-            assert isinstance(shap_y, np.ndarray)
+            if y == "":
+                # Check that ValueError is raised for empty string
+                with pytest.raises(ValueError):
+                    explainer.filter_by_class(explanations, y)
+            else:
+                # Normal behavior for non-empty strings
+                shap_y = explainer.filter_by_class(explanations, y)
+                assert isinstance(shap_y, np.ndarray)
+
+
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.parametrize(
+    "classifier",
+    [LocalClassifierPerLevel, LocalClassifierPerParentNode, LocalClassifierPerNode],
+)
+@pytest.mark.parametrize(
+    "data", ["explainer_data", "explainer_data_no_root", "explainer_data_platypus"]
+)
+def test_shap_multi_plot(data, request, classifier):
+    x_train, x_test, y_train = request.getfixturevalue(data)
+    rfc = RandomForestClassifier()
+    clf = classifier(local_classifier=rfc, replace_classifiers=False)
+
+    clf.fit(x_train, y_train)
+    predictions = clf.predict(x_test)
+    explainer = Explainer(clf, data=x_train)
+
+    class_names = np.random.choice(predictions[0, :], size=2)
+    explanations = explainer.shap_multi_plot(
+        class_names=np.random.choice(predictions[0, :], size=2),
+        features=x_test,
+        pred_class=class_names[0],
+    )
+    assert isinstance(explanations, xarray.Dataset)
