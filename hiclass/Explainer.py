@@ -539,13 +539,14 @@ class Explainer:
     def shap_multi_plot(self, class_names, features, pred_class, features_names=None):
         """
         Plot shap_values for multi-class case on a bar and return explanations.
+
         "Lazy" function which does not require any additional actions from the user
         apart from classifier fitting and explainer initialization.
 
         Parameters
-        __________
+        ----------
         class_names : list of str
-            A list of class names to calculate and visualize the Shapley values for
+            A list of class names to calculate and visualize the Shapley values for.
         features: array-like
             Matrix of feature values with shape (# features) or (# samples x # features).
             Typically, this would be the test set features (X_test).
@@ -557,7 +558,7 @@ class Explainer:
             A list of feature names to include in the bar plot for the shap_values.
 
         Returns
-        _______
+        -------
         explanations: xarray.Dataset
             Whole explanations of data in features provided.
         """
