@@ -25,23 +25,26 @@ classifier = LocalClassifierPerParentNode(
 # Train local classifier per parent node
 classifier.fit(X_train, Y_train)
 
+# Get predictions
+predictions = classifier.predict(X_test)
+
 # Define Explainer
 explainer = Explainer(classifier, data=X_train.values, mode="tree")
 explanations = explainer.explain(X_test.values)
 print(explanations)
 
-# Filter samples which only predicted "Respiratory" at first level
-respiratory_idx = classifier.predict(X_test)[:, 0] == "Respiratory"
-
-# Specify additional filters to obtain only level 0
-shap_filter = {"level": 0, "class": "Respiratory", "sample": respiratory_idx}
+# Filter samples which only predicted "Respiratory"
+respiratory_idx = explainer.get_sample_indices(predictions, "Respiratory")
 
 # Use .sel() method to apply the filter and obtain filtered results
-shap_val_respiratory = explanations.sel(shap_filter)
+shap_val_respiratory = explainer.filter_by_class(
+    explanations, class_name="Respiratory", sample_indices=respiratory_idx
+)
+
 
 # Plot feature importance on test set
 shap.plots.violin(
-    shap_val_respiratory.shap_values,
+    shap_val_respiratory,
     feature_names=X_train.columns.values,
     plot_size=(13, 8),
 )
