@@ -243,3 +243,46 @@ def test_explainers(data, request, classifier, mode):
         "": shap.Explainer,
     }
     assert explainer.explainer == mode_mapping[mode]
+
+
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.parametrize(
+    "classifier",
+    [LocalClassifierPerLevel, LocalClassifierPerParentNode, LocalClassifierPerNode],
+)
+@pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
+def test_filter_by_level(data, request, classifier):
+    x_train, x_test, y_train = request.getfixturevalue(data)
+    rfc = RandomForestClassifier()
+    clf = classifier(local_classifier=rfc, replace_classifiers=False)
+
+    clf.fit(x_train, y_train)
+    explainer = Explainer(clf, data=x_train)
+    explanations = explainer.explain(x_test)
+
+    for i in range(3):
+        filtered_explanations = explainer.filter_by_level(explanations, i)
+        assert isinstance(filtered_explanations, xarray.Dataset)
+
+
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.parametrize(
+    "classifier",
+    [LocalClassifierPerLevel, LocalClassifierPerParentNode, LocalClassifierPerNode],
+)
+@pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
+def test_filter_by_class(data, request, classifier):
+    x_train, x_test, y_train = request.getfixturevalue(data)
+    rfc = RandomForestClassifier()
+    clf = classifier(local_classifier=rfc, replace_classifiers=False)
+
+    clf.fit(x_train, y_train)
+    predictions = clf.predict(x_test)
+
+    explainer = Explainer(clf, data=x_train)
+    explanations = explainer.explain(x_test)
+
+    for pred in predictions:
+        for y in pred:
+            shap_y = explainer.filter_by_class(explanations, y)
+            assert isinstance(shap_y, np.ndarray)

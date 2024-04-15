@@ -379,8 +379,35 @@ class Explainer:
 
         Returns
         _______
-        filtered_explanations : xarray.DataArray
+        filtered_explanations : xarray.Dataset
             Explanations filtered by the given level
+
+        Examples
+        --------
+        >>> from sklearn.ensemble import RandomForestClassifier
+        >>> import numpy as np
+        >>> from hiclass import LocalClassifierPerParentNode, Explainer
+        >>> rfc = RandomForestClassifier()
+        >>> lcppn = LocalClassifierPerParentNode(local_classifier=rfc, replace_classifiers=False)
+        >>> x_train = np.array([[1, 3], [2, 5]])
+        >>> y_train = np.array([[1, 2], [3, 4]])
+        >>> x_test = np.array([[4, 6]])
+        >>> lcppn.fit(x_train, y_train)
+        >>> explainer = Explainer(lcppn, data=x_train, mode="tree")
+        >>> explanations = explainer.explain(x_test)
+        >>> explanations_level_1 = explainer.filter_by_level(explanations, level=1)
+        <xarray.Dataset>
+        Dimensions:          (class: 3, sample: 1, feature: 2)
+        Coordinates:
+          * class            (class) <U1 12B '1' '3' '4'
+            level            int64 8B 1
+        Dimensions without coordinates: sample, feature
+        Data variables:
+            node             (sample) <U13 52B '3'
+            predicted_class  (sample) <U1 4B '4'
+            predict_proba    (sample, class) float64 24B nan nan 1.0
+            classes          (sample, class) object 24B nan nan '4'
+            shap_values      (class, sample, feature) float64 48B nan nan ... 0.0 0.0
         """
         filter_by_level = {"level": level}
         filtered_explanations = explanations.sel(**filter_by_level)
@@ -400,10 +427,10 @@ class Explainer:
         ----------
         explanations : xarray.DataArray
             An array of explanations, where dimensions include 'class', 'level', and 'sample'.
-        class_name : str
+        class_name : str or int
             The name of the class to filter the explanations by.
-        sample_indices : list of int, optional
-            A list of integer indices specifying which samples to include in the filter.
+        sample_indices : list of boolean, optional
+            A list of boolean indices specifying which samples to include in the filter.
             If None, no sample-based filtering is applied.
 
         Returns
@@ -411,13 +438,14 @@ class Explainer:
         numpy.ndarray
             An array of SHAP values filtered according to the specified class and optionally
             by the provided sample indices.
-
-        Example
-        -------
-        # Assuming `explanations` is an xarray.DataArray with the proper dimensions:
-        shap_values = filter_by_class(explanations, 'Dog', sample_indices=[0, 2, 5])
         """
-        shap_filter = {"class": class_name, "level": self.get_class_level(class_name)}
+        # Creating filter for the class
+        class_name = str(class_name)
+        level = self.get_class_level(str(class_name))
+        # Handling with LocalClassifierPerNode case
+        if isinstance(self.hierarchical_model, LocalClassifierPerNode):
+            class_name = str(class_name) + "_1"
+        shap_filter = {"class": class_name, "level": level}
         if sample_indices is not None:
             shap_filter["sample"] = sample_indices
 
@@ -430,7 +458,7 @@ class Explainer:
 
         Parameters
         __________
-        class_name : str
+        class_name : int or str
             Name of the class
 
         Returns
@@ -439,15 +467,17 @@ class Explainer:
             Level of the class in the hierarchy
         """
         classifier = self.hierarchical_model
+        class_name = str(class_name)
         for node in classifier.hierarchy_.nodes:
-            if class_name in node:
+            if class_name in node.split(classifier.separator_):
                 node_classes = node.split(classifier.separator_)
-                class_level = node_classes.index(class_name)
-                return class_level
+                return node_classes.index(class_name)
+
+        raise ValueError(f"Class '{class_name}' not found!")
 
     def get_sample_indices(self, predictions, class_name):
         """
-        Returns indices of samples corresponding to the certain class
+        Returns indices of predictions corresponding to the certain class
 
         Parameters
         __________
