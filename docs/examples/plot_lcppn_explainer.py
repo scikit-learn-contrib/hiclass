@@ -33,12 +33,11 @@ explainer = Explainer(classifier, data=X_train.values, mode="tree")
 explanations = explainer.explain(X_test.values)
 print(explanations)
 
-# Filter samples which only predicted "Respiratory"
-respiratory_idx = explainer.get_sample_indices(predictions, "Respiratory")
-
 # Use .sel() method to apply the filter and obtain filtered results
 shap_val_respiratory = explainer.filter_by_class(
-    explanations, class_name="Respiratory", sample_indices=respiratory_idx
+    explanations,
+    class_name="Respiratory",
+    sample_indices=explainer.get_sample_indices(predictions, "Respiratory"),
 )
 
 
