@@ -28,18 +28,20 @@ explainer = Explainer(classifier, data=X_train, mode="tree")
 explanations = explainer.explain(X_test.values)
 print(explanations)
 
+# Predict
+predictions = classifier.predict(X_test)
+
 # Since Covid is a kind of Respiratory diseases, let's filter explanations for these classes
 
-predictions = classifier.predict(X_test)
-covid_lvl = explainer.get_class_level("Covid")
-covid_idx = explainer.get_sample_indices(predictions, "Covid")
+# Let's get sample indices where 'Covid' is predicted what can be done with .get_sample_indices() method
+sample_idx = explainer.get_sample_indices(predictions, "Covid")
 
-
+# Shapley values filtering by classes with .filter_by_class() method
 shap_values_covid = explainer.filter_by_class(
-    explanations, class_name="Covid", sample_indices=covid_idx
+    explanations, class_name="Covid", sample_indices=sample_idx
 )
 shap_values_resp = explainer.filter_by_class(
-    explanations, class_name="Respiratory", sample_indices=covid_idx
+    explanations, class_name="Respiratory", sample_indices=sample_idx
 )
 
 
@@ -50,7 +52,7 @@ feature_names = X_train.columns.values
 
 shap.summary_plot(
     [shap_values_covid, shap_values_resp],
-    features=X_test.iloc[covid_idx],
+    features=X_test.iloc[sample_idx],
     feature_names=X_train.columns.values,
     plot_type="bar",
     class_names=["Covid", "Respiratory"],
