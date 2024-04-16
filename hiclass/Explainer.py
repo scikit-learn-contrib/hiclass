@@ -587,7 +587,7 @@ class Explainer:
 
         Returns
         -------
-        explanations: xarray.Dataset3
+        explanations: xarray.Dataset
             Whole explanations of data in features provided.
         """
         classifier = self.hierarchical_model
@@ -619,4 +619,19 @@ class Explainer:
 
 # A wrapper function for Ray enabling
 def calculate_shap_values_wrapper(explainer, sample):
+    """
+    Wrapper function for shap_values calculations.
+
+    Parameters
+    __________
+    explainer: Explainer
+        Explainer
+    sample: array-like
+        Sample to calculate SHAP values for.
+
+    Returns
+    _______
+    shap_values: xarray.Dataset
+        Dataset of explanations for the sample.
+    """
     return explainer._calculate_shap_values(sample)
