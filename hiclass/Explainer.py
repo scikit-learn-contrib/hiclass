@@ -25,6 +25,13 @@ except ImportError:
 else:
     shap_installed = True
 
+try:
+    import ray
+except ImportError:
+    _has_ray = False
+else:
+    _has_ray = True
+
 
 class Explainer:
     """Explainer class for returning shap values for each of the three hierarchical classifiers."""
@@ -125,7 +132,7 @@ class Explainer:
         else:
             raise ValueError(f"Invalid model: {self.hierarchical_model}.")
 
-    def _explain_with_xr(self, X):
+    def _explain_with_xr(self, X, use_joblib: bool = False):
         """
         Generate SHAP values for each node using the SHAP package.
 
@@ -139,10 +146,28 @@ class Explainer:
         explanation : xarray.Dataset
             An xarray Dataset consisting of SHAP values for each sample.
         """
-        explanations = Parallel(n_jobs=self.n_jobs, backend="threading")(
-            delayed(self._calculate_shap_values)(sample.reshape(1, -1)) for sample in X
-        )
+        if self.n_jobs > 1:
+            if _has_ray and not use_joblib:
+                if not ray.is_initialized():
+                    ray.init(num_cpus=self.n_jobs)
 
+                calculate_shap_values_remote = ray.remote(calculate_shap_values_wrapper)
+
+                tasks = [
+                    calculate_shap_values_remote.remote(self, sample.reshape(1, -1))
+                    for sample in X
+                ]
+
+                explanations = ray.get(tasks)
+            else:
+                explanations = Parallel(n_jobs=self.n_jobs, backend="threading")(
+                    delayed(self._calculate_shap_values)(sample.reshape(1, -1))
+                    for sample in X
+                )
+        else:
+            explanations = [
+                self._calculate_shap_values(sample.reshape(1, -1)) for sample in X
+            ]
         dataset = xr.concat(explanations, dim="sample")
         return dataset
 
@@ -365,3 +390,248 @@ class Explainer:
             datasets.append(local_dataset)
         sample_explanation = xr.concat(datasets, dim="level")
         return sample_explanation
+
+    def filter_by_level(self, explanations, level):
+        """
+        Return the explanations filtered by the given level.
+
+        Parameters
+        __________
+        explanations : xarray.DataArray
+            The explanations to filter
+        level : int
+            level in the hierarchy to filter
+
+        Returns
+        _______
+        filtered_explanations : xarray.Dataset
+            Explanations filtered by the given level
+
+        Examples
+        --------
+        >>> from sklearn.ensemble import RandomForestClassifier
+        >>> import numpy as np
+        >>> from hiclass import LocalClassifierPerParentNode, Explainer
+        >>> rfc = RandomForestClassifier()
+        >>> lcppn = LocalClassifierPerParentNode(local_classifier=rfc, replace_classifiers=False)
+        >>> x_train = np.array([[1, 3], [2, 5]])
+        >>> y_train = np.array([[1, 2], [3, 4]])
+        >>> x_test = np.array([[4, 6]])
+        >>> lcppn.fit(x_train, y_train)
+        >>> explainer = Explainer(lcppn, data=x_train, mode="tree")
+        >>> explanations = explainer.explain(x_test)
+        >>> explanations_level_1 = explainer.filter_by_level(explanations, level=1)
+        <xarray.Dataset>
+        Dimensions:          (class: 3, sample: 1, feature: 2)
+        Coordinates:
+          * class            (class) <U1 12B '1' '3' '4'
+            level            int64 8B 1
+        Dimensions without coordinates: sample, feature
+        Data variables:
+            node             (sample) <U13 52B '3'
+            predicted_class  (sample) <U1 4B '4'
+            predict_proba    (sample, class) float64 24B nan nan 1.0
+            classes          (sample, class) object 24B nan nan '4'
+            shap_values      (class, sample, feature) float64 48B nan nan ... 0.0 0.0
+        """
+        filter_by_level = {"level": level}
+        filtered_explanations = explanations.sel(**filter_by_level)
+        return filtered_explanations
+
+    def filter_by_class(self, explanations, class_name, sample_indices=None):
+        """
+        Filter SHAP values based on a specified class and optionally by sample indices.
+
+        This function filters the provided explanations data array to return SHAP values
+        for a specific class, determined both by its name and the level it appears in
+        the hierarchy, with an option to further filter by specific sample indices.
+
+        As long as class can belong to one level only, the function also provides filtration
+        by level which is computed based on the class location in the hierarchy.
+        Parameters
+        ----------
+        explanations : xarray.Dataset
+            A dataset of explanations, where dimensions include 'class', 'level', and 'sample'.
+        class_name : str or int
+            The name of the class to filter the explanations by.
+        sample_indices : list of boolean, optional
+            A list of boolean indices specifying which samples to include in the filter.
+            If None, no sample-based filtering is applied.
+
+        Returns
+        -------
+        numpy.ndarray
+            An array of SHAP values filtered according to the specified class and optionally
+            by the provided sample indices.
+
+        Examples
+        ________
+        >>> from sklearn.ensemble import RandomForestClassifier
+        >>> import numpy as np
+        >>> from hiclass import LocalClassifierPerParentNode, Explainer
+        >>> rfc = RandomForestClassifier()
+        >>> lcppn = LocalClassifierPerParentNode(local_classifier=rfc, replace_classifiers=False)
+        >>> x_train = np.array([[1, 3], [2, 5]])
+        >>> y_train = np.array([[1, 2], [3, 4]])
+        >>> x_test = np.array([[4, 6]])
+        >>> lcppn.fit(x_train, y_train)
+        >>> predictions = lcppn.predict(x_test)
+        >>> explainer = Explainer(lcppn, data=x_train, mode="tree")
+        >>> explanations = explainer.explain(x_test)
+        >>> filtered_shap = explainer.filter_by_class(explanations, level=3)
+        >>> print(filtered_shap)
+        [['3' '4']]
+        [[0.1   0.105]]
+        """
+        # Ensure that explanations are provided and have the expected structure
+        if not isinstance(explanations, xr.Dataset):
+            raise ValueError("Explanations should be an xarray.Dataset!")
+
+        # Converting class_name to the string format
+        class_name = str(class_name)
+
+        if class_name == "":
+            raise ValueError("Empty class!")
+
+        # Define level
+        level = self.get_class_level(str(class_name))
+
+        # Handling with LocalClassifierPerNode case
+        if isinstance(self.hierarchical_model, LocalClassifierPerNode):
+            class_name = f"{class_name}_1"
+
+        # Shap filter
+        shap_filter = {"class": class_name, "level": level}
+        if sample_indices is not None:
+            shap_filter["sample"] = sample_indices
+
+        # Select the SHAP values according to the filter and handle possible errors
+        try:
+            filtered_explanations = explanations.sel(**shap_filter)
+        except KeyError as e:
+            raise KeyError(
+                f"Class name {class_name} with level {level} not found."
+            ) from e
+
+        # Return the selected SHAP values as a NumPy array
+        return filtered_explanations.shap_values.values
+
+    def get_class_level(self, class_name):
+        """
+        Return level of the class in the hierarchy.
+
+        Parameters
+        __________
+        class_name : int or str
+            Name of the class
+
+        Returns
+        _______
+        class_level : int
+            Level of the class in the hierarchy
+
+
+        """
+        # Set the classifier
+        classifier = self.hierarchical_model
+
+        # Converting class_name to the string formatn
+        class_name = str(class_name)
+
+        # Iterating through the nodes of hierarchy
+        for node_ in classifier.hierarchy_.nodes:
+            if class_name in node_.split(classifier.separator_):
+                node_classes = node_.split(classifier.separator_)
+                return node_classes.index(class_name)
+
+        raise ValueError(f"Class '{class_name}' not found!")
+
+    def get_sample_indices(self, predictions, class_name):
+        """
+        Return indices of predictions corresponding to the certain class.
+
+        Parameters
+        __________
+        predictions: array-like
+            Array of predictions of the hierarchical classificator
+        class_name: str
+            Name of class
+
+        Returns
+        _______
+        sample_indices: boolean array of indices
+        """
+        class_level = self.get_class_level(class_name)
+        return predictions[:, class_level] == class_name
+
+    def shap_multi_plot(self, class_names, features, pred_class, features_names=None):
+        """
+        Plot shap_values for multi-class case on a bar and return explanations.
+
+        "Lazy" function which does not require any additional actions from the user
+        apart from classifier fitting and explainer initialization.
+
+        Parameters
+        ----------
+        class_names : list of str
+            A list of class names to calculate and visualize the Shapley values for.
+        features: array-like
+            Matrix of feature values with shape (# features) or (# samples x # features).
+            Typically, this would be the test set features (X_test).
+        pred_class : int or str
+            The class label that the classifier's predictions must match for a sample to be
+            included in the subset of data used for SHAP value calculation. If not provided,
+            no filtering is applied, and all samples are considered.
+        features_names : list, optional
+            A list of feature names to include in the bar plot for the shap_values.
+
+        Returns
+        -------
+        explanations: xarray.Dataset
+            Whole explanations of data in features provided.
+        """
+        classifier = self.hierarchical_model
+        predictions = classifier.predict(features)
+
+        if pred_class is not None and not any(pred_class in row for row in predictions):
+            raise ValueError(
+                f"The specified class '{pred_class}' was not found in the predictions."
+            )
+
+        explanations = self.explain(features)
+        sample_idx = self.get_sample_indices(predictions, pred_class)
+        shap_array = []
+        for class_name in class_names:
+            shap_val = self.filter_by_class(
+                explanations, class_name=class_name, sample_indices=sample_idx
+            )
+            shap_array.append(shap_val)
+
+        shap.summary_plot(
+            shap_array,
+            features=features[sample_idx],
+            feature_names=features_names,
+            plot_type="bar",
+            class_names=class_names,
+        )
+        return explanations
+
+
+# A wrapper function for Ray enabling
+def calculate_shap_values_wrapper(explainer, sample):
+    """
+    Wrap the function for shap_values calculations.
+
+    Parameters
+    __________
+    explainer: Explainer
+        Explainer
+    sample: array-like
+        Sample to calculate SHAP values for.
+
+    Returns
+    _______
+    shap_values: xarray.Dataset
+        Dataset of explanations for the sample.
+    """
+    return explainer._calculate_shap_values(sample)
