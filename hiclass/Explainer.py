@@ -620,7 +620,7 @@ class Explainer:
 # A wrapper function for Ray enabling
 def calculate_shap_values_wrapper(explainer, sample):
     """
-    Wrapper function for shap_values calculations.
+    Wrap the function for shap_values calculations.
 
     Parameters
     __________
