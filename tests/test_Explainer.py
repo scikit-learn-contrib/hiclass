@@ -259,6 +259,7 @@ def test_explainers(data, request, classifier, mode):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize(
     "classifier",
     [LocalClassifierPerLevel, LocalClassifierPerParentNode, LocalClassifierPerNode],
@@ -281,6 +282,7 @@ def test_filter_by_level(data, request, classifier):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize(
     "classifier",
     [LocalClassifierPerLevel, LocalClassifierPerParentNode, LocalClassifierPerNode],
@@ -316,6 +318,7 @@ def test_filter_by_class(data, request, classifier):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize(
     "classifier",
     [LocalClassifierPerLevel, LocalClassifierPerParentNode, LocalClassifierPerNode],
