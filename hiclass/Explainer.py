@@ -25,6 +25,13 @@ except ImportError:
 else:
     shap_installed = True
 
+try:
+    import ray
+except ImportError:
+    _has_ray = False
+else:
+    _has_ray = True
+
 
 class Explainer:
     """Explainer class for returning shap values for each of the three hierarchical classifiers."""
@@ -125,7 +132,7 @@ class Explainer:
         else:
             raise ValueError(f"Invalid model: {self.hierarchical_model}.")
 
-    def _explain_with_xr(self, X):
+    def _explain_with_xr(self, X, use_joblib: bool = False):
         """
         Generate SHAP values for each node using the SHAP package.
 
@@ -139,10 +146,28 @@ class Explainer:
         explanation : xarray.Dataset
             An xarray Dataset consisting of SHAP values for each sample.
         """
-        explanations = Parallel(n_jobs=self.n_jobs, backend="threading")(
-            delayed(self._calculate_shap_values)(sample.reshape(1, -1)) for sample in X
-        )
+        if self.n_jobs > 1:
+            if _has_ray and not use_joblib:
+                if not ray.is_initialized():
+                    ray.init(num_cpus=self.n_jobs)
 
+                calculate_shap_values_remote = ray.remote(calculate_shap_values_wrapper)
+
+                tasks = [
+                    calculate_shap_values_remote.remote(self, sample.reshape(1, -1))
+                    for sample in X
+                ]
+
+                explanations = ray.get(tasks)
+            else:
+                explanations = Parallel(n_jobs=self.n_jobs, backend="threading")(
+                    delayed(self._calculate_shap_values)(sample.reshape(1, -1))
+                    for sample in X
+                )
+        else:
+            explanations = [
+                self._calculate_shap_values(sample.reshape(1, -1)) for sample in X
+            ]
         dataset = xr.concat(explanations, dim="sample")
         return dataset
 
@@ -590,3 +615,8 @@ class Explainer:
             class_names=class_names,
         )
         return explanations
+
+
+# A wrapper function for Ray enabling
+def calculate_shap_values_wrapper(explainer, sample):
+    return explainer._calculate_shap_values(sample)

@@ -336,6 +336,9 @@ def test_shap_multi_plot(data, request, classifier):
     explainer = Explainer(clf, data=x_train)
 
     class_names = np.random.choice(predictions[0, :], size=2)
+    while class_names[0] == "" or class_names[1] == "":
+        class_names = np.random.choice(predictions[0, :], size=2)
+
     explanations = explainer.shap_multi_plot(
         class_names=np.random.choice(predictions[0, :], size=2),
         features=x_test,
