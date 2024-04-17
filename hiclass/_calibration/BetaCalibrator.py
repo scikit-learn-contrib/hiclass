@@ -19,7 +19,15 @@ class _BetaCalibrator(_BinaryCalibrator):
             return self
 
         scores_1 = np.log(scores)
+        # replace negative infinity with limit for log(n), n -> -inf
+        replace_negative_inf = np.log(1e-300)
+        scores_1 = np.nan_to_num(scores_1, neginf=replace_negative_inf)
+
         scores_2 = -np.log(1 - scores)
+        # replace positive infinity with limit for log(n), n -> inf
+        replace_positive_inf = np.log(1e300)
+        scores_2 = np.nan_to_num(scores_2, posinf=replace_positive_inf)
+
         feature_matrix = np.column_stack((scores_1, scores_2))
 
         lr = LogisticRegression()

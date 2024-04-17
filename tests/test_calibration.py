@@ -284,6 +284,42 @@ def test_beta_calibration(binary_calibration_data, binary_test_scores):
     )
 
 
+def test_calibration_methods_can_handle_zeros(binary_test_scores):
+    cal_scores = np.array(
+        [
+            [0, 1],
+            [0, 1],
+            [0, 1],
+            [1, 0],
+            [1, 0],
+            [0, 1],
+            [0, 1],
+            [1, 0],
+            [1, 0],
+            [1, 0],
+            [1, 0],
+            [1, 0],
+        ],
+        dtype=np.float32,
+    )
+
+    cal_labels = np.array([1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0])
+    assert_array_equal(np.sum(cal_scores, axis=1), np.ones(len(cal_scores)))
+
+    for calibrator in [
+        _PlattScaling(),
+        _IsotonicRegression(),
+        _BetaCalibrator(),
+        _InductiveVennAbersCalibrator(),
+        _CrossVennAbersCalibrator(LogisticRegression()),
+    ]:
+        try:
+            calibrator.fit(cal_labels, cal_scores[:, 1], cal_scores)
+            calibrator.predict_proba(binary_test_scores[:, 1])
+        except ValueError as e:
+            pytest.fail(repr(e))
+
+
 def test_illegal_calibration_method_raises_error(binary_mock_estimator):
     with pytest.raises(ValueError, match="abc is not a valid calibration method."):
         _Calibrator(binary_mock_estimator, method="abc")
