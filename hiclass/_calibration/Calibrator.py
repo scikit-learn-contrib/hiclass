@@ -103,7 +103,6 @@ class _Calibrator(BaseEstimator):
                 for idx, split in enumerate(score_splits):
                     probabilities[:, idx] = self.calibrators[idx].predict_proba(split)
 
-                # probabilities /= probabilities.sum(axis=1, keepdims=True)
                 probabilities = _normalize_probabilities(probabilities)
 
         else:

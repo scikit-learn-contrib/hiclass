@@ -304,7 +304,6 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
                     probabilities[:, idx] = self.ivaps[idx].predict_proba(scores)
 
             # normalize
-            # probabilities /= probabilities.sum(axis=1, keepdims=True)
             probabilities = _normalize_probabilities(probabilities)
             return probabilities
 

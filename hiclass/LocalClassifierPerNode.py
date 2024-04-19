@@ -323,14 +323,6 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         # normalize probabilities
         level_probability_list = _normalize_probabilities(level_probability_list)
-        """
-        level_probability_list = [
-            np.nan_to_num(
-                level_probabilities / level_probabilities.sum(axis=1, keepdims=True)
-            )
-            for level_probabilities in level_probability_list
-        ]
-        """
 
         # combine probabilities horizontally
         level_probability_list = self._combine_and_reorder(level_probability_list)
