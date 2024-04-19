@@ -6,6 +6,7 @@ from typing import List
 from collections import defaultdict
 from networkx.exception import NetworkXError
 from hiclass import HierarchicalClassifier
+from hiclass._hiclass_utils import _normalize_probabilities
 
 
 class ProbabilityCombiner(abc.ABC):
@@ -24,12 +25,7 @@ class ProbabilityCombiner(abc.ABC):
         ...
 
     def _normalize(self, proba: List[np.ndarray]):
-        return [
-            np.nan_to_num(
-                level_probabilities / level_probabilities.sum(axis=1, keepdims=True)
-            )
-            for level_probabilities in proba
-        ]
+        return _normalize_probabilities(proba)
 
     def _find_predecessors(self, level: int):
         predecessors = defaultdict(list)

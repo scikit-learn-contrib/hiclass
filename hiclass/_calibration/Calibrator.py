@@ -10,6 +10,7 @@ from hiclass._calibration.IsotonicRegression import _IsotonicRegression
 from hiclass._calibration.PlattScaling import _PlattScaling
 from hiclass._calibration.BetaCalibrator import _BetaCalibrator
 from hiclass._calibration.calibration_utils import _one_vs_rest_split
+from hiclass._hiclass_utils import _normalize_probabilities
 
 
 class _Calibrator(BaseEstimator):
@@ -102,7 +103,8 @@ class _Calibrator(BaseEstimator):
                 for idx, split in enumerate(score_splits):
                     probabilities[:, idx] = self.calibrators[idx].predict_proba(split)
 
-                probabilities /= probabilities.sum(axis=1, keepdims=True)
+                # probabilities /= probabilities.sum(axis=1, keepdims=True)
+                probabilities = _normalize_probabilities(probabilities)
 
         else:
             probabilities = np.zeros((X.shape[0], 2))

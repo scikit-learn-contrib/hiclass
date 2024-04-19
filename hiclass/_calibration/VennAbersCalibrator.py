@@ -6,6 +6,7 @@ from hiclass._calibration.calibration_utils import _one_vs_rest_split
 from collections import defaultdict
 from sklearn.utils.validation import check_is_fitted
 from sklearn.base import BaseEstimator
+from hiclass._hiclass_utils import _normalize_probabilities
 
 
 class _InductiveVennAbersCalibrator(_BinaryCalibrator):
@@ -303,7 +304,8 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
                     probabilities[:, idx] = self.ivaps[idx].predict_proba(scores)
 
             # normalize
-            probabilities /= probabilities.sum(axis=1, keepdims=True)
+            # probabilities /= probabilities.sum(axis=1, keepdims=True)
+            probabilities = _normalize_probabilities(probabilities)
             return probabilities
 
         else:

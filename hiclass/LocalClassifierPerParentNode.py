@@ -22,6 +22,8 @@ from hiclass.probability_combiner import (
     init_strings as probability_combiner_init_strings,
 )
 
+from hiclass._hiclass_utils import _normalize_probabilities
+
 
 class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
     """
@@ -305,12 +307,15 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             level_probability_list.append(cur_level_probabilities)
 
         # normalize probabilities
+        level_probability_list = _normalize_probabilities(level_probability_list)
+        """
         level_probability_list = [
             np.nan_to_num(
                 level_probabilities / level_probabilities.sum(axis=1, keepdims=True)
             )
             for level_probabilities in level_probability_list
         ]
+        """
 
         return level_probability_list
 
