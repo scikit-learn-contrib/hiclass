@@ -9,6 +9,7 @@ import networkx as nx
 import numpy as np
 import pickle
 from copy import deepcopy
+from cuml.common.device_selection import using_device_type
 from cuml.multiclass import MulticlassClassifier
 from os.path import exists
 from sklearn.base import BaseEstimator
@@ -239,7 +240,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         if not self.bert:
             self.logger_.info(X)
             self.logger_.info(y)
-            classifier.fit(X, y)
+            with using_device_type("gpu"):
+                classifier.fit(X, y)
         else:
             classifier.fit(X, y)
         self._save_tmp(node, classifier)

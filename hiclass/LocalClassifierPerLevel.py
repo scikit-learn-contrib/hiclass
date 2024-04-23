@@ -221,7 +221,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     def _initialize_local_classifiers(self):
         super()._initialize_local_classifiers()
         self.local_classifiers_ = [
-            deepcopy(self.local_classifier_) for _ in range(self.y_.shape[1])
+            MulticlassClassifier(deepcopy(self.local_classifier_), strategy="ovr")
+            for _ in range(self.y_.shape[1])
         ]
         self.masks_ = [None for _ in range(self.y_.shape[1])]
 
