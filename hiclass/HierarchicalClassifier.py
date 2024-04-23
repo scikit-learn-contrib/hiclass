@@ -216,9 +216,13 @@ class HierarchicalClassifier(abc.ABC):
                     row.append(parent + self.separator_ + child)
                 new_y.append(np.asarray(row, dtype=np.str_))
             new_y = np.array(new_y)
-            self.label_encoder_ = LabelEncoder()
-            self.label_encoder_.fit(new_y)
-            self.y_ = self.label_encoder_.transform(new_y)
+            flat_y = np.unique(np.append(new_y.flatten(), "hiclass::root"))
+            if not self.bert:
+                self.label_encoder_ = LabelEncoder()
+                self.label_encoder_.fit(flat_y)
+                self.y_ = np.array(
+                    [self.label_encoder_.transform(row) for row in new_y]
+                )
 
     def _create_digraph(self):
         # Create DiGraph
@@ -258,8 +262,8 @@ class HierarchicalClassifier(abc.ABC):
             self.logger_.info(f"Creating digraph from {rows} 2D labels")
             for row in range(rows):
                 for column in range(columns - 1):
-                    parent = self.y_[row, column].split(self.separator_)[-1]
-                    child = self.y_[row, column + 1].split(self.separator_)[-1]
+                    parent = self.y_[row, column]
+                    child = self.y_[row, column + 1]
                     if parent != "" and child != "":
                         # Only add edge if both parent and child are not empty
                         self.hierarchy_.add_edge(
@@ -274,7 +278,7 @@ class HierarchicalClassifier(abc.ABC):
             # Add quotes to all nodes in case the text has commas
             mapping = {}
             for node in self.hierarchy_:
-                mapping[node] = '"{}"'.format(node.split(self.separator_)[-1])
+                mapping[node] = '"{}"'.format(node)
             hierarchy = nx.relabel_nodes(self.hierarchy_, mapping, copy=True)
             # Export DAG to CSV file
             self.logger_.info(f"Writing edge list to file {self.edge_list}")
@@ -374,5 +378,5 @@ class HierarchicalClassifier(abc.ABC):
             with open(filename, "wb") as file:
                 pickle.dump((name, classifier), file)
                 self.logger_.info(
-                    f"Stored trained model for local classifier {str(name).split(self.separator_)[-1]} in file {filename}"
+                    f"Stored trained model for local classifier {str(name)} in file {filename}"
                 )

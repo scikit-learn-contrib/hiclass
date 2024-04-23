@@ -161,6 +161,9 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
         y = self._convert_to_1d(y)
 
+        if hasattr(self, "label_encoder_"):
+            y = np.array([self.label_encoder_.inverse_transform(row) for row in y])
+
         self._remove_separator(y)
 
         return y
@@ -215,12 +218,12 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
         if self.tmp_dir:
-            md5 = hashlib.md5(node.encode("utf-8")).hexdigest()
+            md5 = hashlib.md5(str(node).encode("utf-8")).hexdigest()
             filename = f"{self.tmp_dir}/{md5}.sav"
             if exists(filename):
                 (_, classifier) = pickle.load(open(filename, "rb"))
                 self.logger_.info(
-                    f"Loaded trained model for local classifier {node.split(self.separator_)[-1]} from file {filename}"
+                    f"Loaded trained model for local classifier {node} from file {filename}"
                 )
                 return classifier
         self.logger_.info(f"Training local classifier {node}")

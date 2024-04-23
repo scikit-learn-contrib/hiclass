@@ -168,6 +168,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         y = self._convert_to_1d(y)
 
+        if hasattr(self, "label_encoder_"):
+            y = np.array([self.label_encoder_.inverse_transform(row) for row in y])
+
         self._remove_separator(y)
 
         return y
