@@ -5,12 +5,12 @@ Numeric and string output labels are both handled.
 """
 
 import hashlib
-import pickle
-from copy import deepcopy
-from os.path import exists
-
 import networkx as nx
 import numpy as np
+import pickle
+from copy import deepcopy
+from cuml.multiclass import MulticlassClassifier
+from os.path import exists
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
@@ -186,7 +186,11 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         local_classifiers = {}
         nodes = self._get_parents()
         for node in nodes:
-            local_classifiers[node] = {"classifier": deepcopy(self.local_classifier_)}
+            local_classifiers[node] = {
+                "classifier": MulticlassClassifier(
+                    deepcopy(self.local_classifier_), strategy="ovr"
+                )
+            }
         nx.set_node_attributes(self.hierarchy_, local_classifiers)
 
     def _get_parents(self):
