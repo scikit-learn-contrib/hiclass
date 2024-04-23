@@ -234,6 +234,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             classifier = ConstantClassifier()
         if not self.bert:
             try:
+                print(X)
+                print(y)
                 classifier.fit(X, y, sample_weight)
             except TypeError:
                 classifier.fit(X, y)
