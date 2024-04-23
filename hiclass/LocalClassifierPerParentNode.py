@@ -239,10 +239,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         if not self.bert:
             self.logger_.info(X)
             self.logger_.info(y)
-            try:
-                classifier.fit(X, y, sample_weight)
-            except TypeError:
-                classifier.fit(X, y)
+            classifier.fit(X, y)
         else:
             classifier.fit(X, y)
         self._save_tmp(node, classifier)
