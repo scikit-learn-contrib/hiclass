@@ -128,7 +128,9 @@ def test_fit_predict():
     for level, classifier in enumerate(lcpl.local_classifiers_):
         try:
             check_is_fitted(classifier)
-            assert_array_equal(ground_truth[level], classifier.classes_)
+            assert_array_equal(
+                lcpl.label_encoder_.transform(ground_truth[level]), classifier.classes_
+            )
         except NotFittedError as e:
             pytest.fail(repr(e))
     predictions = lcpl.predict(x)
