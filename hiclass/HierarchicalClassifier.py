@@ -3,13 +3,13 @@
 import abc
 import hashlib
 import logging
-import pickle
-
 import networkx as nx
 import numpy as np
+import pickle
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder
 from sklearn.utils.validation import _check_sample_weight
 
 try:
@@ -215,7 +215,10 @@ class HierarchicalClassifier(abc.ABC):
                     child = str(self.y_[i, j])
                     row.append(parent + self.separator_ + child)
                 new_y.append(np.asarray(row, dtype=np.str_))
-            self.y_ = np.array(new_y)
+            new_y = np.array(new_y)
+            self.label_encoder_ = LabelEncoder()
+            self.label_encoder_.fit(new_y)
+            self.y_ = self.label_encoder_.transform(new_y)
 
     def _create_digraph(self):
         # Create DiGraph

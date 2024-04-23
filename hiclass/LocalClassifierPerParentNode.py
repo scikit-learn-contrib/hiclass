@@ -5,13 +5,13 @@ Numeric and string output labels are both handled.
 """
 
 import hashlib
-import networkx as nx
-import numpy as np
 import pickle
 from copy import deepcopy
 from os.path import exists
+
+import networkx as nx
+import numpy as np
 from sklearn.base import BaseEstimator
-from sklearn.preprocessing import LabelEncoder
 from sklearn.utils.validation import check_array, check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
@@ -231,9 +231,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             classifier = ConstantClassifier()
         if not self.bert:
             try:
-                label_encoder = LabelEncoder()
-                label_encoder.fit(y)
-                y = label_encoder.transform(y)
                 classifier.fit(X, y, sample_weight)
             except TypeError:
                 classifier.fit(X, y)
