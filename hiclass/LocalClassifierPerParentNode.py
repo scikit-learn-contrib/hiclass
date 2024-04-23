@@ -187,11 +187,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         local_classifiers = {}
         nodes = self._get_parents()
         for node in nodes:
-            local_classifiers[node] = {
-                "classifier": MulticlassClassifier(
-                    deepcopy(self.local_classifier_), strategy="ovr"
-                )
-            }
+            local_classifiers[node] = {"classifier": deepcopy(self.local_classifier_)}
         nx.set_node_attributes(self.hierarchy_, local_classifiers)
 
     def _get_parents(self):
@@ -238,8 +234,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
         if not self.bert:
-            self.logger_.info(X)
-            self.logger_.info(y)
             with using_device_type("gpu"):
                 classifier.fit(X, y)
         else:
