@@ -478,8 +478,8 @@ def test_log_loss_single_level(uncertainty_data_multi_level):
 
     log_loss_1 = log_loss(classifier, y_true, prob, level=1)
     log_loss_2 = log_loss(classifier, y_true, [prob], level=1)
-    assert math.isclose(log_loss_1, 0.48793, abs_tol=1e-4)
-    assert math.isclose(log_loss_2, 0.48793, abs_tol=1e-4)
+    assert math.isclose(log_loss_1, 0.81349, abs_tol=1e-4)
+    assert math.isclose(log_loss_2, 0.81348, abs_tol=1e-4)
 
 
 def test_local_expected_calibration_error(uncertainty_data):

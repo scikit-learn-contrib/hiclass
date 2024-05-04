@@ -393,7 +393,7 @@ def log_loss(
         for level in range(make_leveled(y_true).shape[1]):
             scores.append(_log_loss(classifier, y_true, y_prob[level], level))
         return _aggregate_scores(scores, agg)
-    return _multiclass_brier_score(classifier, y_true, y_prob, level)
+    return _log_loss(classifier, y_true, y_prob, level)
 
 
 def expected_calibration_error(
