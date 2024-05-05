@@ -348,6 +348,8 @@ def multiclass_brier_score(
     """
     y_prob = _validate_args(agg, y_prob, level)
     if isinstance(y_prob, list):
+        if level:
+            return _multiclass_brier_score(classifier, y_true, y_prob[level], level)
         scores = []
         for level in range(make_leveled(y_true).shape[1]):
             scores.append(
@@ -389,6 +391,8 @@ def log_loss(
     """
     y_prob = _validate_args(agg, y_prob, level)
     if isinstance(y_prob, list):
+        if level:
+            return _log_loss(classifier, y_true, y_prob[level], level)
         scores = []
         for level in range(make_leveled(y_true).shape[1]):
             scores.append(_log_loss(classifier, y_true, y_prob[level], level))
@@ -434,6 +438,10 @@ def expected_calibration_error(
     """
     y_prob = _validate_args(agg, y_prob, level)
     if isinstance(y_prob, list):
+        if level:
+            return _expected_calibration_error(
+                classifier, y_true, y_prob[level], y_pred, level, n_bins
+            )
         scores = []
         for level in range(make_leveled(y_true).shape[1]):
             scores.append(
@@ -485,6 +493,10 @@ def static_calibration_error(
     """
     y_prob = _validate_args(agg, y_prob, level)
     if isinstance(y_prob, list):
+        if level:
+            return _static_calibration_error(
+                classifier, y_true, y_prob[level], y_pred, level, n_bins=n_bins
+            )
         scores = []
         for level in range(make_leveled(y_true).shape[1]):
             scores.append(
@@ -536,6 +548,10 @@ def adaptive_calibration_error(
     """
     y_prob = _validate_args(agg, y_prob, level)
     if isinstance(y_prob, list):
+        if level:
+            return _adaptive_calibration_error(
+                classifier, y_true, y_prob[level], y_pred, level, n_ranges=n_ranges
+            )
         scores = []
         for level in range(make_leveled(y_true).shape[1]):
             scores.append(
