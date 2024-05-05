@@ -21,7 +21,7 @@ def test_disambiguate_str(ambiguous_node_str):
     ground_truth = np.array(
         [["a", "a::HiClass::Separator::b"], ["b", "b::HiClass::Separator::c"]]
     )
-    ambiguous_node_str._disambiguate()
+    ambiguous_node_str.y_ = ambiguous_node_str._disambiguate(ambiguous_node_str.y_)
     assert_array_equal(ground_truth, ambiguous_node_str.y_)
 
 
@@ -36,7 +36,7 @@ def test_disambiguate_int(ambiguous_node_int):
     ground_truth = np.array(
         [["1", "1::HiClass::Separator::2"], ["2", "2::HiClass::Separator::3"]]
     )
-    ambiguous_node_int._disambiguate()
+    ambiguous_node_int.y_ = ambiguous_node_int._disambiguate(ambiguous_node_int.y_)
     assert_array_equal(ground_truth, ambiguous_node_int.y_)
 
 
@@ -128,7 +128,7 @@ def test_assert_digraph_is_dag(cyclic_graph):
 
 def test_convert_1d_y_to_2d(graph_1d):
     ground_truth = np.array([["a"], ["b"], ["c"], ["d"]])
-    graph_1d._convert_1d_y_to_2d()
+    graph_1d.y_ = graph_1d._convert_1d_y_to_2d(graph_1d.y_)
     assert_array_equal(ground_truth, graph_1d.y_)
 
 

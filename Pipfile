@@ -7,15 +7,23 @@ name = "pypi"
 networkx = "*"
 numpy = "*"
 scikit-learn = "*"
+scipy = "1.11.4"
 
 [dev-packages]
-pytest = "*"
-pytest-flake8 = "*"
-pytest-pydocstyle = "*"
-pytest-cov = "*"
+pytest = "7.1.2"
+flake8 = "4.0.1"
+pytest-flake8 = "1.1.1"
+pydocstyle = "6.1.1"
+pytest-pydocstyle = "2.3.0"
+pytest-cov = "3.0.0"
 twine = "*"
 sphinx = "4.1.1"
 sphinx-rtd-theme = "0.5.2"
+black = {version = "24.3.0", extras = ["colorama"]}
+pre-commit = "2.20.0"
+pyfakefs = "*"
+shap = "0.44.1"
+xarray = "*"
 
 [extras]
 ray = "*"
