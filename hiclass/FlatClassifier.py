@@ -93,6 +93,8 @@ class FlatClassifier(BaseEstimator):
         check_is_fitted(self)
 
         # Predict and remove separator
-        predictions = [i.split(self.separator_) for i in self.local_classifier.predict(X)]
+        predictions = [
+            i.split(self.separator_) for i in self.local_classifier.predict(X)
+        ]
 
         return np.array(predictions)
