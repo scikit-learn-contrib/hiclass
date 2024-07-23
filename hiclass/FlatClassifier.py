@@ -6,14 +6,13 @@ Implementation by @lpfgarcia
 
 import numpy as np
 from sklearn.base import BaseEstimator
+from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import check_is_fitted
 
 
 class FlatClassifier(BaseEstimator):
     """
-    Assign a single flat classifier that learns the flat hierarchy.
-
-    A flat classifier in this context concatenates all levels in the hierarchy into a single label.
+    A flat classifier utility that accepts as input a hierarchy and flattens it internally.
 
     Examples
     --------
@@ -29,7 +28,7 @@ class FlatClassifier(BaseEstimator):
 
     def __init__(
         self,
-        local_classifier: BaseEstimator = None,
+        local_classifier: BaseEstimator = LogisticRegression(),
     ):
         """
         Initialize a flat classifier.
@@ -67,7 +66,7 @@ class FlatClassifier(BaseEstimator):
         y = [self.separator_.join(i) for i in y]
 
         # Fit flat classifier
-        self.local_classifier.fit(X, y)
+        self.local_classifier.fit(X, y, sample_weight=sample_weight)
 
         # Return the classifier
         return self
