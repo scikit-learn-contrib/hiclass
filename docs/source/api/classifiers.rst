@@ -49,3 +49,12 @@ LocalClassifierPerParentNode
     :show-inheritance:
     :inherited-members:
     :special-members: __init__
+
+Flat Classifier
+===============
+
+FlatClassifier
+^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: FlatClassifier.FlatClassifier
+    :members:
+    :special-members: __init__

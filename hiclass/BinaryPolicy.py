@@ -2,7 +2,7 @@
 
 from abc import ABC
 
-from scipy.sparse import vstack, csr_matrix
+from scipy.sparse import vstack, csr_matrix, csr_array
 import networkx as nx
 import numpy as np
 
@@ -160,7 +160,7 @@ class BinaryPolicy(ABC):
             )
             y = np.zeros(len(X))
             y[: len(positive_x)] = 1
-        elif isinstance(self.X, csr_matrix):
+        elif isinstance(self.X, csr_matrix) or isinstance(self.X, csr_array):
             X = vstack([positive_x, negative_x])
             sample_weights = (
                 vstack([positive_weights, negative_weights])
