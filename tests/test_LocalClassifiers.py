@@ -63,15 +63,7 @@ def test_empty_levels(empty_levels, classifier):
         ["2", "2.1", ""],
         ["3", "3.1", "3.1.2"],
     ]
-    assert list(clf.hierarchy_.nodes) == [
-        "1",
-        "2",
-        "2" + clf.separator_ + "2.1",
-        "3",
-        "3" + clf.separator_ + "3.1",
-        "3" + clf.separator_ + "3.1" + clf.separator_ + "3.1.2",
-        clf.root_,
-    ]
+    assert list(clf.hierarchy_.nodes) == [0, 1, 2, 3, 4, 5, 6, 7, 8, "hiclass::root"]
     assert_array_equal(ground_truth, predictions)
 
 
@@ -132,12 +124,8 @@ def test_tmp_dir(classifier):
         x = np.array([[1, 2], [3, 4]])
         y = np.array([["a", "b"], ["c", "d"]])
         clf.fit(x, y)
-        if isinstance(clf, LocalClassifierPerLevel):
-            filename = "cfcd208495d565ef66e7dff9f98764da.sav"
-            expected_name = 0
-        else:
-            filename = "0cc175b9c0f1b6a831c399e269772661.sav"
-            expected_name = "a"
+        filename = "cfcd208495d565ef66e7dff9f98764da.sav"
+        expected_name = 0
         assert patcher.fs.exists(filename)
         (name, classifier) = pickle.load(open(filename, "rb"))
         assert expected_name == name

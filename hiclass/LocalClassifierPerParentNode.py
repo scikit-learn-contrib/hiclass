@@ -5,12 +5,13 @@ Numeric and string output labels are both handled.
 """
 
 import hashlib
-import pickle
-from copy import deepcopy
-from os.path import exists
-
 import networkx as nx
 import numpy as np
+import pickle
+from copy import deepcopy
+from cuml.common.device_selection import using_device_type
+from cuml.multiclass import MulticlassClassifier
+from os.path import exists
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted
 
@@ -161,6 +162,9 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
         y = self._convert_to_1d(y)
 
+        if hasattr(self, "label_encoder_"):
+            y = np.array([self.label_encoder_.inverse_transform(row) for row in y])
+
         self._remove_separator(y)
 
         return y
@@ -215,12 +219,12 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
         if self.tmp_dir:
-            md5 = hashlib.md5(node.encode("utf-8")).hexdigest()
+            md5 = hashlib.md5(str(node).encode("utf-8")).hexdigest()
             filename = f"{self.tmp_dir}/{md5}.sav"
             if exists(filename):
                 (_, classifier) = pickle.load(open(filename, "rb"))
                 self.logger_.info(
-                    f"Loaded trained model for local classifier {node.split(self.separator_)[-1]} from file {filename}"
+                    f"Loaded trained model for local classifier {node} from file {filename}"
                 )
                 return classifier
         self.logger_.info(f"Training local classifier {node}")
@@ -230,9 +234,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
         if not self.bert:
-            try:
-                classifier.fit(X, y, sample_weight)
-            except TypeError:
+            with using_device_type("gpu"):
                 classifier.fit(X, y)
         else:
             classifier.fit(X, y)

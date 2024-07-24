@@ -182,7 +182,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             if subset_x.shape[0] > 0:
                 probabilities = np.zeros((subset_x.shape[0], len(successors)))
                 for i, successor in enumerate(successors):
-                    successor_name = str(successor).split(self.separator_)[-1]
+                    successor_name = str(successor)
                     self.logger_.info(f"Predicting for node '{successor_name}'")
                     classifier = self.hierarchy_.nodes[successor]["classifier"]
                     positive_index = np.where(classifier.classes_ == 1)[0]
@@ -200,6 +200,9 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
                 y[mask, level] = prediction
 
         y = self._convert_to_1d(y)
+
+        if hasattr(self, "label_encoder_"):
+            y = np.array([self.label_encoder_.inverse_transform(row) for row in y])
 
         self._remove_separator(y)
 
@@ -246,12 +249,12 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
     def _fit_classifier(self, node):
         classifier = self.hierarchy_.nodes[node]["classifier"]
         if self.tmp_dir:
-            md5 = hashlib.md5(node.encode("utf-8")).hexdigest()
+            md5 = hashlib.md5(str(node).encode("utf-8")).hexdigest()
             filename = f"{self.tmp_dir}/{md5}.sav"
             if exists(filename):
                 (_, classifier) = pickle.load(open(filename, "rb"))
                 self.logger_.info(
-                    f"Loaded trained model for local classifier {node.split(self.separator_)[-1]} from file {filename}"
+                    f"Loaded trained model for local classifier {node} from file {filename}"
                 )
                 return classifier
         self.logger_.info(f"Training local classifier {node}")

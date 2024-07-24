@@ -22,6 +22,9 @@ def test_disambiguate_str(ambiguous_node_str):
         [["a", "a::HiClass::Separator::b"], ["b", "b::HiClass::Separator::c"]]
     )
     ambiguous_node_str._disambiguate()
+    ground_truth = np.array(
+        [ambiguous_node_str.label_encoder_.transform(row) for row in ground_truth]
+    )
     assert_array_equal(ground_truth, ambiguous_node_str.y_)
 
 
@@ -37,6 +40,9 @@ def test_disambiguate_int(ambiguous_node_int):
         [["1", "1::HiClass::Separator::2"], ["2", "2::HiClass::Separator::3"]]
     )
     ambiguous_node_int._disambiguate()
+    ground_truth = np.array(
+        [ambiguous_node_int.label_encoder_.transform(row) for row in ground_truth]
+    )
     assert_array_equal(ground_truth, ambiguous_node_int.y_)
 
 

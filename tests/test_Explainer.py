@@ -52,6 +52,7 @@ def explainer_data_no_root():
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 def test_explainer_tree_lcppn(data, request):
     rfc = RandomForestClassifier()
@@ -104,6 +105,7 @@ def test_explainer_tree_lcpn(data, request):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 def test_explainer_tree_lcpl(data, request):
     rfc = RandomForestClassifier()
@@ -124,6 +126,7 @@ def test_explainer_tree_lcpl(data, request):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 def test_traversal_path_lcppn(data, request):
     x_train, x_test, y_train = request.getfixturevalue(data)
@@ -146,6 +149,7 @@ def test_traversal_path_lcppn(data, request):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 def test_traversal_path_lcpn(data, request):
     x_train, x_test, y_train = request.getfixturevalue(data)
@@ -168,6 +172,7 @@ def test_traversal_path_lcpn(data, request):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize("data", ["explainer_data", "explainer_data_no_root"])
 def test_traversal_path_lcpl(data, request):
     x_train, x_test, y_train = request.getfixturevalue(data)
@@ -205,6 +210,8 @@ def test_explain_with_xr(data, request, classifier):
     assert isinstance(explanations, xarray.Dataset)
 
 
+@pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize(
     "classifier",
     [LocalClassifierPerParentNode, LocalClassifierPerLevel, LocalClassifierPerNode],
@@ -222,6 +229,7 @@ def test_imports(classifier):
 
 
 @pytest.mark.skipif(not shap_installed, reason="shap not installed")
+@pytest.mark.skipif(not xarray_installed, reason="xarray not installed")
 @pytest.mark.parametrize(
     "classifier",
     [LocalClassifierPerLevel, LocalClassifierPerParentNode, LocalClassifierPerNode],

@@ -168,6 +168,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
 
         y = self._convert_to_1d(y)
 
+        if hasattr(self, "label_encoder_"):
+            y = np.array([self.label_encoder_.inverse_transform(row) for row in y])
+
         self._remove_separator(y)
 
         return y
@@ -218,7 +221,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
     def _initialize_local_classifiers(self):
         super()._initialize_local_classifiers()
         self.local_classifiers_ = [
-            deepcopy(self.local_classifier_) for _ in range(self.y_.shape[1])
+            MulticlassClassifier(deepcopy(self.local_classifier_), strategy="ovr")
+            for _ in range(self.y_.shape[1])
         ]
         self.masks_ = [None for _ in range(self.y_.shape[1])]
 
@@ -272,6 +276,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
         if not self.bert:
+            self.logger_.info(X)
+            self.logger_.info(y)
             try:
                 classifier.fit(X, y, sample_weight)
             except TypeError:
