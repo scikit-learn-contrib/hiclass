@@ -48,6 +48,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         n_jobs: int = 1,
         bert: bool = False,
         tmp_dir: str = None,
+        warm_start: bool = False,
     ):
         """
         Initialize a local classifier per node.
@@ -85,6 +86,10 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         tmp_dir : str, default=None
             Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
             it will skip the pre-trained local classifier found in the temporary directory.
+        warm_start : bool, default=False
+            When set to true, the hierarchical classifier reuses the solution of the previous call to fit, that is,
+            new classes can be added. Calling fit again resets the classifier, while partial_fit allows the addition
+            of new classes.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -95,6 +100,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             classifier_abbreviation="LCPN",
             bert=bert,
             tmp_dir=tmp_dir,
+            warm_start=warm_start,
         )
         self.binary_policy = binary_policy
 

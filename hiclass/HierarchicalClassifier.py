@@ -71,6 +71,7 @@ class HierarchicalClassifier(abc.ABC):
         bert: bool = False,
         classifier_abbreviation: str = "",
         tmp_dir: str = None,
+        warm_start: bool = False,
     ):
         """
         Initialize a local hierarchical classifier.
@@ -99,6 +100,10 @@ class HierarchicalClassifier(abc.ABC):
         tmp_dir : str, default=None
             Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
             it will skip the pre-trained local classifier found in the temporary directory.
+        warm_start : bool, default=False
+            When set to true, the hierarchical classifier reuses the solution of the previous call to fit, that is,
+            new classes can be added. Calling fit again resets the classifier, while partial_fit allows the addition
+            of new classes.
         """
         self.local_classifier = local_classifier
         self.verbose = verbose
@@ -108,6 +113,7 @@ class HierarchicalClassifier(abc.ABC):
         self.bert = bert
         self.classifier_abbreviation = classifier_abbreviation
         self.tmp_dir = tmp_dir
+        self.warm_start = warm_start
 
     def fit(self, X, y, sample_weight=None):
         """
