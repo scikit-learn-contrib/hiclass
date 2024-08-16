@@ -113,8 +113,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # Execute common methods necessary before fitting
         super()._pre_fit(X, y, sample_weight)
 
-        # TODO: add partial_fit here if warm_start=True
-
         # Fit local classifiers in DAG
         super().fit(X, y)
 
@@ -198,16 +196,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         # Execute common methods necessary before fitting
         super()._pre_fit(X, y, sample_weight)
 
-        # TODO: add partial_fit here if warm_start=True
-
         # Fit local classifiers in DAG
         super().fit(X, y)
-
-        # TODO: Store the classes seen during fit
-
-        # TODO: Add function to allow user to change local classifier
-
-        # TODO: Add parameter to receive hierarchy as parameter in constructor
 
         # Return the classifier
         return self
@@ -230,7 +220,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         local_classifiers = {}
         nodes = self._get_parents()
         for node in nodes:
-            local_classifiers[node] = {"classifier": deepcopy(self.local_classifier_)}
+            if "classifier" not in self.hierarchy_.nodes[node]:
+                local_classifiers[node] = {"classifier": deepcopy(self.local_classifier_)}
         nx.set_node_attributes(self.hierarchy_, local_classifiers)
 
     def _get_parents(self):
