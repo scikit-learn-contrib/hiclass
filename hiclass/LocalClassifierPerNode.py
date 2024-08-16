@@ -88,8 +88,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             it will skip the pre-trained local classifier found in the temporary directory.
         warm_start : bool, default=False
             When set to true, the hierarchical classifier reuses the solution of the previous call to fit, that is,
-            new classes can be added. Calling fit again resets the classifier, while partial_fit allows the addition
-            of new classes.
+            new classes can be added.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -130,6 +129,8 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
 
         # Initialize policy
         self._initialize_binary_policy()
+
+        # TODO: add partial_fit here if warm_start=True
 
         # Fit local classifiers in DAG
         super().fit(X, y)

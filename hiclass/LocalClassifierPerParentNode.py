@@ -75,8 +75,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             it will skip the pre-trained local classifier found in the temporary directory.
         warm_start : bool, default=False
             When set to true, the hierarchical classifier reuses the solution of the previous call to fit, that is,
-            new classes can be added. Calling fit again resets the classifier, while partial_fit allows the addition
-            of new classes.
+            new classes can be added.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -113,6 +112,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         """
         # Execute common methods necessary before fitting
         super()._pre_fit(X, y, sample_weight)
+
+        # TODO: add partial_fit here if warm_start=True
 
         # Fit local classifiers in DAG
         super().fit(X, y)
@@ -170,6 +171,46 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         self._remove_separator(y)
 
         return y
+
+    def partial_fit(self, X, y, sample_weight=None):
+        """
+        Add new parent nodes for the local classifier per parent node.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            The training input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csc_matrix``.
+        y : array-like of shape (n_samples, n_levels)
+            The target values, i.e., hierarchical class labels for classification.
+        sample_weight : array-like of shape (n_samples,), default=None
+            Array of weights that are assigned to individual samples.
+            If not provided, then each sample is given unit weight.
+
+        Returns
+        -------
+        self : object
+            Fitted estimator.
+        """
+        self.warm_start_ = True
+
+        # Execute common methods necessary before fitting
+        super()._pre_fit(X, y, sample_weight)
+
+        # TODO: add partial_fit here if warm_start=True
+
+        # Fit local classifiers in DAG
+        super().fit(X, y)
+
+        # TODO: Store the classes seen during fit
+
+        # TODO: Add function to allow user to change local classifier
+
+        # TODO: Add parameter to receive hierarchy as parameter in constructor
+
+        # Return the classifier
+        return self
 
     def _predict_remaining_levels(self, X, y):
         for level in range(1, y.shape[1]):
