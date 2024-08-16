@@ -179,6 +179,7 @@ def digraph_one_root():
     classifier = HierarchicalClassifier()
     classifier.logger_ = logging.getLogger("HC")
     classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("c", "d")])
+    classifier.warm_start_ = False
     return classifier
 
 
@@ -197,6 +198,7 @@ def digraph_multiple_roots():
     classifier.X_ = np.array([[1, 2], [3, 4], [5, 6]])
     classifier.y_ = np.array([["a", "b"], ["c", "d"], ["e", "f"]])
     classifier.sample_weight_ = None
+    classifier.warm_start_ = False
     return classifier
 
 
@@ -204,6 +206,17 @@ def test_add_artificial_root_multiple_roots(digraph_multiple_roots):
     digraph_multiple_roots._add_artificial_root()
     successors = list(digraph_multiple_roots.hierarchy_.successors("hiclass::root"))
     assert ["a", "c", "e"] == successors
+    assert "hiclass::root" == digraph_multiple_roots.root_
+
+
+def test_add_artificial_new_nodes(digraph_multiple_roots):
+    digraph_multiple_roots._add_artificial_root()
+    digraph_multiple_roots.hierarchy_.add_node("g")
+    digraph_multiple_roots.hierarchy_.add_node("h")
+    digraph_multiple_roots.warm_start_ = True
+    digraph_multiple_roots._add_artificial_root()
+    successors = list(digraph_multiple_roots.hierarchy_.successors("hiclass::root"))
+    assert ["a", "c", "e", "g", "h"] == successors
     assert "hiclass::root" == digraph_multiple_roots.root_
 
 

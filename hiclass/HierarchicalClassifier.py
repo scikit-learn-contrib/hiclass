@@ -172,10 +172,7 @@ class HierarchicalClassifier(abc.ABC):
         self._disambiguate()
 
         # Create or update DAG from self.y_ and store to self.hierarchy_
-        if not self.warm_start_:
-            self._create_digraph()
-        else:
-            self._update_digraph()
+        self._create_digraph()
 
         # If user passes edge_list, then export
         # DAG to CSV file to visualize with Gephi
@@ -245,18 +242,6 @@ class HierarchicalClassifier(abc.ABC):
                 f"Creating graph from y with {self.y_.ndim} dimensions is not supported"
             )
 
-    def _update_digraph(self):
-        self._update_digraph_1d()
-
-        self._update_digraph_2d()
-
-        if self.y_ndim > 2:
-            # Unsupported dimension
-            self.logger_.error(f"y with {self.y_ndim} dimensions detected")
-            raise ValueError(
-                f"Updating graph from y with {self.y_ndim} dimensions is not supported"
-            )
-
     def _create_digraph_1d(self):
         # Flatten 1D disguised as 2D
         if self.y_.ndim == 2 and self.y_.shape[1] == 1:
@@ -321,7 +306,10 @@ class HierarchicalClassifier(abc.ABC):
         self.logger_.info(f"Detected {len(roots)} roots")
 
         # Add artificial root as predecessor to root(s) detected
-        self.root_ = "hiclass::root"
+        if self.warm_start_:
+            roots.remove(self.root_)
+        else:
+            self.root_ = "hiclass::root"
         for old_root in roots:
             self.hierarchy_.add_edge(self.root_, old_root)
 
