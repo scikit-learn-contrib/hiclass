@@ -57,6 +57,21 @@ def test_create_digraph_1d(graph_1d):
     assert list(ground_truth.edges) == list(graph_1d.hierarchy_.edges)
 
 
+def test_update_digraph_1d(graph_1d):
+    ground_truth = nx.DiGraph()
+    ground_truth.add_nodes_from(np.array(["a", "b", "c", "d", "e", "f"]))
+    graph_1d._create_digraph()
+    attributes = {}
+    attributes["a"] = {"trained_classifier": "yes"}
+    nx.set_node_attributes(graph_1d.hierarchy_, attributes)
+    graph_1d.y_ = np.array(["a", "b", "c", "d", "e", "f"])
+    graph_1d._create_digraph_1d()
+    assert nx.is_isomorphic(ground_truth, graph_1d.hierarchy_)
+    assert list(ground_truth.nodes) == list(graph_1d.hierarchy_.nodes)
+    assert list(ground_truth.edges) == list(graph_1d.hierarchy_.edges)
+    assert graph_1d.hierarchy_.nodes["a"]["trained_classifier"] == "yes"
+
+
 @pytest.fixture
 def graph_1d_disguised_as_2d():
     classifier = HierarchicalClassifier()
@@ -82,6 +97,8 @@ def digraph_2d():
     classifier.logger_ = logging.getLogger("HC")
     classifier.edge_list = tempfile.TemporaryFile()
     classifier.separator_ = "::HiClass::Separator::"
+    classifier.warm_start_ = True
+    classifier.max_levels_ = 3
     return classifier
 
 
@@ -91,6 +108,31 @@ def test_create_digraph_2d(digraph_2d):
     assert nx.is_isomorphic(ground_truth, digraph_2d.hierarchy_)
     assert list(ground_truth.nodes) == list(digraph_2d.hierarchy_.nodes)
     assert list(ground_truth.edges) == list(digraph_2d.hierarchy_.edges)
+
+
+def test_update_digraph_2d(digraph_2d):
+    ground_truth = nx.DiGraph(
+        [
+            ("a", "b"),
+            ("b", "c"),
+            ("d", "e"),
+            ("e", "f"),
+            ("g", "h"),
+            ("h", "i"),
+            ("i", "j"),
+        ]
+    )
+    digraph_2d._create_digraph()
+    attributes = {}
+    attributes["b"] = {"trained_classifier": "yes"}
+    nx.set_node_attributes(digraph_2d.hierarchy_, attributes)
+    digraph_2d.y_ = np.array([["g", "h", "i", "j"]])
+    digraph_2d._create_digraph_2d()
+    assert nx.is_isomorphic(ground_truth, digraph_2d.hierarchy_)
+    assert list(ground_truth.nodes) == list(digraph_2d.hierarchy_.nodes)
+    assert list(ground_truth.edges) == list(digraph_2d.hierarchy_.edges)
+    assert digraph_2d.hierarchy_.nodes["b"]["trained_classifier"] == "yes"
+    assert digraph_2d.max_levels_ == 4
 
 
 @pytest.fixture
@@ -137,6 +179,7 @@ def digraph_one_root():
     classifier = HierarchicalClassifier()
     classifier.logger_ = logging.getLogger("HC")
     classifier.hierarchy_ = nx.DiGraph([("a", "b"), ("b", "c"), ("c", "d")])
+    classifier.warm_start_ = False
     return classifier
 
 
@@ -155,6 +198,7 @@ def digraph_multiple_roots():
     classifier.X_ = np.array([[1, 2], [3, 4], [5, 6]])
     classifier.y_ = np.array([["a", "b"], ["c", "d"], ["e", "f"]])
     classifier.sample_weight_ = None
+    classifier.warm_start_ = False
     return classifier
 
 
@@ -162,6 +206,17 @@ def test_add_artificial_root_multiple_roots(digraph_multiple_roots):
     digraph_multiple_roots._add_artificial_root()
     successors = list(digraph_multiple_roots.hierarchy_.successors("hiclass::root"))
     assert ["a", "c", "e"] == successors
+    assert "hiclass::root" == digraph_multiple_roots.root_
+
+
+def test_add_artificial_new_nodes(digraph_multiple_roots):
+    digraph_multiple_roots._add_artificial_root()
+    digraph_multiple_roots.hierarchy_.add_node("g")
+    digraph_multiple_roots.hierarchy_.add_node("h")
+    digraph_multiple_roots.warm_start_ = True
+    digraph_multiple_roots._add_artificial_root()
+    successors = list(digraph_multiple_roots.hierarchy_.successors("hiclass::root"))
+    assert ["a", "c", "e", "g", "h"] == successors
     assert "hiclass::root" == digraph_multiple_roots.root_
 
 
@@ -224,6 +279,7 @@ def test_fit_digraph():
 def test_pre_fit_bert():
     classifier = HierarchicalClassifier()
     classifier.logger_ = logging.getLogger("HC")
+    classifier.warm_start_ = False
     classifier.bert = True
     x = [[0, 1], [2, 3]]
     y = [["a", "b"], ["c", "d"]]

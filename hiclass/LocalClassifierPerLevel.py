@@ -53,6 +53,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         n_jobs: int = 1,
         bert: bool = False,
         tmp_dir: str = None,
+        warm_start: bool = False,
     ):
         """
         Initialize a local classifier per level.
@@ -79,6 +80,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         tmp_dir : str, default=None
             Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
             it will skip the pre-trained local classifier found in the temporary directory.
+        warm_start : bool, default=False
+            When set to true, the hierarchical classifier reuses the solution of the previous call to fit, that is,
+            new classes can be added.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -89,6 +93,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             classifier_abbreviation="LCPL",
             bert=bert,
             tmp_dir=tmp_dir,
+            warm_start=warm_start,
         )
 
     def fit(self, X, y, sample_weight=None):
@@ -114,6 +119,8 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         """
         # Execute common methods necessary before fitting
         super()._pre_fit(X, y, sample_weight)
+
+        # TODO: add partial_fit here if warm_start=True
 
         # Fit local classifiers in DAG
         super().fit(X, y)

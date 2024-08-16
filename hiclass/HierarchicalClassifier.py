@@ -71,6 +71,7 @@ class HierarchicalClassifier(abc.ABC):
         bert: bool = False,
         classifier_abbreviation: str = "",
         tmp_dir: str = None,
+        warm_start: bool = False,
     ):
         """
         Initialize a local hierarchical classifier.
@@ -99,6 +100,9 @@ class HierarchicalClassifier(abc.ABC):
         tmp_dir : str, default=None
             Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
             it will skip the pre-trained local classifier found in the temporary directory.
+        warm_start : bool, default=False
+            When set to true, the hierarchical classifier reuses the solution of the previous call to fit, that is,
+            new classes can be added.
         """
         self.local_classifier = local_classifier
         self.verbose = verbose
@@ -108,6 +112,7 @@ class HierarchicalClassifier(abc.ABC):
         self.bert = bert
         self.classifier_abbreviation = classifier_abbreviation
         self.tmp_dir = tmp_dir
+        self.warm_start = warm_start
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -155,6 +160,8 @@ class HierarchicalClassifier(abc.ABC):
         else:
             self.sample_weight_ = None
 
+        self.warm_start_ = self.warm_start
+
         self.y_ = make_leveled(self.y_)
 
         # Create and configure logger
@@ -164,7 +171,7 @@ class HierarchicalClassifier(abc.ABC):
         # which would generate the prediction a->b->c
         self._disambiguate()
 
-        # Create DAG from self.y_ and store to self.hierarchy_
+        # Create or update DAG from self.y_ and store to self.hierarchy_
         self._create_digraph()
 
         # If user passes edge_list, then export
@@ -229,7 +236,7 @@ class HierarchicalClassifier(abc.ABC):
         self._create_digraph_2d()
 
         if self.y_.ndim > 2:
-            # Unsuported dimension
+            # Unsupported dimension
             self.logger_.error(f"y with {self.y_.ndim} dimensions detected")
             raise ValueError(
                 f"Creating graph from y with {self.y_.ndim} dimensions is not supported"
@@ -250,7 +257,10 @@ class HierarchicalClassifier(abc.ABC):
     def _create_digraph_2d(self):
         if self.y_.ndim == 2:
             # Create max_levels variable
-            self.max_levels_ = self.y_.shape[1]
+            if self.warm_start_:
+                self.max_levels_ = max(self.max_levels_, self.y_.shape[1])
+            else:
+                self.max_levels_ = self.y_.shape[1]
             rows, columns = self.y_.shape
             self.logger_.info(f"Creating digraph from {rows} 2D labels")
             for row in range(rows):
@@ -296,7 +306,10 @@ class HierarchicalClassifier(abc.ABC):
         self.logger_.info(f"Detected {len(roots)} roots")
 
         # Add artificial root as predecessor to root(s) detected
-        self.root_ = "hiclass::root"
+        if self.warm_start_:
+            roots.remove(self.root_)
+        else:
+            self.root_ = "hiclass::root"
         for old_root in roots:
             self.hierarchy_.add_edge(self.root_, old_root)
 

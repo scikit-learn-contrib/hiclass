@@ -46,6 +46,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         n_jobs: int = 1,
         bert: bool = False,
         tmp_dir: str = None,
+        warm_start: bool = False,
     ):
         """
         Initialize a local classifier per parent node.
@@ -72,6 +73,9 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         tmp_dir : str, default=None
             Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
             it will skip the pre-trained local classifier found in the temporary directory.
+        warm_start : bool, default=False
+            When set to true, the hierarchical classifier reuses the solution of the previous call to fit, that is,
+            new classes can be added.
         """
         super().__init__(
             local_classifier=local_classifier,
@@ -82,6 +86,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             classifier_abbreviation="LCPPN",
             bert=bert,
             tmp_dir=tmp_dir,
+            warm_start=warm_start,
         )
 
     def fit(self, X, y, sample_weight=None):
@@ -165,6 +170,38 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
         return y
 
+    def partial_fit(self, X, y, sample_weight=None):
+        """
+        Add new parent nodes for the local classifier per parent node.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            The training input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csc_matrix``.
+        y : array-like of shape (n_samples, n_levels)
+            The target values, i.e., hierarchical class labels for classification.
+        sample_weight : array-like of shape (n_samples,), default=None
+            Array of weights that are assigned to individual samples.
+            If not provided, then each sample is given unit weight.
+
+        Returns
+        -------
+        self : object
+            Fitted estimator.
+        """
+        self.warm_start_ = True
+
+        # Execute common methods necessary before fitting
+        super()._pre_fit(X, y, sample_weight)
+
+        # Fit local classifiers in DAG
+        super().fit(X, y)
+
+        # Return the classifier
+        return self
+
     def _predict_remaining_levels(self, X, y):
         for level in range(1, y.shape[1]):
             predecessors = set(y[:, level - 1])
@@ -183,7 +220,8 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         local_classifiers = {}
         nodes = self._get_parents()
         for node in nodes:
-            local_classifiers[node] = {"classifier": deepcopy(self.local_classifier_)}
+            if "classifier" not in self.hierarchy_.nodes[node]:
+                local_classifiers[node] = {"classifier": deepcopy(self.local_classifier_)}
         nx.set_node_attributes(self.hierarchy_, local_classifiers)
 
     def _get_parents(self):
