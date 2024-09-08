@@ -7,6 +7,7 @@ from .LocalClassifierPerNode import LocalClassifierPerNode
 from .LocalClassifierPerParentNode import LocalClassifierPerParentNode
 from .LocalClassifierPerLevel import LocalClassifierPerLevel
 from .Pipeline import Pipeline
+from .FlatClassifier import FlatClassifier
 from .MultiLabelLocalClassifierPerNode import MultiLabelLocalClassifierPerNode
 from .MultiLabelLocalClassifierPerParentNode import (
     MultiLabelLocalClassifierPerParentNode,
@@ -22,6 +23,7 @@ __all__ = [
     "LocalClassifierPerParentNode",
     "LocalClassifierPerLevel",
     "Pipeline",
+    "FlatClassifier",
     "Explainer",
     "MultiLabelLocalClassifierPerNode",
     "MultiLabelLocalClassifierPerParentNode",

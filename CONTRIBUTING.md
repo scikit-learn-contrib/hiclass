@@ -29,3 +29,18 @@ pre-commit install
 ```
 
 If black is not executed locally and there are formatting errors, the CI/CD pipeline will fail.
+
+## Building the documentation locally
+
+To build the documentation locally, you need to install another set of dependencies that are specific for the documentation. It is easier to create a separate conda environment and run the following command:
+
+```
+pip install -r docs/requirements.txt
+```
+
+To build the documentation you need to change to run the following commands:
+
+```
+cd docs
+make html
+```
