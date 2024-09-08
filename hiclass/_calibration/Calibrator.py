@@ -39,7 +39,7 @@ class _Calibrator(BaseEstimator):
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
             The calibration input samples. Internally, its dtype will be converted
             to ``dtype=np.float32``. If a sparse matrix is provided, it will be
-            converted into a sparse ``csc_matrix``.
+            converted into a sparse ``csr_matrix``.
         y : array-like of shape (n_samples, n_levels)
             The target values, i.e., hierarchical class labels for classification.
 
