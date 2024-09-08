@@ -105,7 +105,7 @@ class HierarchicalClassifier(abc.ABC):
             If True, skip scikit-learn's checks and sample_weight passing for BERT.
         classifier_abbreviation : str, default=""
             The abbreviation of the local hierarchical classifier to be displayed during logging.
-        calibration_method : {"ivap", "cvap", "platt", "isotonic"}, str, default=None
+        calibration_method : {"ivap", "cvap", "platt", "isotonic", "beta"}, str, default=None
             If set, use the desired method to calibrate probabilities returned by predict_proba().
         tmp_dir : str, default=None
             Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
