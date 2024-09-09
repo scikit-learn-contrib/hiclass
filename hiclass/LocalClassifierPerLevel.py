@@ -88,12 +88,13 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             If set, use the desired method to calibrate probabilities returned by predict_proba().
         return_all_probabilities : bool, default=False
             If True, return probabilities for all levels. Otherwise, return only probabilities for the last level.
-        probability_combiner: {"geometric", "arithmetic", "multiply"}, str, default="multiply"
+        probability_combiner: {"geometric", "arithmetic", "multiply", None}, str, default="multiply"
             Specify the rule for combining probabilities over multiple levels:
 
             - `geometric`: Each levels probabilities are calculated by taking the geometric mean of itself and its predecessors;
             - `arithmetic`: Each levels probabilities are calculated by taking the arithmetic mean of itself and its predecessors;
             - `multiply`: Each levels probabilities are calculated by multiplying itself with its predecessors.
+            - `None`: No aggregation.
         tmp_dir : str, default=None
             Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
             it will skip the pre-trained local classifier found in the temporary directory.
