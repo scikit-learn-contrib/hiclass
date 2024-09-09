@@ -110,7 +110,7 @@ A hierarchical classifier can be calibrated by calling calibrate on the model or
             local_classifier=rf,
             calibration_method='isotonic'
         )
-        
+
         classifier.fit(X_train, Y_train)
         classifier.calibrate(X_cal, Y_cal)
         classifier.predict_proba(X_test)
@@ -119,7 +119,7 @@ A hierarchical classifier can be calibrated by calling calibrate on the model or
         :caption: Pipeline
 
         from hiclass import Pipeline
-        
+
         rf = RandomForestClassifier()
         classifier = LocalClassifierPerNode(
             local_classifier=rf,
@@ -164,9 +164,7 @@ rf = RandomForestClassifier()
 
 # Use local classifier per node with isotonic regression as calibration method
 classifier = LocalClassifierPerNode(
-    local_classifier=rf,
-    calibration_method='isotonic',
-    probability_combiner='multiply'
+    local_classifier=rf, calibration_method="isotonic", probability_combiner="multiply"
 )
 
 # Train local classifier per node
