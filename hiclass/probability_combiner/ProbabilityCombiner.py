@@ -30,14 +30,11 @@ class ProbabilityCombiner(abc.ABC):
     def _find_predecessors(self, level: int):
         predecessors = defaultdict(list)
         for node in self.classifier.global_classes_[level]:
-            try:
+            if self.classifier.hierarchy_.has_node(node):
                 predecessor = list(self.classifier.hierarchy_.predecessors(node))[0]
-            except NetworkXError:
-                # skip empty levels
-                continue
-
-            predecessor_name = str(predecessor).split(self.classifier.separator_)[-1]
-            node_name = str(node).split(self.classifier.separator_)[-1]
-
-            predecessors[node_name].append(predecessor_name)
+                predecessor_name = str(predecessor).split(self.classifier.separator_)[
+                    -1
+                ]
+                node_name = str(node).split(self.classifier.separator_)[-1]
+                predecessors[node_name].append(predecessor_name)
         return predecessors
