@@ -56,7 +56,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
         bert: bool = False,
         calibration_method: str = None,
         return_all_probabilities: bool = False,
-        probability_combiner: str = "geometric",
+        probability_combiner: str = "multiply",
         tmp_dir: str = None,
     ):
         """
@@ -96,7 +96,7 @@ class LocalClassifierPerNode(BaseEstimator, HierarchicalClassifier):
             If set, use the desired method to calibrate probabilities returned by predict_proba().
         return_all_probabilities : bool, default=False
             If True, return probabilities for all levels. Otherwise, return only probabilities for the last level.
-        probability_combiner: {"geometric", "arithmetic", "multiply"}, str, default="geometric"
+        probability_combiner: {"geometric", "arithmetic", "multiply"}, str, default="multiply"
             Specify the rule for combining probabilities over multiple levels:
 
             - `geometric`: Each levels probabilities are calculated by taking the geometric mean of itself and its predecessors;

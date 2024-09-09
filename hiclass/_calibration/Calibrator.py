@@ -117,7 +117,7 @@ class _Calibrator(BaseEstimator):
             return _InductiveVennAbersCalibrator(**params)
         elif name == "cvap":
             return _CrossVennAbersCalibrator(self.estimator, **params)
-        elif name == "sigmoid":
+        elif name == "sigmoid" or name == "platt":
             return _PlattScaling()
         elif name == "isotonic":
             return _IsotonicRegression(params)
