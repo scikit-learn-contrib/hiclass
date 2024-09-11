@@ -23,7 +23,7 @@ import sphinx_code_tabs
 # -- Project information -----------------------------------------------------
 
 project = "hiclass"
-copyright = "2022, Fabio Malcher Miranda, Niklas Köhnecke"
+copyright = "2024, Fabio Malcher Miranda, Niklas Köhnecke"
 author = "Fabio Malcher Miranda, Niklas Köhnecke"
 
 

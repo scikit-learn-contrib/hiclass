@@ -17,3 +17,4 @@ HiClass provides implementations for the most popular machine learning models fo
     multi_label
     metrics
     explainer
+    calibration

@@ -4,7 +4,7 @@
 Calibrating a Classifier
 =====================
 
-A minimalist example showing how to calibrate a Hiclass LCN model. The calibration method can be selected with the :literal:`calibration_method` parameter, for example:
+A minimalist example showing how to calibrate a HiClass LCN model. The calibration method can be selected with the :literal:`calibration_method` parameter, for example:
 
 .. tabs::
 
