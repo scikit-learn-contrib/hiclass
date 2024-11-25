@@ -19,7 +19,7 @@ pip install -e ".[dev]"
 To run the tests simply execute:
 
 ```
-pytest -v --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html
+pytest -v --cov=hiclass --cov-fail-under=90 --cov-report html
 ```
 
 Lastly, you can set up the git hooks scripts to fix formatting errors locally during commits:

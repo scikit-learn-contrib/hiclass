@@ -27,7 +27,7 @@ jobs:
     - name: Test with pytest
       run: |
         flake8
-        pydocstyle
+        pydocstyle hiclass tests
         pytest -v --cov=hiclass --cov-fail-under=90 --cov-report html
         coverage xml
     - name: Upload Coverage to Codecov
