@@ -350,7 +350,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         self.logger_.info("Fitting local classifiers")
 
         def logging_wrapper(func, level, separator, max_level):
-            self.logger_.info(f"fitting level {level+1}/{max_level}")
+            self.logger_.info(f"fitting level {level + 1}/{max_level}")
             return func(self, level, separator)
 
         if self.n_jobs > 1:
@@ -395,7 +395,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         self.logger_.info("Fitting local calibrators")
 
         def logging_wrapper(func, level, separator, max_level):
-            self.logger_.info(f"calibrating level {level+1}/{max_level}")
+            self.logger_.info(f"calibrating level {level + 1}/{max_level}")
             return func(self, level, separator)
 
         if self.n_jobs > 1:

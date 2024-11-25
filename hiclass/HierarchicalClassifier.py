@@ -443,7 +443,7 @@ class HierarchicalClassifier(abc.ABC):
         self, nodes, local_mode: bool = False, use_joblib: bool = False
     ):
         def logging_wrapper(func, idx, node, node_length):
-            self.logger_.info(f"fitting node {idx+1}/{node_length}: {str(node)}")
+            self.logger_.info(f"fitting node {idx + 1}/{node_length}: {str(node)}")
             return func(self, node)
 
         if self.n_jobs > 1:
@@ -481,7 +481,7 @@ class HierarchicalClassifier(abc.ABC):
         self, nodes, local_mode: bool = False, use_joblib: bool = False
     ):
         def logging_wrapper(func, idx, node, node_length):
-            self.logger_.info(f"calibrating node {idx+1}/{node_length}: {str(node)}")
+            self.logger_.info(f"calibrating node {idx + 1}/{node_length}: {str(node)}")
             return func(self, node)
 
         if self.n_jobs > 1:
