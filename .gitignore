@@ -248,6 +248,8 @@ instance/
 # Sphinx documentation
 docs/_build/
 doc/_build/
+docs/examples/trained_model.sav
+docs/source/auto_examples/
 
 # PyBuilder
 target/

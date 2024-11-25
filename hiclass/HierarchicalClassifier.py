@@ -7,10 +7,18 @@ import pickle
 
 import networkx as nx
 import numpy as np
+import scipy
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import _check_sample_weight
+from sklearn.utils.validation import check_array, check_is_fitted
+
+from hiclass.probability_combiner import (
+    GeometricMeanCombiner,
+    ArithmeticMeanCombiner,
+    MultiplyCombiner,
+)
 
 try:
     import ray
@@ -70,6 +78,7 @@ class HierarchicalClassifier(abc.ABC):
         n_jobs: int = 1,
         bert: bool = False,
         classifier_abbreviation: str = "",
+        calibration_method: str = None,
         tmp_dir: str = None,
     ):
         """
@@ -96,6 +105,8 @@ class HierarchicalClassifier(abc.ABC):
             If True, skip scikit-learn's checks and sample_weight passing for BERT.
         classifier_abbreviation : str, default=""
             The abbreviation of the local hierarchical classifier to be displayed during logging.
+        calibration_method : {"ivap", "cvap", "platt", "isotonic", "beta"}, str, default=None
+            If set, use the desired method to calibrate probabilities returned by predict_proba().
         tmp_dir : str, default=None
             Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
             it will skip the pre-trained local classifier found in the temporary directory.
@@ -107,6 +118,7 @@ class HierarchicalClassifier(abc.ABC):
         self.n_jobs = n_jobs
         self.bert = bert
         self.classifier_abbreviation = classifier_abbreviation
+        self.calibration_method = calibration_method
         self.tmp_dir = tmp_dir
 
     def fit(self, X, y, sample_weight=None):
@@ -120,7 +132,7 @@ class HierarchicalClassifier(abc.ABC):
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
             The training input samples. Internally, its dtype will be converted
             to ``dtype=np.float32``. If a sparse matrix is provided, it will be
-            converted into a sparse ``csc_matrix``.
+            converted into a sparse ``csr_matrix``.
         y : array-like of shape (n_samples, n_levels)
             The target values, i.e., hierarchical class labels for classification.
         sample_weight : array-like of shape (n_samples,), default=None
@@ -136,7 +148,8 @@ class HierarchicalClassifier(abc.ABC):
         self._fit_digraph()
 
         # Delete unnecessary variables
-        self._clean_up()
+        if not self.calibration_method == "cvap":
+            self._clean_up()
 
     def _pre_fit(self, X, y, sample_weight):
         # Check that X and y have correct shape
@@ -156,13 +169,55 @@ class HierarchicalClassifier(abc.ABC):
             self.sample_weight_ = None
 
         self.y_ = make_leveled(self.y_)
+        # Avoids creating more columns in prediction if edges are a->b and b->c,
+        # which would generate the prediction a->b->c
+        self.y_ = self._disambiguate(self.y_)
+
+        if self.y_.ndim > 1:
+            self.max_level_dimensions_ = np.array(
+                [len(np.unique(self.y_[:, level])) for level in range(self.y_.shape[1])]
+            )
+            self.global_classes_ = [
+                np.unique(self.y_[:, level]).astype("str")
+                for level in range(self.y_.shape[1])
+            ]
+            self.global_class_to_index_mapping_ = [
+                {
+                    self.global_classes_[level][index]: index
+                    for index in range(len(self.global_classes_[level]))
+                }
+                for level in range(self.y_.shape[1])
+            ]
+        else:
+            self.max_level_dimensions_ = np.array([len(np.unique(self.y_))])
+            self.global_classes_ = [np.unique(self.y_).astype("str")]
+            self.global_class_to_index_mapping_ = [
+                {
+                    self.global_classes_[0][index]: index
+                    for index in range(len(self.global_classes_[0]))
+                }
+            ]
+
+        classes_ = [self.global_classes_[0]]
+        for level in range(1, len(self.max_level_dimensions_)):
+            classes_.append(
+                np.sort(
+                    np.unique(
+                        [
+                            label.split(self.separator_)[level]
+                            for label in self.global_classes_[level]
+                        ]
+                    )
+                )
+            )
+        self.classes_ = classes_
+        self.class_to_index_mapping_ = [
+            {local_labels[index]: index for index in range(len(local_labels))}
+            for local_labels in classes_
+        ]
 
         # Create and configure logger
         self._create_logger()
-
-        # Avoids creating more columns in prediction if edges are a->b and b->c,
-        # which would generate the prediction a->b->c
-        self._disambiguate()
 
         # Create DAG from self.y_ and store to self.hierarchy_
         self._create_digraph()
@@ -175,13 +230,73 @@ class HierarchicalClassifier(abc.ABC):
         self._assert_digraph_is_dag()
 
         # If y is 1D, convert to 2D for binary policies
-        self._convert_1d_y_to_2d()
+        self.y_ = self._convert_1d_y_to_2d(self.y_)
 
         # Detect root(s) and add artificial root to DAG
         self._add_artificial_root()
 
         # Initialize local classifiers in DAG
         self._initialize_local_classifiers()
+
+    def calibrate(self, X, y):
+        """
+        Fit a local calibrator per node.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            The calibration input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            converted into a sparse ``csr_matrix``.
+        y : array-like of shape (n_samples, n_levels)
+            The target values, i.e., hierarchical class labels for classification.
+
+        Returns
+        -------
+        self : object
+            Calibrated estimator.
+        """
+        if not self.calibration_method:
+            raise ValueError("No calibration method specified")
+
+        # check if fitted
+        check_is_fitted(self)
+
+        # Input validation
+        if not self.bert:
+            X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
+        else:
+            X = np.array(X)
+
+        if self.calibration_method == "cvap":
+            # combine train and calibration dataset for cross validation
+            if isinstance(self.X_, scipy.sparse._csr.csr_matrix):
+                self.X_cal = scipy.sparse.vstack([self.X_, X])
+            else:
+                self.X_cal = np.vstack([self.X_, X])
+
+            y = make_leveled(y)
+            y = self._disambiguate(y)
+            y = self._convert_1d_y_to_2d(y)
+            self.y_cal = np.vstack([self.y_, y])
+        else:
+            self.X_cal = X
+            y = make_leveled(y)
+            y = self._disambiguate(y)
+            y = self._convert_1d_y_to_2d(y)
+            self.y_cal = y
+
+        self.logger_.info("Calibrating")
+
+        # Create a calibrator for each local classifier
+        self._initialize_local_calibrators()
+        self._calibrate_digraph()
+
+        self._clean_up()
+        return self
+
+    def _predict_ood():
+        pass
 
     def _create_logger(self):
         # Create logger
@@ -204,18 +319,19 @@ class HierarchicalClassifier(abc.ABC):
             # Add ch to logger
             self.logger_.addHandler(ch)
 
-    def _disambiguate(self):
+    def _disambiguate(self, y):
         self.separator_ = "::HiClass::Separator::"
-        if self.y_.ndim == 2:
+        if y.ndim == 2:
             new_y = []
-            for i in range(self.y_.shape[0]):
-                row = [str(self.y_[i, 0])]
-                for j in range(1, self.y_.shape[1]):
+            for i in range(y.shape[0]):
+                row = [str(y[i, 0])]
+                for j in range(1, y.shape[1]):
                     parent = str(row[-1])
-                    child = str(self.y_[i, j])
+                    child = str(y[i, j])
                     row.append(parent + self.separator_ + child)
                 new_y.append(np.asarray(row, dtype=np.str_))
-            self.y_ = np.array(new_y)
+            return np.array(new_y)
+        return y
 
     def _create_digraph(self):
         # Create DiGraph
@@ -283,10 +399,8 @@ class HierarchicalClassifier(abc.ABC):
             self.logger_.error("Cycle detected in graph")
             raise ValueError("Graph is not directed acyclic")
 
-    def _convert_1d_y_to_2d(self):
-        # This conversion is necessary for the binary policies
-        if self.y_.ndim == 1:
-            self.y_ = np.reshape(self.y_, (-1, 1))
+    def _convert_1d_y_to_2d(self, y):
+        return np.reshape(y, (-1, 1)) if y.ndim == 1 else y
 
     def _add_artificial_root(self):
         # Detect root(s)
@@ -309,6 +423,9 @@ class HierarchicalClassifier(abc.ABC):
         else:
             self.local_classifier_ = self.local_classifier
 
+    def _initialize_local_calibrators(self):
+        self.logger_.info("Initializing local calibrators")
+
     def _convert_to_1d(self, y):
         # Convert predictions to 1D if there is only 1 column
         if self.max_levels_ == 1:
@@ -325,26 +442,79 @@ class HierarchicalClassifier(abc.ABC):
     def _fit_node_classifier(
         self, nodes, local_mode: bool = False, use_joblib: bool = False
     ):
+        def logging_wrapper(func, idx, node, node_length):
+            self.logger_.info(f"fitting node {idx+1}/{node_length}: {str(node)}")
+            return func(self, node)
+
         if self.n_jobs > 1:
             if _has_ray and not use_joblib:
-                ray.init(
-                    num_cpus=self.n_jobs,
-                    local_mode=local_mode,
-                    ignore_reinit_error=True,
-                )
+                if not ray.is_initialized:
+                    ray.init(
+                        num_cpus=self.n_jobs,
+                        local_mode=local_mode,
+                        ignore_reinit_error=True,
+                    )
                 lcppn = ray.put(self)
-                _parallel_fit = ray.remote(self._fit_classifier)
+                _parallel_fit = ray.remote(
+                    self._fit_classifier
+                )  # TODO: use logging wrapper
                 results = [_parallel_fit.remote(lcppn, node) for node in nodes]
                 classifiers = ray.get(results)
             else:
                 classifiers = Parallel(n_jobs=self.n_jobs)(
-                    delayed(self._fit_classifier)(self, node) for node in nodes
+                    delayed(logging_wrapper)(
+                        self._fit_classifier, idx, node, len(nodes)
+                    )
+                    for idx, node in enumerate(nodes)
                 )
 
         else:
-            classifiers = [self._fit_classifier(self, node) for node in nodes]
+            classifiers = [
+                logging_wrapper(self._fit_classifier, idx, node, len(nodes))
+                for idx, node in enumerate(nodes)
+            ]
+
         for classifier, node in zip(classifiers, nodes):
             self.hierarchy_.nodes[node]["classifier"] = classifier
+
+    def _fit_node_calibrator(
+        self, nodes, local_mode: bool = False, use_joblib: bool = False
+    ):
+        def logging_wrapper(func, idx, node, node_length):
+            self.logger_.info(f"calibrating node {idx+1}/{node_length}: {str(node)}")
+            return func(self, node)
+
+        if self.n_jobs > 1:
+            if _has_ray and not use_joblib:
+                if not ray.is_initialized:
+                    ray.init(
+                        num_cpus=self.n_jobs,
+                        local_mode=local_mode,
+                        ignore_reinit_error=True,
+                    )
+                lcppn = ray.put(self)
+                _parallel_fit = ray.remote(self._fit_calibrator)
+                results = [
+                    _parallel_fit.remote(lcppn, node) for idx, node in enumerate(nodes)
+                ]  # TODO: use logging wrapper
+                calibrators = ray.get(results)
+                ray.shutdown()
+            else:
+                calibrators = Parallel(n_jobs=self.n_jobs)(
+                    delayed(logging_wrapper)(
+                        self._fit_calibrator, idx, node, len(nodes)
+                    )
+                    for idx, node in enumerate(nodes)
+                )
+
+        else:
+            calibrators = [
+                logging_wrapper(self._fit_calibrator, idx, node, len(nodes))
+                for idx, node in enumerate(nodes)
+            ]
+
+        for calibrator, node in zip(calibrators, nodes):
+            self.hierarchy_.nodes[node]["calibrator"] = calibrator
 
     @staticmethod
     def _fit_classifier(self, node):
@@ -352,12 +522,46 @@ class HierarchicalClassifier(abc.ABC):
             "Method should be implemented in the LCPN, LCPPN or LCPL"
         )
 
+    @staticmethod
+    def _fit_calibrator(self, node):
+        raise NotImplementedError("Method should be implemented in the LCPN and LCPPN")
+
+    def _create_probability_combiner(self, name):
+        if name == "geometric":
+            return GeometricMeanCombiner(self)
+        elif name == "arithmetic":
+            return ArithmeticMeanCombiner(self)
+        elif name == "multiply":
+            return MultiplyCombiner(self)
+
     def _clean_up(self):
         self.logger_.info("Cleaning up variables that can take a lot of disk space")
-        del self.X_
-        del self.y_
-        if self.sample_weight_ is not None:
+        if hasattr(self, "X_"):
+            del self.X_
+        if hasattr(self, "y_"):
+            del self.y_
+        if hasattr(self, "sample_weight") and self.sample_weight_ is not None:
             del self.sample_weight_
+        if hasattr(self, "X_cal"):
+            del self.X_cal
+        if hasattr(self, "y_cal"):
+            del self.y_cal
+
+    def _combine_and_reorder(self, proba):
+        res = [proba[0]]
+        for level in range(1, self.max_levels_):
+            res_proba = np.zeros(
+                shape=(proba[level].shape[0], len(self.classes_[level]))
+            )
+
+            for old_label in self.global_classes_[level]:
+                old_idx = self.global_class_to_index_mapping_[level][old_label]
+                local_label = old_label.split(self.separator_)[level]
+                new_idx = self.class_to_index_mapping_[level][local_label]
+                res_proba[:, new_idx] += proba[level][:, old_idx]
+
+            res.append(res_proba)
+        return res
 
     def _fit_digraph(self, local_mode: bool = False, use_joblib: bool = False):
         raise NotImplementedError(
