@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
     - uses: actions/checkout@v2
@@ -27,7 +27,9 @@ jobs:
         python -m pip install -e ".[dev]"
     - name: Test with pytest
       run: |
-        pytest -v --flake8 --pydocstyle --cov=hiclass --cov-fail-under=90 --cov-report html
+        flake8
+        pydocstyle hiclass tests
+        pytest -v --cov=hiclass --cov-fail-under=90 --cov-report html
         coverage xml
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v2
