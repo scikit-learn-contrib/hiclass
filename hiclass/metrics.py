@@ -211,7 +211,12 @@ def _recall_macro(y_true: np.ndarray, y_pred: np.ndarray):
     return _compute_macro(y_true, y_pred, _recall_micro)
 
 
-def f1(y_true: np.ndarray, y_pred: np.ndarray, average: str = "micro", zero_division: str = "warn"):
+def f1(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    average: str = "micro",
+    zero_division: str = "warn",
+):
     r"""
     Compute hierarchical f-score.
 
@@ -311,13 +316,19 @@ def _f_score_macro(y_true: np.ndarray, y_pred: np.ndarray, zero_division):
     return _compute_macro(y_true, y_pred, _f_score_micro, zero_division)
 
 
-def _compute_macro(y_true: np.ndarray, y_pred: np.ndarray, _micro_function, zero_division=None):
+def _compute_macro(
+    y_true: np.ndarray, y_pred: np.ndarray, _micro_function, zero_division=None
+):
     overall_sum = 0
     for ground_truth, prediction in zip(y_true, y_pred):
         if zero_division:
-            sample_score = _micro_function(np.array([ground_truth]), np.array([prediction]), zero_division)
+            sample_score = _micro_function(
+                np.array([ground_truth]), np.array([prediction]), zero_division
+            )
         else:
-            sample_score = _micro_function(np.array([ground_truth]), np.array([prediction]))
+            sample_score = _micro_function(
+                np.array([ground_truth]), np.array([prediction])
+            )
         overall_sum = overall_sum + sample_score
     return overall_sum / len(y_true)
 
