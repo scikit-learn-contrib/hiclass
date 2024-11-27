@@ -6,7 +6,7 @@ sphinx_code_tabs==0.5.3
 sphinx-gallery==0.10.1
 matplotlib==3.5.2
 pandas==1.4.2
-ray==1.13.0
+ray
 numpy
 git+https://github.com/charles9n/bert-sklearn.git@master
 shap==0.44.1
