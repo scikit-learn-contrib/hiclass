@@ -161,7 +161,9 @@ class HierarchicalClassifier(abc.ABC):
             )
         else:
             self.X_ = np.array(X)
-            self.y_ = np.array(y)
+            self.y_ = check_array(
+                make_leveled(y), dtype=None, ensure_2d=False, allow_nd=True
+            )
 
         if sample_weight is not None:
             self.sample_weight_ = _check_sample_weight(sample_weight, X)

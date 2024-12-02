@@ -3,6 +3,7 @@ import pickle
 
 import numpy as np
 import pytest
+from bert_sklearn import BertClassifier
 from numpy.testing import assert_array_equal
 from pyfakefs.fake_filesystem_unittest import Patcher
 from sklearn.linear_model import LogisticRegression
@@ -10,8 +11,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.utils.validation import check_is_fitted
 
 from hiclass import (
-    LocalClassifierPerNode,
     LocalClassifierPerLevel,
+    LocalClassifierPerNode,
     LocalClassifierPerParentNode,
 )
 from hiclass.ConstantClassifier import ConstantClassifier
@@ -77,16 +78,20 @@ def test_empty_levels(empty_levels, classifier):
 
 @pytest.mark.parametrize("classifier", classifiers)
 def test_fit_bert(classifier):
-    bert = ConstantClassifier()
+    bert = BertClassifier()
     clf = classifier(
         local_classifier=bert,
         bert=True,
     )
-    X = ["Text 1", "Text 2"]
-    y = ["a", "a"]
-    clf.fit(X, y)
+    x = ["Batman", "Joker", "Rorschach"]
+    y = [
+        ["Action", "The Dark Night"],
+        ["Action", "The Dark Night"],
+        ["Action", "Watchmen"],
+    ]
+    clf.fit(x, y)
     check_is_fitted(clf)
-    predictions = clf.predict(X)
+    predictions = clf.predict(x)
     assert_array_equal(y, predictions)
 
 
@@ -143,3 +148,18 @@ def test_tmp_dir(classifier):
         assert expected_name == name
         check_is_fitted(classifier)
         clf.fit(x, y)
+
+
+@pytest.mark.parametrize("classifier", classifiers)
+def test_bert_unleveled(classifier):
+    clf = classifier(
+        local_classifier=BertClassifier(),
+        bert=True,
+    )
+    x = ["Batman", "Joker"]
+    y = [["Action", "The Dark Night"], ["Action"]]
+    ground_truth = [["Action", "The Dark Night"], ["Action", "The Dark Night"]]
+    clf.fit(x, y)
+    check_is_fitted(clf)
+    predictions = clf.predict(x)
+    assert_array_equal(ground_truth, predictions)
