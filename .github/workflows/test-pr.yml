@@ -23,7 +23,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        ssh-keygen -q -t ed25519 -N '' -f ~/.ssh/id_ed25519 <<<y >/dev/null 2>&1
+        pip install git+https://github.com/charles9n/bert-sklearn.git@master
         python -m pip install --upgrade pip
         python -m pip install -e ".[dev]"
     - name: Test with pytest
