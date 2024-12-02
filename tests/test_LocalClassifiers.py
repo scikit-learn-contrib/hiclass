@@ -143,3 +143,14 @@ def test_tmp_dir(classifier):
         assert expected_name == name
         check_is_fitted(classifier)
         clf.fit(x, y)
+
+
+@pytest.mark.parametrize("classifier", classifiers)
+def test_bert_unleveled(classifier):
+    clf = classifier(
+        local_classifier=LogisticRegression(),
+        bert=True,
+    )
+    x = [[0, 1], [2, 3]]
+    y = [["a"], ["b", "c"]]
+    clf.fit(x, y)
