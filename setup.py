@@ -45,6 +45,7 @@ EXTRAS = {
         "ray",
         "shap==0.44.1",
         "xarray==2023.1.0",
+        "bert-sklearn @ git+ssh://git@github.com/charles9n/bert-sklearn.git#egg=bert-sklearn",
     ],
 }
 
