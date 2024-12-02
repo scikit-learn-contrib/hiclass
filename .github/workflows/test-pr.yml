@@ -23,7 +23,6 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        pip install git+https://github.com/charles9n/bert-sklearn.git@master
         python -m pip install --upgrade pip
         python -m pip install -e ".[dev]"
     - name: Test with pytest
