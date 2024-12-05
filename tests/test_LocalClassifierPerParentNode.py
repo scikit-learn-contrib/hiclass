@@ -4,12 +4,14 @@ import tempfile
 import networkx as nx
 import numpy as np
 import pytest
-from numpy.testing import assert_array_equal, assert_array_almost_equal
+from bert_sklearn import BertClassifier
+from numpy.testing import assert_array_almost_equal, assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.estimator_checks import parametrize_with_checks
 from sklearn.utils.validation import check_is_fitted
+
 from hiclass import LocalClassifierPerParentNode
 from hiclass._calibration.Calibrator import _Calibrator
 from hiclass.HierarchicalClassifier import make_leveled
@@ -393,3 +395,37 @@ def test_fit_calibrate_predict_predict_proba_bert():
     classifier.calibrate(x, y)
     classifier.predict(x)
     classifier.predict_proba(x)
+
+
+# Note: bert only works with the local classifier per parent node
+# It does not have the attribute classes_, which are necessary
+# for the local classifiers per level and per node
+def test_fit_bert():
+    bert = BertClassifier()
+    clf = LocalClassifierPerParentNode(
+        local_classifier=bert,
+        bert=True,
+    )
+    x = ["Batman", "rorschach"]
+    y = [
+        ["Action", "The Dark Night"],
+        ["Action", "Watchmen"],
+    ]
+    clf.fit(x, y)
+    check_is_fitted(clf)
+    predictions = clf.predict(x)
+    assert_array_equal(y, predictions)
+
+
+def test_bert_unleveled():
+    clf = LocalClassifierPerParentNode(
+        local_classifier=BertClassifier(),
+        bert=True,
+    )
+    x = ["Batman", "Jaws"]
+    y = [["Action", "The Dark Night"], ["Thriller"]]
+    ground_truth = [["Action", "The Dark Night"], ["Action", "The Dark Night"]]
+    clf.fit(x, y)
+    check_is_fitted(clf)
+    predictions = clf.predict(x)
+    assert_array_equal(ground_truth, predictions)

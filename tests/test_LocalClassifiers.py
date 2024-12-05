@@ -10,8 +10,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.utils.validation import check_is_fitted
 
 from hiclass import (
-    LocalClassifierPerNode,
     LocalClassifierPerLevel,
+    LocalClassifierPerNode,
     LocalClassifierPerParentNode,
 )
 from hiclass.ConstantClassifier import ConstantClassifier
@@ -73,21 +73,6 @@ def test_empty_levels(empty_levels, classifier):
         clf.root_,
     ]
     assert_array_equal(ground_truth, predictions)
-
-
-@pytest.mark.parametrize("classifier", classifiers)
-def test_fit_bert(classifier):
-    bert = ConstantClassifier()
-    clf = classifier(
-        local_classifier=bert,
-        bert=True,
-    )
-    X = ["Text 1", "Text 2"]
-    y = ["a", "a"]
-    clf.fit(X, y)
-    check_is_fitted(clf)
-    predictions = clf.predict(X)
-    assert_array_equal(y, predictions)
 
 
 @pytest.mark.parametrize("classifier", classifiers)
