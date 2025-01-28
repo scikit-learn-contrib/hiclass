@@ -11,14 +11,6 @@ from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import _check_sample_weight
 
-import functools
-import sklearn.utils.validation
-
-# TODO: Move to MultiLabelHierarchicalClassifier (Parent Class)
-sklearn.utils.validation.check_array = functools.partial(
-    sklearn.utils.validation.check_array, allow_nd=True
-)
-
 try:
     import ray
 except ImportError:

@@ -12,15 +12,12 @@ from os.path import exists
 import numpy as np
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
+from sklearn.utils._tags import ClassifierTags
 from sklearn.utils.validation import check_array, check_is_fitted
 
+from hiclass._calibration.Calibrator import _Calibrator
 from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.HierarchicalClassifier import HierarchicalClassifier
-from hiclass._calibration.Calibrator import _Calibrator
-
-from hiclass.probability_combiner import (
-    init_strings as probability_combiner_init_strings,
-)
 
 try:
     import ray
@@ -113,13 +110,12 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         self.return_all_probabilities = return_all_probabilities
         self.probability_combiner = probability_combiner
 
-        if (
-            self.probability_combiner
-            and self.probability_combiner not in probability_combiner_init_strings
-        ):
-            raise ValueError(
-                f"probability_combiner must be one of {', '.join(probability_combiner_init_strings)} or None."
-            )
+    def __sklearn_tags__(self):
+        """Configure annotations of estimator to allow inspection of capabilities, such as sparse matrix support."""
+        tags = super().__sklearn_tags__()
+        tags.input_tags.sparse = True
+        tags.classifier_tags = ClassifierTags()
+        return tags
 
     def fit(self, X, y, sample_weight=None):
         """

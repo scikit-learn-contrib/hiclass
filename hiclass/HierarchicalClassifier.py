@@ -20,6 +20,10 @@ from hiclass.probability_combiner import (
     MultiplyCombiner,
 )
 
+from hiclass.probability_combiner import (
+    init_strings as probability_combiner_init_strings,
+)
+
 try:
     import ray
 except ImportError:
@@ -79,6 +83,7 @@ class HierarchicalClassifier(abc.ABC):
         bert: bool = False,
         classifier_abbreviation: str = "",
         calibration_method: str = None,
+        probability_combiner: str = "multiply",
         tmp_dir: str = None,
     ):
         """
@@ -107,6 +112,13 @@ class HierarchicalClassifier(abc.ABC):
             The abbreviation of the local hierarchical classifier to be displayed during logging.
         calibration_method : {"ivap", "cvap", "platt", "isotonic", "beta"}, str, default=None
             If set, use the desired method to calibrate probabilities returned by predict_proba().
+        probability_combiner: {"geometric", "arithmetic", "multiply", None}, str, default="multiply"
+            Specify the rule for combining probabilities over multiple levels:
+
+            - `geometric`: Each levels probabilities are calculated by taking the geometric mean of itself and its predecessors;
+            - `arithmetic`: Each levels probabilities are calculated by taking the arithmetic mean of itself and its predecessors;
+            - `multiply`: Each levels probabilities are calculated by multiplying itself with its predecessors.
+            - `None`: No aggregation.
         tmp_dir : str, default=None
             Temporary directory to persist local classifiers that are trained. If the job needs to be restarted,
             it will skip the pre-trained local classifier found in the temporary directory.
@@ -119,6 +131,7 @@ class HierarchicalClassifier(abc.ABC):
         self.bert = bert
         self.classifier_abbreviation = classifier_abbreviation
         self.calibration_method = calibration_method
+        self.probability_combiner = probability_combiner
         self.tmp_dir = tmp_dir
 
     def fit(self, X, y, sample_weight=None):
@@ -152,6 +165,15 @@ class HierarchicalClassifier(abc.ABC):
             self._clean_up()
 
     def _pre_fit(self, X, y, sample_weight):
+        # check params
+        if (
+            self.probability_combiner
+            and self.probability_combiner not in probability_combiner_init_strings
+        ):
+            raise ValueError(
+                f"probability_combiner must be one of {', '.join(probability_combiner_init_strings)} or None."
+            )
+
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 

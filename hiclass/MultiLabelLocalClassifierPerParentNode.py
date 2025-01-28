@@ -4,19 +4,27 @@ Local classifier per parent node approach.
 Numeric and string output labels are both handled.
 """
 
-from copy import deepcopy
+# monkeypatching check_array to accept 3 dimensional arrays
+import functools
 from collections import defaultdict
+from copy import deepcopy
 
 import networkx as nx
 import numpy as np
+import sklearn.utils.validation
 from scipy.sparse import csr_matrix, vstack
 from sklearn.base import BaseEstimator
-from sklearn.utils.validation import check_array, check_is_fitted
+from sklearn.utils._tags import ClassifierTags, TargetTags
+from sklearn.utils.validation import check_is_fitted
 
 from hiclass.ConstantClassifier import ConstantClassifier
 from hiclass.MultiLabelHierarchicalClassifier import (
     MultiLabelHierarchicalClassifier,
     make_leveled,
+)
+
+sklearn.utils.validation.check_array = functools.partial(
+    sklearn.utils.validation.check_array, allow_nd=True
 )
 
 
@@ -88,6 +96,14 @@ class MultiLabelLocalClassifierPerParentNode(
             bert=bert,
         )
 
+    def __sklearn_tags__(self):
+        """Configure annotations of estimator to allow inspection of capabilities, such as sparse matrix support."""
+        tags = super().__sklearn_tags__()
+        tags.input_tags.sparse = True
+        tags.classifier_tags = ClassifierTags()
+        tags.target_tags = TargetTags(required=True)
+        return tags
+
     def fit(self, X, y, sample_weight=None):
         """
         Fit a local classifier per parent node.
@@ -152,7 +168,7 @@ class MultiLabelLocalClassifierPerParentNode(
 
         # Input validation
         if not self.bert:
-            X = check_array(X, accept_sparse="csr")
+            X = sklearn.utils.validation.check_array(X, accept_sparse="csr")
         else:
             X = np.array(X)
 

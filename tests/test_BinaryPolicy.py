@@ -86,6 +86,22 @@ def features_sparse():
             [11, 12],
             [13, 14],
             [15, 16],
+        ]
+    )
+
+
+@pytest.fixture
+def features_sparse_3d():
+    return csr_matrix(
+        [
+            [1, 2],
+            [3, 4],
+            [5, 6],
+            [7, 8],
+            [9, 10],
+            [11, 12],
+            [13, 14],
+            [15, 16],
             [17, 18],
             [19, 20],
             [21, 22],
@@ -1064,9 +1080,9 @@ def test_siblings_get_binary_examples_sparse_labels_2d_3(
 
 
 def test_siblings_get_binary_examples_sparse_labels_3d_1(
-    digraph, features_sparse, labels_3d
+    digraph, features_sparse_3d, labels_3d
 ):
-    policy = SiblingsPolicy(digraph, features_sparse, labels_3d)
+    policy = SiblingsPolicy(digraph, features_sparse_3d, labels_3d)
     ground_truth_x = [
         [1, 2],
         [3, 4],
@@ -1088,9 +1104,9 @@ def test_siblings_get_binary_examples_sparse_labels_3d_1(
 
 
 def test_siblings_get_binary_examples_sparse_labels_3d_2(
-    digraph, features_sparse, labels_3d
+    digraph, features_sparse_3d, labels_3d
 ):
-    policy = SiblingsPolicy(digraph, features_sparse, labels_3d)
+    policy = SiblingsPolicy(digraph, features_sparse_3d, labels_3d)
     ground_truth_x = [
         [5, 6],
         [7, 8],
@@ -1112,9 +1128,9 @@ def test_siblings_get_binary_examples_sparse_labels_3d_2(
 
 
 def test_siblings_get_binary_examples_sparse_labels_3d_3(
-    digraph, features_sparse, labels_3d
+    digraph, features_sparse_3d, labels_3d
 ):
-    policy = SiblingsPolicy(digraph, features_sparse, labels_3d)
+    policy = SiblingsPolicy(digraph, features_sparse_3d, labels_3d)
     ground_truth_x = [
         [5, 6],
         [9, 10],
