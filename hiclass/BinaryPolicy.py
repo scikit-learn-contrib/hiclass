@@ -163,7 +163,7 @@ class BinaryPolicy(ABC):
         elif isinstance(self.X, csr_matrix) or isinstance(self.X, csr_array):
             X = vstack([positive_x, negative_x])
             sample_weights = (
-                vstack([positive_weights, negative_weights])
+                np.concatenate([positive_weights, negative_weights])
                 if self.sample_weight is not None
                 else None
             )

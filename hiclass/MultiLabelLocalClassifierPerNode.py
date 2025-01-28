@@ -4,11 +4,16 @@ Local classifier per node approach.
 Numeric and string output labels are both handled.
 """
 
+# monkeypatching check_array to accept 3 dimensional arrays
+import functools
 from copy import deepcopy
 
-import functools
 import networkx as nx
 import numpy as np
+import sklearn.utils.validation
+from sklearn.base import BaseEstimator
+from sklearn.utils._tags import ClassifierTags, TargetTags
+from sklearn.utils.validation import check_is_fitted
 
 from hiclass import BinaryPolicy
 from hiclass.ConstantClassifier import ConstantClassifier
@@ -17,13 +22,6 @@ from hiclass.MultiLabelHierarchicalClassifier import (
     make_leveled,
 )
 
-from sklearn.base import BaseEstimator
-from sklearn.utils.validation import check_is_fitted
-
-# monkeypatching check_array to accept 3 dimensional arrays
-import sklearn.utils.validation
-
-# TODO: Move to MultiLabelHierarchicalClassifier (Parent Class)
 sklearn.utils.validation.check_array = functools.partial(
     sklearn.utils.validation.check_array, allow_nd=True
 )
@@ -108,6 +106,16 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
         self.binary_policy = binary_policy
         self.tolerance = tolerance
 
+    def __sklearn_tags__(self):
+        """Configure annotations of estimator to allow inspection of capabilities, such as sparse matrix support."""
+        tags = super().__sklearn_tags__()
+        tags.input_tags.sparse = True
+        tags.classifier_tags = ClassifierTags()
+        tags.target_tags = TargetTags(required=True)
+        tags.target_tags.multi_output = True
+        tags.target_tags.single_output = False
+        return tags
+
     def fit(self, X, y, sample_weight=None):
         """
         Fit a local classifier per node.
@@ -175,9 +183,7 @@ class MultiLabelLocalClassifierPerNode(BaseEstimator, MultiLabelHierarchicalClas
 
         # Input validation
         if not self.bert:
-            X = sklearn.utils.validation.check_array(
-                X, accept_sparse="csr"
-            )  # TODO: Decide allow_nd True or False
+            X = sklearn.utils.validation.check_array(X, accept_sparse="csr")
         else:
             X = np.array(X)
 
