@@ -387,12 +387,17 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             md5 = hashlib.md5(node.encode("utf-8")).hexdigest()
             filename = f"{self.tmp_dir}/{md5}.sav"
             if exists(filename):
-                (_, classifier) = pickle.load(open(filename, "rb"))
-                self.logger_.info(
-                    f"Loaded trained model for local classifier {node.split(self.separator_)[-1]} from file {filename}"
-                )
-                return classifier
-        self.logger_.info(f"Training local classifier {node}")
+                try:
+                    (_, classifier) = pickle.load(open(filename, "rb"))
+                    self.logger_.info(
+                        f"Loaded trained model for local classifier {node.split(self.separator_)[-1]} from file {filename}"
+                    )
+                    return classifier
+                except (pickle.UnpicklingError, EOFError):
+                    self.logger_.error(f"Could not load model from file {filename}")
+        self.logger_.info(
+            f"Training local classifier {str(node).split(self.separator_)[-1]}"
+        )
         # get children examples
         X, y, sample_weight = self._get_successors(node)
         unique_y = np.unique(y)
