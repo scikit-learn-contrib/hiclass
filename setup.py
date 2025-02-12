@@ -27,7 +27,7 @@ REQUIRES_PYTHON = ">=3.8,<3.13"
 KEYWORDS = ["hierarchical classification"]
 DACS_SOFTWARE = "https://gitlab.com/dacs-hpi"
 # What packages are required for this module to be executed?
-REQUIRED = ["networkx", "numpy", "scikit-learn", "scipy"]
+REQUIRED = ["networkx", "numpy", "scikit-learn>=1.5", "scipy"]
 
 # What packages are optional?
 # 'fancy feature': ['django'],}
