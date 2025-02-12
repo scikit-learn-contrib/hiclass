@@ -1,6 +1,9 @@
 name: Deploy to PyPI
 
-on: [pull_request]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
 
