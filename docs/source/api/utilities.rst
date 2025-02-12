@@ -95,13 +95,6 @@ F-score
 Datasets
 ----------
 
-Platypus diseases dataset
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autofunction:: datasets.load_platypus
-
-..................................
-
 Hierarchical text classification dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

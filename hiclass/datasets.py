@@ -82,7 +82,7 @@ def load_hierarchical_text_classification(test_size=0.3, random_state=42):
 
     data = [row for row in csv.reader(open(cached_file_path))]
     data.pop(0)
-    data = np.array(data)
+    data = np.array(data, dtype=object)
     X = data[:, 1]
     y = data[:, 7:]
 
