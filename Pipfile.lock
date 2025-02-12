@@ -183,11 +183,6 @@
             "markers": "python_version < '3.12'",
             "version": "==1.2.0"
         },
-        "bert-sklearn": {
-            "editable": true,
-            "git": "https://github.com/charles9n/bert-sklearn.git@master",
-            "ref": "9cb510ae16209c1cb26b078e0e5037e1344600af"
-        },
         "black": {
             "extras": [
                 "colorama"

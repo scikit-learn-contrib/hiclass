@@ -24,14 +24,9 @@ sphinx_code_tabs = "0.5.3"
 sphinx-gallery = "0.10.1"
 matplotlib = "3.9.2"
 pandas = "1.4.2"
-bert-sklearn = {git = "https://github.com/charles9n/bert-sklearn.git@master", editable = true}
 black = {version = "24.3.0", extras = ["colorama"]}
 pre-commit = "2.20.0"
 pyfakefs = "*"
-shap = "0.44.1"
-xarray = "2023.1.0"
 
 [extras]
 ray = "*"
-shap = "0.44.1"
-xarray = "*"

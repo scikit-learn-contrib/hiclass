@@ -1,13 +1,8 @@
-# Defining the exact version will make sure things don't break
-sphinx==5.0.0
-sphinx_rtd_theme==1.0.0
-readthedocs-sphinx-search==0.1.2
-sphinx_code_tabs==0.5.3
-sphinx-gallery==0.10.1
-matplotlib==3.5.2
-pandas==1.4.2
+sphinx
+sphinx_rtd_theme
+readthedocs-sphinx-search
+sphinx_code_tabs
+sphinx-gallery
+matplotlib
 ray
 numpy
-git+https://github.com/charles9n/bert-sklearn.git@master
-shap==0.44.1
-xarray==2023.1.0
