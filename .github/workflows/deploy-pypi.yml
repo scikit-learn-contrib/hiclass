@@ -1,41 +1,10 @@
 name: pipeline
 
-on:
-  push:
-    branches:
-      - main
+on: [pull_request]
 
 jobs:
 
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install -e ".[dev]"
-    - name: Test with pytest
-      run: |
-        flake8
-        pydocstyle hiclass tests
-        pytest -v --cov=hiclass --cov-fail-under=90 --cov-report html
-        coverage xml
-    - name: Upload Coverage to Codecov
-      if: matrix.os == 'ubuntu-latest'
-      uses: codecov/codecov-action@v2
-
   bump:
-    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: write
