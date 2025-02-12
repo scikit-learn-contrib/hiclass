@@ -80,7 +80,6 @@ class HierarchicalClassifier(abc.ABC):
         edge_list: str = None,
         replace_classifiers: bool = True,
         n_jobs: int = 1,
-        bert: bool = False,
         classifier_abbreviation: str = "",
         calibration_method: str = None,
         probability_combiner: str = "multiply",
@@ -106,8 +105,6 @@ class HierarchicalClassifier(abc.ABC):
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
             If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
-        bert : bool, default=False
-            If True, skip scikit-learn's checks and sample_weight passing for BERT.
         classifier_abbreviation : str, default=""
             The abbreviation of the local hierarchical classifier to be displayed during logging.
         calibration_method : {"ivap", "cvap", "platt", "isotonic", "beta"}, str, default=None
@@ -128,7 +125,6 @@ class HierarchicalClassifier(abc.ABC):
         self.edge_list = edge_list
         self.replace_classifiers = replace_classifiers
         self.n_jobs = n_jobs
-        self.bert = bert
         self.classifier_abbreviation = classifier_abbreviation
         self.calibration_method = calibration_method
         self.probability_combiner = probability_combiner
@@ -177,15 +173,9 @@ class HierarchicalClassifier(abc.ABC):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 
-        if not self.bert:
-            self.X_, self.y_ = self._validate_data(
-                X, y, multi_output=True, accept_sparse="csr", allow_nd=True
-            )
-        else:
-            self.X_ = np.array(X)
-            self.y_ = check_array(
-                make_leveled(y), dtype=None, ensure_2d=False, allow_nd=True
-            )
+        self.X_, self.y_ = self._validate_data(
+            X, y, multi_output=True, accept_sparse="csr", allow_nd=True
+        )
 
         if sample_weight is not None:
             self.sample_weight_ = _check_sample_weight(sample_weight, X)
@@ -287,10 +277,7 @@ class HierarchicalClassifier(abc.ABC):
         check_is_fitted(self)
 
         # Input validation
-        if not self.bert:
-            X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
-        else:
-            X = np.array(X)
+        X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
 
         if self.calibration_method == "cvap":
             # combine train and calibration dataset for cross validation

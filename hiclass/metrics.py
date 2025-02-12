@@ -278,12 +278,6 @@ def f1(
     1.0
     >>> f1(y_true, y_pred, zero_division=np.nan)
     nan
-
-    >>> # multilabel hierarchical classification
-    >>> y_true = [[["a", "b", "c"]], [["d", "e", "f"]], [["g", "h", "i"]]]
-    >>> y_pred = [[["a", "b", "c"]], [["d", "e", "f"]], [["g", "h", "i"]]]
-    >>> f1(y_true, y_pred)
-    1.0
     """
     y_true, y_pred = _validate_input(y_true, y_pred)
     functions = {

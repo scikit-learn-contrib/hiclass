@@ -4,7 +4,6 @@ import tempfile
 import networkx as nx
 import numpy as np
 import pytest
-from bert_sklearn import BertClassifier
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError
@@ -376,66 +375,3 @@ def test_fit_calibrate_predict_proba():
     assert_array_almost_equal(
         np.sum(proba[1], axis=1), np.ones(len(proba[1])), decimal=10
     )
-
-
-def test_fit_calibrate_predict_predict_proba_bert():
-    classifier = LocalClassifierPerParentNode(
-        local_classifier=LogisticRegression(),
-        return_all_probabilities=True,
-        calibration_method="ivap",
-        probability_combiner="geometric",
-    )
-
-    classifier.logger_ = logging.getLogger("HC")
-    classifier.bert = True
-    x = [[0, 1], [2, 3]]
-    y = [["a", "b"], ["c", "d"]]
-    sample_weight = None
-    classifier.fit(x, y, sample_weight)
-    classifier.calibrate(x, y)
-    classifier.predict(x)
-    classifier.predict_proba(x)
-
-
-# Note: bert only works with the local classifier per parent node
-# It does not have the attribute classes_, which are necessary
-# for the local classifiers per level and per node
-# Note: skipping this test because it is failing with the current sklearn
-# AttributeError: 'BertClassifier' object has no attribute 'num_labels'
-@pytest.mark.skip(
-    reason="Skipping this test because it is failing with the current sklearn"
-)
-def test_fit_bert():
-    bert = BertClassifier()
-    clf = LocalClassifierPerParentNode(
-        local_classifier=bert,
-        bert=True,
-    )
-    x = ["Batman", "rorschach"]
-    y = [
-        ["Action", "The Dark Night"],
-        ["Action", "Watchmen"],
-    ]
-    clf.fit(x, y)
-    check_is_fitted(clf)
-    predictions = clf.predict(x)
-    assert_array_equal(y, predictions)
-
-
-# Note: skipping this test because it is failing with the current sklearn
-# AttributeError: 'BertClassifier' object has no attribute 'num_labels'
-@pytest.mark.skip(
-    reason="Skipping this test because it is failing with the current sklearn"
-)
-def test_bert_unleveled():
-    clf = LocalClassifierPerParentNode(
-        local_classifier=BertClassifier(),
-        bert=True,
-    )
-    x = ["Batman", "Jaws"]
-    y = [["Action", "The Dark Night"], ["Thriller"]]
-    ground_truth = [["Action", "The Dark Night"], ["Action", "The Dark Night"]]
-    clf.fit(x, y)
-    check_is_fitted(clf)
-    predictions = clf.predict(x)
-    assert_array_equal(ground_truth, predictions)

@@ -33,7 +33,6 @@ REQUIRED = ["networkx", "numpy", "scikit-learn", "scipy"]
 # 'fancy feature': ['django'],}
 EXTRAS = {
     "ray": ["ray>=1.11.0"],
-    "xai": ["shap", "xarray"],
     "dev": [
         "flake8",
         "pytest",
@@ -43,9 +42,6 @@ EXTRAS = {
         "black==24.2.0",
         "pre-commit==2.20.0",
         "ray",
-        "shap",
-        "xarray",
-        "bert-sklearn",
     ],
 }
 

@@ -8,6 +8,3 @@ matplotlib==3.5.2
 pandas==1.4.2
 ray
 numpy
-git+https://github.com/charles9n/bert-sklearn.git@master
-shap==0.44.1
-xarray==2023.1.0

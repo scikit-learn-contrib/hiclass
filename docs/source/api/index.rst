@@ -13,4 +13,3 @@ This is done in order to provide a complete list of the callable functions for e
 
     classifiers
     utilities
-    explainer_api

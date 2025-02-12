@@ -16,7 +16,6 @@ HiClass is an open-source Python library for hierarchical classification compati
 - [Who is using HiClass?](#who-is-using-hiclass)
 - [Install](#install)
 - [Quick start](#quick-start)
-- [Explaining Hierarchical Classifiers](#explaining-hierarchical-classifiers)
 - [Step-by-step walk-through](#step-by-step-walk-through)
 - [API documentation](#api-documentation)
 - [FAQ](#faq)
@@ -34,8 +33,6 @@ HiClass is an open-source Python library for hierarchical classification compati
 - **[Build pipelines](https://hiclass.readthedocs.io/en/latest/auto_examples/plot_pipeline.html):** Since the hierarchical classifiers inherit from the BaseEstimator of scikit-learn, pipelines can be built to automate machine learning workflows.
 - **[Hierarchical metrics](https://hiclass.readthedocs.io/en/latest/api/utilities.html#hierarchical-metrics):** HiClass supports the computation of hierarchical precision, recall and f-score, which are more appropriate for hierarchical data than traditional metrics.
 - **[Compatible with pickle](https://hiclass.readthedocs.io/en/latest/auto_examples/plot_model_persistence.html):** Easily store trained models on disk for future use.
-- **[BERT sklearn](https://hiclass.readthedocs.io/en/latest/auto_examples/plot_bert.html):** Compatible with the library [BERT sklearn](https://github.com/charles9n/bert-sklearn).
-- **[Hierarchical Explanability](https://hiclass.readthedocs.io/en/latest/algorithms/explainer.html):**  HiClass allows explaining hierarchical models using the [SHAP](https://github.com/shap/shap) package.
 
 **Any feature missing on this list?** Search our [issue tracker](https://github.com/scikit-learn-contrib/hiclass/issues) to see if someone has already requested it and add a comment to it explaining your use-case. Otherwise, please open a new issue describing the requested feature and possible use-case scenario. We prioritize our roadmap based on user feedback, so we would love to hear from you.
 
@@ -115,7 +112,6 @@ pip install hiclass"[<extra_name>]"
 Replace <extra_name> with one of the following options:
 
 - ray: Installs the ray package, which is required for parallel processing support.
-- xai: Installs the shap and xarray packages, which are required for explaining Hiclass' predictions.
 
 ### Option 2: Conda
 
@@ -200,10 +196,6 @@ pipeline.fit(X_train, Y_train)
 # Predict
 predictions = pipeline.predict(X_test)
 ```
-
-## Explaining Hierarchical Classifiers
-
-Hierarchical classifiers can provide additional insights when combined with explainability methods. HiClass allows explaining hierarchical models using SHAP values. Different hierarchical models yield different insights. More information on explaining [Local classifier per parent node](https://colab.research.google.com/drive/1rVlYuRU_uO1jw5sD6qo2HoCpCz6E6z5J?usp=sharing), [Local classifier per node](https://colab.research.google.com/drive/1wqSl1t_Qn2f62WNZQ48mdB0mNeu1XSF1?usp=sharing), and [Local classifier per level](https://colab.research.google.com/drive/1VnGlJu-1wSG4wxHXL0Ijf2a7Pu3kklT-?usp=sharing) is available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/algorithms/explainer.html).
 
 ## Step-by-step walk-through
 

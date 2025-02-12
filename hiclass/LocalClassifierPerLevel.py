@@ -53,7 +53,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         edge_list: str = None,
         replace_classifiers: bool = True,
         n_jobs: int = 1,
-        bert: bool = False,
         calibration_method: str = None,
         return_all_probabilities: bool = False,
         probability_combiner: str = "multiply",
@@ -79,8 +78,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
             If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
-        bert : bool, default=False
-            If True, skip scikit-learn's checks and sample_weight passing for BERT.
         calibration_method : {"ivap", "cvap", "platt", "isotonic", "beta"}, str, default=None
             If set, use the desired method to calibrate probabilities returned by predict_proba().
         return_all_probabilities : bool, default=False
@@ -103,7 +100,6 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
             replace_classifiers=replace_classifiers,
             n_jobs=n_jobs,
             classifier_abbreviation="LCPL",
-            bert=bert,
             calibration_method=calibration_method,
             tmp_dir=tmp_dir,
         )
@@ -175,10 +171,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         check_is_fitted(self)
 
         # Input validation
-        if not self.bert:
-            X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
-        else:
-            X = np.array(X)
+        X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
 
         # Initialize array that holds predictions
         y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
@@ -221,10 +214,7 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         # Check if fit has been called
         check_is_fitted(self)
 
-        if not self.bert:
-            X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
-        else:
-            X = np.array(X)
+        X = check_array(X, accept_sparse="csr", allow_nd=True, ensure_2d=False)
 
         if not self.calibration_method:
             self.logger_.info(
@@ -454,12 +444,9 @@ class LocalClassifierPerLevel(BaseEstimator, HierarchicalClassifier):
         unique_y = np.unique(y)
         if len(unique_y) == 1 and self.replace_classifiers:
             classifier = ConstantClassifier()
-        if not self.bert:
-            try:
-                classifier.fit(X, y, sample_weight)
-            except TypeError:
-                classifier.fit(X, y)
-        else:
+        try:
+            classifier.fit(X, y, sample_weight)
+        except TypeError:
             classifier.fit(X, y)
         self._save_tmp(level, classifier)
         return classifier
