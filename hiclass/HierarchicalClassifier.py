@@ -11,15 +11,18 @@ import scipy
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
-from sklearn.utils.validation import _check_sample_weight
-from sklearn.utils.validation import check_array, check_is_fitted
-
-from hiclass.probability_combiner import (
-    GeometricMeanCombiner,
-    ArithmeticMeanCombiner,
-    MultiplyCombiner,
+from sklearn.utils.validation import (
+    _check_sample_weight,
+    check_array,
+    check_is_fitted,
+    validate_data,
 )
 
+from hiclass.probability_combiner import (
+    ArithmeticMeanCombiner,
+    GeometricMeanCombiner,
+    MultiplyCombiner,
+)
 from hiclass.probability_combiner import (
     init_strings as probability_combiner_init_strings,
 )
@@ -173,8 +176,8 @@ class HierarchicalClassifier(abc.ABC):
         # Check that X and y have correct shape
         # and convert them to np.ndarray if need be
 
-        self.X_, self.y_ = self._validate_data(
-            X, y, multi_output=True, accept_sparse="csr", allow_nd=True
+        self.X_, self.y_ = validate_data(
+            self, X, y, multi_output=True, accept_sparse="csr", allow_nd=True
         )
 
         if sample_weight is not None:
