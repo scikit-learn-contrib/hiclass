@@ -11,14 +11,21 @@ import scipy
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
-from sklearn.utils.validation import (_check_sample_weight, check_array,
-                                      check_is_fitted, validate_data)
+from sklearn.utils.validation import (
+    _check_sample_weight,
+    check_array,
+    check_is_fitted,
+    validate_data,
+)
 
-from hiclass.probability_combiner import (ArithmeticMeanCombiner,
-                                          GeometricMeanCombiner,
-                                          MultiplyCombiner)
-from hiclass.probability_combiner import \
-    init_strings as probability_combiner_init_strings
+from hiclass.probability_combiner import (
+    ArithmeticMeanCombiner,
+    GeometricMeanCombiner,
+    MultiplyCombiner,
+)
+from hiclass.probability_combiner import (
+    init_strings as probability_combiner_init_strings,
+)
 
 try:
     import ray
