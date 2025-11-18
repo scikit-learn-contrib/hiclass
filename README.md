@@ -217,9 +217,9 @@ A detailed description on how the classifiers work is available at the [Algorith
 
 ## Support
 
-If you run into any problems or issues, please create a [Github issue](https://github.com/scikit-learn-contrib/hiclass/issues) and we'll try our best to help.
+If you run into any problems or issues, please create a [GitHub issue](https://github.com/scikit-learn-contrib/hiclass/issues) and we'll try our best to help.
 
-We strive to provide good support through our issue tracker on Github. However, if you'd like to receive private support with:
+We strive to provide good support through our issue tracker on GitHub. However, if you'd like to receive private support with:
 
 - Phone / video calls to discuss your specific use case and get recommendations
 - Private discussions over Slack or Mattermost
@@ -234,7 +234,7 @@ You can contribute in multiple ways, e.g., reporting bugs, writing or translatin
 
 ## Getting the latest updates
 
-If you'd like to get updates when we release new versions, please click on the "Watch" button on the top and select "Releases only". Github will then send you notifications along with a changelog with each new release.
+If you'd like to get updates when we release new versions, please click on the "Watch" button on the top and select "Releases only". GitHub will then send you notifications along with a changelog with each new release.
 
 ## Citation
 
