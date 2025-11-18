@@ -167,7 +167,7 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
 
         return p1 / (1 - p0 + p1)
 
-    def predict_intervall(self, scores: np.ndarray):
+    def predict_interval(self, scores: np.ndarray):
         lower = np.searchsorted(self._unique_elements, scores, side="left")
         upper = np.searchsorted(self._unique_elements[:-1], scores, side="right") + 1
         p0 = self._F0[lower]
@@ -289,7 +289,7 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
                         continue
 
                     for calibrator in self.ovr_ivaps[idx]:
-                        res.append(calibrator.predict_intervall(scores))
+                        res.append(calibrator.predict_interval(scores))
 
                     res = np.array(res)
 
@@ -310,7 +310,7 @@ class _CrossVennAbersCalibrator(_BinaryCalibrator):
         else:
             res = []
             for calibrator in self.ivaps:
-                res.append(calibrator.predict_intervall(scores))
+                res.append(calibrator.predict_interval(scores))
 
             res = np.array(res)
             p0 = res[:, :, 0]
