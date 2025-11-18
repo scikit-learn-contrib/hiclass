@@ -359,7 +359,7 @@ class HierarchicalClassifier(abc.ABC):
         self._create_digraph_2d()
 
         if self.y_.ndim > 2:
-            # Unsuported dimension
+            # Unsupported dimension
             self.logger_.error(f"y with {self.y_.ndim} dimensions detected")
             raise ValueError(
                 f"Creating graph from y with {self.y_.ndim} dimensions is not supported"
