@@ -110,11 +110,11 @@ information:
   available.
 
 * `['dirty']`: a boolean, True if the tree has uncommitted changes. Note that
-  this is only accurate if run in a VCS checkout, otherwise it is likely to
+  this is only accurate if run in a VCS checkout; otherwise, it is likely to
   be False or None
 
 * `['error']`: if the version string could not be computed, this will be set
-  to a string describing the problem, otherwise it will be None. It may be
+  to a string describing the problem; otherwise, it will be None. It may be
   useful to throw an exception in setup.py if this is set, to avoid e.g.
   creating tarballs with a version string of "unknown".
 

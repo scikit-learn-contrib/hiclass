@@ -6,7 +6,7 @@ When submitting code, please make every effort to follow existing conventions an
 
 Where appropriate, please provide unit tests or integration tests. Unit tests should be pytest based tests and be added to <project>/tests.
 
-Please make sure all tests pass before submitting a pull request. It is also good if you squash your commits and add the tags #major or #minor to the pull request title if need be, otherwise your pull request will be considered a patch bump. Please check [https://semver.org/](https://semver.org/) for more information about versioning.
+Please make sure all tests pass before submitting a pull request. It is also good if you squash your commits and add the tags #major or #minor to the pull request title if need be; otherwise, your pull request will be considered a patch bump. Please check [https://semver.org/](https://semver.org/) for more information about versioning.
 
 ## Testing the code locally
 
