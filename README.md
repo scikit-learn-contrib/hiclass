@@ -16,7 +16,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - [Who is using HiClass?](#who-is-using-hiclass)
 - [Install](#install)
 - [Quick start](#quick-start)
-- [Step-by-step walk-through](#step-by-step-walk-through)
+- [Step-by-step walkthrough](#step-by-step-walkthrough)
 - [API documentation](#api-documentation)
 - [FAQ](#faq)
 - [Support](#support)
@@ -197,9 +197,9 @@ pipeline.fit(X_train, Y_train)
 predictions = pipeline.predict(X_test)
 ```
 
-## Step-by-step walk-through
+## Step-by-step walkthrough
 
-A step-by-step walk-through is available on our documentation hosted on [Read the Docs](https://hiclass.readthedocs.io/en/latest/index.html).
+A step-by-step walkthrough is available on our documentation hosted on [Read the Docs](https://hiclass.readthedocs.io/en/latest/index.html).
 
 This will guide you through the process of installing hiclass within a virtual environment, training, predicting, persisting models and much more.
 
@@ -207,7 +207,7 @@ This will guide you through the process of installing hiclass within a virtual e
 
 Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/api/index.html).
 
-If you notice any issues with the documentation or walk-through, please let us know by opening an issue here: [https://github.com/scikit-learn-contrib/hiclass/issues](https://github.com/scikit-learn-contrib/hiclass/issues).
+If you notice any issues with the documentation or walkthrough, please let us know by opening an issue here: [https://github.com/scikit-learn-contrib/hiclass/issues](https://github.com/scikit-learn-contrib/hiclass/issues).
 
 ## FAQ
 
