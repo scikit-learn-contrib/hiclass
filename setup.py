@@ -41,7 +41,7 @@ EXTRAS = {
         "pyfakefs==5.3.5",
         "black==26.3.0",
         "pre-commit==2.20.0",
-        "ray",
+        "ray; python_version < '3.13'",
     ],
 }
 
