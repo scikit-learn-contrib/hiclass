@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Script to store basic statistical information."""
+
 import argparse
 import os
 import sys

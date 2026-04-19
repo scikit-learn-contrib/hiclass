@@ -39,7 +39,7 @@ EXTRAS = {
         "pydocstyle",
         "pytest-cov==3.0.0",
         "pyfakefs==5.3.5",
-        "black==24.2.0",
+        "black==26.3.0",
         "pre-commit==2.20.0",
         "ray",
     ],

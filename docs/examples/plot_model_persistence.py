@@ -8,6 +8,7 @@ HiClass is fully compatible with Pickle.
 Pickle can be used to easily store machine learning models on disk.
 In this example, we demonstrate how to use pickle to store and load trained classifiers.
 """
+
 import pickle
 
 from sklearn.linear_model import LogisticRegression

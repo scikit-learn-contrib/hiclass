@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Script to create table with tuning results for flat and hierarchical approaches."""
+
 import argparse
 import glob
 import pickle

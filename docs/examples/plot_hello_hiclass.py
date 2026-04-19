@@ -6,6 +6,7 @@ Hello HiClass
 
 A minimalist example showing how to use HiClass to train and predict.
 """
+
 from sklearn.ensemble import RandomForestClassifier
 
 from hiclass import LocalClassifierPerNode

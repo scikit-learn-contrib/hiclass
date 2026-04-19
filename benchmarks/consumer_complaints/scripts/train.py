@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Script to train with flat or hierarchical approaches."""
+
 import argparse
 import pickle
 import sys

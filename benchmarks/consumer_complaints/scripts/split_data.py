@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Script to split train and test data."""
+
 import argparse
 import sys
 from argparse import Namespace

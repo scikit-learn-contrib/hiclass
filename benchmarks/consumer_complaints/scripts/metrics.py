@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Script to compute metrics."""
+
 import argparse
 import sys
 from argparse import Namespace
