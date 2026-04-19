@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Script to predict with flat approach."""
+
 import argparse
 import pickle
 import sys

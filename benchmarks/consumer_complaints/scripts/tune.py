@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Script to perform hyper-parameter tuning for flat and hierarchical approaches."""
+
 import hashlib
 import json
 import logging
@@ -170,7 +171,7 @@ def load_trial(cfg: DictConfig) -> List[float]:
     md5 = compute_md5(hyperparameters)
     filename = f"{cfg.output_dir}/{md5}.sav"
     if os.path.exists(filename):
-        (_, scores) = pickle.load(open(filename, "rb"))
+        _, scores = pickle.load(open(filename, "rb"))
         log.info(f"Loaded trial with F-scores {scores}")
         return scores
     else:

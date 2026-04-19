@@ -1,9 +1,10 @@
 """Constant classifier if there is only one class in the training set."""
 
 import numpy as np
+from sklearn.base import BaseEstimator
 
 
-class ConstantClassifier:
+class ConstantClassifier(BaseEstimator):
     """A classifier that always returns the only label seen during fit."""
 
     def fit(self, X, y, sample_weight=None):

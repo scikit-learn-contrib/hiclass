@@ -23,7 +23,7 @@ URL_GITHUB = "https://github.com/scikit-learn-contrib/hiclass"
 URL_ISSUES = "https://github.com/scikit-learn-contrib/hiclass/issues"
 EMAIL = "fabio.malchermiranda@hpi.de, Niklas.Koehnecke@student.hpi.uni-potsdam.de"
 AUTHOR = "Fabio Malcher Miranda, Niklas Koehnecke"
-REQUIRES_PYTHON = ">=3.9,<3.13"
+REQUIRES_PYTHON = ">=3.10,<3.13"
 KEYWORDS = ["hierarchical classification"]
 DACS_SOFTWARE = "https://gitlab.com/dacs-hpi"
 # What packages are required for this module to be executed?
@@ -39,7 +39,7 @@ EXTRAS = {
         "pydocstyle",
         "pytest-cov==3.0.0",
         "pyfakefs==5.3.5",
-        "black==24.2.0",
+        "black==26.3.0",
         "pre-commit==2.20.0",
         "ray",
     ],
@@ -152,7 +152,6 @@ setup(
         "Operating System :: Unix",
         "Operating System :: MacOS",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
