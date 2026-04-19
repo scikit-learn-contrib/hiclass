@@ -27,7 +27,7 @@ REQUIRES_PYTHON = ">=3.10,<3.14"
 KEYWORDS = ["hierarchical classification"]
 DACS_SOFTWARE = "https://gitlab.com/dacs-hpi"
 # What packages are required for this module to be executed?
-REQUIRED = ["networkx", "numpy", "scikit-learn>=1.5", "scipy", "requests"]
+REQUIRED = ["networkx", "numpy", "scikit-learn>=1.5", "scipy"]
 
 # What packages are optional?
 # 'fancy feature': ['django'],}
@@ -38,10 +38,10 @@ EXTRAS = {
         "pytest",
         "pydocstyle",
         "pytest-cov==3.0.0",
-        "pyfakefs==5.3.5",
+        "pyfakefs==6.2.0",
         "black==26.3.0",
         "pre-commit==2.20.0",
-        "ray; python_version < '3.13'",
+        "ray",
     ],
 }
 
