@@ -16,7 +16,7 @@ HiClass is an open-source Python library for hierarchical classification compati
 - [Who is using HiClass?](#who-is-using-hiclass)
 - [Install](#install)
 - [Quick start](#quick-start)
-- [Step-by-step walk-through](#step-by-step-walk-through)
+- [Step-by-step walkthrough](#step-by-step-walkthrough)
 - [API documentation](#api-documentation)
 - [FAQ](#faq)
 - [Support](#support)
@@ -197,9 +197,9 @@ pipeline.fit(X_train, Y_train)
 predictions = pipeline.predict(X_test)
 ```
 
-## Step-by-step walk-through
+## Step-by-step walkthrough
 
-A step-by-step walk-through is available on our documentation hosted on [Read the Docs](https://hiclass.readthedocs.io/en/latest/index.html).
+A step-by-step walkthrough is available on our documentation hosted on [Read the Docs](https://hiclass.readthedocs.io/en/latest/index.html).
 
 This will guide you through the process of installing hiclass within a virtual environment, training, predicting, persisting models and much more.
 
@@ -207,7 +207,7 @@ This will guide you through the process of installing hiclass within a virtual e
 
 Here's our official API documentation, available on [Read the Docs](https://hiclass.readthedocs.io/en/latest/api/index.html).
 
-If you notice any issues with the documentation or walk-through, please let us know by opening an issue here: [https://github.com/scikit-learn-contrib/hiclass/issues](https://github.com/scikit-learn-contrib/hiclass/issues).
+If you notice any issues with the documentation or walkthrough, please let us know by opening an issue here: [https://github.com/scikit-learn-contrib/hiclass/issues](https://github.com/scikit-learn-contrib/hiclass/issues).
 
 ## FAQ
 
@@ -217,9 +217,9 @@ A detailed description on how the classifiers work is available at the [Algorith
 
 ## Support
 
-If you run into any problems or issues, please create a [Github issue](https://github.com/scikit-learn-contrib/hiclass/issues) and we'll try our best to help.
+If you run into any problems or issues, please create a [GitHub issue](https://github.com/scikit-learn-contrib/hiclass/issues) and we'll try our best to help.
 
-We strive to provide good support through our issue tracker on Github. However, if you'd like to receive private support with:
+We strive to provide good support through our issue tracker on GitHub. However, if you'd like to receive private support with:
 
 - Phone / video calls to discuss your specific use case and get recommendations
 - Private discussions over Slack or Mattermost
@@ -234,7 +234,7 @@ You can contribute in multiple ways, e.g., reporting bugs, writing or translatin
 
 ## Getting the latest updates
 
-If you'd like to get updates when we release new versions, please click on the "Watch" button on the top and select "Releases only". Github will then send you notifications along with a changelog with each new release.
+If you'd like to get updates when we release new versions, please click on the "Watch" button on the top and select "Releases only". GitHub will then send you notifications along with a changelog with each new release.
 
 ## Citation
 

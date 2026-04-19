@@ -5,7 +5,7 @@ Building Pipelines
 =====================
 
 HiClass can be adopted in scikit-learn pipelines, and fully supports sparse matrices as input.
-This example desmonstrates the use of both of these features.
+This example demonstrates the use of both of these features.
 """
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer

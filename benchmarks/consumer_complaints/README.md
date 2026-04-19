@@ -107,7 +107,7 @@ Regarding the parameters for Snakemake, they have the following meanings:
 - `--reason` makes Snakemake print the reason for each executed rule;
 - `--use-conda` is necessary to indicate that conda will be used to manage the software dependencies of the pipeline;
 - `--cores` tells Snakemake how many cpus can be used overall (the more cpus you can spare, the faster the pipeline will finish). For a cluster execution, 12 cores is more than enough since individual jobs will have more CPUs allocated later;
-- `--resources mem_gb` specifies the total ammount of RAM that should be allocated for all jobs (only used during tuning and training);
+- `--resources mem_gb` specifies the total amount of RAM that should be allocated for all jobs (only used during tuning and training);
 - `--restart-times` defines how many times the pipeline should restart a job if it fails. This could be useful if the reason for failing is out of memory, since each retry will allocate more memory for the failed job;
 - `--jobs` the number of jobs that can be submitted simultaneously;
 - `--cluster` the parameters for individual jobs can be set inside the quotation marks.

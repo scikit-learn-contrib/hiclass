@@ -71,7 +71,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             a single unique class.
         n_jobs : int, default=1
             The number of jobs to run in parallel. Only :code:`fit` is parallelized.
-            If :code:`Ray` is installed it is used, otherwise it defaults to :code:`Joblib`.
+            If :code:`Ray` is installed it is used; otherwise, it defaults to :code:`Joblib`.
         calibration_method : {"ivap", "cvap", "platt", "isotonic", "beta"}, str, default=None
             If set, use the desired method to calibrate probabilities returned by predict_proba().
         return_all_probabilities : bool, default=False

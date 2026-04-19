@@ -160,7 +160,7 @@ def test_inductive_venn_abers_calibrator(binary_calibration_data, binary_test_sc
     calibrator = _InductiveVennAbersCalibrator()
     calibrator.fit(scores=scores[:, 1], y=ground_truth_labels)
 
-    intervalls = calibrator.predict_intervall(test_scores[:, 1])
+    intervals = calibrator.predict_interval(test_scores[:, 1])
     proba = calibrator.predict_proba(test_scores[:, 1])
 
     assert_array_almost_equal(
@@ -188,7 +188,7 @@ def test_inductive_venn_abers_calibrator(binary_calibration_data, binary_test_sc
         ),
     )
     assert_array_almost_equal(
-        intervalls,
+        intervals,
         np.array(
             [
                 [0.66666666, 1.0],
