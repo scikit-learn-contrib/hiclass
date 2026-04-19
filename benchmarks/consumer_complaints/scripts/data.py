@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Script to share common functions for data manipulation."""
+
 import csv
 from typing import TextIO
 

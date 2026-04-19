@@ -1,8 +1,9 @@
 import abc
 import numpy as np
+from sklearn.base import BaseEstimator
 
 
-class _BinaryCalibrator(abc.ABC):
+class _BinaryCalibrator(abc.ABC, BaseEstimator):
     @abc.abstractmethod
     def fit(
         self, y: np.ndarray, scores: np.ndarray, X: np.ndarray = None

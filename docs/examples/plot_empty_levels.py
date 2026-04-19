@@ -11,6 +11,7 @@ with a hierarchy similar to the following image:
 .. figure:: ../algorithms/local_classifier_per_node.svg
    :align: center
 """
+
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 

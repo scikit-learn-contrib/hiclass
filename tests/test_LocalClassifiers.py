@@ -124,7 +124,7 @@ def test_tmp_dir(classifier):
             filename = "0cc175b9c0f1b6a831c399e269772661.sav"
             expected_name = "a"
         assert patcher.fs.exists(filename)
-        (name, classifier) = pickle.load(open(filename, "rb"))
+        name, classifier = pickle.load(open(filename, "rb"))
         assert expected_name == name
         check_is_fitted(classifier)
         clf.fit(x, y)

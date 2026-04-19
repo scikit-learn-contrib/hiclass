@@ -137,6 +137,7 @@ A hierarchical classifier can be calibrated by calling calibrate on the model or
 In the code below, isotonic regression is used to calibrate the model.
 
 """
+
 from sklearn.ensemble import RandomForestClassifier
 
 from hiclass import LocalClassifierPerNode

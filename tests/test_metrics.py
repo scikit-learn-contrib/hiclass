@@ -22,7 +22,6 @@ from hiclass.metrics import (
     adaptive_calibration_error,
 )
 
-
 # TODO: add tests for 3D dataframe (not sure if it's possible to have 3D dataframes)
 
 
