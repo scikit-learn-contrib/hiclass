@@ -1,19 +1,18 @@
-def pytest_sessionstart(session):
-    """Ensure CI working directory exists in pyfakefs to avoid chdir errors.
+import pytest
 
-    Pytest-cov may call ``os.chdir`` to the repository topdir before tests
-    run. When pyfakefs patches ``os``, that chdir fails if the path isn't
-    present in the fake filesystem. This hook creates the expected path
-    inside the fake filesystem (if the pyfakefs plugin is active).
+
+@pytest.fixture(autouse=True)
+def ensure_ci_workdir(request):
+    """Create CI working dir inside pyfakefs when the `fs` fixture is active.
+
+    Use request.getfixturevalue to access `fs` only if present, avoiding
+    failures when pyfakefs is not used.
     """
-    plugin = session.config.pluginmanager.getplugin("pyfakefs")
-    if plugin is None:
-        return
-    fs = getattr(plugin, "fs", None)
-    if fs is None:
-        return
-    try:
-        fs.create_dir("/Users/runner/work/hiclass/hiclass")
-    except Exception:
-        # best-effort: if creation fails, continue and let pytest report errors
-        pass
+    if "fs" in request.fixturenames:
+        try:
+            fs = request.getfixturevalue("fs")
+            fs.create_dir("/Users/runner/work/hiclass/hiclass")
+        except Exception:
+            # best-effort: continue if creation fails
+            pass
+    yield
