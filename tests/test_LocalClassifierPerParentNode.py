@@ -1,9 +1,13 @@
 import logging
 import tempfile
 
+import hypothesis as hp
 import networkx as nx
 import numpy as np
+import numpy.typing as npt
 import pytest
+from hypothesis import strategies as st
+from hypothesis.extra.numpy import arrays
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 from scipy.sparse import csr_matrix
 from sklearn.exceptions import NotFittedError
@@ -375,3 +379,44 @@ def test_fit_calibrate_predict_proba():
     assert_array_almost_equal(
         np.sum(proba[1], axis=1), np.ones(len(proba[1])), decimal=10
     )
+
+
+def test_predict_proba_does_not_depend_on_samples_in_batch() -> None:
+    train_x = np.array([[0], [1]])
+    train_y = [[0, 0], [1, 1]]
+    classifier = LocalClassifierPerParentNode()
+    classifier.fit(train_x, train_y)
+    predict_all_take_first = classifier.predict_proba(train_x)[0]
+    predict_first_take_first = classifier.predict_proba(train_x[:1])[0]
+    np.testing.assert_allclose(predict_all_take_first, predict_first_take_first)
+
+
+@st.composite
+def data_pair(draw: st.DrawFn) -> tuple[npt.NDArray[np.float32], npt.NDArray[np.int8]]:
+    num_samples = draw(st.integers(min_value=1, max_value=100))
+
+    num_features = draw(st.integers(min_value=1, max_value=1_000))
+    num_targets = draw(st.integers(min_value=1, max_value=10))
+
+    data_x = draw(
+        arrays(
+            dtype=np.float32,
+            shape=(num_samples, num_features),
+            elements=st.floats(allow_nan=False, allow_infinity=False, width=32),
+        )
+    )
+    data_y = draw(arrays(dtype=np.int8, shape=(num_samples, num_targets)))
+
+    return data_x, data_y
+
+
+@hp.given(data_pair())
+def test_fuzzy_predict_proba_does_not_depend_on_samples_in_batch(
+    pair: tuple[npt.NDArray[np.float32], npt.NDArray[np.int8]]
+) -> None:
+    data_x, data_y = pair
+    classifier = LocalClassifierPerParentNode()
+    classifier.fit(data_x, data_y)
+    predict_all_take_first = classifier.predict_proba(data_x)[0]
+    predict_first_take_first = classifier.predict_proba(data_x[:1])[0]
+    np.testing.assert_allclose(predict_all_take_first, predict_first_take_first)
