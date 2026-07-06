@@ -217,9 +217,6 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
 
         self.logger_.info("Predicting Probability")
 
-        # Initialize array that holds predictions
-        y = np.empty((X.shape[0], self.max_levels_), dtype=self.dtype_)
-
         # Predict first level
         classifier = self.hierarchy_.nodes[self.root_]["classifier"]
         # use classifier as a fallback if no calibrator is available
@@ -229,8 +226,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
         )
         proba = calibrator.predict_proba(X)
 
-        y[:, 0] = calibrator.classes_[np.argmax(proba, axis=1)]
-        level_probability_list = [proba] + self._predict_proba_remaining_levels(X, y)
+        level_probability_list = [proba] + self._predict_proba_remaining_levels(X)
 
         level_probability_list = self._combine_and_reorder(level_probability_list)
 
@@ -252,18 +248,16 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
             else level_probability_list[-1]
         )
 
-    def _predict_proba_remaining_levels(self, X, y):
+    def _predict_proba_remaining_levels(self, X):
         level_probability_list = []
-        for level in range(1, y.shape[1]):
-            predecessors = set(y[:, level - 1])
+        for level in range(1, len(self.global_classes_)):
+            predecessors = set(self.global_classes_[level - 1])
             predecessors.discard("")
             level_dimension = self.max_level_dimensions_[level]
             cur_level_probabilities = np.zeros((X.shape[0], level_dimension))
 
             for predecessor in predecessors:
-                mask = np.isin(y[:, level - 1], self.global_classes_[level - 1])
-                predecessor_x = X[mask]
-                if predecessor_x.shape[0] > 0:
+                if X.shape[0] > 0:
                     successors = list(self.hierarchy_.successors(predecessor))
                     if len(successors) > 0:
                         classifier = self.hierarchy_.nodes[predecessor]["classifier"]
@@ -275,8 +269,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
                             or classifier
                         )
 
-                        proba = calibrator.predict_proba(predecessor_x)
-                        y[mask, level] = calibrator.classes_[np.argmax(proba, axis=1)]
+                        proba = calibrator.predict_proba(X)
 
                         for successor in successors:
                             class_index = self.global_class_to_index_mapping_[level][
@@ -286,7 +279,7 @@ class LocalClassifierPerParentNode(BaseEstimator, HierarchicalClassifier):
                             proba_index = np.where(calibrator.classes_ == successor)[0][
                                 0
                             ]
-                            cur_level_probabilities[mask, class_index] = proba[
+                            cur_level_probabilities[:, class_index] = proba[
                                 :, proba_index
                             ]
 
