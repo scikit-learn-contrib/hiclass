@@ -357,6 +357,7 @@ def test_f1_macro_1d_list_zero_division():
     y_true = [1, 2, 3, 4]
     y_pred = [5, 6, 7, 8]
     assert 0.0 == f1(y_true, y_pred, "macro")
+    assert 0.0 == f1(y_true, y_pred, "macro", 0.0)
     assert 1.0 == f1(y_true, y_pred, "macro", 1.0)
     assert np.isnan(f1(y_true, y_pred, "macro", np.nan))
 
@@ -371,6 +372,7 @@ def test_f1_macro_2d_list_zero_division():
     y_true = [[1, 2, 3, 4], [5, 6, 7, 8]]
     y_pred = [[5, 6, 7, 8], [1, 2, 3, 4]]
     assert 0.0 == f1(y_true, y_pred, "macro")
+    assert 0.0 == f1(y_true, y_pred, "macro", 0.0)
     assert 1.0 == f1(y_true, y_pred, "macro", 1.0)
     assert np.isnan(f1(y_true, y_pred, "macro", np.nan))
 
@@ -385,6 +387,7 @@ def test_f1_macro_1d_np_array_zero_division():
     y_true = np.array([1, 2, 3, 4])
     y_pred = np.array([5, 6, 7, 8])
     assert 0.0 == f1(y_true, y_pred, "macro")
+    assert 0.0 == f1(y_true, y_pred, "macro", 0.0)
     assert 1.0 == f1(y_true, y_pred, "macro", 1.0)
     assert np.isnan(f1(y_true, y_pred, "macro", np.nan))
 
@@ -399,6 +402,7 @@ def test_f1_macro_2d_np_array_zero_division():
     y_true = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])
     y_pred = np.array([[5, 6, 7, 8], [1, 2, 3, 4]])
     assert 0.0 == f1(y_true, y_pred, "macro")
+    assert 0.0 == f1(y_true, y_pred, "macro", 0.0)
     assert 1.0 == f1(y_true, y_pred, "macro", 1.0)
     assert np.isnan(f1(y_true, y_pred, "macro", np.nan))
 
@@ -434,6 +438,7 @@ def test_f1_macro_3d_np_array_zero_division():
         ]
     )
     assert 0.0 == f1(y_true, y_pred, "macro")
+    assert 0.0 == f1(y_true, y_pred, "macro", 0.0)
     assert 1.0 == f1(y_true, y_pred, "macro", 1.0)
     assert np.isnan(f1(y_true, y_pred, "macro", np.nan))
 

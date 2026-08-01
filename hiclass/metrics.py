@@ -315,7 +315,7 @@ def _compute_macro(
 ):
     overall_sum = 0
     for ground_truth, prediction in zip(y_true, y_pred):
-        if zero_division:
+        if zero_division is not None:
             sample_score = _micro_function(
                 np.array([ground_truth]), np.array([prediction]), zero_division
             )
