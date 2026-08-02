@@ -71,11 +71,15 @@ class _InductiveVennAbersCalibrator(_BinaryCalibrator):
         return self
 
     def _non_left_angle_turn(self, next_to_top, top, p_i):
-        res = np.cross((top - next_to_top), (p_i - top))
+        a = top - next_to_top
+        b = p_i - top
+        res = a[0] * b[1] - a[1] * b[0]
         return res <= 0
 
     def _non_right_angle_turn(self, next_to_top, top, p_i):
-        res = np.cross((top - next_to_top), (p_i - top))
+        a = top - next_to_top
+        b = p_i - top
+        res = a[0] * b[1] - a[1] * b[0]
         return res >= 0
 
     def _initialize_f1_corners(self, csd):
