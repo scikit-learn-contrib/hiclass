@@ -1,3 +1,4 @@
+import logging
 import os
 import pickle
 
@@ -128,3 +129,23 @@ def test_tmp_dir(classifier):
         assert expected_name == name
         check_is_fitted(classifier)
         clf.fit(x, y)
+
+
+@pytest.mark.parametrize("classifier", classifiers)
+def test_logger_level_preserved_after_pickle(classifier):
+    # https://github.com/scikit-learn-contrib/hiclass/issues/146
+    clf = classifier(local_classifier=LogisticRegression(), verbose=logging.WARNING)
+    x = np.array([[1, 2], [3, 4], [5, 6], [7, 8]])
+    y = np.array([["a", "b"], ["a", "c"], ["d", "e"], ["d", "f"]])
+    clf.fit(x, y)
+    assert clf.logger_.getEffectiveLevel() == logging.WARNING
+
+    data = pickle.dumps(clf)
+    # Loggers pickle by name, so the level lives on a process-global singleton.
+    # Change it to simulate another process/instance touching the same logger;
+    # without the fix the unpickled model would inherit this level.
+    logging.getLogger(clf.classifier_abbreviation).setLevel(logging.DEBUG)
+
+    restored = pickle.loads(data)
+    assert restored.verbose == logging.WARNING
+    assert restored.logger_.getEffectiveLevel() == logging.WARNING

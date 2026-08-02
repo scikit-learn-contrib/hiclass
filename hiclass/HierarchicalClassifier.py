@@ -333,6 +333,14 @@ class HierarchicalClassifier(abc.ABC):
             # Add ch to logger
             self.logger_.addHandler(ch)
 
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        # Loggers are pickled by name only, so the verbose level configured at
+        # fit time is not restored (the underlying logger is a process-global
+        # singleton). Recreate the logger to reapply self.verbose.
+        if "logger_" in state:
+            self._create_logger()
+
     def _disambiguate(self, y):
         self.separator_ = "::HiClass::Separator::"
         if y.ndim == 2:
