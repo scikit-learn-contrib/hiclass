@@ -420,3 +420,16 @@ def test_multiclass_probability_merge(
 
     assert_array_equal(np.sum(expected, axis=1), np.ones(len(expected)))
     assert_array_almost_equal(proba, expected, decimal=2)
+
+
+def test_venn_abers_angle_turn_orientation():
+    calibrator = _InductiveVennAbersCalibrator()
+    next_to_top = np.array([0.0, 0.0])
+    top = np.array([1.0, 0.0])
+    counter_clockwise = np.array([2.0, 1.0])
+    clockwise = np.array([2.0, -1.0])
+
+    assert not calibrator._non_left_angle_turn(next_to_top, top, counter_clockwise)
+    assert calibrator._non_left_angle_turn(next_to_top, top, clockwise)
+    assert calibrator._non_right_angle_turn(next_to_top, top, counter_clockwise)
+    assert not calibrator._non_right_angle_turn(next_to_top, top, clockwise)
